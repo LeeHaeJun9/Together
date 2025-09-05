@@ -1,4 +1,4 @@
 package com.example.together.domain;
 
-public class Users {
+public class Cafe {
 }
