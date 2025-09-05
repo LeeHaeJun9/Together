@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>주소 검색 테스트</title>
+  <style>
+    body { font-family: sans-serif; margin: 2em; }
+    h1 { color: #333; }
+    pre { background-color: #f4f4f4; padding: 1em; border: 1px solid #ddd; overflow: auto; }
+    label { display: block; margin-bottom: 0.5em; font-weight: bold; }
+    input[type="text"] { width: 400px; padding: 0.5em; margin-bottom: 1em; }
+    button { padding: 0.7em 1.5em; cursor: pointer; background-color: #007bff; color: white; border: none; border-radius: 4px; }
+    button:hover { background-color: #0056b3; }
+  </style>
+</head>
+<body>
+<h1>도로명주소 API 테스트</h1>
+
+<label for="keyword">주소 키워드:</label>
+<input type="text" id="keyword" placeholder="예: 서울특별시 중구 세종대로 110" />
+<button onclick="searchAddress()">검색</button>
+
+<h3>API 응답 결과:</h3>
+<pre id="result">여기에 JSON 응답이 표시됩니다.</pre>
+
+<script>
+  function searchAddress() {
+    const keyword = document.getElementById("keyword").value;
+    if (!keyword) {
+      alert("주소를 입력하세요!");
+      return;
+    }
+
+    // 서버의 REST API 엔드포인트(/api/address)로 직접 호출
+    fetch(`/api/address?keyword=${encodeURIComponent(keyword)}`)
+            .then(response => {
+              if (!response.ok) {
+                // HTTP 상태 코드가 200이 아니면 에러를 던집니다.
+                throw new Error(`HTTP error! status: ${response.status}`);
+              }
+              return response.json();
+            })
+            .then(data => {
+              // 결과 JSON을 <pre> 태그에 보기 좋게 출력
+              document.getElementById("result").textContent = JSON.stringify(data, null, 2);
+            })
+            .catch(err => {
+              console.error("Fetch Error:", err);
+              document.getElementById("result").textContent = `에러 발생: ${err.message}`;
+            });
+  }
+</script>
+</body>
+</html>
