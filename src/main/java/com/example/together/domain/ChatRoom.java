@@ -9,15 +9,17 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Cafe extends BaseEntity{
+public class ChatRoom extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String name;
-
-    private String description;
+    @ManyToOne(fetch = FetchType.LAZY)
+    private User buyer;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    private User owner;
+    private User seller;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Trade trade;
 }
