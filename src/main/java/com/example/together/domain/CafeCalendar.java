@@ -3,21 +3,23 @@ package com.example.together.domain;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
+
 @Entity
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Cafe extends BaseEntity{
+public class CafeCalendar extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String name;
+    private String title;
 
-    private String description;
+    private LocalDate eventDate;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    private User owner;
+    private Cafe cafe;
 }

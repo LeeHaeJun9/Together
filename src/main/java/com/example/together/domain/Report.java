@@ -9,15 +9,15 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Cafe extends BaseEntity{
+public class Report extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String name;
+    private String reason;
 
-    private String description;
+    private Long targetId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    private User owner;
+    private User reporter;
 }
