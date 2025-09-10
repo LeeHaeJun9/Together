@@ -9,19 +9,17 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Comment extends BaseEntity{
+public class MeetingUser {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String content;
-
     @ManyToOne(fetch = FetchType.LAZY)
-    private User author;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    private Post post;
+    private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
     private Meeting meeting;
+
+    @Enumerated(EnumType.STRING)
+    private MeetingJoinStatus joinStatus;
 }
