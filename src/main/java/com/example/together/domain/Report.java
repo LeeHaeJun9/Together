@@ -18,6 +18,9 @@ public class Report extends BaseEntity {
 
     private Long targetId;
 
+    @Enumerated(EnumType.STRING)
+    private ReportType reportType;
+
     @ManyToOne(fetch = FetchType.LAZY)
     private User reporter;
 }

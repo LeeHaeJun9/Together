@@ -18,6 +18,15 @@ public class Cafe extends BaseEntity{
 
     private String description;
 
+    private String cafeImage;
+
+    private String cafeThumbnail;
+
+    private Integer memberCount;
+
+    @Enumerated(EnumType.STRING) // Enum으로 설정
+    private CafeCategory category;
+
     @ManyToOne(fetch = FetchType.LAZY)
     private User owner;
 }

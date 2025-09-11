@@ -26,6 +26,9 @@ public class Trade extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private TradeStatus tradeStatus = TradeStatus.FOR_SALE;
 
+    @Enumerated(EnumType.STRING)
+    private TradeCategory tradeCategory;
+
     @ManyToOne(fetch = FetchType.LAZY)
     private User seller;
 

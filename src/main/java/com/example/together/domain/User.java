@@ -31,9 +31,6 @@ public class User extends BaseEntity {
     private  String phone;
 
     @Column(nullable = false)
-    private char gender;
-
-    @Column(nullable = false)
     private String nickname;
 
     @Enumerated(EnumType.STRING)
