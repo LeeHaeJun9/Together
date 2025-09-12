@@ -37,7 +37,7 @@ public class AddressController {
         // UriComponentsBuilder가 쿼리 파라미터를 자동으로 인코딩하므로,
         // 수동으로 URLEncoder.encode()를 호출할 필요가 없습니다.
         URI uri = UriComponentsBuilder.fromHttpUrl("https://www.juso.go.kr/addrlink/addrLinkApi.do")
-                .queryParam("confmKey", apiKey)
+                .queryParam("confirmKey", apiKey)
                 .queryParam("currentPage", 1)
                 .queryParam("countPerPage", 10)
                 .queryParam("keyword", keyword)
