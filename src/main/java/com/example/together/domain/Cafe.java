@@ -30,6 +30,7 @@ public class Cafe extends BaseEntity{
     private Integer memberCount;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
     private CafeCategory category;
 
     @ManyToOne(fetch = FetchType.LAZY)
