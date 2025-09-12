@@ -41,4 +41,8 @@ public class CafeApplication extends BaseEntity {
     public void approve() {
         this.status = CafeApplicationStatus.APPROVED;
     }
+
+    public void reject() {
+        this.status = CafeApplicationStatus.REJECTED;
+    }
 }
