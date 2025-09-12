@@ -14,17 +14,22 @@ public class Cafe extends BaseEntity{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
     private String name;
 
+    @Column(nullable = false)
     private String description;
 
+    @Column(nullable = false)
     private String cafeImage;
 
+    @Column(nullable = false)
     private String cafeThumbnail;
 
+    @Column(nullable = false)
     private Integer memberCount;
 
-    @Enumerated(EnumType.STRING) // Enum으로 설정
+    @Enumerated(EnumType.STRING)
     private CafeCategory category;
 
     @ManyToOne(fetch = FetchType.LAZY)

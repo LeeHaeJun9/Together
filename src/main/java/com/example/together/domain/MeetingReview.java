@@ -3,7 +3,8 @@ package com.example.together.domain;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -11,17 +12,21 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class CafeCalendar extends BaseEntity {
+public class MeetingReview extends BaseEntity {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String title;
-
     @ManyToOne(fetch = FetchType.LAZY)
-    private Cafe cafe;
+    private User reviewer;
 
     @ManyToOne(fetch = FetchType.LAZY)
     private Meeting meeting;
 
+    @Column(nullable = false)
+    private String content;
+
+    @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<MeetingReviewImage> images = new ArrayList<>();
 }

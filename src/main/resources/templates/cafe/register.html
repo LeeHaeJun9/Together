@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>카페 개설 신청</title>
+</head>
+<body>
+
+<h2>카페 개설 신청</h2>
+<form th:action="@{/cafe/register}" th:object="${cafeRequest}" th:method="post">
+    <label for="name">카페 이름:</label><br>
+    <input type="text" id="name" th:field="*{name}" required><br><br>
+
+    <label for="description">설명:</label><br>
+    <input type="text" id="description" th:field="*{description}" required><br><br>
+
+    <label for="category">카테고리:</label><br>
+    <select id="category" th:field="*{category}" required>
+        <option value="STUDY">스터디</option>
+        <option value="SPORTS">스포츠</option>
+        <option value="MUSIC">음악</option>
+    </select><br><br>
+
+    <button type="submit">신청하기</button>
+</form>
+
+</body>
+</html>

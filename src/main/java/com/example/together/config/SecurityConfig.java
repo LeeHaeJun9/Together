@@ -17,10 +17,12 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+                .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/css/**", "/js/**", "/images/**",
-                                "/address.html", "/api/address/**"  // 테스트용 URL 허용
+                                "/address.html", "/api/address/**",
+                                "/register", "cafe/register"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

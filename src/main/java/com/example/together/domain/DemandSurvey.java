@@ -14,12 +14,10 @@ public class DemandSurvey extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
     private String title;
 
     private String content;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    private Address address;
 
     @ManyToOne(fetch = FetchType.LAZY)
     private User author;
