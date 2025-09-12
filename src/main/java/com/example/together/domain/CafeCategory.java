@@ -1,7 +1,9 @@
 package com.example.together.domain;
 
 public enum CafeCategory {
-    STUDY("스터디");
+    STUDY("스터디"),
+    SPORTS("스포츠"),
+    MUSIC("음악");
 
 
     private final String koreanName;

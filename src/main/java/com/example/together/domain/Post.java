@@ -14,12 +14,15 @@ public class Post extends BaseEntity{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
     private String title;
 
+    @Column(nullable = false)
     private String content;
 
     private String image;
 
+    @Column(nullable = false)
     private int viewCount;
 
     @Enumerated(EnumType.STRING)

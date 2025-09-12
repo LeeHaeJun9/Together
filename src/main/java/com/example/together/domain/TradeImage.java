@@ -9,17 +9,16 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Comment extends BaseEntity{
+public class TradeImage {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private String content;
-
     @ManyToOne(fetch = FetchType.LAZY)
-    private User author;
+    private Trade trade;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    private Post post;
+    private String imageUrl;
+
+    private int sortOrder;
 }
