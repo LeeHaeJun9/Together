@@ -33,4 +33,8 @@ public class CafeApplicationResponseDTO {
             this.applicantId = null;
         }
     }
+
+    public static CafeApplicationResponseDTO fromEntity(CafeApplication application) {
+        return new CafeApplicationResponseDTO(application);
+    }
 }
