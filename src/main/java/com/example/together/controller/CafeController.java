@@ -1,5 +1,6 @@
 package com.example.together.controller;
 
+import com.example.together.domain.CafeApplication;
 import com.example.together.dto.cafe.CafeApplicationResponseDTO;
 import com.example.together.dto.cafe.CafeCreateRequestDTO;
 import com.example.together.dto.cafe.CafeResponseDTO;
@@ -11,10 +12,13 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/cafe")
@@ -33,13 +37,12 @@ public class CafeController {
 //        return "redirect:/success-page";
 //    }
 
-    @PostMapping("/register")
+    @PostMapping("/apply")
     public String applyForCafe(@ModelAttribute CafeCreateRequestDTO cafeRequest) {
-        Long userId = 1L; // 로그인 시스템이 완성될 때까지 임시로 1L을 사용합니다.
+        Long userId = 1L; // Temporarily hardcoded until the login system is complete.
         cafeService.applyForCafe(cafeRequest, userId);
         return "redirect:/success-page";
     }
-
     @GetMapping("/register")
     public ResponseEntity<String> handleInvalidGetRequest() {
         return ResponseEntity.badRequest().body("잘못된 접근입니다. 카페 신청은 POST 요청으로만 가능합니다.");
@@ -51,9 +54,20 @@ public class CafeController {
         return ResponseEntity.ok(response);
     }
 
+//    @GetMapping("/admin/applications")
+//    public String getCafeApplications(Model model) {
+//        model.addAttribute("applications", cafeService.getPendingApplications());
+//        return "admin/applicationList";
+//    }
     @GetMapping("/admin/applications")
-    public String getCafeApplications(Model model) {
-        model.addAttribute("applications", cafeService.getPendingApplications());
+    public String getPendingApplications(Model model) {
+        // CafeService에서 엔티티 리스트를 가져와서 DTO로 변환
+        List<CafeApplication> applications = cafeService.getPendingApplications();
+        List<CafeApplicationResponseDTO> applicationDTOs = applications.stream()
+                .map(CafeApplicationResponseDTO::fromEntity)
+                .collect(Collectors.toList());
+
+        model.addAttribute("applications", applicationDTOs);
         return "admin/applicationList";
     }
 
@@ -72,7 +86,6 @@ public class CafeController {
             return "redirect:/cafe/admin/applications";
         }
 
-        // **이 부분이 수정되었습니다.**
         // DTO의 각 속성을 개별적으로 모델에 추가합니다.
         model.addAttribute("name", applicationDTO.getName());
         model.addAttribute("description", applicationDTO.getDescription());
@@ -109,5 +122,32 @@ public class CafeController {
         }
 
         return "redirect:/cafe/admin/applications";
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<?> registerCafeAfterApproval(
+            @RequestParam("applicationId") Long applicationId,
+            @RequestPart("cafeImage") MultipartFile cafeImage,
+            @RequestPart("cafeThumbnail") MultipartFile cafeThumbnail,
+            @RequestHeader("X-User-ID") Long userId) {
+        try {
+            CafeResponseDTO responseDTO = cafeService.registerCafeAfterApproval(
+                    applicationId, cafeImage, cafeThumbnail, userId
+            );
+            return ResponseEntity.ok(responseDTO);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("카페 등록 중 알 수 없는 오류가 발생했습니다.");
+        }
+    }
+
+    @GetMapping("/cafeHome")
+    public String showCafeHome() {
+        // "cafe/cafeHome"은 src/main/resources/templates/cafe/cafeHome.html 경로를 의미합니다.
+        // Spring MVC는 'templates' 폴더와 '.html' 확장자를 자동으로 붙여줍니다.
+        return "cafe/cafeHome";
     }
 }

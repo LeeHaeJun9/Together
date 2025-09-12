@@ -16,4 +16,6 @@ public interface CafeApplicationRepository extends JpaRepository<CafeApplication
     Optional<CafeApplication> findByIdWithApplicant(@Param("id") Long id);
     @Query("SELECT a FROM CafeApplication a JOIN FETCH a.applicant WHERE a.status = :status")
     List<CafeApplication> findByStatusWithApplicant(@Param("status") CafeApplicationStatus status);
+
+    Optional<CafeApplication> findByIdAndStatus(Long id, CafeApplicationStatus status);
 }

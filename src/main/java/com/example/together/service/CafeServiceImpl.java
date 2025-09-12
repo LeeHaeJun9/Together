@@ -11,8 +11,10 @@ import com.example.together.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -104,8 +106,10 @@ public class CafeServiceImpl implements CafeService {
 
         // 7. CafeApplication의 상태를 APPROVED로 변경
         application.approve();
+        // 8. 상태 변경을 데이터베이스에 저장
+        cafeApplicationRepository.save(application);
 
-        // 8. 생성된 카페 정보를 DTO로 반환
+        // 9. 생성된 카페 정보를 DTO로 반환
         return new CafeResponseDTO(
                 savedCafe.getId(),
                 savedCafe.getName(),
@@ -127,6 +131,8 @@ public class CafeServiceImpl implements CafeService {
         }
 
         application.reject();
+        // **상태 변경을 데이터베이스에 저장**
+        cafeApplicationRepository.save(application);
 
         return new CafeApplicationResponseDTO(application);
     }
@@ -143,7 +149,7 @@ public class CafeServiceImpl implements CafeService {
         User owner = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
 
-        // **3. DTO의 문자열을 Enum으로 변환 (try-catch 추가)**
+        // **3. DTO의 문자열을 Enum으로 변환
         CafeCategory category;
         try {
             category = CafeCategory.valueOf(requestDTO.getCategory().toUpperCase());
@@ -198,6 +204,7 @@ public class CafeServiceImpl implements CafeService {
     @Override
     @Transactional(readOnly = true)
     public List<CafeApplication> getPendingApplications() {
+        // 반환 타입을 DTO 리스트가 아닌 엔티티 리스트로 변경
         return cafeApplicationRepository.findByStatusWithApplicant(CafeApplicationStatus.PENDING);
     }
 
@@ -207,5 +214,54 @@ public class CafeServiceImpl implements CafeService {
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 신청입니다."));
 
         return new CafeApplicationResponseDTO(application);
+    }
+
+    @Transactional
+    public CafeResponseDTO registerCafeAfterApproval(
+            Long applicationId,
+            MultipartFile cafeImage,
+            MultipartFile cafeThumbnail,
+            Long userId) {
+        // This logic is the same as before
+        CafeApplication application = cafeApplicationRepository.findByIdWithApplicant(applicationId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 신청서를 찾을 수 없습니다."));
+
+        if (application.getStatus() != CafeApplicationStatus.APPROVED) {
+            throw new IllegalStateException("승인된 카페 신청만 등록할 수 있습니다.");
+        }
+
+        if (!application.getApplicant().getId().equals(userId)) {
+            throw new IllegalStateException("해당 신청서의 소유자만 카페를 등록할 수 있습니다.");
+        }
+
+        String cafeImageUrl = "/images/" + cafeImage.getOriginalFilename();
+        String cafeThumbnailUrl = "/thumbnails/" + cafeThumbnail.getOriginalFilename();
+
+
+        Cafe newCafe = Cafe.builder()
+                .name(application.getName())
+                .description(application.getDescription())
+                .category(application.getCategory())
+                .owner(application.getApplicant())
+                .cafeImage(cafeImageUrl)
+                .cafeThumbnail(cafeThumbnailUrl)
+                .memberCount(1) // Starts with 1 owner
+                .build();
+
+
+        cafeRepository.save(newCafe);
+
+        // 최종 등록 후, 신청서를 데이터베이스에서 삭제
+        cafeApplicationRepository.delete(application);
+
+        return new CafeResponseDTO(
+                newCafe.getId(),
+                newCafe.getName(),
+                newCafe.getDescription(),
+                newCafe.getCategory().name(),
+                newCafe.getRegDate(),
+                newCafe.getOwner().getId(),
+                newCafe.getMemberCount()
+        );
     }
 }

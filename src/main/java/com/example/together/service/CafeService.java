@@ -5,6 +5,7 @@ import com.example.together.dto.cafe.CafeApplicationResponseDTO;
 import com.example.together.dto.cafe.CafeCreateRequestDTO;
 import com.example.together.dto.cafe.CafeResponseDTO;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -29,4 +30,7 @@ public interface CafeService {
 
     // 특정 신청 상세 정보 조회
     CafeApplicationResponseDTO getCafeApplicationDetail(Long applicationId);
+
+
+    CafeResponseDTO registerCafeAfterApproval(Long applicationId, MultipartFile cafeImage, MultipartFile cafeThumbnail, Long userId);
 }
