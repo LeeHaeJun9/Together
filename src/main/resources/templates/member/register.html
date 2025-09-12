@@ -3,9 +3,9 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-    <meta name="description" content="Together 로그인 페이지" />
+    <meta name="description" content="Together 회원가입 페이지" />
     <meta name="author" content="" />
-    <title>Together - 로그인</title>
+    <title>Together - 회원가입</title>
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" th:href="@{/assets/favicon.ico}" />
     <!-- Bootstrap CSS -->
@@ -24,9 +24,17 @@
         }
 
         .logo {
-            font-size: 24px;
+            display: flex;
+            align-items: center;
+            font-size: 18px;
             font-weight: bold;
             color: #333;
+        }
+
+        .logo img {
+            height: 45px;
+            width: auto;
+            margin-right: 10px;
         }
 
         .nav-links {
@@ -44,15 +52,15 @@
             color: #495057;
         }
 
-        .login-container {
+        .register-container {
             max-width: 400px;
-            margin: 80px auto;
+            margin: 50px auto;
             padding: 40px;
             background-color: #e9ecef;
             border-radius: 10px;
         }
 
-        .login-title {
+        .register-title {
             text-align: center;
             font-size: 18px;
             font-weight: bold;
@@ -63,17 +71,21 @@
         .form-label {
             font-weight: 500;
             color: #333;
-            margin-bottom: 8px;
+            margin-bottom: 5px;
+        }
+
+        .required {
+            color: #dc3545;
         }
 
         .form-control {
             border-radius: 5px;
             border: 1px solid #ced4da;
             padding: 12px;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
 
-        .btn-login {
+        .btn-register {
             width: 100%;
             padding: 12px;
             background-color: #6c757d;
@@ -82,59 +94,11 @@
             border-radius: 5px;
             font-size: 16px;
             font-weight: 500;
-            margin-bottom: 20px;
+            margin-top: 10px;
         }
 
-        .btn-login:hover {
+        .btn-register:hover {
             background-color: #5a6268;
-        }
-
-        .link-section {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        .link-section a {
-            color: #6c757d;
-            text-decoration: none;
-            font-size: 14px;
-            margin: 0 10px;
-        }
-
-        .link-section a:hover {
-            color: #495057;
-        }
-
-        .btn-kakao {
-            width: 100%;
-            padding: 12px;
-            background-color: #fee500;
-            color: #333;
-            border: none;
-            border-radius: 5px;
-            font-size: 16px;
-            font-weight: 500;
-            margin-bottom: 10px;
-        }
-
-        .btn-kakao:hover {
-            background-color: #fdd835;
-        }
-
-        .btn-naver {
-            width: 100%;
-            padding: 12px;
-            background-color: #03c75a;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            font-size: 16px;
-            font-weight: 500;
-            margin-bottom: 30px;
-        }
-
-        .btn-naver:hover {
-            background-color: #02b351;
         }
 
         .footer {
@@ -142,7 +106,7 @@
             color: white;
             text-align: center;
             padding: 30px 0;
-            margin-top: 80px;
+            margin-top: 50px;
         }
     </style>
 </head>
@@ -168,47 +132,57 @@
     </div>
 </div>
 
-<!-- 로그인 폼 -->
+<!-- 회원가입 폼 -->
 <div class="container">
-    <div class="login-container">
-        <div class="login-title">로그인</div>
+    <div class="register-container">
+        <div class="register-title">회원가입</div>
 
-
-
-        <form action="/login" method="post">
-            <!-- 아이디 또는 이메일 -->
+        <form action="/register" method="post">
+            <!-- 아이디 (필수) -->
             <div class="mb-3">
-                <label class="form-label">아이디 또는 이메일</label>
-                <input type="text" name="userId" class="form-control"
-                       placeholder="아이디나 이메일을 입력하세요" required>
+                <label class="form-label">아이디 <span class="required">*</span></label>
+                <input type="text" name="userId" class="form-control" required>
             </div>
 
-            <!-- 비밀번호 -->
+            <!-- 비밀번호 (필수) -->
             <div class="mb-3">
-                <label class="form-label">비밀번호</label>
-                <input type="password" name="password" class="form-control"
-                       placeholder="비밀번호를 입력하세요" required>
+                <label class="form-label">비밀번호 <span class="required">*</span></label>
+                <input type="password" name="password" class="form-control" required>
             </div>
 
-            <!-- 로그인 버튼 -->
-            <button type="submit" class="btn-login">로그인</button>
+            <!-- 비밀번호 확인 (필수) -->
+            <div class="mb-3">
+                <label class="form-label">비밀번호 확인 <span class="required">*</span></label>
+                <input type="password" name="confirmPassword" class="form-control" required>
+            </div>
+
+            <!-- 이름 -->
+            <div class="mb-3">
+                <label class="form-label">이름</label>
+                <input type="text" name="name" class="form-control">
+            </div>
+
+            <!-- 닉네임 -->
+            <div class="mb-3">
+                <label class="form-label">닉네임</label>
+                <input type="text" name="nickname" class="form-control">
+            </div>
+
+            <!-- 전화번호 -->
+            <div class="mb-3">
+                <label class="form-label">전화번호</label>
+                <input type="tel" name="phone" class="form-control">
+            </div>
+
+            <!-- 이메일 -->
+            <div class="mb-3">
+                <label class="form-label">이메일</label>
+                <input type="email" name="email" class="form-control">
+            </div>
+
+            <!-- 가입하기 버튼 -->
+            <button type="submit" class="btn-register">가입하기</button>
         </form>
-
-        <!-- 링크 섹션 -->
-        <div class="link-section">
-            <a href="/find-id">아이디 찾기</a>
-            <a href="/find-password">비밀번호 찾기</a>
-            <a href="/register">회원가입</a>
-        </div>
-
-        <!-- 소셜 로그인 -->
-        <button type="button" class="btn-kakao" onclick="location.href='/oauth2/authorization/kakao'">
-            카카오톡 로그인
-        </button>
-
-        <button type="button" class="btn-naver" onclick="location.href='/oauth2/authorization/naver'">
-            네이버 로그인
-        </button>
     </div>
 </div>
 
