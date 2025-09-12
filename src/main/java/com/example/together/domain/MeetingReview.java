@@ -18,15 +18,27 @@ public class MeetingReview extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
+    private String title;
+
+    @Column(nullable = false)
+    private String content;
+
     @ManyToOne(fetch = FetchType.LAZY)
     private User reviewer;
 
     @ManyToOne(fetch = FetchType.LAZY)
     private Meeting meeting;
 
-    @Column(nullable = false)
-    private String content;
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    private Cafe cafe;
 
     @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<MeetingReviewImage> images = new ArrayList<>();
+
+
+    public void change(String title, String content) {
+        this.title = title;
+        this.content = content;
+    }
 }
