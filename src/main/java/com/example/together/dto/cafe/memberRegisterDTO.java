@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class RegisterDTO {
+public class memberRegisterDTO {
 
     @NotBlank(message = "사용자 ID는 필수입니다")
     @Size(min = 3, max = 50, message = "사용자 ID는 3자 이상 50자 이하여야 합니다")
