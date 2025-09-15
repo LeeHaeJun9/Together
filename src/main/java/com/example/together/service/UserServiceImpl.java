@@ -87,7 +87,7 @@ public class UserServiceImpl implements UserService {
                     .phone(registerDTO.getPhone())
                     .nickname(registerDTO.getNickname())
                     .systemRole(SystemRole.USER) // 기본값
-                    .cafeRole(CafeRole.CAFE_USER) // 기본값
+//                    .cafeRole(CafeRole.CAFE_USER) // 기본값
                     .status(Status.ACTIVE) // 기본값
                     .build();
 
@@ -163,7 +163,7 @@ public class UserServiceImpl implements UserService {
                         .phone(registerDTO.getPhone() != null ? registerDTO.getPhone() : user.getPhone())
                         .nickname(registerDTO.getNickname() != null ? registerDTO.getNickname() : user.getNickname())
                         .systemRole(user.getSystemRole())
-                        .cafeRole(user.getCafeRole())
+//                        .cafeRole(user.getCafeRole())
                         .status(user.getStatus())
                         .build();
             }
@@ -206,7 +206,7 @@ public class UserServiceImpl implements UserService {
                     .phone(user.getPhone())
                     .nickname(user.getNickname())
                     .systemRole(user.getSystemRole())
-                    .cafeRole(user.getCafeRole())
+//                    .cafeRole(user.getCafeRole())
                     .status(Status.DELETED) // 삭제 상태로 변경
                     .build();
 
