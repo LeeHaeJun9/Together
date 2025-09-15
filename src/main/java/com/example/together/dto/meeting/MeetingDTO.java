@@ -5,6 +5,7 @@ import com.example.together.domain.Cafe;
 import com.example.together.domain.User;
 import com.example.together.domain.Visibility;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -17,7 +18,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class MeetingDTO {
-    @NotEmpty
+
     private Long id;
 
     @NotEmpty
@@ -26,6 +27,7 @@ public class MeetingDTO {
     @NotEmpty
     private String content;
 
+    @NotNull
     private LocalDateTime meetingDate;
 
     private boolean recruiting;
