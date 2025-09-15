@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>카페 정보 수정</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+<div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-lg">
+  <h1 class="text-3xl font-bold text-center mb-6">카페 정보 수정</h1>
+
+  <form th:action="@{/cafe/{cafeId}/update(cafeId=${cafe.id})}" th:object="${cafe}" method="post" enctype="multipart/form-data">
+
+    <div class="mb-4">
+      <label for="name" class="block text-gray-700 font-bold mb-2">카페 이름</label>
+      <input type="text" id="name" name="name" th:value="*{name}"
+             class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+    </div>
+
+    <div class="mb-4">
+      <label for="description" class="block text-gray-700 font-bold mb-2">설명</label>
+      <textarea id="description" name="description" th:text="*{description}"
+                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" rows="4" required></textarea>
+    </div>
+
+    <div class="mb-6">
+      <label for="category" class="block text-gray-700 font-bold mb-2">카테고리</label>
+      <select id="category" name="category"
+              class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+        <option th:each="category : ${T(com.example.together.domain.CafeCategory).values()}"
+                th:value="${category}"
+                th:text="${category.name()}"
+                th:selected="${category == cafe.category}">
+        </option>
+      </select>
+    </div>
+
+    <div class="mb-4">
+      <label for="cafeImage" class="block text-gray-700 font-bold mb-2">카페 대표 이미지</label>
+      <input type="file" id="cafeImage" name="cafeImage"
+             class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+    </div>
+
+    <div class="mb-6">
+      <label for="cafeThumbnail" class="block text-gray-700 font-bold mb-2">카페 썸네일</label>
+      <input type="file" id="cafeThumbnail" name="cafeThumbnail"
+             class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+    </div>
+
+    <div class="flex items-center justify-between">
+      <button type="submit"
+              class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+        수정 완료
+      </button>
+      <a th:href="@{/cafe/{cafeId}(cafeId=${cafe.id})}" class="inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800">
+        취소
+      </a>
+    </div>
+  </form>
+</div>
+</body>
+</html>
