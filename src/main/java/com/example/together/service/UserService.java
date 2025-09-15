@@ -2,15 +2,16 @@
 package com.example.together.service;
 
 import com.example.together.domain.User;
-
+import com.example.together.dto.member.memberRegisterDTO;
 import com.example.together.dto.member.RegisterDTO;
+
 
 public interface UserService {
     // 로그인 관련
     User authenticate(String userId, String password);
 
     // 회원가입 관련
-    User register(RegisterDTO registerDTO);
+    User register(memberRegisterDTO registerDTO);
     boolean isUserIdExists(String userId);
     boolean isEmailExists(String email);
 
@@ -19,6 +20,6 @@ public interface UserService {
     User findByEmail(String email);
 
     // 프로필 관리
-    User updateProfile(Long id, RegisterDTO registerDTO);
+    User updateProfile(Long id, memberRegisterDTO registerDTO);
     void deleteUser(Long id);
 }

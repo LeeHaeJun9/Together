@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="description" content="Together 회원탈퇴" />
+    <meta name="author" content="" />
+    <title>Together - 회원탈퇴</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" th:href="@{/assets/favicon.ico}" />
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <!-- Custom CSS -->
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Arial', sans-serif;
+        }
+
+        .header {
+            background-color: white;
+            padding: 15px 0;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .logo img {
+            height: 45px;
+            width: auto;
+            margin-right: 10px;
+        }
+
+        .nav-links {
+            font-size: 14px;
+            color: #6c757d;
+        }
+
+        .nav-links a {
+            color: #6c757d;
+            text-decoration: none;
+            margin: 0 5px;
+        }
+
+        .nav-links a:hover {
+            color: #495057;
+        }
+
+        .delete-container {
+            max-width: 500px;
+            margin: 80px auto;
+            padding: 40px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        .delete-title {
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 30px;
+            color: #dc3545;
+        }
+
+        .warning-section {
+            background-color: #fff3cd;
+            border: 1px solid #ffecb5;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .warning-title {
+            color: #856404;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .warning-list {
+            color: #856404;
+            margin: 0;
+            padding-left: 20px;
+        }
+
+        .warning-list li {
+            margin-bottom: 5px;
+        }
+
+        .form-label {
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .required {
+            color: #dc3545;
+        }
+
+        .form-control {
+            border-radius: 5px;
+            border: 1px solid #ced4da;
+            padding: 12px;
+            margin-bottom: 20px;
+        }
+
+        .btn-section {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        .btn-delete {
+            padding: 12px 30px;
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .btn-delete:hover {
+            background-color: #c82333;
+        }
+
+        .btn-cancel {
+            padding: 12px 30px;
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-cancel:hover {
+            background-color: #5a6268;
+            color: white;
+        }
+
+        .confirmation-section {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .confirmation-text {
+            color: #721c24;
+            font-weight: 500;
+            text-align: center;
+        }
+
+        .footer {
+            background-color: #6c757d;
+            color: white;
+            text-align: center;
+            padding: 30px 0;
+            margin-top: 80px;
+        }
+    </style>
+</head>
+<body>
+<!-- 헤더 -->
+<div class="header">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col">
+                <div class="logo">
+                    <img src="/images/moyeora-logo.png" alt="모여라 로고" />
+                    <span>모여라</span>
+                </div>
+            </div>
+            <div class="col-auto">
+                <div class="nav-links">
+                    <a href="/login">로그인</a> /
+                    <a href="/register">회원가입</a> /
+                    <a href="/mypage">마이페이지</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 회원탈퇴 메인 -->
+<div class="container">
+    <div class="delete-container">
+        <div class="delete-title">회원탈퇴</div>
+
+        <!-- 경고 섹션 -->
+        <div class="warning-section">
+            <div class="warning-title">탈퇴 전 확인사항</div>
+            <ul class="warning-list">
+                <li>탈퇴 시 모든 개인정보와 활동 내역이 삭제됩니다</li>
+                <li>참여했던 카페 및 모임 정보가 사라집니다</li>
+                <li>작성한 게시글과 댓글이 모두 삭제됩니다</li>
+                <li>진행 중인 거래가 있다면 완료 후 탈퇴해주세요</li>
+                <li>탈퇴 후에는 동일한 아이디로 재가입이 불가능합니다</li>
+            </ul>
+        </div>
+
+        <!-- 확인 메시지 -->
+        <div class="confirmation-section">
+            <div class="confirmation-text">
+                정말로 탈퇴하시겠습니까?<br>
+                이 작업은 되돌릴 수 없습니다.
+            </div>
+        </div>
+
+        <!-- 탈퇴 폼 -->
+        <form action="/member/delete" method="post">
+            <!-- 비밀번호 확인 -->
+            <div class="mb-3">
+                <label class="form-label">비밀번호 확인 <span class="required">*</span></label>
+                <input type="password" name="password" class="form-control"
+                       placeholder="현재 비밀번호를 입력하세요" required>
+            </div>
+
+            <!-- 비밀번호 재입력 -->
+            <div class="mb-3">
+                <label class="form-label">비밀번호 재입력 <span class="required">*</span></label>
+                <input type="password" name="confirmPassword" class="form-control"
+                       placeholder="비밀번호를 다시 입력하세요" required>
+            </div>
+
+            <!-- 탈퇴 사유 (선택사항) -->
+            <div class="mb-3">
+                <label class="form-label">탈퇴 사유 (선택사항)</label>
+                <textarea name="reason" class="form-control" rows="4"
+                          placeholder="탈퇴 사유를 입력해주시면 서비스 개선에 도움이 됩니다 (선택사항)"></textarea>
+            </div>
+
+            <!-- 버튼 섹션 -->
+            <div class="btn-section">
+                <a href="/member/profile" class="btn-cancel">취소</a>
+                <button type="submit" class="btn-delete">탈퇴하기</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- 푸터 -->
+<div class="footer">
+    <div class="container">
+        <p class="mb-0">© 2025 천안 모여라. All rights reserved. | 이용약관 | 개인정보처리방침 | 고객센터</p>
+    </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- JavaScript for form validation -->
+<script>
+    document.querySelector('form').addEventListener('submit', function(e) {
+        const password = document.querySelector('input[name="password"]').value;
+        const confirmPassword = document.querySelector('input[name="confirmPassword"]').value;
+
+        if (password !== confirmPassword) {
+            e.preventDefault();
+            alert('비밀번호가 일치하지 않습니다.');
+            return;
+        }
+
+        const confirmed = confirm('정말로 탈퇴하시겠습니까? 이 작업은 되돌릴 수 없습니다.');
+        if (!confirmed) {
+            e.preventDefault();
+        }
+    });
+</script>
+</body>
+</html>
