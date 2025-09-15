@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>카페 개설 신청 목록</title>
+</head>
+<body>
+
+<h2>카페 개설 신청 목록 (검토 대기중)</h2>
+
+<!-- 메시지 표시 영역 -->
+<div th:if="${message}" style="color: green; font-weight: bold; margin-bottom: 1em;">
+    <p th:text="${message}"></p>
+</div>
+<div th:if="${error}" style="color: red; font-weight: bold; margin-bottom: 1em;">
+    <p th:text="${error}"></p>
+</div>
+
+<div th:if="${#lists.isEmpty(applications)}">
+    <p>검토 대기 중인 신청이 없습니다.</p>
+</div>
+
+<table border="1" th:unless="${#lists.isEmpty(applications)}">
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>카페 이름</th>
+        <th>설명</th>
+        <th>카테고리</th>
+        <th>신청일</th>
+        <th>상세 보기</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="app : ${applications}">
+        <td th:text="${app.applicationId}"></td>
+        <td th:text="${app.name}"></td>
+        <td th:text="${app.description}"></td>
+        <td th:text="${app.category}"></td>
+        <td th:text="${#temporals.format(app.regDate, 'yyyy-MM-dd HH:mm')}"></td>
+        <td><a th:href="@{'/cafe/admin/applications/' + ${app.applicationId}}">상세 보기</a></td>
+    </tr>
+    </tbody>
+</table>
+
+</body>
+</html>

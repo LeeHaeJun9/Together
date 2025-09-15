@@ -13,6 +13,6 @@ public class CafeRegistrationController {
     @GetMapping
     public String showRegistrationForm(Model model) {
         model.addAttribute("cafeRequest", new CafeCreateRequestDTO());
-        return "cafe/register";
+        return "cafeOpen/register";
     }
 }

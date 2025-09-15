@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/basic.html}">
+
+<div layout:fragment="content">
+    <h1>Meeting Register</h1>
+
+    <div class="card-body">
+        <form action="/meeting/register" method="post">
+            <div class="input-group mb-3">
+                <span class="input-group-text">Title</span>
+                <input type="text" name="title" class="form-control" placeholder="Title">
+            </div>
+
+            <div class="input-group mb-3">
+                <span class="input-group-text">Content</span>
+                <textarea class="form-control col-sm-5" rows="5" name="content"></textarea>
+            </div>
+
+            <div class="input-group mb-3">
+                <span class="input-group-text">meetingDate</span>
+                <input type="datetime-local" name="meetingDate" class="form-control" placeholder="DateTime">
+            </div>
+
+            <div class="my-4">
+                <div class="float-end">
+                    <button type="submit" class="btn btn-primary submitBtn">Submit</button>
+                    <button type="reset" class="btn btn-secondary">Reset</button>
+                </div>
+            </div>
+        </form>
+    </div><!--end card body-->
+
+
+
+    <!--    @NotEmpty-->
+    <!--    private Long id;-->
+
+    <!--    @NotEmpty-->
+    <!--    private String title;-->
+
+    <!--    @NotEmpty-->
+    <!--    private String content;-->
+
+    <!--    private LocalDateTime meetingDate;-->
+    <!--    private boolean recruiting;-->
+
+    <!--    private Visibility visibility;-->
+
+    <!--    private User organizer;-->
+
+    <!--    private Cafe cafe;-->
+
+    <!--    private Address addressId;-->
+
+    <!--    private LocalDateTime regDate;-->
+
+    <!--    private LocalDateTime modDate;-->
+
+
+
+
+
+</div>
+
+
+<script layout:fragment="script" th:inline="javascript">
+    console.log("meetingRegister....")
+
+    const errors = [[${errors}]]
+    console.log(errors)
+
+    let errorMsg = ''
+
+    if(errors){
+        for (let i = 0; i < errors.length; i++) {
+            errorMsg += `${errors[i].field}은(는) ${errors[i].code} \n`
+        }
+        alert(errorMsg)
+    }
+
+
+
+</script>
+</html>

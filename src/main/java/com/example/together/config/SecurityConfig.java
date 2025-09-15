@@ -22,7 +22,9 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/css/**", "/js/**", "/images/**",
                                 "/address.html", "/api/address/**",
-                                "/register", "cafe/register", "/member/login", "member/register"
+                                "/register", "cafe/register", "/member/login", "member/register",
+                                 "/cafe/admin/**", "/login.html"
+
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
