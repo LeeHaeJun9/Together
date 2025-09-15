@@ -39,10 +39,6 @@ public class User extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
-    private CafeRole cafeRole = CafeRole.CAFE_USER;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
     private Status status = Status.ACTIVE;
 
 }

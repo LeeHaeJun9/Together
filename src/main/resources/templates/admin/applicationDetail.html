@@ -13,14 +13,11 @@
 <p>신청자ID: <span th:text="${applicantId}">[신청자ID]</span></p>
 <p>신청일: <span th:text="${#temporals.format(regDate, 'yyyy-MM-dd HH:mm')}">[신청일]</span></p>
 
-
-<!-- 승인 폼 -->
 <form th:action="@{/cafe/admin/approve}" method="post">
   <input type="hidden" name="applicationId" th:value="${applicationId}" />
   <button type="submit">승인</button>
 </form>
 
-<!-- 거절 폼 -->
 <form th:action="@{/cafe/admin/reject}" method="post">
   <input type="hidden" name="applicationId" th:value="${applicationId}" />
   <button type="submit">거절</button>

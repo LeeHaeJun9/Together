@@ -1,19 +1,17 @@
 package com.example.together.service;
 
 import com.example.together.domain.*;
-import com.example.together.dto.cafe.CafeApplicationResponseDTO;
-import com.example.together.dto.cafe.CafeCreateRequestDTO;
-import com.example.together.dto.cafe.CafeResponseDTO;
-import com.example.together.repository.CafeApplicationRepository;
-import com.example.together.repository.CafeRepository;
-import com.example.together.repository.MembershipRepository;
-import com.example.together.repository.UserRepository;
+import com.example.together.dto.cafe.*;
+import com.example.together.repository.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -25,6 +23,12 @@ public class CafeServiceImpl implements CafeService {
     private final UserRepository userRepository;
     private final MembershipRepository membershipRepository;
     private final CafeApplicationRepository  cafeApplicationRepository;
+    private final CafeJoinRequestRepository  cafeJoinRequestRepository;
+
+
+    @Value("${org.zerock.upload.path}")
+    private String uploadPath;
+
 
     @Transactional
     @Override
@@ -71,8 +75,8 @@ public class CafeServiceImpl implements CafeService {
 
     @Transactional
     @Override
-    public CafeResponseDTO approveCafe(Long applicationId, Long adminId) {
-        // 1. 관리자 권한 확인 (실제로는 JWT 토큰 등으로 검증)
+    public CafeApplicationResponseDTO approveCafe(Long applicationId, Long adminId) {
+        // 1. 관리자 권한 확인 (이 부분은 실제 구현에 따라 달라질 수 있습니다.)
         // ...
 
         // 2. 승인할 카페 개설 신청 정보 조회 및 검증
@@ -82,42 +86,14 @@ public class CafeServiceImpl implements CafeService {
             throw new IllegalStateException("이미 처리된 신청입니다.");
         }
 
-        // 3. CafeApplication 정보를 기반으로 실제 Cafe 엔티티 생성
-        User applicant = application.getApplicant();
-        Cafe newCafe = Cafe.builder()
-                .name(application.getName())
-                .description(application.getDescription())
-                .category(application.getCategory())
-                .owner(applicant)
-                .build();
-
-        // 4. Cafe 엔티티를 데이터베이스에 저장
-        Cafe savedCafe = cafeRepository.save(newCafe);
-
-        // 5. 신청자에게 CAFE_ADMIN 역할을 가진 Membership 부여
-        Membership ownerMembership = Membership.builder()
-                .user(applicant)
-                .cafe(savedCafe)
-                .role(CafeRole.CAFE_ADMIN)
-                .build();
-
-        // 6. Membership 엔티티를 데이터베이스에 저장
-        membershipRepository.save(ownerMembership);
-
-        // 7. CafeApplication의 상태를 APPROVED로 변경
+        // 3. CafeApplication의 상태를 APPROVED로 변경
         application.approve();
-        // 8. 상태 변경을 데이터베이스에 저장
-        cafeApplicationRepository.save(application);
 
-        // 9. 생성된 카페 정보를 DTO로 반환
-        return new CafeResponseDTO(
-                savedCafe.getId(),
-                savedCafe.getName(),
-                savedCafe.getDescription(),
-                savedCafe.getCategory().name(),
-                savedCafe.getRegDate(),
-                savedCafe.getOwner().getId(),
-                1); // 소유자 1명으로 시작
+        // 4. 상태 변경을 데이터베이스에 저장
+        CafeApplication savedApplication = cafeApplicationRepository.save(application);
+
+        // 5. 응답 DTO 반환
+        return new CafeApplicationResponseDTO(savedApplication);
     }
 
     @Transactional
@@ -176,18 +152,28 @@ public class CafeServiceImpl implements CafeService {
                 savedCafe.getCategory().name(),
                 savedCafe.getRegDate(),
                 savedCafe.getOwner().getId(),
-                1 // 생성자 본인 포함 1명으로 시작
+                1 ,
+                null,
+                null,
+                true,
+                true
         );
     }
 
     @Override
-    public CafeResponseDTO getCafeById(Long cafeId) {
+    public CafeResponseDTO getCafeById(Long cafeId, Long userId) {
         // 1. Cafe 엔티티 조회
         Cafe cafe = cafeRepository.findById(cafeId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 카페입니다."));
 
         // 2. 동적으로 회원 수 계산
         Integer memberCount = membershipRepository.countByCafe(cafe);
+
+        boolean isOwner = cafe.getOwner().getId().equals(userId);
+
+        User user = userRepository.getReferenceById(userId);
+        boolean isMember = membershipRepository.existsByCafeAndUser(cafe, user);
+
 
         // 3. 응답 DTO 반환
         return new CafeResponseDTO(
@@ -197,7 +183,11 @@ public class CafeServiceImpl implements CafeService {
                 cafe.getCategory().name(),
                 cafe.getRegDate(),
                 cafe.getOwner().getId(),
-                memberCount
+                memberCount,
+                cafe.getCafeImage(),
+                cafe.getCafeThumbnail(),
+                isOwner,
+                isMember
         );
     }
 
@@ -217,12 +207,14 @@ public class CafeServiceImpl implements CafeService {
     }
 
     @Transactional
+    @Override
     public CafeResponseDTO registerCafeAfterApproval(
             Long applicationId,
             MultipartFile cafeImage,
             MultipartFile cafeThumbnail,
             Long userId) {
-        // This logic is the same as before
+
+        // 1. 승인된 신청서와 신청자 정보 조회 및 유효성 검증
         CafeApplication application = cafeApplicationRepository.findByIdWithApplicant(applicationId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 신청서를 찾을 수 없습니다."));
 
@@ -234,34 +226,269 @@ public class CafeServiceImpl implements CafeService {
             throw new IllegalStateException("해당 신청서의 소유자만 카페를 등록할 수 있습니다.");
         }
 
-        String cafeImageUrl = "/images/" + cafeImage.getOriginalFilename();
-        String cafeThumbnailUrl = "/thumbnails/" + cafeThumbnail.getOriginalFilename();
+        if (cafeImage.isEmpty() || cafeThumbnail.isEmpty()) {
+            throw new IllegalArgumentException("카페 이미지와 썸네일은 필수입니다.");
+        }
 
+        String uuid = UUID.randomUUID().toString();
+        String cafeImageFileName = uuid + "_" + cafeImage.getOriginalFilename();
+        String cafeThumbnailFileName = uuid + "_" + cafeThumbnail.getOriginalFilename();
 
+        // 파일 저장
+        try {
+            File uploadDir = new File(uploadPath);
+            if (!uploadDir.exists()) {
+                uploadDir.mkdirs(); // 디렉터리가 없으면 생성
+            }
+            cafeImage.transferTo(new File(uploadPath, cafeImageFileName));
+            cafeThumbnail.transferTo(new File(uploadPath, cafeThumbnailFileName));
+        } catch (Exception e) {
+            throw new RuntimeException("파일 저장에 실패했습니다.", e);
+        }
+
+        // DB에 저장할 경로 설정 (예: /upload/고유파일명.jpg)
+        String cafeImageUrl = "/upload/" + cafeImageFileName;
+        String cafeThumbnailUrl = "/upload/" + cafeThumbnailFileName;
+
+        // 3. CafeApplication 정보를 기반으로 실제 Cafe 엔티티 생성
+        User applicant = application.getApplicant();
         Cafe newCafe = Cafe.builder()
                 .name(application.getName())
                 .description(application.getDescription())
                 .category(application.getCategory())
-                .owner(application.getApplicant())
+                .owner(applicant)
                 .cafeImage(cafeImageUrl)
                 .cafeThumbnail(cafeThumbnailUrl)
-                .memberCount(1) // Starts with 1 owner
+                .memberCount(1) // 소유자 1명으로 시작
                 .build();
 
+        // 4. Cafe 엔티티를 데이터베이스에 저장
+        Cafe savedCafe = cafeRepository.save(newCafe);
 
-        cafeRepository.save(newCafe);
+        // 5. 신청자에게 CAFE_ADMIN 역할을 가진 Membership 부여
+        Membership ownerMembership = Membership.builder()
+                .user(applicant)
+                .cafe(savedCafe)
+                .role(CafeRole.CAFE_ADMIN)
+                .build();
 
-        // 최종 등록 후, 신청서를 데이터베이스에서 삭제
+        // 6. Membership 엔티티를 데이터베이스에 저장
+        membershipRepository.save(ownerMembership);
+
+        // 7. 최종 등록이 완료되었으므로, CafeApplication을 데이터베이스에서 삭제
         cafeApplicationRepository.delete(application);
 
+        // 8. 생성된 카페 정보를 DTO로 반환
         return new CafeResponseDTO(
-                newCafe.getId(),
-                newCafe.getName(),
-                newCafe.getDescription(),
-                newCafe.getCategory().name(),
-                newCafe.getRegDate(),
-                newCafe.getOwner().getId(),
-                newCafe.getMemberCount()
+                savedCafe.getId(),
+                savedCafe.getName(),
+                savedCafe.getDescription(),
+                savedCafe.getCategory().name(),
+                savedCafe.getRegDate(),
+                savedCafe.getOwner().getId(),
+                savedCafe.getMemberCount(),
+                savedCafe.getCafeImage(),
+                savedCafe.getCafeThumbnail(),
+                true,
+                true
         );
+    }
+
+    @Transactional(readOnly = true)
+    public List<CafeResponseDTO> getAllCafes() {
+        // 1. 데이터베이스에서 모든 Cafe 엔티티를 가져옵니다.
+        List<Cafe> cafes = cafeRepository.findAll();
+
+        // 2. 각 Cafe 엔티티를 DTO로 변환하여 리스트로 반환합니다.
+        return cafes.stream()
+                .map(cafe -> new CafeResponseDTO(
+                        cafe.getId(),
+                        cafe.getName(),
+                        cafe.getDescription(),
+                        cafe.getCategory().name(),
+                        cafe.getRegDate(),
+                        cafe.getOwner().getId(),
+                        cafe.getMemberCount(),
+                        cafe.getCafeImage(),
+                        cafe.getCafeThumbnail(),
+                        false,
+                        false
+                ))
+                .collect(Collectors.toList());
+    }
+
+
+    @Transactional
+    @Override
+    public void updateCafe(Long cafeId, CafeUpdateDTO updateDTO, Long userId) throws IllegalAccessException {
+        Cafe cafe = cafeRepository.findById(cafeId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 카페입니다."));
+
+        // 권한 확인: 소유자 ID와 요청한 사용자 ID가 다르면 예외 발생
+        if (!cafe.getOwner().getId().equals(userId)) {
+            throw new IllegalAccessException("카페를 수정할 권한이 없습니다.");
+        }
+
+        // 1. DTO의 텍스트 정보로 엔티티 업데이트
+        cafe.setName(updateDTO.getName());
+        cafe.setDescription(updateDTO.getDescription());
+        cafe.setCategory(updateDTO.getCategory());
+
+        // 2. 이미지 파일 처리
+        if (updateDTO.getCafeImage() != null && !updateDTO.getCafeImage().isEmpty()) {
+            // 기존 이미지 파일 삭제 (선택 사항이지만 좋은 습관)
+            // File oldFile = new File(uploadPath, cafe.getCafeImage());
+            // if (oldFile.exists()) { oldFile.delete(); }
+
+            // 새로운 이미지 파일 저장
+            String uuid = UUID.randomUUID().toString();
+            String originalFilename = updateDTO.getCafeImage().getOriginalFilename();
+            String newFileName = uuid + "_" + originalFilename;
+
+            try {
+                updateDTO.getCafeImage().transferTo(new File(uploadPath, newFileName));
+                cafe.setCafeImage("/upload/" + newFileName);
+            } catch (Exception e) {
+                throw new RuntimeException("카페 이미지 저장에 실패했습니다.", e);
+            }
+        }
+
+        // 3. 썸네일 이미지 파일 처리 (위와 동일한 로직 적용)
+        if (updateDTO.getCafeThumbnail() != null && !updateDTO.getCafeThumbnail().isEmpty()) {
+            // 기존 썸네일 파일 삭제
+            // ... (위와 동일한 로직)
+
+            // 새로운 썸네일 파일 저장
+            String uuid = UUID.randomUUID().toString();
+            String originalFilename = updateDTO.getCafeThumbnail().getOriginalFilename();
+            String newFileName = uuid + "_" + originalFilename;
+
+            try {
+                updateDTO.getCafeThumbnail().transferTo(new File(uploadPath, newFileName));
+                cafe.setCafeThumbnail("/upload/" + newFileName);
+            } catch (Exception e) {
+                throw new RuntimeException("카페 썸네일 저장에 실패했습니다.", e);
+            }
+        }
+
+        // 4. 최종적으로 엔티티 저장
+        cafeRepository.save(cafe);
+    }
+
+    @Transactional
+    @Override
+    public void deleteCafe(Long cafeId, Long userId) throws IllegalAccessException {
+        Cafe cafe = cafeRepository.findById(cafeId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 카페입니다."));
+
+        // 권한 확인: 소유자 ID와 요청한 사용자 ID가 다르면 예외 발생
+        if (!cafe.getOwner().getId().equals(userId)) {
+            throw new IllegalAccessException("카페를 삭제할 권한이 없습니다.");
+        }
+
+        membershipRepository.deleteByCafe(cafe);
+
+        // 데이터베이스에서 카페 삭제
+        cafeRepository.delete(cafe);
+    }
+
+    @Override
+    @Transactional
+    public void sendJoinRequest(Long cafeId, Long userId) {
+        Cafe cafe = cafeRepository.findById(cafeId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 카페를 찾을 수 없습니다."));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+
+        // 이미 가입했거나 신청 중인지 확인
+        if (membershipRepository.findByCafeAndUser(cafe, user).isPresent() ||
+                cafeJoinRequestRepository.existsByCafeAndUserAndStatus(cafe, user, CafeJoinRequestStatus.PENDING)) {
+            throw new IllegalStateException("이미 가입된 회원이거나 가입 신청이 처리 중입니다.");
+        }
+
+        // CafeJoinRequest 엔티티 생성 및 저장
+        CafeJoinRequest joinRequest = CafeJoinRequest.builder()
+                .cafe(cafe)
+                .user(user)
+                .status(CafeJoinRequestStatus.PENDING)
+                .build();
+        cafeJoinRequestRepository.save(joinRequest);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<CafeJoinRequestResponseDTO> getPendingJoinRequests(Long cafeId) {
+        Cafe cafe = cafeRepository.findById(cafeId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 카페를 찾을 수 없습니다."));
+
+        List<CafeJoinRequest> requests = cafeJoinRequestRepository.findByCafeAndStatus(cafe, CafeJoinRequestStatus.PENDING);
+
+        // DTO로 변환하여 반환
+        return requests.stream()
+                .map(CafeJoinRequestResponseDTO::new)
+                .collect(Collectors.toList());
+    }
+
+
+    @Override
+    @Transactional
+    public Long approveJoinRequest(Long requestId, Long adminId) {
+        CafeJoinRequest joinRequest = cafeJoinRequestRepository.findById(requestId)
+                .orElseThrow(() -> new IllegalArgumentException("가입 신청을 찾을 수 없습니다."));
+
+        // 1. 관리자 권한 확인 (요청 받은 카페의 소유자인지)
+        if (!joinRequest.getCafe().getOwner().getId().equals(adminId)) {
+            throw new IllegalStateException("승인 권한이 없습니다.");
+        }
+
+        // 2. 신청 상태 확인
+        if (joinRequest.getStatus() != CafeJoinRequestStatus.PENDING) {
+            throw new IllegalStateException("이미 처리된 신청입니다.");
+        }
+
+        // 3. Membership 엔티티 생성 및 저장 (사용자에게 일반 멤버 역할 부여)
+        Membership newMember = Membership.builder()
+                .cafe(joinRequest.getCafe())
+                .user(joinRequest.getUser())
+                .role(CafeRole.CAFE_USER) // 기본 역할은 CAFE_USER
+                .build();
+        membershipRepository.save(newMember);
+
+        // 4. CafeJoinRequest 상태를 APPROVED로 변경
+        joinRequest.setStatus(CafeJoinRequestStatus.APPROVED);
+        cafeJoinRequestRepository.save(joinRequest);
+
+        // 5. 카페 회원수 증가
+        joinRequest.getCafe().setMemberCount(joinRequest.getCafe().getMemberCount() + 1);
+        cafeRepository.save(joinRequest.getCafe());
+
+        // ✅ 6. 승인된 카페의 ID를 반환
+        return joinRequest.getCafe().getId();
+    }
+
+    @Override
+    @Transactional
+    public void rejectJoinRequest(Long requestId, Long adminId) {
+        CafeJoinRequest joinRequest = cafeJoinRequestRepository.findById(requestId)
+                .orElseThrow(() -> new IllegalArgumentException("가입 신청을 찾을 수 없습니다."));
+
+        if (!joinRequest.getCafe().getOwner().getId().equals(adminId)) {
+            throw new IllegalStateException("거절 권한이 없습니다.");
+        }
+
+        if (joinRequest.getStatus() != CafeJoinRequestStatus.PENDING) {
+            throw new IllegalStateException("이미 처리된 신청입니다.");
+        }
+
+        joinRequest.setStatus(CafeJoinRequestStatus.REJECTED);
+        cafeJoinRequestRepository.save(joinRequest);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public boolean isCafeOwner(Long cafeId, Long userId) {
+        return cafeRepository.findById(cafeId)
+                .map(cafe -> cafe.getOwner().getId().equals(userId))
+                .orElse(false);
     }
 }
