@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>카페 신청 상세</title>
+</head>
+<body>
+<h1>카페 신청 상세 정보</h1>
+
+<p>카페명: <span th:text="${name}">[카페명]</span></p>
+<p>설명: <span th:text="${description}">[설명]</span></p>
+<p>카테고리: <span th:text="${category}">[카테고리]</span></p>
+<p>신청자ID: <span th:text="${applicantId}">[신청자ID]</span></p>
+<p>신청일: <span th:text="${#temporals.format(regDate, 'yyyy-MM-dd HH:mm')}">[신청일]</span></p>
+
+<form th:action="@{/cafe/admin/approve}" method="post">
+  <input type="hidden" name="applicationId" th:value="${applicationId}" />
+  <button type="submit">승인</button>
+</form>
+
+<form th:action="@{/cafe/admin/reject}" method="post">
+  <input type="hidden" name="applicationId" th:value="${applicationId}" />
+  <button type="submit">거절</button>
+</form>
+
+<a href="/cafe/admin/applications">목록으로 돌아가기</a>
+
+</body>
+</html>
