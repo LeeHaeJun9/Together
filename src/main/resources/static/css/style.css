@@ -1,0 +1,120 @@
+* {
+    margin: 0;
+    padding: 0px;
+    box-sizing: border-box;
+}
+
+input:focus {
+    outline: none;
+}
+
+/* 모든 리스트 점 빼기 */
+li {
+    list-style-type: none;
+}
+
+/* a태그 */
+a {
+    text-decoration-line: none;
+    color: black;
+}
+
+a:visited {
+    color : black;
+}
+
+#header_container {
+    width: 1440px;
+    height: 5000px;
+    position: relative;
+    margin: 0 auto;
+}
+
+/* h3 태그 p 태그*/
+h3, p {
+    text-align: left;
+}
+
+/* span 태그 */
+span {
+    font-weight: normal;
+}
+span:hover {
+    font-weight: bold;
+}
+
+body {
+    font-family: sans-serif;
+}
+
+
+/* 상단 */
+header {
+    width: 1440px;
+    height: 155px;
+    margin: 0 auto;
+    background-color: white;
+    border-bottom: 0.3px solid lightgray;
+    top: 1px;
+    position: sticky;
+    z-index: 100;
+}
+
+/* 로고 */
+#logo {
+    width: 200px;
+    height: 80px;
+    position: relative;
+    top: 30px;
+}
+
+#logo_img {
+    width: 200px;
+    height: 80px;
+    object-fit: cover;
+}
+
+/* 검색창 */
+.search_bar{
+    width: 500px;
+    height: 50px;
+    margin: auto;
+    position: relative;
+    top: -25px;
+    padding: 10px;
+    border-radius: 15px;
+    border: 1px solid lightgray;
+}
+
+.search_bar i{
+    flex: 1;
+}
+
+.search_bar input{
+    flex: 7;
+    border: none;
+    outline: none;
+}
+
+/* 로그인 */
+.login {
+    width: 70px;
+    height: 50px;
+    float: right;
+    position:relative;
+    left: -50px;
+    top: -60px;
+}
+
+/* 상단 리스트 */
+.list_bar {
+    margin: auto;
+    text-align: center;
+    float: left;
+}
+
+.list_bar li{
+    width: 59px;
+    float: left;
+    margin: 0 auto;
+}
