@@ -33,12 +33,12 @@
     </thead>
     <tbody>
     <tr th:each="app : ${applications}">
-        <td th:text="${app.id}"></td>
+        <td th:text="${app.applicationId}"></td>
         <td th:text="${app.name}"></td>
         <td th:text="${app.description}"></td>
         <td th:text="${app.category}"></td>
         <td th:text="${#temporals.format(app.regDate, 'yyyy-MM-dd HH:mm')}"></td>
-        <td><a th:href="@{'/cafe/admin/applications/' + ${app.id}}">상세 보기</a></td>
+        <td><a th:href="@{'/cafe/admin/applications/' + ${app.applicationId}}">상세 보기</a></td>
     </tr>
     </tbody>
 </table>

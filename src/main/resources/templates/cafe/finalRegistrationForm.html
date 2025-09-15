@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>최종 카페 등록</title>
+</head>
+<body>
+<h1>최종 카페 등록</h1>
+
+<div th:if="${error}" style="color: red;">
+  <p th:text="${error}"></p>
+</div>
+
+<div th:if="${message}" style="color: green;">
+  <p th:text="${message}"></p>
+</div>
+
+<p>아래는 승인된 카페 신청 정보입니다. 추가 이미지를 업로드하여 등록을 완료하세요.</p>
+
+<div>
+  <strong>카페명:</strong> <span th:text="${name}"></span><br/>
+  <strong>설명:</strong> <span th:text="${description}"></span><br/>
+  <strong>카테고리:</strong> <span th:text="${category}"></span>
+</div>
+
+<hr/>
+
+<form th:action="@{/cafe/myApplications/{applicationId}/register(applicationId=${applicationId})}"
+      method="post"
+      enctype="multipart/form-data">
+
+
+  <div>
+    <label for="cafeImage">카페 대표 이미지:</label>
+    <input type="file" id="cafeImage" name="cafeImage" required>
+  </div>
+
+  <div>
+    <label for="cafeThumbnail">카페 썸네일:</label>
+    <input type="file" id="cafeThumbnail" name="cafeThumbnail" required>
+  </div>
+
+  <br/>
+  <button type="submit">등록 완료</button>
+</form>
+
+<br/>
+<a th:href="@{/myApplications}">내 신청 목록으로 돌아가기</a>
+
+</body>
+</html>

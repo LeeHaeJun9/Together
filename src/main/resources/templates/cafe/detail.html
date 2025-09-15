@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${cafe.name} + ' 상세 페이지'"></title>
+    <link rel="stylesheet" href="/css/cafeHome.css">
+</head>
+<body>
+
+<div class="page-container">
+
+    <header class="header">
+        <div class="logo">
+            <a href="/">로고 (홈으로)</a>
+        </div>
+        <nav class="user-actions">
+            <a href="/mypage">마이페이지</a>
+            <a href="/logout">로그아웃</a>
+        </nav>
+    </header>
+
+    <nav class="main-nav">
+        <ul>
+            <li><a th:href="@{/cafe/{cafeId}(cafeId=${cafe.id})}">카페 홈</a></li>
+
+            <li th:unless="${cafe.isMember}">
+                <form th:action="@{/cafe/{cafeId}/join(cafeId=${cafe.id})}" method="post">
+                    <button type="submit" class="join-button">가입신청</button>
+                </form>
+            </li>
+
+            <li th:if="${cafe.isMember}">
+                <a th:href="@{/cafe/{cafeId}/boards(cafeId=${cafe.id})}">게시글</a>
+            </li>
+            <li th:if="${cafe.isMember}">
+                <a th:href="@{/cafe/{cafeId}/meetings(cafeId=${cafe.id})}">모임</a>
+            </li>
+        </ul>
+    </nav>
+
+    <main class="main-content">
+        <section class="cafe-header">
+            <div class="cafe-image-container">
+                <img th:src="${cafe.cafeImage}" alt="카페 대표 이미지">
+            </div>
+            <div class="cafe-info-box">
+                <h1 th:text="${cafe.name}">카페 이름</h1>
+            </div>
+        </section>
+
+        <section class="cafe-introduction">
+            <h2>카페 소개</h2>
+            <p th:text="${cafe.description}">카페 소개</p>
+        </section>
+
+        <section class="cafe-calendar">
+            <h2>카페 모임 캘린더</h2>
+        </section>
+
+        <section class="announcements-events">
+            <h2>최신 공지 & 이벤트</h2>
+        </section>
+
+        <section class="latest-popular-posts">
+            <h2>최신 게시글 또는 인기 게시글</h2>
+        </section>
+
+        <section class="similar-cafes">
+            <h2>비슷한 카페</h2>
+        </section>
+
+        <div th:if="${cafe.isOwner}" class="owner-actions">
+            <a th:href="@{/cafe/{cafeId}/edit(cafeId=${cafe.id})}" class="edit-button">
+                수정
+            </a>
+
+            <form th:action="@{/cafe/{cafeId}/delete(cafeId=${cafe.id})}" method="post" style="display:inline;">
+                <button type="submit" class="delete-button">삭제</button>
+            </form>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>푸터</p>
+    </footer>
+
+</div>
+
+</body>
+</html>
