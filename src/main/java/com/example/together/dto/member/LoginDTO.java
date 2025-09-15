@@ -1,4 +1,4 @@
-package com.example.together.dto.cafe;
+package com.example.together.dto.member;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
