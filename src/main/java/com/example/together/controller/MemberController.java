@@ -1,66 +1,86 @@
 package com.example.together.controller;
 
-import com.example.together.dto.member.LoginDTO;
-import com.example.together.dto.member.MyPageDTO;
+import com.example.together.dto.member.memberRegisterDTO;
+import com.example.together.service.UserService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+@Slf4j
 @Controller
-@RequestMapping("/member")
+@RequiredArgsConstructor
 public class MemberController {
 
-    @GetMapping("/login")
-    public String loginPage() {
-        return "member/login";  // member/login.html 반환
+    private final UserService userService;
+
+    // 회원가입 페이지
+    @GetMapping("/member/register")
+    public String showRegisterForm(Model model) {
+        log.info("GET /member/register - 회원가입 페이지 요청");
+        model.addAttribute("memberRegisterDTO", new memberRegisterDTO());
+        return "member/register";
     }
 
-    @GetMapping("/register")
-    public String registerPage() {
-        return "member/memberRegister";  // member/memberRegister.html 반환
-    }
-    // 🆕 로그인 처리 추가
-    @PostMapping("/login")
-    public String loginProcess(LoginDTO loginDTO, Model model) {
+    // 회원가입 처리
+    @PostMapping("/member/register")
+    public String processRegistration(@Valid @ModelAttribute("memberRegisterDTO") memberRegisterDTO registerDTO,
+                                      BindingResult bindingResult,
+                                      Model model,
+                                      RedirectAttributes redirectAttributes) {
 
-        // 임시 검증 로직 (다음 단계에서 UserService 연동 예정)
-        if (loginDTO.getUserId() != null && loginDTO.getPassword() != null) {
-            // 로그인 성공 (임시)
-            System.out.println("로그인 시도: " + loginDTO.getUserId());
-            return "redirect:/main";  // 메인 페이지로 이동
-        } else {
-            // 로그인 실패
-            model.addAttribute("error", "아이디와 비밀번호를 입력해주세요.");
-            return "member/login";  // 로그인 페이지로 돌아가기
+        log.info("POST /member/register - 회원가입 시도: userId = {}", registerDTO.getUserId());
+
+        // 비밀번호 일치 확인
+        if (!registerDTO.getPassword().equals(registerDTO.getConfirmPassword())) {
+            bindingResult.rejectValue("confirmPassword", "password.mismatch", "비밀번호가 일치하지 않습니다.");
+        }
+        // 아이디 중복 확인
+        if (userService.isUserIdExists(registerDTO.getUserId())) {
+            bindingResult.rejectValue("userId", "userId.duplicate", "이미 사용 중인 아이디입니다.");
+        }
+        // 이메일 중복 확인
+        if (userService.isEmailExists(registerDTO.getEmail())) {
+            bindingResult.rejectValue("email", "email.duplicate", "이미 사용 중인 이메일입니다.");
+        }
+
+        // 유효성 검사 실패 시
+        if (bindingResult.hasErrors()) {
+            log.warn("회원가입 폼 유효성 검사 실패");
+            return "member/register";
+        }
+
+        // 모든 검증 통과 후 회원가입 진행
+        try {
+            userService.register(registerDTO);
+            redirectAttributes.addFlashAttribute("message", "회원가입에 성공했습니다. 로그인해주세요.");
+            return "redirect:/login";
+        } catch (IllegalArgumentException e) {
+            log.warn("회원가입 처리 중 예외 발생: {}", e.getMessage());
+            model.addAttribute("error", e.getMessage());
+            return "member/register";
         }
     }
-    // 🆕 마이페이지 추가
-    @GetMapping("/mypage")
-    public String myPage(Model model) {
 
-        // TODO: 세션에서 현재 로그인한 사용자 정보 가져오기
-        // 임시로 하드코딩 (실제로는 세션에서 userId를 가져와야 함)
-        String currentUserId = "testUser";  // 임시값
-
-        // UserService를 통해 사용자 정보 조회 (다음 단계에서 구현)
-        // User user = userService.findByUserId(currentUserId);
-        // MyPageDTO myPageDTO = MyPageDTO.fromUser(user);
-
-        // 임시 MyPageDTO 생성
-        MyPageDTO myPageDTO = MyPageDTO.builder()
-                .userId(currentUserId)
-                .nickname("임시 닉네임")
-                .name("홍길동")
-                .email("test@example.com")
-                .build();
-
-        model.addAttribute("myPageData", myPageDTO);
-        return "member/mypage";  // member/mypage.html 반환
+    // 사용자 ID 중복 확인 AJAX
+    @PostMapping("/member/register/check-userid")
+    @ResponseBody
+    public String checkUserId(@RequestParam("userId") String userId) {
+        log.info("아이디 중복 확인: userId = {}", userId);
+        boolean exists = userService.isUserIdExists(userId);
+        return exists ? "{\"available\": false}" : "{\"available\": true}";
     }
 
+    // 이메일 중복 확인 AJAX
+    @PostMapping("/member/register/check-email")
+    @ResponseBody
+    public String checkEmail(@RequestParam("email") String email) {
+        log.info("이메일 중복 확인: email = {}", email);
+        boolean exists = userService.isEmailExists(email);
+        return exists ? "{\"available\": false}" : "{\"available\": true}";
+    }
 }
-
-
-
