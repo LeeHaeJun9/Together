@@ -32,7 +32,7 @@ public class TradeDTO {
   @NotNull
   private Long sellerId;
 
-  private String regDate;        // 문자열로 간단 노출
+  private String regDate;
 
   private String modDate;
 }

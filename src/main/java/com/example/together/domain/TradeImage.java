@@ -11,14 +11,15 @@ import lombok.*;
 @Builder
 public class TradeImage {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    private Trade trade;
+  @Column(nullable = false, length = 1024)
+  private String imageUrl;
 
-    private String imageUrl;
+  private Integer sortOrder;
 
-    private int sortOrder;
+  @ManyToOne(fetch = FetchType.LAZY, optional = false)
+  private Trade trade;
 }

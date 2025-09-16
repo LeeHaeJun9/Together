@@ -19,24 +19,13 @@
         </div>
 
         <div class="input-group mb-3">
-            <span class="input-group-text">MeetingDate</span>
-            <input type="datetime-local" class="form-control" th:value="${dto.meetingDate}" readonly>
-        </div>
-
-        <div class="input-group mb-3">
-            <span class="input-group-text">Address</span>
-            <input type="text" class="form-control" th:value="${dto.addressId}" readonly>
-        </div>
-
-
-        <div class="input-group mb-3">
             <span class="input-group-text">Content</span>
             <textarea class="form-control col-sm-5" rows="5" readonly>[[${dto.content}]]</textarea>
         </div>
 
         <div class="input-group mb-3">
             <span class="input-group-text">Writer</span>
-            <input type="text" class="form-control" th:value="${dto.organizer}" readonly>
+            <input type="text" class="form-control" th:value="${dto.reviewer}" readonly>
         </div>
 
         <div class="input-group mb-3">
@@ -46,10 +35,10 @@
 
         <div class="my-4">
             <div class="float-end" th:with="link = ${pageRequestDTO.getLink()}">
-                <a th:href="|@{/meeting/list}?${link}|" class="text-decoration-none">
+                <a th:href="|@{/meeting/review/list}?${link}|" class="text-decoration-none">
                     <button type="button" class="btn btn-primary">List</button>
                 </a>
-                <a th:href="|@{/meeting/modify(id=${dto.id})}&${link}|" class="text-decoration-none">
+                <a th:href="|@{/meeting/review/modify(id=${dto.id})}&${link}|" class="text-decoration-none">
                     <button type="button" class="btn btn-secondary">Modify</button>
                 </a>
             </div>

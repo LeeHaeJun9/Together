@@ -1,15 +1,21 @@
-package com.example.together.service;
+package com.example.together.service.meeting;
 
 import com.example.together.domain.Meeting;
+import com.example.together.dto.PageRequestDTO;
+import com.example.together.dto.PageResponseDTO;
 import com.example.together.dto.meeting.MeetingDTO;
 import com.example.together.repository.MeetingRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Log4j2
@@ -52,5 +58,24 @@ public class MeetingServiceImpl implements MeetingService {
     @Override
     public void MeetingDelete(Long id) {
         meetingRepository.deleteById(id);
+    }
+
+    @Override
+    public PageResponseDTO<MeetingDTO> list(PageRequestDTO pageRequestDTO) {
+        String[] types = pageRequestDTO.getTypes();
+        String keyword = pageRequestDTO.getKeyword();
+        Pageable pageable = pageRequestDTO.getPageable("id");
+
+        Page<Meeting> result = meetingRepository.searchAll(types, keyword, pageable);
+
+        List<MeetingDTO> dtoList = result.getContent().stream()
+                .map(meeting -> modelMapper.map(meeting, MeetingDTO.class)).collect(Collectors.toList());
+
+        return PageResponseDTO.<MeetingDTO>withAll()
+                .pageRequestDTO(pageRequestDTO)
+                .dtoList(dtoList)
+                .total((int)result.getTotalElements())
+                .build();
+
     }
 }
