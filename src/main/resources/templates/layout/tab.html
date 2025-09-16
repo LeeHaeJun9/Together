@@ -13,7 +13,7 @@
     <link th:href="@{/header/css/styles.css}" rel="stylesheet" />
 </head>
 <body>
-<!-- Responsive navbar-->
+<!-- header -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container">
         <a class="navbar-brand" href="#">모여라</a>
@@ -36,6 +36,26 @@
         </div>
     </div>
 </nav>
+
+<!-- nav tab -->
+<div>
+    <ul class="nav nav-tabs">
+        <li class="nav-item">
+            <a class="nav-link active" aria-current="page" href="#">Active</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#">Link</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#">Link</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link disabled" aria-disabled="true">Disabled</a>
+        </li>
+    </ul>
+</div>
+
+
 <!-- Page content-->
 <div class="container" layout:fragment="content">
 
