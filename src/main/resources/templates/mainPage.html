@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project1 메인</title>
+    <style>
+        body{
+            width: 85vw;
+            margin: 0 auto;
+        }
+
+        /* header */
+
+        /* 로고(홈으로 이동) */
+        .logo {
+            float: left;
+            width: 20%;
+            height: auto;
+            margin: 10px 0;
+        }
+
+        /* 상단 바 */
+        .upbar {
+            float: right;
+        }
+        .upbar ul {
+            list-style: none;
+            margin: 50px 20px;
+        }
+        /* 창이 500px 이하일 때 */
+        @media screen and (max-width: 500px) {
+            .upbar ul {
+                margin: 50px 0;
+            }
+        }
+        .upbar ul li {
+            float: left;
+            margin: 2px;
+        }
+        .upbar button {
+            border: none;
+            background: none;
+            font-size: 18px;
+        }
+        a {
+            text-decoration: none;
+            color: black;
+        }
+        a:visited {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        /* 배너 */
+        .banner {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+        }
+        .bannertext {
+            clear: both;
+            float: left;
+            width: 500px;
+            padding: 10px;
+        }
+        .banner p {
+            padding: 0px 10px;
+            font-size: 18px;
+        }
+        .bannerimg img{
+            width: 100%;
+            height: 100%;
+            max-height: 400px;
+            object-fit: contain;
+            object-position: right;
+            float: right;
+        }
+
+        /* 창이 1000px 이하일 때 */
+        @media screen and (max-width: 1100px) {
+            .banner {
+                flex-direction: column;
+                align-items: center;
+            }
+            .bannertext {
+                width: 500px;
+                float: none;
+                margin: 0 auto;
+            }
+            .bannerimg img {
+                width: 100%;
+                max-height: 350px;
+                float: none;
+            }
+        }
+
+        /* 창이 500px 이하일 때 */
+        @media screen and (max-width: 500px) {
+            .bannerimg img {
+                display: none;
+            }
+        }
+
+
+        /* main */
+        main {
+            clear: both;
+            margin-top: 20px;
+        }
+        section {
+            margin-top: 20px;
+        }
+        fieldset {
+            /*border: none;*/
+            text-align: center;
+            border-radius: 30px;
+        }
+        legend h1 {
+            padding: 0px 20px 0px;
+        }
+
+        /* 검색창 */
+        .outline {
+            border: none;
+        }
+        .search {
+            display: flex;
+            justify-content: center;
+            height: 60px;
+            margin: 0 0 20px;
+        }
+        .search select {
+            width: 150px;
+            border-radius: 50px 0 0 50px;
+            font-size: 16px;
+            padding-left: 30px;
+            text-align: center;
+        }
+        .search select optgroup {
+            text-align: left;
+        }
+        .search input {
+            width: 50%;
+            border-radius: 0;
+            font-size: 16px;
+            padding: 20px;
+            box-shadow: none
+        }
+        .search button {
+            width: 100px;
+            border-radius: 0 50px 50px 0;
+            font-size: 16px;
+            background: none;
+        }
+        .search button:hover {
+            background-color: rgba(204, 204, 204, 0.2);
+        }
+        .search button img {
+            display: block;
+            max-width: 100%;
+            height: 80%;
+            margin: 0 auto;
+        }
+        .box {
+            font-size: 16px;
+            border: 1px solid #ccc;
+        }
+
+        /* 인기검색창 */
+        .keyword {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 50px;
+        }
+        .keyword ul {
+            list-style: none;
+            display: flex;
+            flex-direction: row;
+            padding: 0;
+        }
+        .keyword h3 {
+            margin: 10px;
+        }
+        .keyword ul button {
+            float: left;
+            margin: 10px;
+            width: 90%;
+            border-radius: 50px;
+            font-size: 16px;
+            background: none;
+            border: 1.8px solid #ccc;
+        }
+        .keyword ul button:hover {
+            background-color: rgba(204, 204, 204, 0.3);
+        }
+
+        /* 카테고리로 찾기 */
+        .category {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            column-gap: 30px;
+            padding: 0px 60px;
+            text-align: center
+        }
+        .item {
+            text-align: center;
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        .item img {
+            width: 100%;
+            height: 240px;
+            object-fit: cover;
+            border-radius: 40px;
+        }
+        .item a {
+            text-decoration: none;
+        }
+        /* 글자 올라오기 */
+        .caption {
+            color: white;
+            background-color: rgba(0, 0, 0, 0.6);
+            width: 100%;
+            height: 240px;
+            font-size: 30px;
+            line-height: 8em;
+            opacity: 0;
+            transition: all 0.5s ease-in-out;
+            position: absolute;
+            top: 0;
+            left: 0;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 40px;
+        }
+        .item a:hover .caption {
+            opacity: 1;
+            border-radius: 40px;
+        }
+
+        .dosidong {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            justify-content: center;
+            width: 100%;
+            max-width: 700px;
+            box-sizing: border-box;
+            margin: 30px auto;
+        }
+        .dosidong div {
+            display: flex;
+            justify-content: center;
+        }
+        .dosidong div select {
+            width: 150px;
+            height: 70px;
+            font-size: 18px;
+            padding-left: 10px;
+            margin: 0 20px 20px;
+            border-radius: 20px;
+            border: #ccc 2px solid;
+        }
+        /* 모임 자동 추천 슬라이더 버전*/
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin: 40px auto;
+            box-sizing: border-box;
+            padding: 0 20px;
+        }
+        .slider-wrapper {
+            width: 100%;
+            overflow: hidden;
+        }
+        .recom {
+            display: flex;
+            transition: transform 0.3s ease-in-out;
+            gap: 20px;
+        }
+        .card {
+            width: calc((100% - (20px * 4)) / 4);
+            height: 200px;
+            background-color: #ccc;
+            border-radius: 10px;
+            flex-shrink: 0;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        .card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+        .prev, .next {
+            background-color: white;
+            border: 1px solid #ccc;
+            font-size: 30px;
+            cursor: pointer; /* 커서 모양 바꾸기 */
+            padding: 10px 15px;
+            border-radius: 8px;
+        }
+
+        /* 푸터 */
+        .footer {
+            margin: 30px 0px;
+            padding: 40px 20px;
+            font-size: 14px;
+            color: #555;
+        }
+        .footer-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            max-width: 1200px;
+            margin: auto;
+        }
+        .footer-section {
+            margin: 10px;
+            width: 250px;
+        }
+        .footer-section h4 {
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+        .footer-section ul {
+            list-style: none;
+            padding: 0;
+        }
+        .footer-section ul li {
+            margin-bottom: 6px;
+        }
+        .footer-section ul li a {
+            text-decoration: none;
+            color: #555;
+        }
+        .footer-section ul li a:hover {
+            text-decoration: underline;
+        }
+        .footer-bottom {
+            text-align: center;
+            margin-top: 30px;
+            padding-bottom: 30px;
+            font-size: 13px;
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+<header>
+    <div class="logo"> <!-- 로고(홈으로 이동) -->
+        <a href="#">
+            <img src="resources/pic/logo.svg" alt="로고">
+        </a>
+    </div>
+    <nav class="upbar"> <!-- 상단 바 -->
+        <ul>
+            <li><button><a href="#">마이페이지</a></button></li>
+            <li><button><a href="#">로그인</a></button></li>
+            <li><button><a href="#">회원가입</a></button></li>
+        </ul>
+    </nav>
+    <div class="banner"> <!-- 배너 -->
+        <div class="bannertext"> <!-- 배너텍스트 -->
+            <h1>같이 놀 사람? 여기 모여라!</h1>
+            <P><b>누구나 쉽게, 어디서든 가볍게.</b><br>
+                같은 관심사만 있으면 지역은 상관없어요.<br>
+                산책, 독서, 보드게임, 전시회 등<br>
+                시간과 일정이 맞는 사람들끼리 모이면 그게 바로 소모임!</P>
+            <p>우리 동네뿐 아니라 근처 도시, 여행지에서도<br>
+                마음 맞는 사람들과 자연스럽게 어울릴 수 있어요.</p>
+            <p>관심사로 연결된 사람들이 모여<br>
+                모임을 만들고, 참여하고, 함께 즐기는 공간,<br>
+                “같이 놀 사람? 여기 모여라!”</P>
+        </div>
+        <div class="bannerimg"> <!-- 배너이미지 -->
+            <img src="resources/pic/banner.jpg" alt="배너 이미지">
+        </div>
+    </div>
+</header>
+
+<main>
+    <section> <!-- 검색창 -->
+        <form>
+            <fieldset class="outline">
+                <div class="search">
+                    <select class="box" name="option"> <!-- 지역, 성별, 연령 검색 어떻게 구현? -->
+                        <optgroup label="성별">
+                            <option value="male">남성</option>
+                            <option value="female">여성</option>
+                        </optgroup>
+                        <optgroup label="연령">
+                            <option value="age10">10대</option>
+                            <option value="age2030">20대~30대</option>
+                            <option value="age4060">40대~60대</option>
+                            <option value="age70+">70대 이상</option>
+                        </optgroup>
+                    </select>
+                    <input type="search" class="box" placeholder=" 관심사가 무엇인가요?">
+                    <button type="submit" class="box"><img src="resources/pic/search.png"></button>
+                </div>
+                <div class="keyword">  <!-- 인기검색어 -->
+                    <h3>인기검색어</h3>
+                    <ul>
+                        <li><button>런닝크루</button></li>
+                        <li><button>뜨개질</button></li>
+                        <li><button>모루인형</button></li>
+                        <li><button>강아지 산책</button></li>
+                        <li><button>천안 모임</button></li>
+                        <li><button>밋업</button></li>
+                        <li><button>달리기</button></li>
+                        <!-- <li><button>키워드1</button></li> -->
+                    </ul>
+                </div>
+            </fieldset>
+        </form>
+    </section>
+    <section> <!-- 카테고리로 찾기 -->
+        <fieldset>
+            <legend><h1>카테고리 검색</h1></legend>
+            <div class="category">
+                <div class="item">
+                    <a href="board/list" style="text-decoration: none;"><img src="resources/pic/hobby.jpg">
+                        <div class="caption">전체</div></a>
+                </div>
+                <div class="item">
+                    <a href="board/list?types=c&keyword=운동"><img src="resources/pic/sports.jpg">
+                        <div class="caption">운동</div></a>
+                </div>
+                <div class="item">
+                    <a href="board/list?types=c&keyword=예술"><img src="resources/pic/arts.jpg">
+                        <div class="caption">예술</div></a>
+                </div>
+                <div class="item">
+                    <a href="board/list?types=c&keyword=음악"><img src="resources/pic/musics.jpg">
+                        <div class="caption">음악</div></a>
+                </div>
+                <div class="item">
+                    <a href="board/list?types=c&keyword=반려동물"><img src="resources/pic/pets.jpg">
+                        <div class="caption">반려동물</div></a>
+                </div>
+                <div class="item">
+                    <a href="board/list?types=c&keyword=수집"><img src="resources/pic/collect.jpg">
+                        <div class="caption">수집</div></a>
+                </div>
+                <div class="item">
+                    <a href="board/list?types=c&keyword=언어"><img src="resources/pic/comunicate.jpg">
+                        <div class="caption">언어</div></a>
+                </div>
+                <div class="item">
+                    <a href="board/list?types=c&keyword=요리"><img src="resources/pic/cook.jpg">
+                        <div class="caption">요리</div></a>
+                </div>
+            </div>
+        </fieldset>
+    </section>
+    <section> <!-- 지역으로 찾기 -->
+        <fieldset>
+            <legend><h1>지역 검색</h1></legend>
+            <div class="dosidong">
+                <div>
+                    <select>
+                        <optgroup label="도/특별시/광역시">
+                            <option value="">전체</option>
+                            <option value="">서울특별시</option>
+                            <option value="">부산광역시</option>
+                            <option value="">인천광역시</option>
+                            <option value="">대구광역시</option>
+                            <option value="">대전광역시</option>
+                            <option value="">광주광역시</option>
+                            <option value="">세종특별자치시</option>
+                            <option value="">경기도</option>
+                            <option value="" selected>충청남도</option>
+                            <option value="">충청북도</option>
+                            <option value="">전라남도</option>
+                            <option value="">전라북도</option>
+                            <option value="">경상남도</option>
+                            <option value="">경상북도</option>
+                            <option value="">강원특별자치도</option>
+                            <option value="">전북특별자치도</option>
+                            <option value="">제주특별자치도</option>
+                        </optgroup>
+                    </select>
+                </div>
+                <div>
+                    <select>
+                        <optgroup label="시/군/구">
+                            <option value="">전체</option>
+                        </optgroup>
+                        <optgroup label="충청남도">
+                            <option value="">전체</option>
+                            <option value="">천안시</option>
+                            <option value="">아산시</option>
+                            <option value="">공주시</option>
+                            <option value="">보령시</option>
+                            <option value="">서산시</option>
+                            <option value="">논산시</option>
+                            <option value="">계룡시</option>
+                            <option value="">당진시</option>
+                            <option value="">금산군</option>
+                            <option value="">부여군</option>
+                            <option value="">서천군</option>
+                            <option value="">청양군</option>
+                            <option value="">홍성군</option>
+                            <option value="">예산군</option>
+                            <option value="">태안군</option>
+                        </optgroup>
+                        <optgroup label="충청북도">
+                            <option value="">전체</option>
+                        </optgroup>
+                    </select>
+                </div>
+                <div>
+                    <select>
+                        <optgroup label="정렬">  <!-- 지역으로 할거면 읍/면/동 -->
+                            <option value="">Top 10</option>
+                            <option value="">뜨고 있는 모임</option>
+                            <option value="">새로 만들어진 모임</option>
+                            <option value="">최근 회원이 모집된 모임</option>
+                        </optgroup>
+                    </select>
+                </div>
+            </div>
+            <!-- 모임 자동 추천 / 슬라이드 형식-->
+            <div class="container">
+                <button class="prev">«</button>
+                <div class="slider-wrapper">
+                    <div class="recom">
+                        <div class="card"><img src="resources/pic/card1.jpg"></div>
+                        <div class="card"><img src="resources/pic/card2.jpg"></div>
+                        <div class="card"><img src="resources/pic/card3.jpg"></div>
+                        <div class="card"><img src="resources/pic/card4.jpg"></div>
+                        <div class="card"><img src="resources/pic/card5.jpg"></div>
+                        <div class="card"><img src="resources/pic/card6.jpg"></div>
+                        <div class="card"><img src="resources/pic/card7.jpg"></div>
+                        <div class="card"><img src="resources/pic/card8.jpg"></div>
+                        <div class="card"><img src="resources/pic/card9.jpg"></div>
+                        <div class="card"><img src="resources/pic/card10.jpg"></div>
+                    </div>
+                </div>
+                <button class="next">»</button>
+            </div>
+        </fieldset>
+    </section>
+</main>
+
+<!-- 푸터 -->
+<footer class="footer">
+    <div class="footer-container">
+        <div class="footer-section">
+            <h4>회사 정보</h4>
+            <p>회사명: 모여라 </p>
+            <p>사업자등록번호: 123-45-67890</p>
+            <p>주소: 충청남도 천안시 서북구 봉정로 345</p>
+        </div>
+        <div class="footer-section">
+            <h4>고객센터</h4>
+            <p>전화: 041-1234-5678</p>
+            <p>이메일: email@gmail.com</p>
+            <p>운영시간: 평일 09:00 ~ 18:00</p>
+        </div>
+        <div class="footer-section">
+            <h4>바로가기</h4>
+            <ul>
+                <li><a href="#">회사 소개</a></li>
+                <li><a href="#">이용약관</a></li>
+                <li><a href="#">개인정보처리방침</a></li>
+                <li><a href="#">문의하기</a></li>
+            </ul>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <p>&copy; 2025 예시회사. All rights reserved.</p>
+    </div>
+</footer>
+
+<script> // 스크립트 작동이 안됨
+// 모임 자동 추천, 슬라이드 형
+const track = document.querySelector('.recom');
+const prev = document.querySelector('.prev');
+const next = document.querySelector('.next');
+const card = document.querySelectorAll('.card').length;
+
+let currentIndex = 0;
+const visibleCards = 4; // 한 번에 보여줄 카드 수
+const totalCards = 10;
+const cardPercent = 100 / visibleCards;
+
+next.addEventListener('click', () => {
+    if (currentIndex < totalCards - visibleCards) {
+        currentIndex++;
+        track.style.transform = `translateX(-${currentIndex * cardPercent}%)`;
+    }
+});
+
+prev.addEventListener('click', () => {
+    if (currentIndex > 0) {
+        currentIndex--;
+        track.style.transform =  `translateX(-${currentIndex * cardPercent}%)`
+    }
+});
+</script>
+</body>
+</html>

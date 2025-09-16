@@ -1,5 +1,7 @@
 package com.example.together.service;
 
+import com.example.together.dto.PageRequestDTO;
+import com.example.together.dto.PageResponseDTO;
 import com.example.together.dto.meeting.MeetingDTO;
 
 public interface MeetingService {
@@ -7,4 +9,6 @@ public interface MeetingService {
     MeetingDTO MeetingDetail(Long id); //모임 상세
     void MeetingModify(MeetingDTO meetingDTO); // 모임 수정
     void MeetingDelete(Long id);
+
+    PageResponseDTO<MeetingDTO> list(PageRequestDTO pageRequestDTO);
 }
