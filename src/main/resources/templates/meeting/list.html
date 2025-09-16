@@ -7,18 +7,49 @@
 <div layout:fragment="content">
     <h1>Meeting List</h1>
 
+    <div class="row mt-3">
+        <div class="col">
+            <div class="card">
+                <div class="card-header">
+                    Meeting List
+                </div>
+                <div class="card-body" >
+                    <h5 class="card-title">Meeting List </h5>
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th scope="col">Id</th>
+                            <th scope="col">Title</th>
+                            <th scope="col">Writer</th>
+                            <th scope="col">meetingDate</th>
+                        </tr>
+                        </thead>
+                        <tbody th:with="link = ${pageRequestDTO.getLink()}">
+                        <tr th:each="dto:${responseDTO.dtoList}">
+                            <th scope="row">[[${dto.id}]]</th>
+                            <td>
+                                <!--                                [[${dto.title}]]-->
+                                <a th:href="|@{/meeting/read(id = ${dto.id})}&${link}|" class="text-decoration-none">[[${dto.title}]]</a>
+                            </td>
+                            <td>[[${dto.organizer}]]</td>
+                            <!--                            날짜 포맷팅 p.481-->
+                            <td>[[${#temporals.format(dto.meetingDate, 'yyyy-MM-dd')}]]</td>
+                        </tr>
+                        </tbody>
+                    </table>
 
-</div>
+                </div>
 
 
-<script layout:fragment="script" th:inline="javascript">
-    console.log("meetingList....")
+                <script layout:fragment="script" th:inline="javascript">
+                    console.log("meetingList....")
 
-    const result = [[${result}]]
-    if(result) {
-        // alert(result + " 게시글이 등록되었습니다.")
-        alert("게시글이 등록되었습니다.")
-    }
+                    const result = [[${result}]]
+                    if(result) {
+                        // alert(result + " 게시글이 등록되었습니다.")
+                        alert("게시글이 등록되었습니다.")
+                    }
 
-</script>
-</html>
+
+
+                </script>

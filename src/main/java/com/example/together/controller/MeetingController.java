@@ -1,6 +1,8 @@
 package com.example.together.controller;
 
 
+import com.example.together.dto.PageRequestDTO;
+import com.example.together.dto.PageResponseDTO;
 import com.example.together.dto.meeting.MeetingDTO;
 import com.example.together.service.MeetingService;
 import jakarta.validation.Valid;
@@ -22,8 +24,10 @@ public class MeetingController {
     private final MeetingService meetingService;
 
     @GetMapping("/list")
-    public void meetingList() {
-
+    public void meetingList(PageRequestDTO pageRequestDTO, Model model) {
+        PageResponseDTO<MeetingDTO> responseDTO = meetingService.list(pageRequestDTO);
+        log.info(responseDTO);
+        model.addAttribute("responseDTO", responseDTO);
     }
 
 
@@ -49,10 +53,36 @@ public class MeetingController {
         return "redirect:/meeting/list";
     }
 
-    @GetMapping("/read")
-    public void meetingRead(Long id, Model model) {
+    @GetMapping({"/read", "/modify"})
+    public void meetingRead(Long id, PageRequestDTO pageRequestDTO, Model model) {
         MeetingDTO meetingDTO = meetingService.MeetingDetail(id);
         log.info(meetingDTO);
         model.addAttribute("dto", meetingDTO);
+    }
+    @PostMapping("/modify")
+    public String meetingModify (PageRequestDTO pageRequestDTO, @Valid MeetingDTO meetingDTO, BindingResult bindingResult, RedirectAttributes redirectAttributes) {
+        log.info("meetingModify Post....." + meetingDTO);
+
+        if(bindingResult.hasErrors()) {
+            log.info("has errors..... meetingModify Post....");
+            String link = pageRequestDTO.getLink();
+            redirectAttributes.addFlashAttribute("errors", bindingResult.getAllErrors());
+            redirectAttributes.addAttribute("id", meetingDTO.getId());
+            return "redirect:/meeting/modify?"+ link;
+        }
+
+        meetingService.MeetingModify(meetingDTO);
+        redirectAttributes.addFlashAttribute("result", "modified");
+        redirectAttributes.addAttribute("id", meetingDTO.getId());
+        return "redirect:/meeting/read";
+    }
+
+
+    @PostMapping("/remove")
+    public String meetingRemove(Long id, RedirectAttributes redirectAttributes) {
+        log.info("meetingRemove..." + id);
+        meetingService.MeetingDelete(id);
+        redirectAttributes.addFlashAttribute("result", "removed");
+        return "redirect:/meeting/list";
     }
 }
