@@ -1,5 +1,10 @@
 package com.example.together.controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RequestBody;
+
 import com.example.together.dto.member.memberRegisterDTO;
 import com.example.together.service.UserService;
 import jakarta.validation.Valid;
@@ -13,6 +18,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.security.Principal;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 @Slf4j
 @Controller
@@ -98,5 +105,43 @@ public class MemberController {
             model.addAttribute("cafes", new ArrayList<>());
         }
         return "member/my-cafes";
+    }
+
+    @Autowired
+//    private UserService userService; // 사용자 서비스
+
+    // 아이디 찾기 페이지 표시
+    @GetMapping("/member/findId")
+    public String findIdPage() {
+        return "member/findId";
+    }
+
+    // 아이디 찾기 요청 처리
+    @PostMapping("/member/findId")
+    @ResponseBody
+    public Map<String, Object> findId(@RequestBody Map<String, String> request) {
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            String name = request.get("name");
+            String email = request.get("email");
+
+            // 데이터베이스에서 사용자 찾기
+            String userId = userService.findUserIdByNameAndEmail(name, email);
+
+            if (userId != null) {
+                response.put("success", true);
+                response.put("userId", userId);
+            } else {
+                response.put("success", false);
+                response.put("message", "일치하는 회원 정보를 찾을 수 없습니다.");
+            }
+
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", "서버 오류가 발생했습니다.");
+        }
+
+        return response;
     }
 }

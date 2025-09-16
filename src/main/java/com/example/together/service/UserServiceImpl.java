@@ -151,8 +151,11 @@ public class UserServiceImpl implements UserService, UserDetailsService {
                 return user;
             }
         }
-
-
         return null;
+    }
+    @Override
+    public String findUserIdByNameAndEmail(String name, String email) {
+        Optional<User> userOpt = userRepository.findByNameAndEmail(name, email);
+        return userOpt.isPresent() ? userOpt.get().getUserId() : null;
     }
 }
