@@ -1,5 +1,7 @@
-package com.example.together.service;
+package com.example.together.service.meeting;
 
+import com.example.together.dto.PageRequestDTO;
+import com.example.together.dto.PageResponseDTO;
 import com.example.together.dto.meeting.MeetingReviewDTO;
 
 public interface MeetingReviewService {
@@ -7,4 +9,6 @@ public interface MeetingReviewService {
     MeetingReviewDTO MeetingReviewDetail(Long id); // 모임 후기 상세
     void MeetingReviewModify(MeetingReviewDTO meetingReviewDTO); // 모임 후기 수정
     void MeetingReviewDelete(Long id); // 모임 후기 삭제
+
+    PageResponseDTO<MeetingReviewDTO> list(PageRequestDTO pageRequestDTO);
 }

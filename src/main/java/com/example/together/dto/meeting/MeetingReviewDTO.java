@@ -1,5 +1,6 @@
 package com.example.together.dto.meeting;
 
+import com.example.together.domain.Cafe;
 import com.example.together.domain.Meeting;
 import com.example.together.domain.User;
 import jakarta.persistence.FetchType;
@@ -18,7 +19,6 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class MeetingReviewDTO {
 
-    @NotEmpty
     private Long id;
 
     @NotEmpty
@@ -36,5 +36,5 @@ public class MeetingReviewDTO {
 
     private LocalDateTime modDate;
 
-//    private Cafe cafe;
+    private Cafe cafe;
 }
