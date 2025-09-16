@@ -11,6 +11,9 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.security.Principal;
+import java.util.ArrayList;
+
 @Slf4j
 @Controller
 @RequiredArgsConstructor
@@ -82,5 +85,18 @@ public class MemberController {
         log.info("이메일 중복 확인: email = {}", email);
         boolean exists = userService.isEmailExists(email);
         return exists ? "{\"available\": false}" : "{\"available\": true}";
+    }
+    @GetMapping("/member/my-cafes")
+    public String myCafes(Model model, Principal principal) {
+        if (principal != null) {
+            String userId = principal.getName();
+            // 사용자가 참여한 카페 목록 조회
+            // List<Cafe> myCafes = cafeService.findByUserId(userId);
+            // model.addAttribute("cafes", myCafes);
+
+            // 임시로 빈 목록 전달
+            model.addAttribute("cafes", new ArrayList<>());
+        }
+        return "member/my-cafes";
     }
 }
