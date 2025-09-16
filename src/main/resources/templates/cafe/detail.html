@@ -30,7 +30,7 @@
             </li>
 
             <li th:if="${cafe.isMember}">
-                <a th:href="@{/cafe/{cafeId}/boards(cafeId=${cafe.id})}">게시글</a>
+                <a th:href="@{/cafe/{cafeId}/posts(cafeId=${cafe.id})}">게시글</a>
             </li>
             <li th:if="${cafe.isMember}">
                 <a th:href="@{/cafe/{cafeId}/meetings(cafeId=${cafe.id})}">모임</a>

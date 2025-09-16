@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>게시글 목록</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<div class="container">
+  <h1 th:text="${cafeId} + '번 카페 게시글'">게시글 목록</h1>
+
+  <div class="action-buttons">
+    <a th:href="@{/cafe/{cafeId}/posts/create(cafeId=${cafeId})}" class="btn btn-primary">글쓰기</a>
+  </div>
+
+  <table class="post-table">
+    <thead>
+    <tr>
+      <th>No.</th>
+      <th>제목</th>
+      <th>작성자</th>
+      <th>조회수</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="post, iStat : ${posts}">
+      <td th:text="${iStat.count}">1</td>
+      <td>
+        <a th:href="@{/cafe/{cafeId}/posts/{postId}(cafeId=${cafeId}, postId=${post.id})}" th:text="${post.title}">게시글 제목</a>
+      </td>
+      <td th:text="${post.authorName}">작성자 이름</td>
+      <td th:text="${post.viewCount}">0</td>
+    </tr>
+    <tr th:if="${#lists.isEmpty(posts)}">
+      <td colspan="4">아직 작성된 게시글이 없습니다.</td>
+    </tr>
+    </tbody>
+  </table>
+</div>
+
+</body>
+</html>
