@@ -1,4 +1,4 @@
-package com.example.together.controller;
+package com.example.together.controller.cafe;
 
 import com.example.together.dto.cafe.CafeCreateRequestDTO;
 import org.springframework.stereotype.Controller;

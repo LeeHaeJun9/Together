@@ -3,6 +3,10 @@ package com.example.together.domain;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Getter
 @Setter
@@ -19,9 +23,21 @@ public class DemandSurvey extends BaseEntity {
 
     private String content;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    private User author;
+    @Column(nullable = false)
+    private LocalDateTime deadline;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private VoteType voteType;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    private Cafe cafe;
+    @JoinColumn(name = "author_id")
+    private User author;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "post_id")
+    private Post post;
+
+    @OneToMany(mappedBy = "survey", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Vote> votes = new ArrayList<>();
 }

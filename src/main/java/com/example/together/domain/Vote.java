@@ -16,16 +16,14 @@ public class Vote extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
     private String option;
 
-    private LocalDate deadline;
-
-    @Enumerated(EnumType.STRING)
-    private VoteType voteType;
-
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "survey_id")
     private DemandSurvey survey;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "voter_id")
     private User voter;
 }
