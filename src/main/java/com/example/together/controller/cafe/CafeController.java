@@ -1,9 +1,9 @@
-package com.example.together.controller;
+package com.example.together.controller.cafe;
 
 import com.example.together.domain.CafeApplication;
 import com.example.together.domain.CafeApplicationStatus;
 import com.example.together.dto.cafe.*;
-import com.example.together.service.CafeService;
+import com.example.together.service.cafe.CafeService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;

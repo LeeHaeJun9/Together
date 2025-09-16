@@ -1,4 +1,4 @@
-package com.example.together.controller;
+package com.example.together.controller.address;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;

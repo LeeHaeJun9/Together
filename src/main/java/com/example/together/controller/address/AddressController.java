@@ -1,4 +1,4 @@
-package com.example.together.controller;
+package com.example.together.controller.address;
 
 import com.example.together.domain.Address;
 import com.example.together.repository.AddressRepository;

@@ -1,0 +1,21 @@
+<form th:action="@{/cafe/{cafeId}/posts/{postId}/update(cafeId=${post.cafeId}, postId=${post.id})}"
+      method="post" enctype="multipart/form-data"> <div>
+  <label for="title">제목:</label>
+  <input type="text" id="title" name="title" th:value="${post.title}" required>
+</div>
+
+  <div>
+    <label for="content">내용:</label>
+    <textarea id="content" name="content" rows="10" th:text="${post.content}" required></textarea>
+  </div>
+
+  <div>
+    <label for="newImage">이미지 변경:</label>
+    <input type="file" id="newImage" name="newImage">
+    <p>현재 이미지: <span th:text="${post.image}"></span></p>
+    <img th:if="${post.image}" th:src="${post.image}" style="max-width: 200px; display: block; margin-top: 10px;">
+  </div>
+
+  <button type="submit">수정하기</button>
+  <a th:href="@{/cafe/{cafeId}/posts/{postId}(cafeId=${post.cafeId}, postId=${post.id})}" class="btn">취소</a>
+</form>
