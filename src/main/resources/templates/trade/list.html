@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/basic.html}">
+<head>
+    <meta charset="UTF-8">
+    <title>TradeHome</title>
+    <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+            rel="stylesheet"
+            integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+            crossorigin="anonymous">
+    <link href="/static/css/style.css" rel="stylesheet">
+</head>
+<body>
+<script
+        src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+<!-- 헤더 -->
+<header id="header">
+    <!-- 로고 -->
+    <div id="logo">
+        <img id="logo_img" src="#">
+    </div>
+
+    <!-- 검색 바 -->
+    <form class="search_bar" action="#" method="get">
+        <div class="input_box">
+            <i class="fa-solid i1 fa-magnifying-glass" aria-hidden="true"></i>
+            <input class="search_text" type="text" name="q" placeholder="검색어를 입력하세요" />
+        </div>
+    </form>
+
+    <!-- 로그인 -->
+    <div class="login">
+        <a href="#"><span>로그인</span></a>
+    </div>
+
+    <!-- 상단 리스트 -->
+    <nav class="list_bar" aria-label="상단 메뉴">
+        <ul class="t_list">
+            <!-- 카페랑 모임부분 작성하기 -->
+            <li><a href="#"  class="menu-link" id="menu-cafe"><span>카페 목록</span></a></li>
+            <li><a href="#" class="menu-link" id="menu-group"><span>모임 목록</span></a></li>
+            <li><a href="/trade/list" class="menu-link" id="menu-trade"><span>중고거래</span></a></li>
+        </ul>
+    </nav>
+</header>
+
+<div class="container py-3">
+
+    <!-- 한 줄 5개, 화면 줄면 자동으로 4/3/2/1개 -->
+    <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5 g-4"
+         th:with="items=${list}">
+
+        <div class="col" th:each="t : ${items}">
+            <div class="card h-100 shadow-sm">
+
+                <div class="ratio ratio-4x3">
+                    <img th:src="${t.thumbnail}" class="card-img-top object-fit-cover" alt="thumbnail">
+                </div>
+
+                <div class="card-body">
+                    <h6 class="card-title mb-1 text-truncate" th:text="${t.title}">상품 제목</h6>
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <span class="fw-semibold" th:text="${#numbers.formatInteger(t.price,0,'COMMA')} + '원'">0원</span>
+                        <span class="badge bg-light text-dark border" th:text="${t.tradeStatus}">FOR_SALE</span>
+                    </div>
+                    <p class="card-text small text-muted mb-0">
+                        <span th:text="${t.tradeCategory}">ELECTRONICS</span> 작성자 <span th:text="${t.sellerId != null ? 'user#'+t.sellerId : '알수없음'}">user#1</span>
+                    </p>
+                </div>
+
+                <div class="card-footer bg-white">
+                    <a class="btn btn-sm btn-outline-primary w-100"
+                       th:href="@{/trade/read(id=${t.id})}">자세히 보기</a>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+</body>
+</html>

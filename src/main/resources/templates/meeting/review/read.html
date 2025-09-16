@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/tab.html}">
+
+<div layout:fragment="content">
+    <h1>Meeting Detail</h1>
+
+    <div class="card-body">
+        <div class="input-group mb-3">
+            <span class="input-group-text">Id</span>
+            <input type="text" class="form-control" th:value="${dto.id}" readonly>
+        </div>
+
+        <div class="input-group mb-3">
+            <span class="input-group-text">Title</span>
+            <input type="text" class="form-control" th:value="${dto.title}" readonly>
+        </div>
+
+        <div class="input-group mb-3">
+            <span class="input-group-text">Content</span>
+            <textarea class="form-control col-sm-5" rows="5" readonly>[[${dto.content}]]</textarea>
+        </div>
+
+        <div class="input-group mb-3">
+            <span class="input-group-text">Writer</span>
+            <input type="text" class="form-control" th:value="${dto.reviewer}" readonly>
+        </div>
+
+        <div class="input-group mb-3">
+            <span class="input-group-text">Cafe</span>
+            <input type="text" class="form-control" th:value="${dto.cafe}" readonly>
+        </div>
+
+        <div class="my-4">
+            <div class="float-end" th:with="link = ${pageRequestDTO.getLink()}">
+                <a th:href="|@{/meeting/review/list}?${link}|" class="text-decoration-none">
+                    <button type="button" class="btn btn-primary">List</button>
+                </a>
+                <a th:href="|@{/meeting/review/modify(id=${dto.id})}&${link}|" class="text-decoration-none">
+                    <button type="button" class="btn btn-secondary">Modify</button>
+                </a>
+            </div>
+        </div>
+
+        <!--        <div class="my-4" th:with="user=${#authentication.principal}">-->
+        <!--            <div class="float-end" th:with="link = ${pageRequestDTO.getLink()}">-->
+        <!--                <a th:href="|@{/board/list}?${link}|" class="text-decoration-none">-->
+        <!--                    <button type="button" class="btn btn-primary">List</button>-->
+        <!--                </a>-->
+        <!--                <a th:if="${user != null && user.username == dto.writer}"-->
+        <!--                   th:href="|@{/board/modify(bno=${dto.bno})}&${link}|" class="text-decoration-none">-->
+        <!--                    <button type="button" class="btn btn-secondary">Modify</button>-->
+        <!--                </a>-->
+        <!--            </div>-->
+        <!--        </div>-->
+    </div>
+
+
+    <script layout:fragment="script" th:inline="javascript">
+        document.querySelector(".btn-primary").addEventListener("click", function (e) {
+            self.location = `/board/modify?tno=${dto.tno}&${pageRequestDTO.link}`
+        },false)
+
+        document.querySelector(".btn-secondary").addEventListener("click", function (e) {
+            self.location = `/board/list?${pageRequestDTO.link}`
+        }, false)
+
+    </script>

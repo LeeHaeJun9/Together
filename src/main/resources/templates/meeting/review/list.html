@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/tab.html}">
+
+<div layout:fragment="content">
+    <h1>MeetingReview List</h1>
+
+    <div class="row mt-3">
+        <div class="col">
+            <div class="card">
+                <div class="card-header">
+                    MeetingReview List
+                </div>
+                <div class="card-body" >
+                    <h5 class="card-title">MeetingReview List </h5>
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th scope="col">Id</th>
+                            <th scope="col">Title</th>
+                            <th scope="col">Writer</th>
+                            <th scope="col">Meeting</th>
+                        </tr>
+                        </thead>
+                        <tbody th:with="link = ${pageRequestDTO.getLink()}">
+                        <tr th:each="dto:${responseDTO.dtoList}">
+                            <th scope="row">[[${dto.id}]]</th>
+                            <td>
+                                <a th:href="|@{/meeting/review/read(id = ${dto.id})}&${link}|" class="text-decoration-none">[[${dto.title}]]</a>
+                            </td>
+                            <td>[[${dto.reviewer}]]</td>
+                            <td>[[${dto.meeting}]]</td>
+                        </tr>
+                        </tbody>
+                    </table>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script layout:fragment="script" th:inline="javascript">
+    console.log("mtReviewList....")
+
+    const result = [[${result}]]
+    if(result) {
+        // alert(result + " 게시글이 등록되었습니다.")
+        alert("게시글이 등록되었습니다.")
+    }
+
+</script>

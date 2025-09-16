@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/tab.html}">
+
+<head>
+    <title>MeetingReview Modify</title>
+</head>
+
+<div layout:fragment="content">
+    <div class="row mt-3">
+        <div class="col">
+            <div class="card">
+                <div class="card-header">
+                    MeetingReview Modify
+                </div>
+                <div class="card-body">
+                    <form th:action="@{/meeting/review/modify}" method="post" id="f1">
+                        <div class="input-group mb-3">
+                            <span class="input-group-text">id</span>
+                            <input type="text" class="form-control" th:value="${dto.id}" name="id" readonly>
+                        </div>
+                        <div class="input-group mb-3">
+                            <span class="input-group-text">Title</span>
+                            <input type="text" class="form-control" name="title" th:value="${dto.title}">
+                        </div>
+
+                        <div class="input-group mb-3">
+                            <span class="input-group-text">Content</span>
+                            <textarea class="form-control col-sm-5" rows="5" name="content">[[${dto.content}]]</textarea>
+                        </div>
+
+                        <div class="input-group mb-3">
+                            <span class="input-group-text">Writer</span>
+                            <input type="text" class="form-control" th:value="${dto.reviewer}" name="reviewer" readonly>
+                        </div>
+
+                        <div class="my-4">
+                            <div class="float-end">
+                                <button type="button" class="btn btn-primary listBtn">List</button>
+                                <button type="button" class="btn btn-secondary modBtn">Modify</button>
+                                <button type="button" class="btn btn-danger removeBtn">Remove</button>
+                            </div>
+                        </div>
+                    </form>
+
+
+                </div><!--end card body-->
+            </div><!--end card-->
+        </div><!-- end col-->
+    </div><!-- end row-->
+</div>
+
+
+<script layout:fragment="script" th:inline="javascript">
+    console.log("mtReviewModify....")
+
+    const errors = [[${errors}]]
+    console.log(errors)
+
+    let errorMsg = ''
+
+    if(errors){
+        for (let i = 0; i < errors.length; i++) {
+            errorMsg += `${errors[i].field}은(는) ${errors[i].code} \n`
+        }
+        alert(errorMsg)
+    }
+
+
+    const link = [[${pageRequestDTO.getLink()}]]
+    const formObj = document.querySelector("#f1")
+
+    document.querySelector(".modBtn").addEventListener("click", function (e) {
+        e.preventDefault()
+        e.stopPropagation()
+
+        formObj.action = `/meeting/review/modify?${link}`
+        formObj.method = 'post'
+        formObj.submit()
+    }, false)
+
+    document.querySelector(".removeBtn").addEventListener("click", function (e) {
+        e.stopPropagation()
+        e.preventDefault()
+
+        formObj.action = `/meeting/review/remove`
+        formObj.method = 'post'
+        formObj.submit()
+    }, false)
+
+    document.querySelector(".listBtn").addEventListener("click", function (e) {
+        e.preventDefault()
+        e.stopPropagation()
+
+        formObj.reset()
+        self.location = `/meeting/review/list?${link}`
+    }, false)
+
+</script>
