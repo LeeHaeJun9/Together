@@ -24,6 +24,14 @@ public class CafeController {
 
     private final CafeService cafeService;
 
+    @GetMapping("/main")
+    public String mainPage(Model model, Principal principal) {
+        log.info("GET /main - 메인페이지 요청");
+        List<CafeResponseDTO> cafes = cafeService.getAllCafes();
+        model.addAttribute("cafes", cafes);
+        return "mainpage";
+    }
+
     // TODO: 실제 사용자 ID를 Principal 객체에서 가져오도록 변경해야 합니다.
     // 현재는 임시로 하드코딩된 userId를 사용합니다.
     // **중요: 실제 애플리케이션에서는 이 임시 코드를 로그인된 사용자의 ID를 반환하는 실제 로직으로 교체해야 합니다.**

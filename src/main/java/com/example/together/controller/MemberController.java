@@ -1,5 +1,6 @@
 package com.example.together.controller;
 
+import com.example.together.domain.User;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -68,7 +69,7 @@ public class MemberController {
         try {
             userService.register(registerDTO);
             redirectAttributes.addFlashAttribute("message", "회원가입에 성공했습니다. 로그인해주세요.");
-            return "redirect:/login";
+            return "redirect:/main";
         } catch (IllegalArgumentException e) {
             log.warn("회원가입 처리 중 예외 발생: {}", e.getMessage());
             model.addAttribute("error", e.getMessage());
@@ -143,5 +144,155 @@ public class MemberController {
         }
 
         return response;
+    }
+    // 비밀번호 찾기 페이지 표시
+    @GetMapping("/member/findPw")
+    public String findPwPage() {
+        return "member/findPw";
+    }
+
+    // 비밀번호 찾기 요청 처리 (임시 비밀번호 발급)
+    @PostMapping("/member/findPw")
+    @ResponseBody
+    public Map<String, Object> findPassword(@RequestBody Map<String, String> request) {
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            String userId = request.get("userId");
+            String email = request.get("email");
+            String name = request.get("name");
+
+            // 사용자 정보 확인 (임시로 간단하게 구현)
+            boolean userExists = userService.isUserIdExists(userId) &&
+                    userService.isEmailExists(email);
+
+            if (userExists) {
+                // 임시 비밀번호 생성 (간단한 랜덤 문자열)
+                String tempPassword = "temp" + System.currentTimeMillis() % 10000;
+
+                response.put("success", true);
+                response.put("tempPassword", tempPassword);
+                response.put("message", "임시 비밀번호가 발급되었습니다.");
+
+                log.info("임시 비밀번호 발급 성공: userId = {}", userId);
+
+            } else {
+                response.put("success", false);
+                response.put("message", "입력하신 정보와 일치하는 회원을 찾을 수 없습니다.");
+                log.warn("비밀번호 찾기 실패: 사용자 정보 불일치 - userId = {}", userId);
+            }
+
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", "서버 오류가 발생했습니다.");
+            log.error("비밀번호 찾기 처리 중 오류: {}", e.getMessage());
+        }
+
+        return response;
+    }
+    // 프로필 페이지 표시
+    @GetMapping("/member/profile")
+    public String profilePage(Model model, Principal principal) {
+        if (principal != null) {
+            String userId = principal.getName();
+            User user = userService.findByUserId(userId);
+            model.addAttribute("user", user);
+            log.info("프로필 페이지 요청: userId = {}", userId);
+        }
+        return "member/profile";
+    }
+
+    // 개별 필드 업데이트
+    @PostMapping("/member/profile/update")
+    @ResponseBody
+    public Map<String, Object> updateProfile(@RequestBody Map<String, String> request,
+                                             Principal principal) {
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            if (principal == null) {
+                response.put("success", false);
+                response.put("message", "로그인이 필요합니다.");
+                return response;
+            }
+
+            String userId = principal.getName();
+            String field = request.get("field");
+            String value = request.get("value");
+
+            // 필드별 업데이트 처리
+            boolean success = userService.updateUserField(userId, field, value);
+
+            if (success) {
+                response.put("success", true);
+                response.put("message", "정보가 성공적으로 수정되었습니다.");
+                log.info("프로필 수정 성공: userId = {}, field = {}", userId, field);
+            } else {
+                response.put("success", false);
+                response.put("message", "정보 수정에 실패했습니다.");
+            }
+
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", "서버 오류가 발생했습니다.");
+            log.error("프로필 수정 오류: {}", e.getMessage());
+        }
+
+        return response;
+    }
+
+    // 비밀번호 변경
+    @PostMapping("/member/profile/password")
+    @ResponseBody
+    public Map<String, Object> changePassword(@RequestBody Map<String, String> request,
+                                              Principal principal) {
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            if (principal == null) {
+                response.put("success", false);
+                response.put("message", "로그인이 필요합니다.");
+                return response;
+            }
+
+            String userId = principal.getName();
+            String currentPassword = request.get("currentPassword");
+            String newPassword = request.get("newPassword");
+
+            // 현재 비밀번호 확인 및 새 비밀번호로 변경
+            boolean success = userService.changePassword(userId, currentPassword, newPassword);
+
+            if (success) {
+                response.put("success", true);
+                response.put("message", "비밀번호가 성공적으로 변경되었습니다.");
+                log.info("비밀번호 변경 성공: userId = {}", userId);
+            } else {
+                response.put("success", false);
+                response.put("message", "현재 비밀번호가 일치하지 않습니다.");
+            }
+
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", "서버 오류가 발생했습니다.");
+            log.error("비밀번호 변경 오류: {}", e.getMessage());
+        }
+
+        return response;
+    }
+    // 거래 내역 페이지 표시
+    @GetMapping("/member/myTrade")
+    public String myTradePage(Model model, Principal principal) {
+        if (principal != null) {
+            String userId = principal.getName();
+
+            // 임시로 빈 리스트 전달 (실제 구현 전)
+            model.addAttribute("sellCount", 0);
+            model.addAttribute("soldCount", 0);
+            model.addAttribute("favoriteCount", 0);
+            model.addAttribute("chatCount", 0);
+
+            log.info("거래 내역 페이지 요청: userId = {}", userId);
+        }
+        return "member/myTrade";
     }
 }
