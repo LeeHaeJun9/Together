@@ -22,4 +22,6 @@ public interface UserService {
     // 프로필 관리
     User updateProfile(Long id, memberRegisterDTO registerDTO);
     void deleteUser(Long id);
+
+    String findUserIdByNameAndEmail(String name, String email);
 }
