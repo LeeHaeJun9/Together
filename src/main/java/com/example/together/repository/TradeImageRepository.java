@@ -7,9 +7,9 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
-public interface TradeImageRepository extends JpaRepository<TradeImage,Long> {
 
-  // Trade의 이미지 목록을 정렬
+public interface TradeImageRepository extends JpaRepository<TradeImage, Long> {
+
   @Query("""
         select image
         from TradeImage image
@@ -18,5 +18,5 @@ public interface TradeImageRepository extends JpaRepository<TradeImage,Long> {
     """)
   List<TradeImage> findImages(@Param("tradeId") Long tradeId);
 
-
+  void deleteByTrade_Id(Long tradeId);
 }
