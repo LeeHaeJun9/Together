@@ -1,10 +1,10 @@
-package com.example.together.controller;
+package com.example.together.controller.meeting;
 
 
 import com.example.together.dto.PageRequestDTO;
 import com.example.together.dto.PageResponseDTO;
 import com.example.together.dto.meeting.MeetingDTO;
-import com.example.together.service.MeetingService;
+import com.example.together.service.meeting.MeetingService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;

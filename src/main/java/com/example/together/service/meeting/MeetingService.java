@@ -1,4 +1,4 @@
-package com.example.together.service;
+package com.example.together.service.meeting;
 
 import com.example.together.dto.PageRequestDTO;
 import com.example.together.dto.PageResponseDTO;
