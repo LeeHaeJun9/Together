@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>회원 관리 - Together Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .admin-header {
+            background: linear-gradient(135deg, #007bff 0%, #6f42c1 100%);
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+        }
+        .user-card {
+            transition: all 0.3s;
+            border-left: 4px solid #007bff;
+        }
+        .user-card:hover {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .user-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        .status-active { color: #28a745; }
+        .status-suspended { color: #dc3545; }
+        .status-inactive { color: #6c757d; }
+        .filter-section {
+            background-color: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+        }
+        .table-responsive {
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .btn-action {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.875rem;
+            margin: 0.125rem;
+        }
+        .sidebar {
+            background-color: #f8f9fa;
+            min-height: calc(100vh - 200px);
+            border-radius: 10px;
+        }
+        .nav-link {
+            color: #495057;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        .nav-link:hover {
+            background-color: #e9ecef;
+            color: #007bff;
+        }
+        .nav-link.active {
+            background-color: #007bff;
+            color: white;
+        }
+        .stat-badge {
+            font-size: 0.875rem;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+        }
+    </style>
+</head>
+<body>
+<!-- Admin Header -->
+<div class="admin-header">
+    <div class="container-fluid">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h2><i class="fas fa-users me-2"></i>회원 관리</h2>
+                <p class="mb-0">플랫폼 사용자를 관리하고 모니터링하세요</p>
+            </div>
+            <div class="col-md-4 text-end">
+                <a href="/manager/manager" class="btn btn-light me-2">
+                    <i class="fas fa-tachometer-alt"></i> 대시보드
+                </a>
+                <div class="dropdown d-inline">
+                    <button class="btn btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-user-shield"></i> 관리자님
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="/mypage">마이페이지</a></li>
+                        <li><a class="dropdown-item" href="/main">사용자 모드</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="/logout">로그아웃</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-2">
+            <div class="sidebar p-3">
+                <nav class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/manager/manager">
+                            <i class="fas fa-tachometer-alt me-2"></i>대시보드
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/manager/mUser">
+                            <i class="fas fa-users me-2"></i>회원 관리
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/manager/mCafe">
+                            <i class="fas fa-coffee me-2"></i>카페 관리
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/manager/mTrade">
+                            <i class="fas fa-shopping-cart me-2"></i>거래 관리
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/manager/mMeeting">
+                            <i class="fas fa-calendar-alt me-2"></i>모임 관리
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/manager/mReport">
+                            <i class="fas fa-exclamation-triangle me-2"></i>신고 관리
+                        </a>
+                    </li>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-10">
+            <!-- Statistics -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="card bg-primary text-white">
+                        <div class="card-body text-center">
+                            <i class="fas fa-users fa-2x mb-2"></i>
+                            <h4 th:text="${totalUsers ?: 1245}">1,245</h4>
+                            <small>총 회원수</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-success text-white">
+                        <div class="card-body text-center">
+                            <i class="fas fa-user-check fa-2x mb-2"></i>
+                            <h4 th:text="${activeUsers ?: 1156}">1,156</h4>
+                            <small>활성 회원</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-warning text-white">
+                        <div class="card-body text-center">
+                            <i class="fas fa-user-times fa-2x mb-2"></i>
+                            <h4 th:text="${suspendedUsers ?: 23}">23</h4>
+                            <small>정지 회원</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-info text-white">
+                        <div class="card-body text-center">
+                            <i class="fas fa-user-plus fa-2x mb-2"></i>
+                            <h4 th:text="${newUsersToday ?: 12}">12</h4>
+                            <small>오늘 신규</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Search and Filter Section -->
+            <div class="filter-section">
+                <form method="get" action="/manager/mUser">
+                    <div class="row align-items-end">
+                        <div class="col-md-3">
+                            <label class="form-label">검색</label>
+                            <input type="text" class="form-control" name="search"
+                                   placeholder="아이디, 이름, 이메일" th:value="${searchTerm}">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">상태</label>
+                            <select class="form-select" name="status">
+                                <option value="">전체</option>
+                                <option value="ACTIVE" th:selected="${status == 'ACTIVE'}">활성</option>
+                                <option value="LOCKED" th:selected="${status == 'LOCKED'}">정지</option>
+                                <option value="DELETED" th:selected="${status == 'DELETED'}">탈퇴</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">권한</label>
+                            <select class="form-select" name="role">
+                                <option value="">전체</option>
+                                <option value="USER" th:selected="${role == 'USER'}">일반회원</option>
+                                <option value="ADMIN" th:selected="${role == 'ADMIN'}">관리자</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">정렬</label>
+                            <select class="form-select" name="sort">
+                                <option value="regDate" th:selected="${sort == 'regDate'}">가입일순</option>
+                                <option value="userId" th:selected="${sort == 'userId'}">아이디순</option>
+                                <option value="name" th:selected="${sort == 'name'}">이름순</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <button type="submit" class="btn btn-primary me-2">
+                                <i class="fas fa-search"></i> 검색
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary" onclick="resetFilters()">
+                                <i class="fas fa-undo"></i> 초기화
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Bulk Actions -->
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                    <button class="btn btn-outline-primary btn-sm" onclick="selectAll()">
+                        <i class="fas fa-check-square"></i> 전체선택
+                    </button>
+                    <button class="btn btn-outline-warning btn-sm" onclick="bulkSuspend()">
+                        <i class="fas fa-ban"></i> 선택 정지
+                    </button>
+                    <button class="btn btn-outline-success btn-sm" onclick="bulkActivate()">
+                        <i class="fas fa-check"></i> 선택 활성화
+                    </button>
+                </div>
+                <div>
+                    <span class="text-muted">총 <strong th:text="${totalCount ?: 1245}">1,245</strong>명의 회원</span>
+                </div>
+            </div>
+
+            <!-- User Table -->
+            <div class="card">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                        <tr>
+                            <th><input type="checkbox" id="selectAllCheckbox"></th>
+                            <th>프로필</th>
+                            <th>아이디</th>
+                            <th>이름</th>
+                            <th>이메일</th>
+                            <th>상태</th>
+                            <th>권한</th>
+                            <th>가입일</th>
+                            <th>최종접속</th>
+                            <th>관리</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="user : ${users}" th:if="${users != null and !users.isEmpty()}">
+                            <td>
+                                <input type="checkbox" class="user-checkbox" th:value="${user.id}">
+                            </td>
+                            <td>
+                                <img th:src="${user.profileImage ?: '/images/default-avatar.png'}"
+                                     alt="프로필" class="user-avatar">
+                            </td>
+                            <td>
+                                <strong th:text="${user.userId}">user123</strong>
+                                <br><small class="text-muted" th:text="${user.nickname}">닉네임</small>
+                            </td>
+                            <td th:text="${user.name}">홍길동</td>
+                            <td th:text="${user.email}">user@example.com</td>
+                            <td>
+                                    <span class="badge"
+                                          th:class="${user.status == 'ACTIVE' ? 'bg-success' :
+                                                       user.status == 'LOCKED' ? 'bg-danger' : 'bg-secondary'}"
+                                          th:text="${user.status == 'ACTIVE' ? '활성' :
+                                                       user.status == 'LOCKED' ? '정지' : '탈퇴'}">
+                                        활성
+                                    </span>
+                            </td>
+                            <td>
+                                    <span class="badge"
+                                          th:class="${user.systemRole == 'ADMIN' ? 'bg-warning' : 'bg-primary'}"
+                                          th:text="${user.systemRole == 'ADMIN' ? '관리자' : '일반'}">
+                                        일반
+                                    </span>
+                            </td>
+                            <td th:text="${#temporals.format(user.regDate, 'yyyy-MM-dd')}">2024-01-15</td>
+                            <td th:text="${user.lastLoginDate != null ? #temporals.format(user.lastLoginDate, 'MM-dd HH:mm') : '없음'}">01-20 14:30</td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    <button class="btn btn-outline-info btn-action"
+                                            th:onclick="|viewUserDetail(${user.id})|">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="btn btn-outline-warning btn-action"
+                                            th:onclick="|editUser(${user.id})|">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-outline-success btn-action"
+                                            th:if="${user.status == 'LOCKED'}"
+                                            th:onclick="|activateUser(${user.id})|">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                    <button class="btn btn-outline-danger btn-action"
+                                            th:if="${user.status == 'ACTIVE'}"
+                                            th:onclick="|suspendUser(${user.id})|">
+                                        <i class="fas fa-ban"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        <!-- Empty State -->
+                        <tr th:if="${users == null or users.isEmpty()}">
+                            <td colspan="10" class="text-center py-4">
+                                <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                                <br><span class="text-muted">조건에 맞는 회원이 없습니다.</span>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Pagination -->
+            <nav th:if="${totalPages > 1}" aria-label="User pagination" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item" th:class="${currentPage == 0} ? 'disabled'">
+                        <a class="page-link" th:href="@{/manager/mUser(page=${currentPage - 1}, search=${searchTerm}, status=${status}, role=${role}, sort=${sort})}">이전</a>
+                    </li>
+                    <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                        th:class="${i == currentPage} ? 'active'">
+                        <a class="page-link"
+                           th:href="@{/manager/mUser(page=${i}, search=${searchTerm}, status=${status}, role=${role}, sort=${sort})}"
+                           th:text="${i + 1}">1</a>
+                    </li>
+                    <li class="page-item" th:class="${currentPage == totalPages - 1} ? 'disabled'">
+                        <a class="page-link" th:href="@{/manager/mUser(page=${currentPage + 1}, search=${searchTerm}, status=${status}, role=${role}, sort=${sort})}">다음</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+<!-- User Detail Modal -->
+<div class="modal fade" id="userDetailModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">회원 상세 정보</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="userDetailContent">
+                <!-- User detail content will be loaded here -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Filter reset function
+    function resetFilters() {
+        window.location.href = '/manager/mUser';
+    }
+
+    // Select all function
+    function selectAll() {
+        const checkboxes = document.querySelectorAll('.user-checkbox');
+        const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = selectAllCheckbox.checked;
+        });
+    }
+
+    // Bulk operations
+    function bulkSuspend() {
+        const selectedUsers = getSelectedUsers();
+        if (selectedUsers.length === 0) {
+            alert('정지할 회원을 선택해주세요.');
+            return;
+        }
+        if (confirm(`선택한 ${selectedUsers.length}명의 회원을 정지하시겠습니까?`)) {
+            // API call for bulk suspend
+            console.log('Suspending users:', selectedUsers);
+            location.reload();
+        }
+    }
+
+    function bulkActivate() {
+        const selectedUsers = getSelectedUsers();
+        if (selectedUsers.length === 0) {
+            alert('활성화할 회원을 선택해주세요.');
+            return;
+        }
+        if (confirm(`선택한 ${selectedUsers.length}명의 회원을 활성화하시겠습니까?`)) {
+            // API call for bulk activate
+            console.log('Activating users:', selectedUsers);
+            location.reload();
+        }
+    }
+
+    function getSelectedUsers() {
+        const checkboxes = document.querySelectorAll('.user-checkbox:checked');
+        return Array.from(checkboxes).map(cb => cb.value);
+    }
+
+    // Individual user actions
+    function viewUserDetail(userId) {
+        // Load user detail via AJAX and show modal
+        fetch(`/api/admin/users/${userId}`)
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('userDetailContent').innerHTML = `
+                    <div class="row">
+                        <div class="col-md-4 text-center">
+                            <img src="${data.profileImage || '/images/default-avatar.png'}"
+                                 class="img-fluid rounded-circle mb-3" style="width: 150px; height: 150px;">
+                        </div>
+                        <div class="col-md-8">
+                            <h5>${data.name} (${data.userId})</h5>
+                            <p><strong>이메일:</strong> ${data.email}</p>
+                            <p><strong>전화번호:</strong> ${data.phone || '없음'}</p>
+                            <p><strong>가입일:</strong> ${data.regDate}</p>
+                            <p><strong>상태:</strong> ${data.status}</p>
+                            <p><strong>참여 카페:</strong> ${data.cafeCount || 0}개</p>
+                            <p><strong>거래 횟수:</strong> ${data.tradeCount || 0}회</p>
+                        </div>
+                    </div>
+                `;
+                new bootstrap.Modal(document.getElementById('userDetailModal')).show();
+            })
+            .catch(error => {
+                alert('사용자 정보를 불러오는데 실패했습니다.');
+            });
+    }
+
+    function editUser(userId) {
+        window.location.href = `/manager/users/${userId}/edit`;
+    }
+
+    function suspendUser(userId) {
+        if (confirm('이 회원을 정지하시겠습니까?')) {
+            fetch(`/api/admin/users/${userId}/suspend`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            })
+                .then(response => {
+                    if (response.ok) {
+                        alert('회원이 정지되었습니다.');
+                        location.reload();
+                    } else {
+                        alert('정지 처리에 실패했습니다.');
+                    }
+                });
+        }
+    }
+
+    function activateUser(userId) {
+        if (confirm('이 회원을 활성화하시겠습니까?')) {
+            fetch(`/api/admin/users/${userId}/activate`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            })
+                .then(response => {
+                    if (response.ok) {
+                        alert('회원이 활성화되었습니다.');
+                        location.reload();
+                    } else {
+                        alert('활성화 처리에 실패했습니다.');
+                    }
+                });
+        }
+    }
+
+    // Select all checkbox functionality
+    document.getElementById('selectAllCheckbox').addEventListener('change', function() {
+        const checkboxes = document.querySelectorAll('.user-checkbox');
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = this.checked;
+        });
+    });
+</script>
+</body>
+</html>
