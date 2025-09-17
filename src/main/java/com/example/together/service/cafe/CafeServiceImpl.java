@@ -491,10 +491,4 @@ public class CafeServiceImpl implements CafeService {
                 .map(cafe -> cafe.getOwner().getId().equals(userId))
                 .orElse(false);
     }
-
-    @Override
-    public Cafe getCafeEntityById(Long cafeId) {
-        return cafeRepository.findById(cafeId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 카페입니다."));
-    }
 }
