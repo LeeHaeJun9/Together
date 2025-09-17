@@ -3,6 +3,7 @@ package com.example.together.controller.cafe;
 import com.example.together.domain.CafeApplication;
 import com.example.together.domain.CafeApplicationStatus;
 import com.example.together.dto.cafe.*;
+import com.example.together.service.UserService;
 import com.example.together.service.cafe.CafeService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +24,7 @@ import java.util.stream.Collectors;
 public class CafeController {
 
     private final CafeService cafeService;
+    private final UserService userService;
 
     @GetMapping("/main")
     public String mainPage(Model model, Principal principal) {
@@ -32,31 +34,29 @@ public class CafeController {
         return "mainpage";
     }
 
-    // TODO: 실제 사용자 ID를 Principal 객체에서 가져오도록 변경해야 합니다.
-    // 현재는 임시로 하드코딩된 userId를 사용합니다.
-    // **중요: 실제 애플리케이션에서는 이 임시 코드를 로그인된 사용자의 ID를 반환하는 실제 로직으로 교체해야 합니다.**
     private Long getLoggedInUserId(Principal principal) {
         if (principal == null) {
-            return null; // 로그인되지 않은 사용자
+            // 로그인되지 않은 사용자는 null을 반환하여 서비스 계층에서 처리하도록 합니다.
+            return null;
         }
-        // 실제 구현에서는 principal.getName() (username)을 사용하여 User 엔티티를 찾고 ID를 반환해야 합니다.
-        // 예: User user = userService.findByUsername(principal.getName()); return user.getId();
-        return 1L; // 임시 userId (로그인된 사용자라고 가정)
+        String userIdString = principal.getName();
+        // UserService의 findByUserId 메서드를 사용해 Long 타입의 고유 ID를 반환합니다.
+        return userService.findByUserId(userIdString).getId();
     }
 
     @PostMapping("/apply")
     public String applyForCafe(@ModelAttribute CafeCreateRequestDTO cafeRequest, Principal principal) {
         Long userId = getLoggedInUserId(principal); // 로그인된 사용자 ID 사용
-        if (userId == null) {
-            // TODO: 로그인 페이지로 리다이렉트 또는 에러 처리
-            return "redirect:/login"; // 예시: 로그인 페이지로 리다이렉트
-        }
         cafeService.applyForCafe(cafeRequest, userId);
         // TODO: 신청 완료 페이지로 리다이렉트하거나 메시지를 표시하는 것이 좋습니다.
         return "redirect:/cafe/application-status"; // 가상의 신청 현황 페이지
     }
 
-    // TODO: 카페 신청 폼을 보여주는 GET 매핑도 필요합니다 (예: /cafe/apply-form)
+    @GetMapping("/application-status")
+    public String showApplicationStatus() {
+        return "cafe/applicationStatus";
+    }
+
     @GetMapping("/apply-form")
     public String showApplyForm(Model model) {
         model.addAttribute("cafeCreateRequestDTO", new CafeCreateRequestDTO());
@@ -72,7 +72,7 @@ public class CafeController {
                 .collect(Collectors.toList());
 
         model.addAttribute("applications", applicationDTOs);
-        return "admin/applicationList";
+        return "/cafe/admin/applicationList";
     }
 
     @GetMapping("/admin/applications/{applicationId}")
@@ -95,26 +95,28 @@ public class CafeController {
         model.addAttribute("applicantId", applicationDTO.getApplicantId());
         model.addAttribute("regDate", applicationDTO.getRegDate());
 
-        return "admin/applicationDetail";
+        return "/cafe/admin/applicationDetail";
     }
 
 
     @PostMapping("/admin/approve")
     public String approveCafe(@RequestParam Long applicationId, RedirectAttributes redirectAttributes, Principal principal) {
-        Long adminId = getLoggedInUserId(principal); // 로그인된 관리자 ID 사용
+        Long adminId = getLoggedInUserId(principal); // 로그인된 사용자 ID
         if (adminId == null) {
-            return "redirect:/login";
+            return "redirect:/login"; // 로그인되지 않았으면 로그인 페이지로 리다이렉트
+        }
+
+        if (!userService.isAdmin(adminId)) {
+            redirectAttributes.addFlashAttribute("error", "카페 신청 승인 권한이 없습니다.");
+            return "redirect:/cafe/admin/applications";
         }
 
         try {
             CafeApplicationResponseDTO approvedCafe = cafeService.approveCafe(applicationId, adminId);
             redirectAttributes.addFlashAttribute("message", approvedCafe.getName() + " 카페 개설 신청이 승인되었습니다.");
-            // TODO: 사용자에게 승인 알림 (이메일, 알림 시스템, 마이페이지에 링크 등) 로직 추가
-            // 예: redirectAttributes.addFlashAttribute("finalRegistrationLink", "/cafe/my-applications/" + applicationId + "/complete");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "카페 신청 승인 중 오류가 발생했습니다: " + e.getMessage());
         }
-
 
         return "redirect:/cafe/admin/applications";
     }
@@ -217,12 +219,14 @@ public class CafeController {
     @GetMapping("/{cafeId}")
     public String getCafe(@PathVariable Long cafeId, Model model, Principal principal) {
         Long userId = (principal != null) ? getLoggedInUserId(principal) : null; // 로그인된 사용자 ID (없으면 null)
-        if (userId == null) {
-            // 로그인 없이도 카페 상세 조회 가능하도록 처리하거나, 로그인 필요시 리다이렉트
-            // 현재 로직은 userId가 null이더라도 서비스가 처리할 수 있다고 가정
+        String userNickname = null;
+
+        if (userId != null) {
+            userNickname = userService.getUserNicknameById(userId);
         }
         CafeResponseDTO response = cafeService.getCafeById(cafeId, userId);
         model.addAttribute("cafe", response);
+        model.addAttribute("userNickname", userNickname);
         return "cafe/detail";
     }
 
@@ -334,12 +338,12 @@ public class CafeController {
             Long cafeId = cafeService.approveJoinRequest(requestId, adminId);
             redirectAttributes.addFlashAttribute("message", "가입 신청이 승인되었습니다.");
 
-            return "redirect:/my/cafe/" + cafeId + "/joinRequests";
+            return "redirect:/cafe/my/cafe/" + cafeId + "/joinRequests";
         } catch (IllegalStateException | IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
 
             // 오류 발생 시에는 임시로 기존 URL로 리다이렉트
-            return "redirect:/my/cafe/joinRequests";
+            return "redirect:/cafe/my/cafe/joinRequests";
         }
     }
 }

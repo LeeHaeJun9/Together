@@ -1,12 +1,10 @@
 package com.example.together.service.post;
 
-import com.example.together.domain.Cafe;
-import com.example.together.domain.Post;
-import com.example.together.domain.PostType;
-import com.example.together.domain.User;
+import com.example.together.domain.*;
 import com.example.together.dto.post.PostCreateRequestDTO;
 import com.example.together.dto.post.PostResponseDTO;
 import com.example.together.repository.CafeRepository;
+import com.example.together.repository.DemandSurveyRepository;
 import com.example.together.repository.PostRepository;
 import com.example.together.repository.UserRepository;
 
@@ -30,6 +28,7 @@ public class PostServiceImpl implements PostService {
     private final PostRepository postRepository;
     private final CafeRepository cafeRepository;
     private final UserRepository userRepository;
+    private final DemandSurveyRepository demandSurveyRepository;
 
     @Value("${org.zerock.upload.path}")
     private String uploadPath;
@@ -72,6 +71,19 @@ public class PostServiceImpl implements PostService {
                 .build();
 
         Post savedPost = postRepository.save(post);
+
+        if (requestDTO.getPostType() == PostType.NOTICE && requestDTO.getDemandSurvey() != null) {
+            DemandSurvey demandSurvey = DemandSurvey.builder()
+                    .title(requestDTO.getDemandSurvey().getTitle())
+                    .content(requestDTO.getDemandSurvey().getContent())
+                    .deadline(requestDTO.getDemandSurvey().getDeadline())
+                    .voteType(requestDTO.getDemandSurvey().getVoteType())
+                    .post(savedPost)
+                    .author(author)
+                    .build();
+            demandSurveyRepository.save(demandSurvey);
+        }
+
         return new PostResponseDTO(savedPost, userId);
     }
 
@@ -142,6 +154,43 @@ public class PostServiceImpl implements PostService {
         post.setContent(requestDTO.getContent());
         post.setImage(newImageUrl); // 이미지 URL 업데이트
         post.setPostType(requestDTO.getPostType());
+
+        if (requestDTO.getPostType() == PostType.NOTICE) {
+            if (requestDTO.getDemandSurvey() != null) {
+                DemandSurvey existingSurvey = post.getDemandSurvey();
+                if (existingSurvey != null) {
+                    // 기존 수요조사가 있으면 업데이트
+                    existingSurvey.setTitle(requestDTO.getDemandSurvey().getTitle());
+                    existingSurvey.setContent(requestDTO.getDemandSurvey().getContent());
+                    existingSurvey.setDeadline(requestDTO.getDemandSurvey().getDeadline());
+                    existingSurvey.setVoteType(requestDTO.getDemandSurvey().getVoteType());
+                } else {
+                    // 기존 수요조사가 없으면 새로 생성
+                    DemandSurvey newSurvey = DemandSurvey.builder()
+                            .title(requestDTO.getDemandSurvey().getTitle())
+                            .content(requestDTO.getDemandSurvey().getContent())
+                            .deadline(requestDTO.getDemandSurvey().getDeadline())
+                            .voteType(requestDTO.getDemandSurvey().getVoteType())
+                            .post(post)
+                            .author(post.getAuthor())
+                            .build();
+                    demandSurveyRepository.save(newSurvey);
+                    post.setDemandSurvey(newSurvey);
+                }
+            } else {
+                // 기존 수요조사 데이터 삭제
+                if (post.getDemandSurvey() != null) {
+                    demandSurveyRepository.delete(post.getDemandSurvey());
+                    post.setDemandSurvey(null);
+                }
+            }
+        } else {
+            // 게시글 유형이 GENERAL로 변경되었을 경우, 기존 수요조사 삭제
+            if (post.getDemandSurvey() != null) {
+                demandSurveyRepository.delete(post.getDemandSurvey());
+                post.setDemandSurvey(null);
+            }
+        }
 
         postRepository.save(post);
     }

@@ -30,5 +30,8 @@ public interface UserService {
     String findUserIdByNameAndEmail(String name, String email);
 
 
+    boolean isAdmin(Long adminId);
+
+    String getUserNicknameById(Long userId);
 }
 

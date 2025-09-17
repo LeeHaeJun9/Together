@@ -14,6 +14,7 @@
             <a href="/">로고 (홈으로)</a>
         </div>
         <nav class="user-actions">
+            <span th:if="${userNickname}" th:text="${userNickname} + '님'"></span>
             <a href="/mypage">마이페이지</a>
             <a href="/logout">로그아웃</a>
         </nav>
@@ -34,6 +35,9 @@
             </li>
             <li th:if="${cafe.isMember}">
                 <a th:href="@{/cafe/{cafeId}/meetings(cafeId=${cafe.id})}">모임</a>
+            </li>
+            <li th:if="${cafe.isOwner}">
+                <a th:href="@{/cafe/my/cafe/{cafeId}/joinRequests(cafeId=${cafe.id})}">가입 신청 목록</a>
             </li>
         </ul>
     </nav>

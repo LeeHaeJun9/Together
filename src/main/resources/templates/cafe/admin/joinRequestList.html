@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>가입 신청 목록</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 p-8">
+
+<div class="max-w-4xl mx-auto bg-white rounded-lg shadow-md p-6">
+  <h1 class="text-3xl font-bold text-center text-gray-800 mb-6">
+    가입 신청 목록
+  </h1>
+
+  <div th:if="${error}" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+    <span th:text="${error}"></span>
+  </div>
+
+  <div th:if="${#lists.isEmpty(requests)}" class="text-center text-gray-500">
+    현재 보류 중인 가입 신청이 없습니다.
+  </div>
+
+  <div th:unless="${#lists.isEmpty(requests)}">
+    <table class="min-w-full divide-y divide-gray-200">
+      <thead class="bg-gray-50">
+      <tr>
+        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+          신청자 이름
+        </th>
+        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+          신청일
+        </th>
+        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+          상태
+        </th>
+        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+          액션
+        </th>
+      </tr>
+      </thead>
+      <tbody class="bg-white divide-y divide-gray-200">
+      <tr th:each="request : ${requests}">
+        <td th:text="${request.username}" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"></td>
+        <td th:text="${#temporals.format(request.requestDate, 'yyyy-MM-dd HH:mm')}" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"></td>
+        <td th:text="${request.status}" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"></td>
+        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+          <form th:action="@{/cafe/my/cafe/joinRequests/approve/{requestId}(requestId=${request.requestId})}" method="post" class="inline">
+            <button type="submit" class="text-green-600 hover:text-green-900 mr-2">승인</button>
+          </form>
+          <form th:action="@{/cafe/my/cafe/joinRequests/reject/{requestId}(requestId=${request.requestId})}" method="post" class="inline">
+            <button type="submit" class="text-red-600 hover:text-red-900" onclick="return confirm('정말로 거절하시겠습니까?');">거절</button>
+          </form>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+</body>
+</html>

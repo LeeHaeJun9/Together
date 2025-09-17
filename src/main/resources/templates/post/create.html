@@ -30,10 +30,10 @@
     <div>
       <label>게시글 유형:</label>
       <div>
-        <input type="radio" id="general" name="postType" value="GENERAL" th:field="*{postType}" checked>
+        <input type="radio" id="general" name="postType" value="GENERAL" th:field="*{postType}">
         <label for="general">일반 게시글</label>
       </div>
-      <div>
+      <div th:if="${isOwner}">
         <input type="radio" id="notice" name="postType" value="NOTICE" th:field="*{postType}">
         <label for="notice">공지사항</label>
       </div>
@@ -44,10 +44,67 @@
       <input type="file" id="imageFile" name="imageFile">
     </div>
 
+    <div id="demandSurveyFields" style="display: none;">
+      <h3>수요조사 정보</h3>
+      <div>
+        <label for="surveyTitle">수요조사 제목:</label>
+        <input type="text" id="surveyTitle" name="demandSurvey.title"> </div>
+      <div>
+        <label for="surveyContent">수요조사 내용:</label>
+        <textarea id="surveyContent" name="demandSurvey.content" rows="3"></textarea> </div>
+      <div>
+        <label for="deadline">마감일:</label>
+        <input type="datetime-local" id="deadline" name="demandSurvey.deadline"> </div>
+      <div>
+        <label>투표 타입:</label>
+        <div>
+          <input type="radio" id="voteTypeAnonymous" name="demandSurvey.voteType" value="ANONYMOUS" checked> <label for="voteTypeAnonymous">익명 투표</label>
+        </div>
+        <div>
+          <input type="radio" id="voteTypePublic" name="demandSurvey.voteType" value="PUBLIC"> <label for="voteTypePublic">공개 투표</label>
+        </div>
+      </div>
+    </div>
+
     <button type="submit">작성하기</button>
     <a th:href="@{/cafe/{cafeId}/posts(cafeId=${cafeId})}" class="btn">취소</a>
   </form>
 </div>
+
+<script>
+  // ✅ JavaScript로 수요조사 필드 동적 제어
+  const postTypeRadios = document.querySelectorAll('input[name="postType"]');
+  const demandSurveyFields = document.getElementById('demandSurveyFields');
+  const deadlineInput = document.getElementById('deadline');
+  const surveyTitleInput = document.getElementById('surveyTitle');
+  const surveyContentTextarea = document.getElementById('surveyContent');
+  const voteTypeAnonymousInput = document.getElementById('voteTypeAnonymous');
+  const voteTypePublicInput = document.getElementById('voteTypePublic');
+
+  function toggleDemandSurveyFields() {
+    if (document.getElementById('notice').checked) {
+      demandSurveyFields.style.display = 'block';
+      surveyTitleInput.setAttribute('required', 'required');
+      deadlineInput.setAttribute('required', 'required');
+      voteTypeAnonymousInput.setAttribute('required', 'required');
+      voteTypePublicInput.setAttribute('required', 'required');
+    } else {
+      demandSurveyFields.style.display = 'none';
+      surveyTitleInput.removeAttribute('required');
+      deadlineInput.removeAttribute('required');
+      voteTypeAnonymousInput.removeAttribute('required');
+      voteTypePublicInput.removeAttribute('required');
+    }
+  }
+
+  // 페이지 로드 시 초기 상태 설정
+  toggleDemandSurveyFields();
+
+  // 라디오 버튼 변경 시 함수 호출
+  postTypeRadios.forEach(radio => {
+    radio.addEventListener('change', toggleDemandSurveyFields);
+  });
+</script>
 
 </body>
 </html>

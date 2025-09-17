@@ -41,6 +41,17 @@
 <body>
 
 <div class="container">
+  <div class="post-actions">
+    <a th:if="${post.owner}"
+       th:href="@{/cafe/{cafeId}/posts/{postId}/edit(cafeId=${cafeId}, postId=${post.id})}"
+       class="btn btn-primary">수정</a>
+
+    <form th:if="${post.owner}"
+          th:action="@{/cafe/{cafeId}/posts/{postId}/delete(cafeId=${cafeId}, postId=${post.id})}"
+          method="post" style="display:inline-block;">
+      <button type="submit" class="btn btn-danger" onclick="return confirm('정말로 삭제하시겠습니까?');">삭제</button>
+    </form>
+  </div>
   <a th:href="@{/cafe/{cafeId}/posts(cafeId=${cafeId})}" class="btn btn-back">목록으로</a>
   <h1 th:text="${post.title}">게시글 제목</h1>
   <div class="post-meta">
@@ -54,6 +65,15 @@
       <img th:src="${post.image}" alt="게시글 이미지">
     </div>
     <p th:text="${post.content}">게시글 내용</p>
+  </div>
+
+  <div th:if="${post.postType.name() == 'NOTICE' and post.demandSurvey != null}" class="demand-survey-section">
+    <h2 th:text="${post.demandSurvey.title}">수요조사 제목</h2>
+    <p th:text="${post.demandSurvey.content}">수요조사 내용</p>
+    <p>마감일: <span th:text="${#temporals.format(post.demandSurvey.deadline, 'yyyy-MM-dd HH:mm')}"></span></p>
+
+    <div id="voteContainer">
+    </div>
   </div>
 
   <div class="comments-section">
@@ -110,6 +130,103 @@
   const commentIdInput = document.getElementById('editCommentId');
   const contentTextarea = document.getElementById('editCommentContent');
   const editButtons = document.querySelectorAll('.edit-comment-btn');
+  const postId = /*[[${post.id}]]*/ null;
+  const cafeId = /*[[${cafeId}]]*/ null;
+  const surveyId = /*[[${post.demandSurvey != null ? post.demandSurvey.id : null}]]*/ null;
+  const deadline = /*[[${post.demandSurvey != null ? post.demandSurvey.deadline : null}]]*/ null;
+  // TODO: userId를 로그인된 사용자의 실제 ID로 설정해야 합니다.
+  const userId = /*[[${post.isOwner ? -1 : 1}]]*/ null;
+
+  const voteContainer = document.getElementById('voteContainer');
+
+  // ✅ 투표 관련 로직
+  if (surveyId) {
+    // 투표 또는 결과 UI를 렌더링하는 메인 함수
+    function renderVoteUI() {
+      const now = new Date();
+      const deadlineDate = new Date(deadline);
+      const isExpired = now > deadlineDate;
+
+      // TODO: 사용자가 이미 투표했는지 확인하는 API 호출 (백엔드에 추가 필요)
+      const hasVoted = false; // 임시값, 실제로는 API 응답으로 결정
+
+      if (isExpired || hasVoted) {
+        // 투표가 마감되었거나 이미 참여한 경우: 결과 UI 표시
+        showVoteResults();
+      } else {
+        // 투표가 마감되지 않았고 참여하지 않은 경우: 투표 폼 UI 표시
+        showVoteForm();
+      }
+    }
+
+    // 투표 폼 UI를 렌더링하는 함수
+    function showVoteForm() {
+      let html = `
+        <div class="vote-form-options">
+          <input type="radio" id="vote-option-1" name="voteOption" value="찬성">
+          <label for="vote-option-1">참석</label><br>
+          <input type="radio" id="vote-option-2" name="voteOption" value="반대">
+          <label for="vote-option-2">비참석</label><br>
+        </div>
+        <button id="submitVoteBtn">투표하기</button>
+      `;
+      voteContainer.innerHTML = html;
+
+      // 투표 버튼 클릭 이벤트 리스너
+      document.getElementById('submitVoteBtn').addEventListener('click', () => {
+        const selectedOption = document.querySelector('input[name="voteOption"]:checked');
+        if (selectedOption) {
+          submitVote(selectedOption.value);
+        } else {
+          alert("옵션을 선택해주세요.");
+        }
+      });
+    }
+
+    // 투표 결과를 렌더링하는 함수
+    async function showVoteResults() {
+      try {
+        const response = await fetch(`/cafe/${cafeId}/posts/${postId}/demand-survey/${surveyId}/votes`);
+        if (!response.ok) {
+          throw new Error('투표 결과를 가져오는 데 실패했습니다.');
+        }
+        const results = await response.json();
+
+        let html = '<h4>투표 결과</h4><ul>';
+        results.forEach(result => {
+          html += `<li>${result.option}: ${result.count}표</li>`;
+        });
+        html += '</ul>';
+        voteContainer.innerHTML = html;
+      } catch (error) {
+        voteContainer.innerHTML = `<div style="color:red;">오류: ${error.message}</div>`;
+      }
+    }
+
+    // 투표를 백엔드로 전송하는 함수
+    async function submitVote(option) {
+      try {
+        const response = await fetch(`/cafe/${cafeId}/posts/${postId}/demand-survey/${surveyId}/votes`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ option: option })
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(errorText);
+        }
+        alert("투표가 완료되었습니다.");
+        renderVoteUI(); // UI를 결과 화면으로 전환
+      } catch (error) {
+        alert("투표 실패: " + error.message);
+      }
+    }
+
+    renderVoteUI();
+  }
 
   editButtons.forEach(button => {
     button.addEventListener('click', (event) => {

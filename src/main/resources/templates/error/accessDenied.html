@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>접근 거부</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+<div class="bg-white p-8 rounded-lg shadow-md max-w-lg w-full text-center">
+  <h1 class="text-4xl font-bold text-red-600 mb-4">
+    접근 권한 없음 🚫
+  </h1>
+  <p class="text-gray-700 text-lg mb-6">
+    이 페이지에 접근할 수 있는 권한이 없습니다.
+  </p>
+  <div th:if="${error}" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
+    <span th:text="${error}"></span>
+  </div>
+  <div class="mt-4">
+    <a th:href="@{/}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+      메인 페이지로 돌아가기
+    </a>
+  </div>
+</div>
+</body>
+</html>
