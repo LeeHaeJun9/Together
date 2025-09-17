@@ -18,6 +18,31 @@
             <input type="text" class="form-control" th:value="${dto.title}" readonly>
         </div>
 
+        <div class="input-group mb-3" th:if="*{cafe != null}">
+            <span class="input-group-text" >Category</span>
+            <input type="text" class="form-control" placeholder="Category" readonly th:value="*{cafe.category}">
+        </div>
+        <div class="input-group mb-3" th:if="*{cafe != null}">
+            <span class="input-group-text">Cafe</span>
+            <input type="hidden" th:field="*{cafe.id}" />
+            <input type="text" class="form-control" placeholder="Cafe" th:value="*{cafe.name}" readonly>
+        </div>
+        <div class="input-group mb-3">
+            <span class="input-group-text">Cafe</span>
+            <input type="text" class="form-control" th:value="${dto.cafe}" readonly>
+        </div>
+
+
+<!--        <div class="input-group mb-3">-->
+<!--            <span class="input-group-text">Writer</span>-->
+<!--            <input type="text" name="organizer" class="form-control" th:value="${#authentication.principal.username}" readonly>-->
+<!--        </div>-->
+        <div class="input-group mb-3">
+            <span class="input-group-text">Writer</span>
+            <input type="text" class="form-control" th:value="${dto.organizer}" readonly>
+        </div>
+
+
         <div class="input-group mb-3">
             <span class="input-group-text">MeetingDate</span>
             <input type="datetime-local" class="form-control" th:value="${dto.meetingDate}" readonly>
@@ -34,15 +59,23 @@
             <textarea class="form-control col-sm-5" rows="5" readonly>[[${dto.content}]]</textarea>
         </div>
 
-        <div class="input-group mb-3">
-            <span class="input-group-text">Writer</span>
-            <input type="text" class="form-control" th:value="${dto.organizer}" readonly>
-        </div>
 
-        <div class="input-group mb-3">
-            <span class="input-group-text">Cafe</span>
-            <input type="text" class="form-control" th:value="${dto.cafe}" readonly>
+        <div>
+            <span th:text="${dto.recruiting} ? '모집 마감' : '모집 중'"></span>
         </div>
+<!--        <div class="form-check">-->
+<!--            <div class="form-check form-check-inline">-->
+<!--                <input class="form-check-input" type="radio" name="recruiting" id="end" value="true"-->
+<!--                       th:checked="${dto.recruiting == true}" disabled>-->
+<!--                <label class="form-check-label" for="end">모집 마감</label>-->
+<!--            </div>-->
+<!--            <div class="form-check form-check-inline">-->
+<!--                <input class="form-check-input" type="radio" name="recruiting" id="ing" value="false"-->
+<!--                       th:checked="${dto.recruiting == false}" disabled>-->
+<!--                <label class="form-check-label" for="ing">모집 중</label>-->
+<!--            </div>-->
+<!--        </div>-->
+
 
         <div class="my-4">
             <div class="float-end" th:with="link = ${pageRequestDTO.getLink()}">
