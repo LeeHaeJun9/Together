@@ -61,6 +61,7 @@ header {
     width: 1440px;
     height: 155px;
     margin: 0 auto;
+    margin-bottom: 30px;
     background-color: white;
     border-bottom: 0.3px solid lightgray;
     top: 1px;
@@ -166,4 +167,109 @@ header {
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
+
+
+
+/*register*/
+
+
+.page-container{
+    width:1400px;
+    margin:0 auto;
+    padding:16px 0;
+}
+
+.trade-form .form-control{
+    width:100%;
+    border-radius:8px;
+    padding:16px;
+    font-size:16px;
+    box-sizing:border-box;
+}
+.trade-form > .mb-2,
+.trade-form > .mb-3{
+    margin-bottom:5px !important;
+}
+.actions{ margin-top:5px; display:flex; gap:8px; }
+
+.trade-form input[name="title"],
+.trade-form input[name="price"],
+.trade-form input[name="writer"]{
+    background:#f3f4f6;
+    border:0;
+    box-shadow:none;
+}
+.trade-form input[name="title"]:focus,
+.trade-form input[name="price"]:focus,
+.trade-form input[name="writer"]:focus{
+    background:#eef0f3;
+    outline:none;
+    box-shadow:none;
+}
+
+/* 내용 */
+.content-box{
+    background:#f3f4f6;
+    border-radius:8px;
+    padding:0;
+    display:grid;
+}
+
+.content-box textarea{
+    border:0;
+    background:transparent;
+    padding:16px;
+    resize:vertical;
+    min-height:260px;
+    font-size:16px;
+    box-sizing:border-box;
+}
+
+.image-uploader{ margin-top:6px; }
+.image-toolbar{ display:flex; align-items:center; gap:8px; margin-bottom:5px; }
+.image-count{ color:#6b7280; font-size:14px; }
+
+
+.upload-tile{
+    width:120px; aspect-ratio:1/1;
+    display:grid; place-items:center; text-align:center;
+    background:#e5e7eb; color:#111827; border-radius:8px;
+    cursor:pointer; user-select:none; font-size:14px; line-height:1.2;
+    transition:filter .15s, background .15s, border-color .15s;
+    border:2px dashed #cbd5e1;
+}
+.upload-tile:hover{ filter:brightness(.97); }
+.upload-tile.dragover{ background:#eef3ff; border-color:#6ea8fe; }
+
+.image-list{
+    display:flex; flex-wrap:wrap; gap:5px; margin-top:5px;
+}
+
+
+.image-item{
+    position:relative; width:120px; aspect-ratio:1/1;
+    border-radius:8px; overflow:hidden; background:#f3f4f6; cursor:pointer;
+}
+.image-item img{ width:100%; height:100%; object-fit:cover; display:block; }
+
+
+.image-item::after{
+    content:"클릭하면 삭제";
+    position:absolute; inset:0; display:grid; place-items:center;
+    background:rgba(0,0,0,0); color:#fff; font-size:13px;
+    opacity:0; transition:background .15s, opacity .15s;
+}
+.image-item:hover::after{ background:rgba(0,0,0,.35); opacity:1; }
+
+
+.btn-primary-like{
+    background:#2563eb; color:#fff; border:none;
+    padding:10px 16px; border-radius:10px; font-weight:600; cursor:pointer;
+}
+.btn-outline-like{
+    background:transparent; color:#374151; border:1px solid #d1d5db;
+    padding:10px 16px; border-radius:10px; font-weight:600; cursor:pointer;
+}
+.btn-primary-like:hover{ filter:brightness(.95); }
+.btn-outline-like:hover{ background:#f9fafb; }
 
