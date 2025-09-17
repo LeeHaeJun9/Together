@@ -9,7 +9,6 @@
         <link rel="stylesheet"
               th:href="@{/css/style.css(v=${#dates.createNow().time})}">
     </th:block>
-    <link href="/static/css/style.css" rel="stylesheet">
 </head>
 <body>
 
@@ -98,8 +97,10 @@
     </div>
 </section>
 
-<th:block layout:fragment="page-scripts">
-    <script th:src="@{/js/img.js}" defer></script>
-</th:block>
+<!--<th:block layout:fragment="page-scripts">-->
+<!--    <script th:src="@{/js/img.js}" defer></script>-->
+<!--</th:block>-->
+<script src="js/img.js"></script>
+
 </body>
 </html>
