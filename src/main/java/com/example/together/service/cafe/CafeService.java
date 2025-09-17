@@ -1,5 +1,6 @@
 package com.example.together.service.cafe;
 
+import com.example.together.domain.Cafe;
 import com.example.together.domain.CafeApplication;
 import com.example.together.dto.cafe.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -57,4 +58,6 @@ public interface CafeService {
     List<CafeApplicationResponseDTO> getApplicationsByUserId(Long userId);
 
     MyJoinedCafesDTO getMyJoinedCafes(Long userId);
+
+    Cafe getCafeEntityById(Long cafeId);
 }

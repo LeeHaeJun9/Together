@@ -493,6 +493,7 @@ public class CafeServiceImpl implements CafeService {
     }
 
     @Override
+<<<<<<< HEAD
     @Transactional(readOnly = true)
     public List<CafeApplicationResponseDTO> getApplicationsByUserId(Long userId) {
         // CafeApplicationRepository를 사용하여 특정 사용자 ID에 해당하는 신청서 목록을 찾습니다.
@@ -529,5 +530,11 @@ public class CafeServiceImpl implements CafeService {
                 .sportsCafes(sportsCafes)
                 .studyCafes(studyCafes)
                 .build();
+    }
+
+    @Override
+    public Cafe getCafeEntityById(Long cafeId) {
+        return cafeRepository.findById(cafeId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 카페입니다."));
     }
 }

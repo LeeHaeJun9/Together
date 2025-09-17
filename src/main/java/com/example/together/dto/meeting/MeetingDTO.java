@@ -4,6 +4,7 @@ import com.example.together.domain.Address;
 import com.example.together.domain.Cafe;
 import com.example.together.domain.User;
 import com.example.together.domain.Visibility;
+import com.example.together.dto.cafe.CafeResponseDTO;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -36,11 +37,13 @@ public class MeetingDTO {
 
     private User organizer;
 
-    private Cafe cafe;
+    private CafeResponseDTO cafe;
 
     private Address addressId;
 
     private LocalDateTime regDate;
 
     private LocalDateTime modDate;
+
+
 }
