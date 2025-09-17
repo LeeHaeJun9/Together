@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 
+import java.security.Principal;
 import java.util.List;
 
 @Log4j2
@@ -36,6 +38,7 @@ public class TradeController {
 
   @GetMapping("/register")
   public void registerGET() {
+
   }
 
   @PostMapping(value = "/register", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -51,6 +54,17 @@ public class TradeController {
     Long id = tradeService.register(tradeUploadDTO, 1L);
     redirectAttributes.addFlashAttribute("result", id);
     return "redirect:/trade/list";
+  }
+
+  @GetMapping("/trade/register")
+  public String registerForm(Model model,
+                             @AuthenticationPrincipal(expression="nickname") String nickname,
+                             java.security.Principal principal) {
+    String writer = (nickname != null && !nickname.isBlank())
+        ? nickname
+        : (principal != null ? principal.getName() : "");
+    model.addAttribute("writerName", writer);
+    return "trade/register";
   }
 
   @GetMapping({"/read", "/modify"})

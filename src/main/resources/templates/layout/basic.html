@@ -11,6 +11,9 @@
     <link rel="icon" type="image/x-icon" th:href="@{/header/assets/favicon.ico}" />
     <!-- Core theme CSS (includes Bootstrap)-->
     <link th:href="@{/header/css/styles.css}" rel="stylesheet" />
+
+    <!-- ✅ 각 페이지가 자기 CSS를 삽입할 슬롯 -->
+    <th:block layout:fragment="page-styles"></th:block>
 </head>
 <body>
 <!-- Responsive navbar-->
