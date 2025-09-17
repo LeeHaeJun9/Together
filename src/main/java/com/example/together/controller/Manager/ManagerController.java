@@ -9,10 +9,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.security.Principal;
-import java.time.LocalDate;
 
 @Controller
-@RequestMapping("/manager")
+@RequestMapping("/admin")
 @RequiredArgsConstructor
 @Slf4j
 
