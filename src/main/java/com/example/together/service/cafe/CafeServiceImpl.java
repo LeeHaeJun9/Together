@@ -491,4 +491,43 @@ public class CafeServiceImpl implements CafeService {
                 .map(cafe -> cafe.getOwner().getId().equals(userId))
                 .orElse(false);
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<CafeApplicationResponseDTO> getApplicationsByUserId(Long userId) {
+        // CafeApplicationRepository를 사용하여 특정 사용자 ID에 해당하는 신청서 목록을 찾습니다.
+        List<CafeApplication> applications = cafeApplicationRepository.findByApplicantId(userId);
+
+        // 조회된 엔티티 목록을 DTO 목록으로 변환하여 반환합니다.
+        return applications.stream()
+                .map(CafeApplicationResponseDTO::fromEntity)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public MyJoinedCafesDTO getMyJoinedCafes(Long userId) {
+        // 1. 해당 사용자의 모든 Membership 정보를 조회합니다.
+        List<Membership> memberships = membershipRepository.findByUserId(userId);
+
+        // 2. 가입한 카페들의 카테고리별 통계를 계산합니다.
+        long totalCafes = memberships.size();
+        long musicCafes = memberships.stream()
+                .filter(m -> m.getCafe().getCategory() == CafeCategory.MUSIC)
+                .count();
+        long sportsCafes = memberships.stream()
+                .filter(m -> m.getCafe().getCategory() == CafeCategory.SPORTS)
+                .count();
+        long studyCafes = memberships.stream()
+                .filter(m -> m.getCafe().getCategory() == CafeCategory.STUDY)
+                .count();
+
+        // 3. 통계와 가입 목록을 DTO에 담아 반환합니다.
+        return MyJoinedCafesDTO.builder()
+                .memberships(memberships)
+                .totalCafes(totalCafes)
+                .musicCafes(musicCafes)
+                .sportsCafes(sportsCafes)
+                .studyCafes(studyCafes)
+                .build();
+    }
 }

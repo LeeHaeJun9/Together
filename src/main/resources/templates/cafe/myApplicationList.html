@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>내 카페 신청 목록</title>
+</head>
+<body>
+<h1>내 카페 신청 목록</h1>
+<div th:if="${userApplications == null or userApplications.isEmpty()}">
+    <p>신청한 카페가 없습니다.</p>
+</div>
+<div th:unless="${userApplications.isEmpty()}">
+    <table>
+        <thead>
+        <tr>
+            <th>카페명</th>
+            <th>상태</th>
+            <th>신청일</th>
+            <th>관리</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="app : ${userApplications}">
+            <td th:text="${app.name}"></td>
+            <td>
+                <span th:if="${app.status.name() == 'PENDING'}">승인 대기 중</span>
+                <span th:if="${app.status.name() == 'APPROVED'}" style="color: green; font-weight: bold;">승인 완료</span>
+                <span th:if="${app.status.name() == 'REJECTED'}" style="color: red;">승인 거절</span>
+            </td>
+            </td>
+            <td th:text="${#temporals.format(app.regDate, 'yyyy-MM-dd')}"></td>
+            <td>
+                <a th:if="${app.status.name() == 'APPROVED'}"
+                   th:href="@{/cafe/myApplications/{applicationId}/complete(applicationId=${app.applicationId})}">
+                    최종 등록하기
+                </a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+<a href="/mypage">마이페이지로 돌아가기</a>
+</body>
+</html>
