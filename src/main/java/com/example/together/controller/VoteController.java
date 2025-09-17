@@ -2,6 +2,7 @@ package com.example.together.controller;
 
 import com.example.together.dto.vote.VoteCreateRequestDTO;
 import com.example.together.dto.vote.VoteResponseDTO;
+import com.example.together.service.UserService;
 import com.example.together.service.vote.VoteService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -16,10 +17,16 @@ import java.util.List;
 public class VoteController {
 
     private final VoteService voteService;
+    private final UserService userService;
 
     // 현재 사용자의 ID를 가져오는 메서드 (실제 구현 필요)
     private Long getLoggedInUserId(Principal principal) {
-        return 1L;
+        if (principal == null) {
+            throw new IllegalStateException("로그인된 사용자가 없습니다.");
+        }
+        String userIdString = principal.getName();
+        // UserService를 통해 String 타입의 userId로 Long 타입의 고유 ID를 찾음
+        return userService.findByUserId(userIdString).getId();
     }
 
     @PostMapping

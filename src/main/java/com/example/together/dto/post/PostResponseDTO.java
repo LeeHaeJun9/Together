@@ -2,6 +2,7 @@ package com.example.together.dto.post;
 
 import com.example.together.domain.Post;
 import com.example.together.domain.PostType;
+import com.example.together.dto.demandSurvey.DemandSurveyResponseDTO;
 import lombok.Getter;
 
 @Getter
@@ -18,6 +19,8 @@ public class PostResponseDTO {
     private final Long cafeId;
     private final boolean isOwner;
 
+    private DemandSurveyResponseDTO demandSurvey;
+
     public PostResponseDTO(Post post, Long userId) {
         this.id = post.getId();
         this.title = post.getTitle();
@@ -30,5 +33,11 @@ public class PostResponseDTO {
         this.authorName = post.getAuthor().getName();
         this.cafeId = post.getCafe().getId();
         this.isOwner = post.getAuthor().getId().equals(userId);
+
+        if (post.getDemandSurvey() != null) {
+            this.demandSurvey = new DemandSurveyResponseDTO(post.getDemandSurvey());
+        } else {
+            this.demandSurvey = null;
+        }
     }
 }

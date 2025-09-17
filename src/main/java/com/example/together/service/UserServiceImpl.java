@@ -249,4 +249,22 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         Optional<User> userOpt = userRepository.findByNameAndEmail(name, email);
         return userOpt.isPresent() ? userOpt.get().getUserId() : null;
     }
+
+    @Override
+    public boolean isAdmin(Long adminId) {
+        // 1. userRepository를 사용해 ID로 사용자 조회
+        Optional<User> userOpt = userRepository.findById(adminId);
+
+        // 2. 사용자가 존재하고, 그 사용자의 역할이 SystemRole.ADMIN인지 확인
+        //    userOpt.isPresent()는 사용자가 존재하는지 확인하고,
+        //    userOpt.get().getSystemRole().equals(SystemRole.ADMIN)는 역할이 ADMIN인지 확인합니다.
+        return userOpt.isPresent() && userOpt.get().getSystemRole().equals(SystemRole.ADMIN);
+    }
+
+    @Transactional(readOnly = true)
+    public String getUserNicknameById(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+        return user.getNickname();
+    }
 }

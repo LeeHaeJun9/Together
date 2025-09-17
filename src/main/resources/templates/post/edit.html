@@ -8,7 +8,7 @@
     <label for="content">내용:</label>
     <textarea id="content" name="content" rows="10" th:text="${post.content}" required></textarea>
   </div>
-
+  <input type="hidden" name="postType" th:value="${post.postType}">
   <div>
     <label for="newImage">이미지 변경:</label>
     <input type="file" id="newImage" name="newImage">

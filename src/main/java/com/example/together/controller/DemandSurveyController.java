@@ -1,6 +1,7 @@
 package com.example.together.controller;
 
 import com.example.together.dto.demandSurvey.DemandSurveyCreateRequestDTO;
+import com.example.together.service.UserService;
 import com.example.together.service.demandSurvey.DemandSurveyService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -15,10 +16,14 @@ import java.security.Principal;
 public class DemandSurveyController {
 
     private final DemandSurveyService demandSurveyService;
+    private final UserService userService;
 
-    // 현재 사용자의 ID를 가져오는 메서드 (실제 구현 필요)
     private Long getLoggedInUserId(Principal principal) {
-        return 1L;
+        if (principal == null) {
+            throw new IllegalStateException("로그인된 사용자가 없습니다.");
+        }
+        String userIdString = principal.getName();
+        return userService.findByUserId(userIdString).getId();
     }
 
     @PostMapping
