@@ -22,4 +22,6 @@ public interface CafeJoinRequestRepository extends JpaRepository<CafeJoinRequest
     // 사용자 엔티티를 포함하여 특정 신청을 조회합니다.
     @Query("SELECT j FROM CafeJoinRequest j JOIN FETCH j.user WHERE j.id = :id")
     Optional<CafeJoinRequest> findByIdWithUser(@Param("id") Long id);
+
+    void deleteByCafe(Cafe cafe);
 }
