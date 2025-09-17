@@ -1,20 +1,13 @@
 package com.example.together.controller.meeting;
 
-
-import com.example.together.domain.Cafe;
-import com.example.together.domain.User;
 import com.example.together.dto.PageRequestDTO;
 import com.example.together.dto.PageResponseDTO;
-import com.example.together.dto.cafe.CafeResponseDTO;
 import com.example.together.dto.meeting.MeetingDTO;
-import com.example.together.service.CafeService;
 import com.example.together.service.UserService;
 import com.example.together.service.meeting.MeetingService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
