@@ -25,6 +25,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable( ))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(toStaticResources().atCommonLocations()).permitAll()
+                        .requestMatchers("/api/**").authenticated()
                         // ✅ 진짜 수정된 부분: /register 와 /member/register 모두 허용
                         .requestMatchers("/", "/login", "/register", "/member/register", "/member/register/**").permitAll()
                         .requestMatchers("/member/findId").permitAll()

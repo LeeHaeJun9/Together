@@ -16,9 +16,11 @@ public interface MembershipRepository extends JpaRepository<Membership, Long> {
 
     boolean existsByCafeAndUser(Cafe cafe, User user);
 
-    Optional<Object> findByCafeAndUser(Cafe cafe, User user);
+    Optional<Membership> findByCafeAndUser(Cafe cafe, User user);
 
     @EntityGraph(attributePaths = "cafe")
     List<Membership> findByUserId(Long userId);
+
+
 
 }

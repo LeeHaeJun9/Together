@@ -3,24 +3,44 @@
 <head>
   <meta charset="UTF-8">
   <title>게시글 목록</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="/css/style.css">
+  <style>
+    body {
+      background-color: #f8f9fa; /* 연한 회색 배경 */
+    }
+    .container {
+      margin-top: 50px;
+    }
+    .action-buttons {
+      margin-bottom: 20px;
+      text-align: right;
+    }
+    .post-table {
+      border: 1px solid #dee2e6;
+      background-color: #fff;
+    }
+    .btn-primary {
+      color: white !important;
+    }
+  </style>
 </head>
 <body>
 
 <div class="container">
-  <h1 th:text="${cafeId} + '번 카페 게시글'">게시글 목록</h1>
+  <h2 class="my-4" th:text="${cafeName}">게시글 목록</h2>
 
   <div class="action-buttons">
     <a th:href="@{/cafe/{cafeId}/posts/create(cafeId=${cafeId})}" class="btn btn-primary">글쓰기</a>
   </div>
 
-  <table class="post-table">
-    <thead>
+  <table class="table table-striped table-hover post-table">
+    <thead class="table-dark">
     <tr>
-      <th>No.</th>
-      <th>제목</th>
-      <th>작성자</th>
-      <th>조회수</th>
+      <th scope="col">No.</th>
+      <th scope="col">제목</th>
+      <th scope="col">작성자</th>
+      <th scope="col">조회수</th>
     </tr>
     </thead>
     <tbody>
@@ -33,11 +53,12 @@
       <td th:text="${post.viewCount}">0</td>
     </tr>
     <tr th:if="${#lists.isEmpty(posts)}">
-      <td colspan="4">아직 작성된 게시글이 없습니다.</td>
+      <td colspan="4" class="text-center">아직 작성된 게시글이 없습니다.</td>
     </tr>
     </tbody>
   </table>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

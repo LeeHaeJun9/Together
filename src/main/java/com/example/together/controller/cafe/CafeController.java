@@ -387,4 +387,21 @@ public class CafeController {
 
         return "cafe/myCafes"; // Thymeleaf 템플릿 파일 이름
     }
+
+    @PostMapping("/{cafeId}/leave")
+    @ResponseBody // API 요청임을 나타내기 위해 @ResponseBody 사용
+    public String leaveCafe(@PathVariable Long cafeId, Principal principal) {
+        if (principal == null) {
+            return "redirect:/login"; // 로그인되지 않았으면 로그인 페이지로 리다이렉트
+        }
+        Long userId = getLoggedInUserId(principal);
+        try {
+            cafeService.leaveCafe(cafeId, userId);
+            return "redirect:/cafe/list"; // 탈퇴 후 카페 목록 페이지로 리다이렉트
+        } catch (Exception e) {
+            // 오류 처리: 에러 페이지로 리디렉션하거나 JSON 응답 반환
+            log.error("Failed to leave cafe {}: {}", cafeId, e.getMessage());
+            return "redirect:/error"; // 예시: 에러 페이지로 리다이렉트
+        }
+    }
 }

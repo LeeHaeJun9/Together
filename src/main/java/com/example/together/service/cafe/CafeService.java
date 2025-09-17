@@ -59,5 +59,7 @@ public interface CafeService {
 
     MyJoinedCafesDTO getMyJoinedCafes(Long userId);
 
-    Cafe getCafeEntityById(Long cafeId);
+    void leaveCafe(Long cafeId, Long userId);
+
+    String getCafeNameById(Long cafeId);
 }
