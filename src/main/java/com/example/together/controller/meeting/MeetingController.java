@@ -1,6 +1,7 @@
 package com.example.together.controller.meeting;
 
 
+import com.example.together.config.UserEditor;
 import com.example.together.domain.Cafe;
 import com.example.together.domain.User;
 import com.example.together.dto.PageRequestDTO;
@@ -17,10 +18,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
@@ -31,6 +30,12 @@ public class MeetingController {
     private final MeetingService meetingService;
     private final UserRepository userRepository;
     private final CafeService cafeService;
+    private final UserEditor userEditor;
+
+    @InitBinder
+    public void initBinder(WebDataBinder binder) {
+        binder.registerCustomEditor(User.class, userEditor);
+    }
 
     @GetMapping("/list")
     public void meetingList(PageRequestDTO pageRequestDTO, Model model) {
@@ -51,7 +56,7 @@ public class MeetingController {
 //            meetingDTO.setCafe(cafeResponse);  // meetingDTO에 cafeResponse 설정
 //        }
 
-        model.addAttribute("meetingDTO", meetingDTO);
+        model.addAttribute("dto", meetingDTO);
     }
     @PostMapping("/register")
     public String meetingRegisterPost(@Valid MeetingDTO meetingDTO, BindingResult bindingResult, RedirectAttributes redirectAttributes) {
@@ -78,7 +83,7 @@ public class MeetingController {
         model.addAttribute("dto", meetingDTO);
     }
     @PostMapping("/modify")
-    public String meetingModify (PageRequestDTO pageRequestDTO, @Valid MeetingDTO meetingDTO, BindingResult bindingResult, RedirectAttributes redirectAttributes) {
+    public String meetingModify (@ModelAttribute MeetingDTO dto, PageRequestDTO pageRequestDTO, @Valid MeetingDTO meetingDTO, BindingResult bindingResult, RedirectAttributes redirectAttributes) {
         log.info("meetingModify Post....." + meetingDTO);
 
         if(bindingResult.hasErrors()) {
@@ -88,6 +93,8 @@ public class MeetingController {
             redirectAttributes.addAttribute("id", meetingDTO.getId());
             return "redirect:/meeting/modify?"+ link;
         }
+
+        System.out.println("Organizer: " + dto.getOrganizer().getUserId());
 
         meetingService.MeetingModify(meetingDTO);
         redirectAttributes.addFlashAttribute("result", "modified");
