@@ -103,6 +103,7 @@
             background-color: #f8f9fa;
             padding: 20px;
             border-radius: 8px;
+            margin-bottom: 20px;
         }
 
         .form-section-title {
@@ -129,6 +130,10 @@
             padding: 12px;
         }
 
+        .form-control:disabled {
+            background-color: #f8f9fa;
+        }
+
         .input-group {
             display: flex;
             align-items: center;
@@ -139,24 +144,66 @@
             flex: 1;
         }
 
-        .btn-change {
+        .btn-change, .btn-save, .btn-cancel {
             padding: 8px 16px;
-            background-color: #6c757d;
-            color: white;
             border: none;
             border-radius: 5px;
             font-size: 14px;
             white-space: nowrap;
+            cursor: pointer;
+        }
+
+        .btn-change {
+            background-color: #6c757d;
+            color: white;
         }
 
         .btn-change:hover {
             background-color: #5a6268;
         }
 
-        .password-group {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
+        .btn-save {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .btn-save:hover {
+            background-color: #218838;
+        }
+
+        .btn-cancel {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .btn-cancel:hover {
+            background-color: #c82333;
+        }
+
+        .password-section {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .alert {
+            padding: 12px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
         }
 
         .footer {
@@ -165,6 +212,10 @@
             text-align: center;
             padding: 30px 0;
             margin-top: 50px;
+        }
+
+        .hidden {
+            display: none;
         }
     </style>
 </head>
@@ -182,7 +233,7 @@
             <div class="col-auto">
                 <div class="nav-links">
                     <a href="/login">로그인</a> /
-                    <a href="/register">회원가입</a> /
+                    <a href="/member/register">회원가입</a> /
                     <a href="/mypage">마이페이지</a>
                 </div>
             </div>
@@ -193,6 +244,9 @@
 <!-- 프로필 관리 메인 -->
 <div class="container">
     <div class="profile-container">
+        <!-- 알림 메시지 -->
+        <div id="alertContainer"></div>
+
         <!-- 프로필 헤더 -->
         <div class="profile-header">
             <div class="row align-items-center">
@@ -201,29 +255,33 @@
                 </div>
                 <div class="col">
                     <div class="profile-info">
-                        <h5>닉네임</h5>
+                        <h5 th:text="${user != null ? user.nickname : '사용자'}">사용자</h5>
+                        <small class="text-muted" th:text="'아이디: ' + (${user != null ? user.userId : ''})">아이디: </small>
                     </div>
                 </div>
                 <div class="col-auto">
                     <div class="profile-buttons">
                         <button class="btn btn-secondary btn-profile">이미지 변경</button>
-                        <button class="btn btn-danger btn-profile">회원 탈퇴</button>
+                        <a href="/member/deleteUser" class="btn btn-danger btn-profile">회원 탈퇴</a>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- 프로필 정보 폼 -->
+        <!-- 기본 정보 수정 폼 -->
         <div class="profile-form-section">
-            <div class="form-section-title">프로필 정보</div>
+            <div class="form-section-title">기본 정보</div>
 
-            <form>
+            <form id="profileForm">
                 <!-- 닉네임 -->
                 <div class="form-group">
                     <label class="form-label">닉네임</label>
                     <div class="input-group">
-                        <input type="text" class="form-control" value="user01" readonly>
-                        <button type="button" class="btn-change">변경하기</button>
+                        <input type="text" id="nickname" class="form-control"
+                               th:value="${user != null ? user.nickname : ''}" disabled>
+                        <button type="button" class="btn-change" onclick="enableEdit('nickname')">변경하기</button>
+                        <button type="button" class="btn-save hidden" onclick="saveField('nickname')">저장</button>
+                        <button type="button" class="btn-cancel hidden" onclick="cancelEdit('nickname')">취소</button>
                     </div>
                 </div>
 
@@ -231,28 +289,67 @@
                 <div class="form-group">
                     <label class="form-label">이름</label>
                     <div class="input-group">
-                        <input type="text" class="form-control" value="홍길동" readonly>
-                        <button type="button" class="btn-change">변경하기</button>
+                        <input type="text" id="name" class="form-control"
+                               th:value="${user != null ? user.name : ''}" disabled>
+                        <button type="button" class="btn-change" onclick="enableEdit('name')">변경하기</button>
+                        <button type="button" class="btn-save hidden" onclick="saveField('name')">저장</button>
+                        <button type="button" class="btn-cancel hidden" onclick="cancelEdit('name')">취소</button>
                     </div>
                 </div>
 
-                <!-- 비밀번호 -->
+                <!-- 이메일 -->
                 <div class="form-group">
-                    <label class="form-label">비밀번호</label>
-                    <div class="password-group">
-                        <input type="password" class="form-control" placeholder="현재 비밀번호를 입력하세요" readonly>
-                        <div class="input-group">
-                            <input type="password" class="form-control" placeholder="새 비밀번호를 입력하세요" readonly>
-                            <button type="button" class="btn-change">변경하기</button>
-                        </div>
+                    <label class="form-label">이메일</label>
+                    <div class="input-group">
+                        <input type="email" id="email" class="form-control"
+                               th:value="${user != null ? user.email : ''}" disabled>
+                        <button type="button" class="btn-change" onclick="enableEdit('email')">변경하기</button>
+                        <button type="button" class="btn-save hidden" onclick="saveField('email')">저장</button>
+                        <button type="button" class="btn-cancel hidden" onclick="cancelEdit('email')">취소</button>
                     </div>
                 </div>
 
-                <!-- 비밀번호 재입력 -->
+                <!-- 전화번호 -->
                 <div class="form-group">
-                    <label class="form-label">비밀번호 재입력</label>
-                    <input type="password" class="form-control" placeholder="새 비밀번호를 다시 입력하세요" readonly>
+                    <label class="form-label">전화번호</label>
+                    <div class="input-group">
+                        <input type="tel" id="phone" class="form-control"
+                               th:value="${user != null ? user.phone : ''}" disabled>
+                        <button type="button" class="btn-change" onclick="enableEdit('phone')">변경하기</button>
+                        <button type="button" class="btn-save hidden" onclick="saveField('phone')">저장</button>
+                        <button type="button" class="btn-cancel hidden" onclick="cancelEdit('phone')">취소</button>
+                    </div>
                 </div>
+            </form>
+        </div>
+
+        <!-- 비밀번호 변경 섹션 -->
+        <div class="password-section">
+            <div class="form-section-title">비밀번호 변경</div>
+
+            <form id="passwordForm">
+                <!-- 현재 비밀번호 -->
+                <div class="form-group">
+                    <label class="form-label">현재 비밀번호</label>
+                    <input type="password" id="currentPassword" class="form-control"
+                           placeholder="현재 비밀번호를 입력하세요" required>
+                </div>
+
+                <!-- 새 비밀번호 -->
+                <div class="form-group">
+                    <label class="form-label">새 비밀번호</label>
+                    <input type="password" id="newPassword" class="form-control"
+                           placeholder="새 비밀번호를 입력하세요 (8자 이상)" required>
+                </div>
+
+                <!-- 새 비밀번호 확인 -->
+                <div class="form-group">
+                    <label class="form-label">새 비밀번호 확인</label>
+                    <input type="password" id="confirmPassword" class="form-control"
+                           placeholder="새 비밀번호를 다시 입력하세요" required>
+                </div>
+
+                <button type="submit" class="btn btn-primary">비밀번호 변경</button>
             </form>
         </div>
     </div>
@@ -267,5 +364,158 @@
 
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- 프로필 관리 JavaScript -->
+<script>
+    let originalValues = {}; // 원본 값 저장
+
+    // 필드 수정 모드 활성화
+    function enableEdit(fieldId) {
+        const field = document.getElementById(fieldId);
+        const container = field.parentElement;
+
+        // 원본 값 저장
+        originalValues[fieldId] = field.value;
+
+        // 입력 필드 활성화
+        field.disabled = false;
+        field.focus();
+
+        // 버튼 전환
+        container.querySelector('.btn-change').classList.add('hidden');
+        container.querySelector('.btn-save').classList.remove('hidden');
+        container.querySelector('.btn-cancel').classList.remove('hidden');
+    }
+
+    // 수정 취소
+    function cancelEdit(fieldId) {
+        const field = document.getElementById(fieldId);
+        const container = field.parentElement;
+
+        // 원본 값 복원
+        field.value = originalValues[fieldId];
+        field.disabled = true;
+
+        // 버튼 전환
+        container.querySelector('.btn-change').classList.remove('hidden');
+        container.querySelector('.btn-save').classList.add('hidden');
+        container.querySelector('.btn-cancel').classList.add('hidden');
+    }
+
+    // 필드 저장
+    function saveField(fieldId) {
+        const field = document.getElementById(fieldId);
+        const value = field.value.trim();
+
+        if (!value) {
+            showAlert('필드를 비워둘 수 없습니다.', 'danger');
+            return;
+        }
+
+        // AJAX 요청으로 서버에 업데이트
+        fetch('/member/profile/update', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                field: fieldId,
+                value: value
+            })
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showAlert(data.message, 'success');
+
+                    // 필드 비활성화
+                    field.disabled = true;
+
+                    // 버튼 전환
+                    const container = field.parentElement;
+                    container.querySelector('.btn-change').classList.remove('hidden');
+                    container.querySelector('.btn-save').classList.add('hidden');
+                    container.querySelector('.btn-cancel').classList.add('hidden');
+
+                    // 닉네임이 변경된 경우 헤더도 업데이트
+                    if (fieldId === 'nickname') {
+                        document.querySelector('.profile-info h5').textContent = value;
+                    }
+
+                } else {
+                    showAlert(data.message, 'danger');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showAlert('서버 오류가 발생했습니다.', 'danger');
+            });
+    }
+
+    // 비밀번호 변경
+    document.getElementById('passwordForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const currentPassword = document.getElementById('currentPassword').value;
+        const newPassword = document.getElementById('newPassword').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+
+        if (newPassword !== confirmPassword) {
+            showAlert('새 비밀번호가 일치하지 않습니다.', 'danger');
+            return;
+        }
+
+        if (newPassword.length < 8) {
+            showAlert('비밀번호는 8자 이상이어야 합니다.', 'danger');
+            return;
+        }
+
+        // AJAX 요청으로 비밀번호 변경
+        fetch('/member/profile/password', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                currentPassword: currentPassword,
+                newPassword: newPassword
+            })
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showAlert(data.message, 'success');
+                    // 폼 초기화
+                    document.getElementById('passwordForm').reset();
+                } else {
+                    showAlert(data.message, 'danger');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showAlert('서버 오류가 발생했습니다.', 'danger');
+            });
+    });
+
+    // 알림 메시지 표시
+    function showAlert(message, type) {
+        const alertContainer = document.getElementById('alertContainer');
+        const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
+
+        alertContainer.innerHTML = `
+            <div class="alert ${alertClass}" role="alert">
+                ${message}
+            </div>
+        `;
+
+        // 3초 후 알림 제거
+        setTimeout(() => {
+            alertContainer.innerHTML = '';
+        }, 3000);
+
+        // 페이지 최상단으로 스크롤
+        window.scrollTo(0, 0);
+    }
+</script>
 </body>
 </html>

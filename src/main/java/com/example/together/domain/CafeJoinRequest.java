@@ -2,6 +2,7 @@ package com.example.together.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -28,5 +29,7 @@ public class CafeJoinRequest extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private CafeJoinRequestStatus status;
 
+    @CreationTimestamp
+    @Column(nullable = false, updatable = false)
     private LocalDateTime requestDate;
 }

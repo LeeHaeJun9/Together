@@ -6,6 +6,7 @@ import com.example.together.domain.User;
 import com.example.together.dto.member.memberRegisterDTO;
 import com.example.together.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -15,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -102,6 +104,94 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     /**
+     * 개별 필드 업데이트
+     */
+    @Override
+    @Transactional
+    public boolean updateUserField(String userId, String field, String value) {
+        try {
+            User user = findByUserId(userId);
+            if (user == null) {
+                return false;
+            }
+
+            // 필드별로 업데이트 처리
+            switch (field) {
+                case "nickname":
+                    user.setNickname(value);
+                    break;
+                case "name":
+                    user.setName(value);
+                    break;
+                case "email":
+                    // 이메일 중복 확인 (본인 제외)
+                    if (isEmailExistsExcludeUser(value, userId)) {
+                        return false; // 중복된 이메일
+                    }
+                    user.setEmail(value);
+                    break;
+                case "phone":
+                    user.setPhone(value);
+                    break;
+                default:
+                    return false; // 지원하지 않는 필드
+            }
+
+            userRepository.save(user);
+            return true;
+
+        } catch (Exception e) {
+            log.error("사용자 정보 업데이트 실패: userId = {}, field = {}, error = {}",
+                    userId, field, e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * 비밀번호 변경
+     */
+    @Override
+    @Transactional
+    public boolean changePassword(String userId, String currentPassword, String newPassword) {
+        try {
+            User user = findByUserId(userId);
+            if (user == null) {
+                return false;
+            }
+
+            // 현재 비밀번호 확인
+            if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
+                return false; // 현재 비밀번호 불일치
+            }
+
+            // 새 비밀번호 암호화 후 저장
+            String encodedNewPassword = passwordEncoder.encode(newPassword);
+            user.setPassword(encodedNewPassword);
+
+            userRepository.save(user);
+            return true;
+
+        } catch (Exception e) {
+            log.error("비밀번호 변경 실패: userId = {}, error = {}", userId, e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * 이메일 중복 확인 (본인 제외)
+     */
+    @Override
+    public boolean isEmailExistsExcludeUser(String email, String excludeUserId) {
+        try {
+            User existingUser = userRepository.findByEmail(email).orElse(null);
+            return existingUser != null && !existingUser.getUserId().equals(excludeUserId);
+        } catch (Exception e) {
+            log.error("이메일 중복 확인 실패: email = {}, error = {}", email, e.getMessage());
+            return true; // 오류 시 중복으로 처리하여 안전하게
+        }
+    }
+
+    /**
      * 회원 탈퇴 (논리적 삭제)
      * 마찬가지로 변경 감지를 활용하여 상태만 변경하도록 수정했습니다.
      */
@@ -151,8 +241,30 @@ public class UserServiceImpl implements UserService, UserDetailsService {
                 return user;
             }
         }
-
-
         return null;
+    }
+
+    @Override
+    public String findUserIdByNameAndEmail(String name, String email) {
+        Optional<User> userOpt = userRepository.findByNameAndEmail(name, email);
+        return userOpt.isPresent() ? userOpt.get().getUserId() : null;
+    }
+
+    @Override
+    public boolean isAdmin(Long adminId) {
+        // 1. userRepository를 사용해 ID로 사용자 조회
+        Optional<User> userOpt = userRepository.findById(adminId);
+
+        // 2. 사용자가 존재하고, 그 사용자의 역할이 SystemRole.ADMIN인지 확인
+        //    userOpt.isPresent()는 사용자가 존재하는지 확인하고,
+        //    userOpt.get().getSystemRole().equals(SystemRole.ADMIN)는 역할이 ADMIN인지 확인합니다.
+        return userOpt.isPresent() && userOpt.get().getSystemRole().equals(SystemRole.ADMIN);
+    }
+
+    @Transactional(readOnly = true)
+    public String getUserNicknameById(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+        return user.getNickname();
     }
 }

@@ -22,4 +22,16 @@ public interface UserService {
     // 프로필 관리
     User updateProfile(Long id, memberRegisterDTO registerDTO);
     void deleteUser(Long id);
+
+    boolean updateUserField(String userId, String field, String value);
+    boolean changePassword(String userId, String currentPassword, String newPassword);
+    boolean isEmailExistsExcludeUser(String email, String excludeUserId);
+
+    String findUserIdByNameAndEmail(String name, String email);
+
+
+    boolean isAdmin(Long adminId);
+
+    String getUserNicknameById(Long userId);
 }
+

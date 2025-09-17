@@ -120,7 +120,7 @@ public class LoginController {
                 }
             }
 
-            return "redirect:/mypage";  // 마이페이지로 이동
+            return "redirect:/mainPage";  // 마이페이지로 이동
         } else {
             log.info("인증되지 않은 사용자, 로그인 페이지로 이동");
             return "redirect:/login";

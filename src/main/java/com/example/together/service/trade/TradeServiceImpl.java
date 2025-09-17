@@ -113,39 +113,47 @@ public class TradeServiceImpl implements TradeService {
   @Override
   @Transactional(readOnly = true)
   public List<TradeDTO> listMain(String category, String keyword) {
-    String where = " where Trade.tradeStatus <> :completed ";
-    if (category != null && !category.isBlank()) where += " and t.tradeCategory = :category ";
-    if (keyword  != null && !keyword.isBlank())  where += " and lower(t.title) like lower(concat('%', :kw, '%')) ";
 
-    String jpql = "select t from Trade t" + where + " order by t.regDate desc";
+    TradeCategory cat = null;
+    if (category != null && !category.isBlank()) {
+      try {
+        cat = TradeCategory.valueOf(category.trim());
+      } catch (IllegalArgumentException ignore) {
+      }
+    }
+    String kw = (keyword != null && !keyword.isBlank()) ? keyword.trim() : null;
 
-    TypedQuery<Trade> q = entityManager.createQuery(jpql, Trade.class)
-        .setParameter("completed", TradeStatus.COMPLETED);
+    String jpql = """
+      select t
+      from Trade t
+      where t.tradeStatus <> :completed
+        and (:cat is null or t.tradeCategory = :cat)
+        and (:kw is null or t.title like concat('%', :kw, '%')
+                     or t.description like concat('%', :kw, '%'))
+      order by t.regDate desc
+      """;
 
-    if (category != null && !category.isBlank())
-      q.setParameter("category", TradeCategory.valueOf(category));
-    if (keyword != null && !keyword.isBlank())
-      q.setParameter("kw", keyword);
+    TypedQuery<Trade> query = entityManager.createQuery(jpql, Trade.class)
+        .setParameter("completed", TradeStatus.COMPLETED)
+        .setParameter("cat", cat)
+        .setParameter("kw", kw);
 
-    return q.getResultList().stream().map(this::toDTO).toList();
-  }
+    List<Trade> list = query.getResultList();
 
-
-  private TradeDTO toDTO(Trade trade) {
-    String rd = (trade.getRegDate() != null) ? trade.getRegDate().format(DT) : null;
-    String md = (trade.getModDate() != null) ? trade.getModDate().format(DT) : null;
-
-    return TradeDTO.builder()
-        .id(trade.getId())
-        .title(trade.getTitle())
-        .description(trade.getDescription())
-        .price(trade.getPrice())
-        .thumbnail(trade.getThumbnail())
-        .tradeCategory(trade.getTradeCategory().name())
-        .tradeStatus(trade.getTradeStatus().name())
-        .sellerId(trade.getSeller() != null ? trade.getSeller().getId() : null)
-        .regDate(rd)
-        .modDate(md)
-        .build();
+    // 3) 엔티티 -> DTO 매핑
+    return list.stream()
+        .map(t -> TradeDTO.builder()
+            .id(t.getId())
+            .title(t.getTitle())
+            .description(t.getDescription())
+            .price(t.getPrice())
+            .thumbnail(t.getThumbnail())
+            .tradeCategory(t.getTradeCategory() != null ? t.getTradeCategory().name() : null)
+            .tradeStatus(t.getTradeStatus() != null ? t.getTradeStatus().name() : null)
+            .sellerId(t.getSeller() != null ? t.getSeller().getId() : null)
+            .regDate(t.getRegDate() != null ? t.getRegDate().toString() : null)
+            .modDate(t.getModDate() != null ? t.getModDate().toString() : null)
+            .build())
+        .toList();
   }
 }

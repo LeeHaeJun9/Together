@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>계정 설정 - Together</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .settings-card {
+            border-left: 4px solid #6c757d;
+            margin-bottom: 2rem;
+        }
+        .page-header {
+            background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+        }
+        .setting-section {
+            border-bottom: 1px solid #dee2e6;
+            padding-bottom: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .setting-section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+        .danger-zone {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+        }
+        .form-switch .form-check-input {
+            width: 3rem;
+            height: 1.5rem;
+        }
+        .password-strength {
+            height: 5px;
+            border-radius: 3px;
+            margin-top: 0.5rem;
+        }
+        .strength-weak { background-color: #dc3545; }
+        .strength-medium { background-color: #ffc107; }
+        .strength-strong { background-color: #198754; }
+    </style>
+</head>
+<body>
+<!-- Header -->
+<div class="page-header">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h2><i class="fas fa-cog me-2"></i>계정 설정</h2>
+                <p class="mb-0">계정 정보 및 개인정보를 관리하세요</p>
+            </div>
+            <div class="col-md-4 text-end">
+                <a href="/mypage" class="btn btn-light">
+                    <i class="fas fa-arrow-left"></i> 마이페이지
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <!-- 계정 정보 -->
+            <div class="card settings-card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-user-circle me-2"></i>계정 정보</h5>
+                </div>
+                <div class="card-body">
+                    <div class="setting-section">
+                        <h6>기본 정보</h6>
+                        <div class="row mb-3">
+                            <div class="col-sm-3">
+                                <label class="form-label">아이디</label>
+                            </div>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" th:value="${user?.userId}" readonly>
+                                <small class="text-muted">아이디는 변경할 수 없습니다.</small>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-sm-3">
+                                <label class="form-label">이메일</label>
+                            </div>
+                            <div class="col-sm-9">
+                                <div class="input-group">
+                                    <input type="email" class="form-control" th:value="${user?.email}" id="userEmail">
+                                    <button class="btn btn-outline-secondary" onclick="updateEmail()">변경</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-sm-3">
+                                <label class="form-label">닉네임</label>
+                            </div>
+                            <div class="col-sm-9">
+                                <div class="input-group">
+                                    <input type="text" class="form-control" th:value="${user?.nickname}" id="userNickname">
+                                    <button class="btn btn-outline-secondary" onclick="updateNickname()">변경</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="setting-section">
+                        <h6>연락처 정보</h6>
+                        <div class="row mb-3">
+                            <div class="col-sm-3">
+                                <label class="form-label">전화번호</label>
+                            </div>
+                            <div class="col-sm-9">
+                                <div class="input-group">
+                                    <input type="tel" class="form-control" th:value="${user?.phone}" id="userPhone">
+                                    <button class="btn btn-outline-secondary" onclick="updatePhone()">변경</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 비밀번호 변경 -->
+            <div class="card settings-card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-lock me-2"></i>비밀번호 변경</h5>
+                </div>
+                <div class="card-body">
+                    <form id="passwordChangeForm">
+                        <div class="mb-3">
+                            <label class="form-label">현재 비밀번호</label>
+                            <input type="password" class="form-control" id="currentPassword" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">새 비밀번호</label>
+                            <input type="password" class="form-control" id="newPassword" required>
+                            <div class="password-strength" id="passwordStrength"></div>
+                            <small class="text-muted">8자 이상, 영문, 숫자, 특수문자 조합</small>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">새 비밀번호 확인</label>
+                            <input type="password" class="form-control" id="confirmPassword" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">비밀번호 변경</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- 알림 설정 -->
+            <div class="card settings-card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-bell me-2"></i>알림 설정</h5>
+                </div>
+                <div class="card-body">
+                    <div class="setting-section">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div>
+                                <strong>카페 알림</strong>
+                                <br><small class="text-muted">새로운 모임, 공지사항 알림</small>
+                            </div>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="cafeNotification" checked>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div>
+                                <strong>거래 알림</strong>
+                                <br><small class="text-muted">판매, 구매, 채팅 알림</small>
+                            </div>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="tradeNotification" checked>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div>
+                                <strong>모임 알림</strong>
+                                <br><small class="text-muted">모임 시작 전 알림</small>
+                            </div>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="meetingNotification" checked>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>마케팅 알림</strong>
+                                <br><small class="text-muted">이벤트, 프로모션 알림</small>
+                            </div>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="marketingNotification">
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn btn-secondary" onclick="saveNotificationSettings()">알림 설정 저장</button>
+                </div>
+            </div>
+
+            <!-- 개인정보 설정 -->
+            <div class="card settings-card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-shield-alt me-2"></i>개인정보 설정</h5>
+                </div>
+                <div class="card-body">
+                    <div class="setting-section">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div>
+                                <strong>프로필 공개</strong>
+                                <br><small class="text-muted">다른 사용자에게 프로필 정보 공개</small>
+                            </div>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="profilePublic" checked>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div>
+                                <strong>활동 이력 공개</strong>
+                                <br><small class="text-muted">참여한 카페, 모임 이력 공개</small>
+                            </div>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="activityPublic" checked>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>연락처 공개</strong>
+                                <br><small class="text-muted">거래 시 연락처 정보 공개</small>
+                            </div>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="contactPublic">
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn btn-secondary" onclick="savePrivacySettings()">개인정보 설정 저장</button>
+                </div>
+            </div>
+
+            <!-- 위험 구역 -->
+            <div class="danger-zone">
+                <h5 class="text-danger"><i class="fas fa-exclamation-triangle me-2"></i>위험 구역</h5>
+                <p class="mb-3">다음 작업들은 되돌릴 수 없습니다. 신중하게 결정해주세요.</p>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <button class="btn btn-outline-warning w-100" onclick="confirmAccountDeactivation()">
+                            <i class="fas fa-pause"></i> 계정 비활성화
+                        </button>
+                        <small class="text-muted">계정을 일시적으로 비활성화합니다.</small>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <button class="btn btn-outline-danger w-100" onclick="confirmAccountDeletion()">
+                            <i class="fas fa-trash"></i> 계정 삭제
+                        </button>
+                        <small class="text-muted">모든 데이터가 영구적으로 삭제됩니다.</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // 개별 정보 업데이트
+    function updateEmail() {
+        const email = document.getElementById('userEmail').value;
+        updateField('email', email);
+    }
+
+    function updateNickname() {
+        const nickname = document.getElementById('userNickname').value;
+        updateField('nickname', nickname);
+    }
+
+    function updatePhone() {
+        const phone = document.getElementById('userPhone').value;
+        updateField('phone', phone);
+    }
+
+    function updateField(field, value) {
+        fetch('/member/profile/update', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                field: field,
+                value: value
+            })
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('정보가 성공적으로 수정되었습니다.');
+                } else {
+                    alert(data.message || '수정에 실패했습니다.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('오류가 발생했습니다.');
+            });
+    }
+
+    // 비밀번호 변경
+    document.getElementById('passwordChangeForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const currentPassword = document.getElementById('currentPassword').value;
+        const newPassword = document.getElementById('newPassword').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+
+        if (newPassword !== confirmPassword) {
+            alert('새 비밀번호가 일치하지 않습니다.');
+            return;
+        }
+
+        fetch('/member/profile/password', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                currentPassword: currentPassword,
+                newPassword: newPassword
+            })
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('비밀번호가 성공적으로 변경되었습니다.');
+                    document.getElementById('passwordChangeForm').reset();
+                } else {
+                    alert(data.message || '비밀번호 변경에 실패했습니다.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('오류가 발생했습니다.');
+            });
+    });
+
+    // 비밀번호 강도 체크
+    document.getElementById('newPassword').addEventListener('input', function() {
+        const password = this.value;
+        const strengthBar = document.getElementById('passwordStrength');
+
+        let strength = 0;
+        if (password.length >= 8) strength++;
+        if (/[a-z]/.test(password)) strength++;
+        if (/[A-Z]/.test(password)) strength++;
+        if (/[0-9]/.test(password)) strength++;
+        if (/[^A-Za-z0-9]/.test(password)) strength++;
+
+        strengthBar.className = 'password-strength';
+        if (strength < 3) {
+            strengthBar.classList.add('strength-weak');
+        } else if (strength < 5) {
+            strengthBar.classList.add('strength-medium');
+        } else {
+            strengthBar.classList.add('strength-strong');
+        }
+    });
+
+    // 알림 설정 저장
+    function saveNotificationSettings() {
+        const settings = {
+            cafe: document.getElementById('cafeNotification').checked,
+            trade: document.getElementById('tradeNotification').checked,
+            meeting: document.getElementById('meetingNotification').checked,
+            marketing: document.getElementById('marketingNotification').checked
+        };
+
+        // API 호출 로직
+        alert('알림 설정이 저장되었습니다.');
+    }
+
+    // 개인정보 설정 저장
+    function savePrivacySettings() {
+        const settings = {
+            profilePublic: document.getElementById('profilePublic').checked,
+            activityPublic: document.getElementById('activityPublic').checked,
+            contactPublic: document.getElementById('contactPublic').checked
+        };
+
+        // API 호출 로직
+        alert('개인정보 설정이 저장되었습니다.');
+    }
+
+    // 계정 비활성화
+    function confirmAccountDeactivation() {
+        if (confirm('정말로 계정을 비활성화하시겠습니까?\n\n비활성화된 계정은 언제든 다시 활성화할 수 있습니다.')) {
+            // 계정 비활성화 API 호출
+            alert('계정 비활성화 기능은 준비 중입니다.');
+        }
+    }
+
+    // 계정 삭제
+    function confirmAccountDeletion() {
+        if (confirm('⚠️ 경고 ⚠️\n\n계정을 삭제하면 모든 데이터가 영구적으로 삭제됩니다.\n\n정말로 계정을 삭제하시겠습니까?')) {
+            if (confirm('마지막 확인입니다.\n\n정말로 계정을 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.')) {
+                // 계정 삭제 API 호출
+                window.location.href = '/member/delete-account';
+            }
+        }
+    }
+</script>
+</body>
+</html>

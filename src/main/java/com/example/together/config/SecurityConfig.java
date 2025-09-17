@@ -27,7 +27,14 @@ public class SecurityConfig {
                         .requestMatchers(toStaticResources().atCommonLocations()).permitAll()
                         // ✅ 진짜 수정된 부분: /register 와 /member/register 모두 허용
                         .requestMatchers("/", "/login", "/register", "/member/register", "/member/register/**").permitAll()
+                        .requestMatchers("/member/findId").permitAll()
+                        .requestMatchers("/member/findPw").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
+
+                        // 2. 그 다음 정적 리소스를 허용합니다.
+                        .requestMatchers("/css/**", "/js/**", "/images/**", "/assets/**").permitAll() // toStaticResources() 대신 명시적으로 작성
+
+
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form

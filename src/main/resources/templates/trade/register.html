@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<html lang="en">
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/basic.html}">
@@ -49,5 +48,57 @@
     </nav>
 </header>
 
+<body class="bg-light">
+<div class="container py-4">
+    <div class="card shadow-sm">
+        <div class="card-header bg-white">
+            <h5 class="m-0">등록하기</h5>
+        </div>
+
+        <div class="card-body">
+            <form th:action="@{/trade/register}" action="/trade/register" method="post" class="vstack gap-3">
+
+                <div class="row g-3">
+                    <div class="col-md-8">
+                        <label class="form-label">제목</label>
+                        <input class="form-control" type="text" name="title" maxlength="255" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">가격(원)</label>
+                        <input class="form-control" type="number" name="price" min="0" step="1" required>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="form-label">내용</label>
+                    <textarea class="form-control register__textarea" name="description" maxlength="255" required></textarea>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">썸네일(URL)</label>
+                        <input class="form-control" type="text" name="thumbnail" maxlength="255" placeholder="/img/xxx.jpg" required>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">카테고리</label>
+                        <select class="form-select" name="tradeCategory" required>
+                            <option value="BOOKS">도서</option>
+                            <option value="ELECTRONICS">전자기기</option>
+                            <option value="FASHION">패션</option>
+                        </select>
+                    </div>
+                </div>
+
+
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-primary">등록</button>
+                    <button type="button" class="btn btn-danger removeBtn">목록</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
 </body>
 </html>

@@ -1,4 +1,4 @@
-package com.example.together.service;
+package com.example.together.service.cafe;
 
 import com.example.together.domain.*;
 import com.example.together.dto.cafe.*;
