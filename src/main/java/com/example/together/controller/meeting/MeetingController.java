@@ -1,19 +1,26 @@
 package com.example.together.controller.meeting;
 
 
+import com.example.together.domain.Cafe;
+import com.example.together.domain.User;
 import com.example.together.dto.PageRequestDTO;
 import com.example.together.dto.PageResponseDTO;
+import com.example.together.dto.cafe.CafeResponseDTO;
 import com.example.together.dto.meeting.MeetingDTO;
+import com.example.together.repository.UserRepository;
+import com.example.together.service.cafe.CafeService;
 import com.example.together.service.meeting.MeetingService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
@@ -22,6 +29,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @RequiredArgsConstructor
 public class MeetingController {
     private final MeetingService meetingService;
+    private final UserRepository userRepository;
+    private final CafeService cafeService;
 
     @GetMapping("/list")
     public void meetingList(PageRequestDTO pageRequestDTO, Model model) {
@@ -32,8 +41,17 @@ public class MeetingController {
 
 
     @GetMapping("/register")
-    public void meetingRegisterGet() {
+    public void meetingRegisterGet(@RequestParam(required = false) Long cafeId,
+                                   @AuthenticationPrincipal User user,
+                                   Model model) {
+        MeetingDTO meetingDTO = new MeetingDTO();
 
+//        if (cafeId != null) {
+//            CafeResponseDTO cafeResponse = cafeService.getCafeById(cafeId);
+//            meetingDTO.setCafe(cafeResponse);  // meetingDTO에 cafeResponse 설정
+//        }
+
+        model.addAttribute("meetingDTO", meetingDTO);
     }
     @PostMapping("/register")
     public String meetingRegisterPost(@Valid MeetingDTO meetingDTO, BindingResult bindingResult, RedirectAttributes redirectAttributes) {
