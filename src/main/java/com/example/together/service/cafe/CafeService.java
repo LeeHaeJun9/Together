@@ -53,5 +53,4 @@ public interface CafeService {
 
     // 사용자가 카페 운영자인지 확인하는 메서드
     boolean isCafeOwner(Long cafeId, Long userId);
-
 }
