@@ -3,6 +3,7 @@ package com.example.together.config;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -22,7 +23,8 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http ) throws Exception {
         http
-                .csrf(csrf -> csrf.disable( ))
+//                .csrf(csrf -> csrf.disable( ))
+                .csrf(Customizer.withDefaults()) // Enable CSRF
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(toStaticResources().atCommonLocations()).permitAll()
                         // ✅ 진짜 수정된 부분: /register 와 /member/register 모두 허용
@@ -34,7 +36,9 @@ public class SecurityConfig {
                         // 2. 그 다음 정적 리소스를 허용합니다.
                         .requestMatchers("/css/**", "/js/**", "/images/**", "/assets/**").permitAll() // toStaticResources() 대신 명시적으로 작성
 
-
+                        // Fix admin security - require authentication
+                        .requestMatchers("/admin/login").permitAll() // Only login page public
+                        .requestMatchers("/admin/**").hasRole("ADMIN") // Require ADMIN role
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form

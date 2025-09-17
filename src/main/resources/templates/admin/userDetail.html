@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>사용자 상세 정보</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .back-btn {
+            background: #6c757d;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .back-btn:hover {
+            background: #5a6268;
+            transform: translateY(-1px);
+        }
+
+        .content {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+        }
+
+        .user-info {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .info-section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #eee;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .info-label {
+            font-weight: bold;
+            color: #555;
+            font-size: 14px;
+        }
+
+        .info-value {
+            font-size: 16px;
+            color: #333;
+        }
+
+        .status {
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            width: fit-content;
+        }
+
+        .status.active {
+            background: #e8f5e8;
+            color: #4CAF50;
+        }
+
+        .status.suspended {
+            background: #fff3e0;
+            color: #ff9800;
+        }
+
+        .status.banned {
+            background: #ffebee;
+            color: #f44336;
+        }
+
+        .warning-level {
+            padding: 6px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+            width: fit-content;
+        }
+
+        .warning-level.low {
+            background: #e8f5e8;
+            color: #4CAF50;
+        }
+
+        .warning-level.medium {
+            background: #fff3e0;
+            color: #ff9800;
+        }
+
+        .warning-level.high {
+            background: #ffebee;
+            color: #f44336;
+        }
+
+        .actions-panel {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            height: fit-content;
+        }
+
+        .action-section {
+            margin-bottom: 25px;
+        }
+
+        .action-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .status-select, .warning-select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .status-select:focus, .warning-select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .action-btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 10px;
+        }
+
+        .btn-update {
+            background: #2196f3;
+            color: white;
+        }
+
+        .btn-update:hover {
+            background: #1976d2;
+            transform: translateY(-1px);
+        }
+
+        .btn-warning {
+            background: #ff9800;
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background: #f57c00;
+            transform: translateY(-1px);
+        }
+
+        .btn-danger {
+            background: #f44336;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #d32f2f;
+            transform: translateY(-1px);
+        }
+
+        .profile-image {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 3px solid #eee;
+        }
+
+        .activity-list {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .activity-item {
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+
+        .activity-text {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .activity-time {
+            color: #999;
+            font-size: 12px;
+        }
+
+        .warning-input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            margin-bottom: 10px;
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="header">
+    <h1>👤 사용자 상세 정보</h1>
+    <button class="back-btn" onclick="goBack()">← 목록으로</button>
+</div>
+
+<div class="content">
+    <!-- 사용자 정보 -->
+    <div class="user-info">
+        <!-- 기본 정보 -->
+        <div class="info-section">
+            <div class="section-title">
+                📋 기본 정보
+            </div>
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-label">프로필 사진</div>
+                    <div class="info-value">
+                        <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxjaXJjbGUgY3g9IjUwIiBjeT0iNTAiIHI9IjUwIiBmaWxsPSIjZTNmMmZkIi8+CjxjaXJjbGUgY3g9IjUwIiBjeT0iNDAiIHI9IjE1IiBmaWxsPSIjMjE5NmYzIi8+CjxwYXRoIGQ9Ik0yMCA4MEMyMCA2NS44NTc5IDMxLjQzMTUgNTUgNTAgNTVDNjguNTY4NSA1NSA4MCA2NS44NTc5IDgwIDgwIiBmaWxsPSIjMjE5NmYzIi8+Cjwvc3ZnPgo=" alt="프로필 사진" class="profile-image">
+                    </div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">계정 상태</div>
+                    <div class="info-value">
+                        <span class="status active">활성</span>
+                    </div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">사용자명</div>
+                    <div class="info-value">김사용자</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">이메일</div>
+                    <div class="info-value">user@example.com</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">전화번호</div>
+                    <div class="info-value">010-1234-5678</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">가입일</div>
+                    <div class="info-value">2024-01-15</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 활동 정보 -->
+        <div class="info-section">
+            <div class="section-title">
+                📊 활동 정보
+            </div>
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-label">총 리뷰 수</div>
+                    <div class="info-value">47개</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">평균 평점</div>
+                    <div class="info-value">4.2 / 5.0</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">즐겨찾기 카페</div>
+                    <div class="info-value">12개</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">마지막 로그인</div>
+                    <div class="info-value">2024-03-20 14:30</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">신고 받은 횟수</div>
+                    <div class="info-value">2회</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">경고 수준</div>
+                    <div class="info-value">
+                        <span class="warning-level medium">보통</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 최근 활동 -->
+        <div class="info-section">
+            <div class="section-title">
+                🕒 최근 활동
+            </div>
+            <div class="activity-list">
+                <div class="activity-item">
+                    <div class="activity-text">스타벅스 강남점에 리뷰 작성</div>
+                    <div class="activity-time">2시간 전</div>
+                </div>
+                <div class="activity-item">
+                    <div class="activity-text">카페베네 홍대점을 즐겨찾기에 추가</div>
+                    <div class="activity-time">1일 전</div>
+                </div>
+                <div class="activity-item">
+                    <div class="activity-text">이디야 신촌점에서 체크인</div>
+                    <div class="activity-time">3일 전</div>
+                </div>
+                <div class="activity-item">
+                    <div class="activity-text">투썸플레이스 명동점 리뷰 수정</div>
+                    <div class="activity-time">5일 전</div>
+                </div>
+                <div class="activity-item">
+                    <div class="activity-text">할리스 종로점에 사진 업로드</div>
+                    <div class="activity-time">1주 전</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 통계 정보 -->
+        <div class="info-section">
+            <div class="section-title">
+                📈 상세 통계
+            </div>
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-label">이번 달 방문</div>
+                    <div class="info-value">8회</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">누적 포인트</div>
+                    <div class="info-value">1,250P</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">작성 댓글 수</div>
+                    <div class="info-value">156개</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">업로드 사진</div>
+                    <div class="info-value">89장</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 관리 작업 -->
+    <div class="actions-panel">
+        <div class="action-section">
+            <div class="action-title">🔄 계정 상태 변경</div>
+            <select class="status-select" id="statusSelect">
+                <option value="active" selected>활성</option>
+                <option value="suspended">일시 정지</option>
+                <option value="banned">영구 차단</option>
+            </select>
+            <button class="action-btn btn-update" onclick="updateUserStatus()">상태 변경</button>
+        </div>
+
+        <div class="action-section">
+            <div class="action-title">⚠️ 경고 부여</div>
+            <select class="warning-select" id="warningSelect">
+                <option value="">경고 유형 선택</option>
+                <option value="spam">스팸 행위</option>
+                <option value="inappropriate">부적절한 내용</option>
+                <option value="harassment">괴롭힘</option>
+                <option value="fake">허위 정보</option>
+            </select>
+            <textarea class="warning-input" id="warningReason" placeholder="경고 사유를 자세히 입력하세요..."></textarea>
+            <button class="action-btn btn-warning" onclick="giveWarning()">경고 부여</button>
+        </div>
+
+        <div class="action-section">
+            <div class="action-title">📧 메시지 발송</div>
+            <button class="action-btn btn-update" onclick="sendMessage()">사용자에게 메시지</button>
+        </div>
+
+        <div class="action-section">
+            <div class="action-title">📋 활동 로그</div>
+            <button class="action-btn btn-update" onclick="viewActivityLog()">상세 로그 보기</button>
+        </div>
+
+        <div class="action-section">
+            <div class="action-title">⚠️ 위험 작업</div>
+            <button class="action-btn btn-danger" onclick="forceWithdraw()">강제 탈퇴</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 사용자 상태 변경
+    function updateUserStatus() {
+        const select = document.getElementById('statusSelect');
+        const newStatus = select.value;
+        const statusText = select.options[select.selectedIndex].text;
+
+        if (confirm(`사용자 상태를 '${statusText}'로 변경하시겠습니까?`)) {
+            // 실제로는 서버에 요청을 보내야 함
+            console.log('상태 변경:', newStatus);
+            alert(`사용자 상태가 '${statusText}'로 변경되었습니다.`);
+
+            // 화면의 상태 표시 업데이트
+            updateStatusDisplay(newStatus);
+        }
+    }
+
+    // 화면의 상태 표시 업데이트
+    function updateStatusDisplay(status) {
+        const statusElement = document.querySelector('.status');
+
+        statusElement.className = `status ${status}`;
+
+        switch(status) {
+            case 'active':
+                statusElement.textContent = '활성';
+                break;
+            case 'suspended':
+                statusElement.textContent = '일시정지';
+                break;
+            case 'banned':
+                statusElement.textContent = '영구차단';
+                break;
+        }
+    }
+
+    // 경고 부여
+    function giveWarning() {
+        const warningType = document.getElementById('warningSelect').value;
+        const warningReason = document.getElementById('warningReason').value.trim();
+
+        if (!warningType) {
+            alert('경고 유형을 선택해주세요.');
+            return;
+        }
+
+        if (!warningReason) {
+            alert('경고 사유를 입력해주세요.');
+            return;
+        }
+
+        const warningTypeText = document.getElementById('warningSelect').options[document.getElementById('warningSelect').selectedIndex].text;
+
+        if (confirm(`'${warningTypeText}' 경고를 부여하시겠습니까?\n\n사유: ${warningReason}`)) {
+            // 실제로는 서버에 요청을 보내야 함
+            console.log('경고 부여:', { type: warningType, reason: warningReason });
+            alert('경고가 부여되었습니다.');
+
+            // 입력 필드 초기화
+            document.getElementById('warningSelect').value = '';
+            document.getElementById('warningReason').value = '';
+        }
+    }
+
+    // 메시지 발송
+    function sendMessage() {
+        const message = prompt('사용자에게 발송할 메시지를 입력하세요:');
+
+        if (message && message.trim()) {
+            if (confirm('메시지를 발송하시겠습니까?')) {
+                console.log('메시지 발송:', message);
+                alert('메시지가 발송되었습니다.');
+            }
+        }
+    }
+
+    // 활동 로그 보기
+    function viewActivityLog() {
+        alert('상세 활동 로그 페이지로 이동합니다.');
+        // 실제로는 로그 페이지로 이동
+        // window.location.href = 'userActivityLog.html?id=1';
+    }
+
+    // 강제 탈퇴
+    function forceWithdraw() {
+        const reason = prompt('강제 탈퇴 사유를 입력하세요:');
+
+        if (reason && reason.trim()) {
+            const confirmation = prompt('정말로 이 사용자를 강제 탈퇴시키시겠습니까?\n탈퇴시키려면 "강제탈퇴"라고 입력하세요:');
+
+            if (confirmation === '강제탈퇴') {
+                if (confirm('⚠️ 경고: 이 작업은 되돌릴 수 없습니다. 정말 진행하시겠습니까?')) {
+                    console.log('강제 탈퇴:', reason);
+                    alert('사용자가 강제 탈퇴되었습니다.');
+                    window.location.href = 'userList.html';
+                }
+            } else if (confirmation !== null) {
+                alert('잘못 입력되었습니다. 강제 탈퇴가 취소되었습니다.');
+            }
+        }
+    }
+
+    // 뒤로 가기
+    function goBack() {
+        window.history.back();
+    }
+
+    // 페이지 로드 시 초기화
+    window.addEventListener('load', function() {
+        console.log('사용자 상세 페이지가 로드되었습니다.');
+    });
+</script>
+</body>
+</html>
