@@ -346,4 +346,45 @@ public class CafeController {
             return "redirect:/cafe/my/cafe/joinRequests";
         }
     }
+
+    @GetMapping("/myApplications")
+    public String showMyApplications(Model model, Principal principal) {
+        if (principal == null) {
+            // 로그인하지 않은 사용자는 로그인 페이지로 리다이렉트
+            return "redirect:/login";
+        }
+
+        Long userId = getLoggedInUserId(principal);
+
+        // CafeService를 통해 사용자의 모든 신청 내역을 가져옵니다.
+        List<CafeApplicationResponseDTO> myApplications = cafeService.getApplicationsByUserId(userId);
+
+        // 뷰(Thymeleaf)로 전달하기 위해 모델에 추가
+        model.addAttribute("userApplications", myApplications);
+
+        // 신청 목록을 보여줄 뷰 템플릿의 경로를 반환합니다.
+        return "cafe/myApplicationList"; // 예시: cafe/myApplicationList.html
+    }
+
+    @GetMapping("/my/joined-cafes")
+    public String showMyJoinedCafes(Model model, Principal principal) {
+        if (principal == null) {
+            return "redirect:/login";
+        }
+
+        Long userId = getLoggedInUserId(principal);
+
+        System.out.println("로그인된 사용자 ID: " + userId);
+
+        MyJoinedCafesDTO myCafesData = cafeService.getMyJoinedCafes(userId);
+
+        // ✅ HTML 템플릿에서 사용할 수 있도록 모델에 데이터를 추가합니다.
+        model.addAttribute("cafes", myCafesData.getMemberships());
+        model.addAttribute("totalCafes", myCafesData.getTotalCafes());
+        model.addAttribute("musicCafes", myCafesData.getMusicCafes());
+        model.addAttribute("sportsCafes", myCafesData.getSportsCafes());
+        model.addAttribute("studyCafes", myCafesData.getStudyCafes());
+
+        return "cafe/myCafes"; // Thymeleaf 템플릿 파일 이름
+    }
 }
