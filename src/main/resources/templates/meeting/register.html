@@ -7,11 +7,14 @@
 <div layout:fragment="content">
     <h1>Meeting Register</h1>
     <div class="card-body">
-        <form th:action="@{/meeting/register}" th:object="${meetingDTO}" method="post">
+        <form th:action="@{/meeting/register}" method="post">
             <div class="input-group mb-3">
                 <span class="input-group-text">Title</span>
-                <input type="text" th:field="*{title}" class="form-control" placeholder="Title">
+                <input type="text" th:field="*{dto.title}" class="form-control" placeholder="Title">
             </div>
+
+
+
             <div class="input-group mb-3" th:if="*{cafe != null}">
                 <span class="input-group-text" >Category</span>
                 <input type="text" class="form-control" placeholder="Category" readonly th:value="*{cafe.category}">
@@ -25,38 +28,49 @@
                 <span class="input-group-text">Writer</span>
                 <input type="text" name="organizer" class="form-control" placeholder="organizer" th:value="${#authentication.principal.username}" readonly>
             </div>
+
+
+
             <div class="input-group mb-3">
                 <span class="input-group-text">meetingDate</span>
-                <input type="datetime-local" th:field="*{meetingDate}" class="form-control" placeholder="DateTime">
+                <input type="datetime-local" th:field="*{dto.meetingDate}" class="form-control" placeholder="DateTime">
             </div>
 <!--            <div class="input-group mb-3">-->
 <!--                <span class="input-group-text">Address</span>-->
-<!--                <input type="text" th:field="*{address}" class="form-control" placeholder="address">-->
+<!--                <input type="text" th:field="*{dto.addressId}" class="form-control" placeholder="address">-->
 <!--            </div>-->
+
+
             <div class="input-group mb-3">
                 <span class="input-group-text">Content</span>
-                <textarea class="form-control col-sm-5" rows="5" th:field="*{content}"></textarea>
+                <textarea class="form-control col-sm-5" rows="5" th:field="*{dto.content}"></textarea>
             </div>
+
+
             <div class="form-check">
                 <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="radio" th:field="*{visibility}" id="public" value="public">
+                    <input class="form-check-input" type="radio" th:field="*{dto.visibility}" id="public" value="PUBLIC">
                     <label class="form-check-label" for="public">공개</label>
                 </div>
                 <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="radio" th:field="*{visibility}" id="private" value="private">
+                    <input class="form-check-input" type="radio" th:field="*{dto.visibility}" id="private" value="PRIVATE">
                     <label class="form-check-label" for="private">비공개</label>
                 </div>
             </div>
+
+
             <div class="form-check">
                 <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="radio" th:field="*{recruiting}" id="end" value="true">
+                    <input class="form-check-input" type="radio" th:field="*{dto.recruiting}" id="end" value="true">
                     <label class="form-check-label" for="public">모집 마감</label>
                 </div>
                 <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="radio" th:field="*{recruiting}" id="ing" value="false">
+                    <input class="form-check-input" type="radio" th:field="*{dto.recruiting}" id="ing" value="false">
                     <label class="form-check-label" for="private">모집 중</label>
                 </div>
             </div>
+
+
             <div class="my-4">
                 <div class="float-end">
                     <button type="submit" class="btn btn-primary submitBtn">Submit</button>
