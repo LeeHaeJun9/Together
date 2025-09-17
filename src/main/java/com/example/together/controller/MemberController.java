@@ -94,7 +94,7 @@ public class MemberController {
         boolean exists = userService.isEmailExists(email);
         return exists ? "{\"available\": false}" : "{\"available\": true}";
     }
-    @GetMapping("/member/my-cafes")
+    @GetMapping("/member/myCafes")
     public String myCafes(Model model, Principal principal) {
         if (principal != null) {
             String userId = principal.getName();
@@ -105,7 +105,7 @@ public class MemberController {
             // 임시로 빈 목록 전달
             model.addAttribute("cafes", new ArrayList<>());
         }
-        return "member/my-cafes";
+        return "member/myCafes";
     }
 
     @Autowired
@@ -294,5 +294,49 @@ public class MemberController {
             log.info("거래 내역 페이지 요청: userId = {}", userId);
         }
         return "member/myTrade";
+    }
+    // 나의 모임 페이지 표시
+    @GetMapping("/member/myMeetings")
+    public String myMeetingsPage(Model model, Principal principal) {
+        if (principal != null) {
+            String userId = principal.getName();
+
+            // 임시로 빈 리스트 전달 (실제 구현 전)
+            model.addAttribute("upcomingMeetings", 0);
+            model.addAttribute("completedMeetings", 0);
+            model.addAttribute("hostedMeetings", 0);
+            model.addAttribute("reviewCount", 0);
+
+            log.info("나의 모임 페이지 요청: userId = {}", userId);
+        }
+        return "member/myMeetings";
+    }
+    // 찜한 상품 페이지 표시
+    @GetMapping("/member/favorites")
+    public String favoritesPage(Model model, Principal principal) {
+        if (principal != null) {
+            String userId = principal.getName();
+
+            // 임시로 빈 리스트 전달 (실제 구현 전)
+            model.addAttribute("totalFavorites", 0);
+            model.addAttribute("availableCount", 0);
+            model.addAttribute("soldOutCount", 0);
+            model.addAttribute("recentCount", 0);
+            model.addAttribute("favorites", new ArrayList<>());
+
+            log.info("찜한 상품 페이지 요청: userId = {}", userId);
+        }
+        return "member/favorites";
+    }
+    // 계정 설정 페이지 표시
+    @GetMapping("/member/settings")
+    public String settingsPage(Model model, Principal principal) {
+        if (principal != null) {
+            String userId = principal.getName();
+            User user = userService.findByUserId(userId);
+            model.addAttribute("user", user);
+            log.info("계정 설정 페이지 요청: userId = {}", userId);
+        }
+        return "member/settings";
     }
 }
