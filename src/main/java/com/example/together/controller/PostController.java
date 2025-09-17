@@ -45,8 +45,10 @@ public class PostController {
 
         Long userId = getUserIdFromPrincipal(principal);
         List<PostResponseDTO> posts = postService.getPostsByCafe(cafeId, userId);
+        String cafeName = cafeService.getCafeNameById(cafeId);
         model.addAttribute("cafeId", cafeId);
         model.addAttribute("posts", posts);
+        model.addAttribute("cafeName", cafeName);
         return "post/list";
     }
 

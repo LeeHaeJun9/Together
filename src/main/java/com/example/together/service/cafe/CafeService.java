@@ -57,4 +57,8 @@ public interface CafeService {
     List<CafeApplicationResponseDTO> getApplicationsByUserId(Long userId);
 
     MyJoinedCafesDTO getMyJoinedCafes(Long userId);
+
+    void leaveCafe(Long cafeId, Long userId);
+
+    String getCafeNameById(Long cafeId);
 }

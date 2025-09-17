@@ -11,6 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -24,6 +25,8 @@ public class CafeServiceImpl implements CafeService {
     private final MembershipRepository membershipRepository;
     private final CafeApplicationRepository  cafeApplicationRepository;
     private final CafeJoinRequestRepository  cafeJoinRequestRepository;
+    private final PostRepository postRepository;
+    private final CommentRepository commentRepository;
 
 
     @Value("${org.zerock.upload.path}")
@@ -386,6 +389,12 @@ public class CafeServiceImpl implements CafeService {
             throw new IllegalAccessException("카페를 삭제할 권한이 없습니다.");
         }
 
+        commentRepository.deleteByPostIn(postRepository.findByCafe(cafe));
+
+        postRepository.deleteByCafe(cafe);
+
+        cafeJoinRequestRepository.deleteByCafe(cafe);
+
         membershipRepository.deleteByCafe(cafe);
 
         // 데이터베이스에서 카페 삭제
@@ -529,5 +538,34 @@ public class CafeServiceImpl implements CafeService {
                 .sportsCafes(sportsCafes)
                 .studyCafes(studyCafes)
                 .build();
+    }
+
+    @Override
+    @Transactional
+    public void leaveCafe(Long cafeId, Long userId) {
+        // 1. 카페 및 사용자 존재 여부 확인
+        Cafe cafe = cafeRepository.findById(cafeId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 카페입니다."));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+
+        // 2. 해당 카페의 소유자인지 확인 (소유자는 탈퇴할 수 없음)
+        if (cafe.getOwner().getId().equals(userId)) {
+            throw new IllegalStateException("카페 소유자는 탈퇴할 수 없습니다. 카페를 삭제하거나 소유권을 이전하세요.");
+        }
+
+        // 3. 해당 사용자의 멤버십 정보 찾기
+        Membership membership = membershipRepository.findByCafeAndUser(cafe, user)
+                .orElseThrow(() -> new IllegalArgumentException("해당 카페의 회원이 아닙니다."));
+
+        // 4. 멤버십 정보 삭제
+        membershipRepository.delete(membership);
+    }
+
+    @Override
+    public String getCafeNameById(Long cafeId) {
+        return cafeRepository.findById(cafeId)
+                .map(Cafe::getName)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 카페입니다."));
     }
 }
