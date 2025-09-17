@@ -1,10 +1,12 @@
 package com.example.together.service.meeting;
 
 import com.example.together.domain.Meeting;
+import com.example.together.domain.User;
 import com.example.together.dto.PageRequestDTO;
 import com.example.together.dto.PageResponseDTO;
 import com.example.together.dto.meeting.MeetingDTO;
 import com.example.together.repository.MeetingRepository;
+import com.example.together.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -25,6 +27,7 @@ public class MeetingServiceImpl implements MeetingService {
 
     private final ModelMapper modelMapper;
     private final MeetingRepository meetingRepository;
+    private final UserRepository userRepository;
 
     @Override
     public Long MeetingCreate(MeetingDTO meetingDTO) {
@@ -77,5 +80,12 @@ public class MeetingServiceImpl implements MeetingService {
                 .total((int)result.getTotalElements())
                 .build();
 
+    }
+
+    @Transactional
+    public String getUserNicknameById(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+        return user.getNickname();
     }
 }

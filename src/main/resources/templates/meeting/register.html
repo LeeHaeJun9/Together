@@ -9,20 +9,64 @@
 
     <div class="card-body">
         <form action="/meeting/register" method="post">
+
             <div class="input-group mb-3">
                 <span class="input-group-text">Title</span>
                 <input type="text" name="title" class="form-control" placeholder="Title">
             </div>
+
+
+            <div class="input-group mb-3">
+                <span class="input-group-text">Category</span>
+                <input type="text" name="category" class="form-control" placeholder="Category" readonly>
+            </div>
+            <div class="input-group mb-3">
+                <span class="input-group-text">Cafe</span>
+                <input type="text" name="cafe" class="form-control" placeholder="Cafe" readonly>
+            </div>
+            <div class="input-group mb-3">
+                <span class="input-group-text">Writer</span>
+                <input type="text" name="organizer" class="form-control" placeholder="organizer" th:value="${user.nickname}" readonly>
+            </div>
+
+
+            <div class="input-group mb-3">
+                <span class="input-group-text">meetingDate</span>
+                <input type="datetime-local" name="meetingDate" class="form-control" placeholder="DateTime">
+            </div>
+            <div class="input-group mb-3">
+                <span class="input-group-text">Address</span>
+                <input type="text" name="address" class="form-control" placeholder="address">
+            </div>
+
 
             <div class="input-group mb-3">
                 <span class="input-group-text">Content</span>
                 <textarea class="form-control col-sm-5" rows="5" name="content"></textarea>
             </div>
 
-            <div class="input-group mb-3">
-                <span class="input-group-text">meetingDate</span>
-                <input type="datetime-local" name="meetingDate" class="form-control" placeholder="DateTime">
+            <div class="form-check">
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="visibility" id="public" value="public">
+                    <label class="form-check-label" for="public">공개</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="visibility" id="private" value="private">
+                    <label class="form-check-label" for="private">비공개</label>
+                </div>
             </div>
+
+            <div class="form-check">
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="recruiting" id="end" value="public">
+                    <label class="form-check-label" for="public">모집 마감</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="recruiting" id="ing" value="private">
+                    <label class="form-check-label" for="private">모집 중</label>
+                </div>
+            </div>
+
 
             <div class="my-4">
                 <div class="float-end">
@@ -32,37 +76,6 @@
             </div>
         </form>
     </div><!--end card body-->
-
-
-
-    <!--    @NotEmpty-->
-    <!--    private Long id;-->
-
-    <!--    @NotEmpty-->
-    <!--    private String title;-->
-
-    <!--    @NotEmpty-->
-    <!--    private String content;-->
-
-    <!--    private LocalDateTime meetingDate;-->
-    <!--    private boolean recruiting;-->
-
-    <!--    private Visibility visibility;-->
-
-    <!--    private User organizer;-->
-
-    <!--    private Cafe cafe;-->
-
-    <!--    private Address addressId;-->
-
-    <!--    private LocalDateTime regDate;-->
-
-    <!--    private LocalDateTime modDate;-->
-
-
-
-
-
 </div>
 
 
