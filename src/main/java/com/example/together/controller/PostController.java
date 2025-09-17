@@ -91,14 +91,24 @@ public class PostController {
 
     @GetMapping("/posts/{postId}")
     public String getPostDetail(@PathVariable Long cafeId, @PathVariable Long postId, Model model, Principal principal) {
-        Long userId = getUserIdFromPrincipal(principal);
         try {
+            boolean isLoggedIn = (principal != null);
+
+            Long userId = null;
+            if (isLoggedIn) {
+                userId = getUserIdFromPrincipal(principal);
+            }
+
             PostResponseDTO post = postService.getPostById(postId, userId);
             List<CommentResponseDTO> comments = commentService.getCommentsByPost(postId, userId);
+
             model.addAttribute("post", post);
             model.addAttribute("comments", comments);
             model.addAttribute("commentCreateRequestDTO", new CommentCreateRequestDTO());
             model.addAttribute("cafeId", cafeId);
+            model.addAttribute("isLoggedIn", isLoggedIn);
+            model.addAttribute("loggedInUserId", userId);
+
             return "post/detail";
         } catch (IllegalArgumentException e) {
             model.addAttribute("error", e.getMessage());
@@ -156,6 +166,11 @@ public class PostController {
     public String createComment(@PathVariable Long cafeId, @PathVariable Long postId,
                                 @ModelAttribute CommentCreateRequestDTO requestDTO,
                                 Principal principal, RedirectAttributes redirectAttributes) {
+        if (principal == null) {
+            redirectAttributes.addFlashAttribute("error", "로그인 후 댓글을 작성할 수 있습니다.");
+            return "redirect:/cafe/" + cafeId + "/posts/" + postId;
+        }
+
         Long userId = getUserIdFromPrincipal(principal);
         requestDTO.setPostId(postId);
         try {
