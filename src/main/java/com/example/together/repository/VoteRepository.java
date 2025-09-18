@@ -16,4 +16,6 @@ public interface VoteRepository extends JpaRepository<Vote, Long> {
     List<Object[]> countVotesByOption(@Param("surveyId") Long surveyId);
 
     boolean existsBySurveyIdAndVoterId(Long surveyId, Long voterId);
+
+    List<Vote> findBySurveyId(Long surveyId);
 }
