@@ -27,14 +27,20 @@ public class MeetingReviewDTO {
     @NotEmpty
     private String content;
 
-    private User reviewer;
+//    private String reviewer;
+//    private User reviewer;
+    private String reviewer;
+    private String reviewerNickname;
+
 
     @ManyToOne(fetch = FetchType.LAZY)
     private Meeting meeting;
+    private Long meetingId;
+    private LocalDateTime meetingDateFromMeeting;
 
     private LocalDateTime regDate;
 
     private LocalDateTime modDate;
 
-    private Cafe cafe;
+//    private Cafe cafe;
 }

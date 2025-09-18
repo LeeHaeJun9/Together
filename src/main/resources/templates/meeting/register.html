@@ -15,14 +15,14 @@
 
 
 
-            <div class="input-group mb-3" th:if="*{cafe != null}">
+            <div class="input-group mb-3" th:if="*{dto.cafe != null}">
                 <span class="input-group-text" >Category</span>
-                <input type="text" class="form-control" placeholder="Category" readonly th:value="*{cafe.category}">
+                <input type="text" class="form-control" placeholder="Category" readonly th:value="*{dto.cafe.category}">
             </div>
-            <div class="input-group mb-3" th:if="*{cafe != null}">
+            <div class="input-group mb-3" th:if="*{dto.cafe != null}">
                 <span class="input-group-text">Cafe</span>
-                <input type="hidden" th:field="*{cafe.id}" />
-                <input type="text" class="form-control" placeholder="Cafe" th:value="*{cafe.name}" readonly>
+                <input type="hidden" th:field="*{dto.cafe.id}" />
+                <input type="text" class="form-control" placeholder="Cafe" th:value="*{dto.cafe.name}" readonly>
             </div>
             <div class="input-group mb-3">
                 <span class="input-group-text">Writer</span>

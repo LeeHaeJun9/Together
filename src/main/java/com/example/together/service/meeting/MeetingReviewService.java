@@ -1,5 +1,6 @@
 package com.example.together.service.meeting;
 
+import com.example.together.domain.MeetingReview;
 import com.example.together.dto.PageRequestDTO;
 import com.example.together.dto.PageResponseDTO;
 import com.example.together.dto.meeting.MeetingReviewDTO;
@@ -11,4 +12,5 @@ public interface MeetingReviewService {
     void MeetingReviewDelete(Long id); // 모임 후기 삭제
 
     PageResponseDTO<MeetingReviewDTO> list(PageRequestDTO pageRequestDTO);
+    MeetingReview createReview(String userId, Long meetingId, String title, String content);
 }
