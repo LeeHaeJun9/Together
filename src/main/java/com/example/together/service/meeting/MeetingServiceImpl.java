@@ -54,7 +54,7 @@ public class MeetingServiceImpl implements MeetingService {
                 meetingDTO.getMeetingDate(),
                 meetingDTO.isRecruiting(),
                 meetingDTO.getVisibility(),
-                meetingDTO.getAddressId()
+                meetingDTO.getAddress()
         );
     }
 
