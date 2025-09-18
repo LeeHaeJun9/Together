@@ -24,7 +24,7 @@ public class ManagerController {
     /**
      * 관리자 대시보드 메인 페이지
      */
-    @GetMapping("/manager")
+    @GetMapping("/manager/dashboard")
     public String managerDashboard(Model model, Principal principal) {
         log.info("관리자 대시보드 요청: admin = {}", principal != null ? principal.getName() : "anonymous");
 

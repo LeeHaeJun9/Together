@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>관리자 페이지 - 모여라</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: #667eea;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .admin-header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .admin-title {
+            font-size: 2.5rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        .admin-subtitle {
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .dashboard-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+            color: white;
+            font-size: 1.5rem;
+        }
+
+        .card-title {
+            font-size: 1.4rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+
+        .card-description {
+            color: #666;
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        .card-button {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .card-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .stats-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .stats-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 1.5rem;
+            color: #333;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 1.5rem;
+            background: linear-gradient(135deg, #f8f9ff, #e8ebff);
+            border-radius: 15px;
+            border: 1px solid rgba(102, 126, 234, 0.1);
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .container {
+                padding: 0 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <img src="/images/moyeora-logo.png" alt="모여라 로고" style="height: 32px; margin-right: 8px;">
+            모여라
+        </div>
+        <ul class="nav-links">
+            <li><a href="/mainPage">홈</a></li>
+            <li><a href="/member/mypage">마이페이지</a></li>
+            <li><a href="/logout">로그아웃</a></li>
+        </ul>
+    </nav>
+</header>
+
+<div class="container">
+    <div class="admin-header">
+        <h1 class="admin-title">관리자 대시보드</h1>
+        <p class="admin-subtitle">모여라 플랫폼을 관리하고 모니터링하세요</p>
+    </div>
+
+    <div class="dashboard-grid">
+        <div class="dashboard-card">
+            <div class="card-icon">👥</div>
+            <h3 class="card-title">사용자 관리</h3>
+            <p class="card-description">회원 정보를 조회하고 관리할 수 있습니다. 계정 상태 변경 및 권한 설정이 가능합니다.</p>
+            <a href="/admin/users" class="card-button">사용자 관리</a>
+        </div>
+
+        <div class="dashboard-card">
+            <div class="card-icon">☕</div>
+            <h3 class="card-title">카페 관리</h3>
+            <p class="card-description">등록된 카페 정보를 관리하고 새로운 카페를 추가할 수 있습니다.</p>
+            <a href="/admin/cafes" class="card-button">카페 관리</a>
+        </div>
+
+        <div class="dashboard-card">
+            <div class="card-icon">🛍️</div>
+            <h3 class="card-title">중고거래 관리</h3>
+            <p class="card-description">중고거래 게시글을 모니터링하고 부적절한 콘텐츠를 관리할 수 있습니다.</p>
+            <a href="/admin/trades" class="card-button">거래 관리</a>
+        </div>
+
+        <div class="dashboard-card">
+            <div class="card-icon">💬</div>
+            <h3 class="card-title">채팅 관리</h3>
+            <p class="card-description">채팅방을 모니터링하고 신고된 메시지를 처리할 수 있습니다.</p>
+            <a href="/admin/chats" class="card-button">채팅 관리</a>
+        </div>
+
+        <div class="dashboard-card">
+            <div class="card-icon">📊</div>
+            <h3 class="card-title">통계 분석</h3>
+            <p class="card-description">플랫폼 사용 통계와 분석 데이터를 확인할 수 있습니다.</p>
+            <a href="/admin/statistics" class="card-button">통계 보기</a>
+        </div>
+
+        <div class="dashboard-card">
+            <div class="card-icon">⚙️</div>
+            <h3 class="card-title">시스템 설정</h3>
+            <p class="card-description">시스템 전반적인 설정을 관리하고 업데이트할 수 있습니다.</p>
+            <a href="/admin/settings" class="card-button">설정 관리</a>
+        </div>
+    </div>
+
+    <div class="stats-section">
+        <h2 class="stats-title">실시간 통계</h2>
+        <div class="stats-grid">
+            <div class="stat-item">
+                <div class="stat-number" th:text="${totalUsers ?: '1,234'}">1,234</div>
+                <div class="stat-label">총 사용자</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" th:text="${totalCafes ?: '89'}">89</div>
+                <div class="stat-label">등록된 카페</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" th:text="${totalTrades ?: '567'}">567</div>
+                <div class="stat-label">중고거래 게시글</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" th:text="${activeChats ?: '23'}">23</div>
+                <div class="stat-label">활성 채팅방</div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

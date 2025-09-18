@@ -1,19 +1,21 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layout/tab.html}">
-
-
-<div layout:fragment="content">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meeting Register</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container mt-5">
     <h1>Meeting Register</h1>
     <div class="card-body">
         <form th:action="@{/meeting/register}" method="post">
+            <input type="hidden" name="cafe.id" th:if="${dto.cafe != null}" th:value="${dto.cafe.id}">
             <div class="input-group mb-3">
                 <span class="input-group-text">Title</span>
                 <input type="text" th:field="*{dto.title}" class="form-control" placeholder="Title">
             </div>
-
-
 
             <div class="input-group mb-3" th:if="*{dto.cafe != null}">
                 <span class="input-group-text" >Category</span>
@@ -24,28 +26,22 @@
                 <input type="hidden" th:field="*{dto.cafe.id}" />
                 <input type="text" class="form-control" placeholder="Cafe" th:value="*{dto.cafe.name}" readonly>
             </div>
-            <div class="input-group mb-3">
-                <span class="input-group-text">Writer</span>
-                <input type="text" name="organizer" class="form-control" placeholder="organizer" th:value="${#authentication.principal.username}" readonly>
-            </div>
-
-
-
-            <div class="input-group mb-3">
-                <span class="input-group-text">meetingDate</span>
-                <input type="datetime-local" th:field="*{dto.meetingDate}" class="form-control" placeholder="DateTime">
-            </div>
-
-<!--            <div class="input-group mb-3">-->
-<!--                <span class="input-group-text">Address</span>-->
-<!--                <input type="text" th:field="*{dto.addressId}" class="form-control" placeholder="address">-->
-<!--            </div>-->
 
             <div class="input-group mb-3">
                 <span class="input-group-text">Content</span>
                 <textarea class="form-control col-sm-5" rows="5" th:field="*{dto.content}"></textarea>
             </div>
 
+            <div class="input-group mb-3">
+                <span class="input-group-text">Meeting Date</span>
+                <input type="datetime-local" th:field="*{dto.meetingDate}" class="form-control">
+            </div>
+
+            <div class="input-group mb-3">
+                <span class="input-group-text">Address</span>
+                <input type="text" th:field="*{dto.address}" id="address" class="form-control" placeholder="주소" >
+                <button type="button" onclick="execDaumPostcode()" class="btn btn-outline-secondary">주소 찾기</button>
+            </div>
 
             <div class="form-check">
                 <div class="form-check form-check-inline">
@@ -62,41 +58,38 @@
             <div class="form-check">
                 <div class="form-check form-check-inline">
                     <input class="form-check-input" type="radio" th:field="*{dto.recruiting}" id="end" value="true">
-                    <label class="form-check-label" for="public">모집 마감</label>
+                    <label class="form-check-label" for="end">모집 마감</label>
                 </div>
                 <div class="form-check form-check-inline">
                     <input class="form-check-input" type="radio" th:field="*{dto.recruiting}" id="ing" value="false">
-                    <label class="form-check-label" for="private">모집 중</label>
+                    <label class="form-check-label" for="ing">모집 중</label>
                 </div>
             </div>
 
 
             <div class="my-4">
                 <div class="float-end">
-                    <button type="submit" class="btn btn-primary submitBtn">Submit</button>
+                    <button type="submit" class="btn btn-primary">Submit</button>
                     <button type="reset" class="btn btn-secondary">Reset</button>
                 </div>
             </div>
         </form>
     </div>
-    <!--end card body-->
 </div>
 
-<script th:inline="javascript">
-
-    console.log("meetingRegister....")
-
-    const errors = [[${errors}]]
-    console.log(errors)
-
-    let errorMsg = ''
-
-    if(errors){
-        for (let i = 0; i < errors.length; i++) {
-            errorMsg += `${errors[i].field}은(는) ${errors[i].code} \n`
-        }
-        alert(errorMsg)
+<script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+<script>
+    // 함수 이름을 execDaumPostcode()로 통일
+    function execDaumPostcode() {
+        new daum.Postcode({
+            oncomplete: function(data) {
+                var addr = data.address;
+                document.getElementById("address").value = addr;
+            }
+        }).open();
     }
-
-    const auth = [[${authentication.principal}]]
 </script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

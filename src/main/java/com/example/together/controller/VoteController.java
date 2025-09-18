@@ -12,7 +12,7 @@ import java.security.Principal;
 import java.util.List;
 
 @RestController
-@RequestMapping("/cafe/{cafeId}/posts/{postId}/demand-survey/{surveyId}/votes")
+@RequestMapping("/api/cafe/{cafeId}/posts/{postId}/demandSurvey/{surveyId}")
 @RequiredArgsConstructor
 public class VoteController {
 
@@ -29,7 +29,7 @@ public class VoteController {
         return userService.findByUserId(userIdString).getId();
     }
 
-    @PostMapping
+    @PostMapping("/votes")
     public ResponseEntity<String> createVote(@PathVariable Long cafeId,
                                              @PathVariable Long postId,
                                              @PathVariable Long surveyId,
@@ -44,7 +44,7 @@ public class VoteController {
         }
     }
 
-    @GetMapping
+    @GetMapping("/votes")
     public ResponseEntity<List<VoteResponseDTO>> getVoteResults(@PathVariable Long surveyId) {
         try {
             List<VoteResponseDTO> results = voteService.getVoteResults(surveyId);
@@ -53,4 +53,5 @@ public class VoteController {
             return ResponseEntity.notFound().build();
         }
     }
+
 }

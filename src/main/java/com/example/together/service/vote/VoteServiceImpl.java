@@ -64,4 +64,11 @@ public class VoteServiceImpl implements VoteService {
                 .map(result -> new VoteResponseDTO((String) result[0], (Long) result[1]))
                 .collect(Collectors.toList());
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public boolean hasVoted(Long surveyId, Long userId) {
+        // ✅ 변경된 메서드 이름으로 호출
+        return voteRepository.existsBySurveyIdAndVoterId(surveyId, userId);
+    }
 }

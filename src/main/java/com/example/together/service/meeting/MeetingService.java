@@ -11,5 +11,6 @@ public interface MeetingService {
     void MeetingDelete(Long id);
 
     PageResponseDTO<MeetingDTO> list(PageRequestDTO pageRequestDTO);
+    PageResponseDTO<MeetingDTO> listByCafeId(Long cafeId, PageRequestDTO pageRequestDTO);
     String getUserNicknameById(Long userId);
 }
