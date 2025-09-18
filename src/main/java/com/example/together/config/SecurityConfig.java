@@ -11,7 +11,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-//import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
@@ -22,8 +21,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
-import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
-
 
 @Configuration
 @EnableWebSecurity
@@ -66,10 +63,12 @@ public class SecurityConfig {
                                 new AntPathRequestMatcher("/join"),
                                 new AntPathRequestMatcher("/css/**"),
                                 new AntPathRequestMatcher("/js/**"),
-                                new AntPathRequestMatcher("/images/**")
+                                new AntPathRequestMatcher("/images/**"),
+                                new AntPathRequestMatcher("/resources/**")  // ADDED: Static resources
                         ).permitAll()
-                        // "/admin/**" 경로는 ADMIN 권한을 가진 사용자만 접근 가능
-                        .requestMatchers(new AntPathRequestMatcher("/admin/**")).hasAuthority("ADMIN")
+                        // FIXED: Changed from hasAuthority("ADMIN") to hasRole("ADMIN")
+                        .requestMatchers(new AntPathRequestMatcher("/admin/**")).hasRole("ADMIN")
+                        .requestMatchers(new AntPathRequestMatcher("/manager/**")).hasRole("ADMIN")  // ADDED: Manager pages
                         // 나머지 모든 경로는 인증된 사용자만 접근 가능
                         .anyRequest().authenticated()
                 )
@@ -108,19 +107,13 @@ public class SecurityConfig {
                 session.setAttribute("loginUser", user);
                 session.setAttribute("userId", user.getUserId()); // Store the actual userId from the User object
 
-                // 사용자의 역할을 확인하여 적절한 페이지로 리디렉션
-                if (authentication.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ADMIN"))) {
-                    response.sendRedirect("/admin");
+                // FIXED: Changed from "ADMIN" to "ROLE_ADMIN" to match what's in the logs
+                if (authentication.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
+                    response.sendRedirect("/manager");  // CHANGED: Redirect to /manager instead of /admin
                 } else {
                     response.sendRedirect("/mainPage");
                 }
             }
         };
     }
-
-//    // 비밀번호 인코더
-//    @Bean
-//    public BCryptPasswordEncoder passwordEncoder() {
-//        return new BCryptPasswordEncoder();
-//    }
 }

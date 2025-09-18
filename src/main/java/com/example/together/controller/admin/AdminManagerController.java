@@ -7,18 +7,17 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
 @Controller
-@RequestMapping("/admin/manager")
+@RequestMapping("/admin/managers")  // CHANGED: Changed from /admin/manager to /admin/managers
 public class AdminManagerController {
 
     // 관리자 목록 페이지
-    @GetMapping("/list")
+    @GetMapping("/list")  // This now becomes /admin/managers/list (no conflict!)
     public String managerList(
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "search", required = false) String search,
@@ -74,14 +73,14 @@ public class AdminManagerController {
     }
 
     // 관리자 등록 폼 페이지
-    @GetMapping("/register")
+    @GetMapping("/register")  // Now becomes /admin/managers/register
     public String registerForm(Model model) {
         model.addAttribute("managerDTO", new ManagerDTO());
         return "admin/register";
     }
 
     // 관리자 등록 처리
-    @PostMapping("/register")
+    @PostMapping("/register")  // Now becomes /admin/managers/register
     public String registerManager(
             @ModelAttribute ManagerDTO managerDTO,
             BindingResult result,
@@ -114,7 +113,7 @@ public class AdminManagerController {
             redirectAttributes.addFlashAttribute("message",
                     "관리자 '" + managerDTO.getManagerName() + "'이(가) 성공적으로 등록되었습니다.");
 
-            return "redirect:/admin/manager/list";
+            return "redirect:/admin/managers/list";  // UPDATED: Changed redirect path
 
         } catch (Exception e) {
             model.addAttribute("error", "등록 중 오류가 발생했습니다: " + e.getMessage());
@@ -123,14 +122,14 @@ public class AdminManagerController {
     }
 
     // 관리자 수정 폼 페이지
-    @GetMapping("/edit/{id}")
+    @GetMapping("/edit/{id}")  // Now becomes /admin/managers/edit/{id}
     public String editForm(@PathVariable Long id, Model model) {
         // 실제로는 Service에서 ID로 조회
         ManagerDTO manager = findManagerById(id);
 
         if (manager == null) {
             model.addAttribute("error", "관리자를 찾을 수 없습니다.");
-            return "redirect:/admin/manager/list";
+            return "redirect:/admin/managers/list";  // UPDATED: Changed redirect path
         }
 
         model.addAttribute("managerDTO", manager);
@@ -138,7 +137,7 @@ public class AdminManagerController {
     }
 
     // 관리자 삭제
-    @DeleteMapping("/delete/{id}")
+    @DeleteMapping("/delete/{id}")  // Now becomes /admin/managers/delete/{id}
     @ResponseBody
     public String deleteManager(@PathVariable Long id) {
         try {
