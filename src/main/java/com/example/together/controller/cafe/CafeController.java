@@ -1,14 +1,18 @@
 package com.example.together.controller.cafe;
 
+import com.example.together.domain.Cafe;
 import com.example.together.domain.CafeApplication;
 import com.example.together.domain.CafeApplicationStatus;
 import com.example.together.dto.PageRequestDTO;
 import com.example.together.dto.PageResponseDTO;
 import com.example.together.dto.cafe.*;
+import com.example.together.dto.calendar.CalendarEventDTO;
 import com.example.together.dto.meeting.MeetingDTO;
+import com.example.together.dto.post.PostResponseDTO;
 import com.example.together.service.UserService;
 import com.example.together.service.cafe.CafeService;
 import com.example.together.service.meeting.MeetingService;
+import com.example.together.service.post.PostService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
@@ -30,6 +34,7 @@ public class CafeController {
     private final CafeService cafeService;
     private final UserService userService;
     private final MeetingService meetingService;
+    private final PostService postService;
 
     @GetMapping("/main")
     public String mainPage(Model model, Principal principal) {
@@ -226,12 +231,21 @@ public class CafeController {
         Long userId = (principal != null) ? getLoggedInUserId(principal) : null; // 로그인된 사용자 ID (없으면 null)
         String userNickname = null;
 
+        List<PostResponseDTO> latestNotices = postService.getLatestNotices(cafeId, userId);
+        List<PostResponseDTO> popularPosts = postService.getPopularPosts(cafeId, 5, userId);
+        List<Cafe> similarCafes = cafeService.getSimilarCafes(cafeId, 3);
+        List<CalendarEventDTO> events = cafeService.getCalendarEvents(cafeId);
+
         if (userId != null) {
             userNickname = userService.getUserNicknameById(userId);
         }
         CafeResponseDTO response = cafeService.getCafeById(cafeId, userId);
         model.addAttribute("cafe", response);
         model.addAttribute("userNickname", userNickname);
+        model.addAttribute("latestNotices", latestNotices);
+        model.addAttribute("popularPosts", popularPosts);
+        model.addAttribute("similarCafes", similarCafes);
+        model.addAttribute("calendarEvents", events);
         return "cafe/detail";
     }
 

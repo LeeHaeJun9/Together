@@ -15,23 +15,38 @@
 <div class="container mt-5">
     <h1>Meeting Register</h1>
     <div class="card-body">
-        <form th:action="@{/meeting/register}" method="post">
-            <input type="hidden" name="cafe.id" th:if="${dto.cafe != null}" th:value="${dto.cafe.id}">
+        <form th:action="@{/meeting/register}" th:object="${meetingDTO}" method="post">
+            <!-- ✅ CSRF 토큰을 hidden 필드로 추가 -->
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+            <!-- ✅ 카페 ID는 cafeResponse 객체에서 가져옴 -->
+            <input type="hidden" name="cafeId" th:value="${cafeResponse.id}" />
+
             <div class="input-group mb-3">
                 <span class="input-group-text">Title</span>
-                <input type="text" th:field="*{dto.title}" class="form-control" placeholder="Title">
+                <!-- ✅ th:field를 *{title}로 수정하여 meetingDTO에 직접 바인딩 -->
+                <input type="text" th:field="*{title}" class="form-control" placeholder="Title">
             </div>
 
-            <div class="input-group mb-3" th:if="*{dto.cafe != null}">
+            <div class="input-group mb-3">
                 <span class="input-group-text" >Category</span>
-                <input type="text" class="form-control" placeholder="Category" readonly th:value="*{dto.cafe.category}">
-            </div>
-            <div class="input-group mb-3" th:if="*{dto.cafe != null}">
-                <span class="input-group-text">Cafe</span>
-                <input type="hidden" th:field="*{dto.cafe.id}" />
-                <input type="text" class="form-control" placeholder="Cafe" th:value="*{dto.cafe.name}" readonly>
+                <!-- ✅ 카페 정보는 cafeResponse에서 직접 가져옴 -->
+                <input type="text" class="form-control" placeholder="Category" readonly th:value="${cafeResponse.category}">
             </div>
             <div class="input-group mb-3">
+                <span class="input-group-text">Cafe</span>
+                <!-- ✅ 카페 정보는 cafeResponse에서 직접 가져옴 -->
+                <input type="text" class="form-control" placeholder="Cafe" th:value="${cafeResponse.name}" readonly>
+            </div>
+            <div class="input-group mb-3">
+                <span class="input-group-text">사용자</span>
+                <input type="text" class="form-control" placeholder="Name" th:value="${userName}" readonly>
+            </div>
+
+
+            <div class="input-group mb-3">
+                <span class="input-group-text">Content</span>
+                <!-- ✅ th:field를 *{content}로 수정하여 meetingDTO에 직접 바인딩 -->
+                <textarea class="form-control col-sm-5" rows="5" th:field="*{content}"></textarea>
                 <span class="input-group-text">Writer</span>
                 <input type="text" name="userId" class="form-control" th:value="${#authentication.principal.username}" readonly>
             </div>
@@ -39,7 +54,8 @@
 
             <div class="input-group mb-3">
                 <span class="input-group-text">Meeting Date</span>
-                <input type="datetime-local" th:field="*{dto.meetingDate}" class="form-control">
+                <!-- ✅ th:field를 *{meetingDate}로 수정하여 meetingDTO에 직접 바인딩 -->
+                <input type="datetime-local" th:field="*{meetingDate}" class="form-control">
             </div>
 
             <div class="input-group mb-3">
@@ -48,7 +64,8 @@
             </div>
             <div class="input-group mb-3">
                 <span class="input-group-text">Address</span>
-                <input type="text" th:field="*{dto.address}" id="address" class="form-control" placeholder="주소" >
+                <!-- ✅ th:field를 *{address}로 수정하여 meetingDTO에 직접 바인딩 -->
+                <input type="text" th:field="*{address}" id="address" class="form-control" placeholder="주소" >
                 <button type="button" onclick="execDaumPostcode()" class="btn btn-outline-secondary">주소 찾기</button>
             </div>
 
@@ -60,6 +77,14 @@
 
             <div class="form-check">
                 <div class="form-check form-check-inline">
+                    <!-- ✅ th:field를 *{visibility}로 수정하여 meetingDTO에 직접 바인딩 -->
+                    <input class="form-check-input" type="radio" th:field="*{visibility}" id="public" value="PUBLIC">
+                    <label class="form-check-label" for="public">공개</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <!-- ✅ th:field를 *{visibility}로 수정하여 meetingDTO에 직접 바인딩 -->
+                    <input class="form-check-input" type="radio" th:field="*{visibility}" id="private" value="PRIVATE">
+                    <label class="form-check-label" for="private">비공개</label>
                     <input class="form-check-input" type="radio" th:field="*{dto.visibility}" id="public" value="PUBLIC" checked>
                     <label class="form-check-label" for="public">공개(회원전체)</label>
                 </div>
@@ -72,6 +97,13 @@
 
             <div class="form-check">
                 <div class="form-check form-check-inline">
+                    <!-- ✅ th:field를 *{recruiting}로 수정하여 meetingDTO에 직접 바인딩 -->
+                    <input class="form-check-input" type="radio" th:field="*{recruiting}" id="end" value="true">
+                    <label class="form-check-label" for="end">모집 마감</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <!-- ✅ th:field를 *{recruiting}로 수정하여 meetingDTO에 직접 바인딩 -->
+                    <input class="form-check-input" type="radio" th:field="*{recruiting}" id="ing" value="false">
                     <input class="form-check-input" type="radio" th:field="*{dto.recruiting}" id="ing" value="false">
                     <label class="form-check-label" for="ing">모집 중</label>
                 </div>

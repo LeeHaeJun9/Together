@@ -1,11 +1,14 @@
 package com.example.together.service.meeting;
 
 import com.example.together.domain.Cafe;
+import com.example.together.domain.CafeCalendar;
 import com.example.together.domain.Meeting;
 import com.example.together.domain.User;
 import com.example.together.dto.PageRequestDTO;
 import com.example.together.dto.PageResponseDTO;
 import com.example.together.dto.meeting.MeetingDTO;
+import com.example.together.repository.CafeCalendarRepository;
+import com.example.together.repository.CafeRepository;
 import com.example.together.repository.MeetingRepository;
 import com.example.together.repository.UserRepository;
 import jakarta.transaction.Transactional;
@@ -30,8 +33,27 @@ public class MeetingServiceImpl implements MeetingService {
     private final ModelMapper modelMapper;
     private final MeetingRepository meetingRepository;
     private final UserRepository userRepository;
+    private final CafeRepository cafeRepository;
+    private final CafeCalendarRepository cafeCalendarRepository;
 
     @Override
+    public Long MeetingCreate(MeetingDTO meetingDTO, Long cafeId) {
+        // 1. DTO를 엔티티로 변환하여 Meeting 테이블에 저장합니다.
+        Meeting meeting = modelMapper.map(meetingDTO, Meeting.class);
+        Long savedMeetingId = meetingRepository.save(meeting).getId();
+
+        // 2. 캘린더 이벤트를 생성하여 CafeCalendar 테이블에 저장합니다. (핵심)
+        Cafe cafe = cafeRepository.findById(meetingDTO.getCafe().getId())
+                .orElseThrow(() -> new IllegalArgumentException("카페를 찾을 수 없습니다."));
+
+        CafeCalendar calendarEvent = CafeCalendar.builder()
+                .cafe(cafe)
+                .meeting(meeting)
+                .build();
+
+        cafeCalendarRepository.save(calendarEvent);
+
+        return savedMeetingId;
     public Long MeetingCreate(MeetingDTO meetingDTO) {
 //        Meeting meeting = modelMapper.map(meetingDTO, Meeting.class);
 //        Long id = meetingRepository.save(meeting).getId();
