@@ -15,4 +15,7 @@ public interface PostService {
     PostResponseDTO getPostById(Long postId, Long userId);
     void updatePost(Long postId, PostCreateRequestDTO requestDTO, MultipartFile newImage, Long userId);
     void deletePost(Long postId, Long userId);
+    void increaseViewCount(Long postId);
+    List<PostResponseDTO> getLatestNotices(Long cafeId, Long userId);
+    List<PostResponseDTO> getPopularPosts(Long cafeId, int limit, Long userId);
 }

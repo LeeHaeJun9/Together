@@ -10,6 +10,9 @@ import com.example.together.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -113,8 +116,8 @@ public class PostServiceImpl implements PostService {
     public PostResponseDTO getPostById(Long postId, Long userId) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다."));
-        post.setViewCount(post.getViewCount() + 1);
-        postRepository.save(post);
+//        post.setViewCount(post.getViewCount() + 1);
+//        postRepository.save(post);
         return new PostResponseDTO(post, userId);
     }
 
@@ -215,5 +218,38 @@ public class PostServiceImpl implements PostService {
 
         // ✅ 3. 게시글 삭제
         postRepository.delete(post);
+    }
+
+    @Transactional
+    @Override
+    public void increaseViewCount(Long postId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다."));
+        post.setViewCount(post.getViewCount() + 1);
+        postRepository.save(post);
+    }
+
+    @Override
+    public List<PostResponseDTO> getLatestNotices(Long cafeId, Long userId) {
+        Cafe cafe = cafeRepository.findById(cafeId)
+                .orElseThrow(() -> new IllegalArgumentException("카페를 찾을 수 없습니다."));
+        List<Post> notices = postRepository.findTop5ByCafeAndPostTypeOrderByRegDateDesc(cafe, PostType.NOTICE);
+        return notices.stream()
+                .map(post -> new PostResponseDTO(post, userId))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<PostResponseDTO> getPopularPosts(Long cafeId, int limit, Long userId) {
+        Cafe cafe = cafeRepository.findById(cafeId)
+                .orElseThrow(() -> new IllegalArgumentException("카페를 찾을 수 없습니다."));
+
+        Pageable pageable = PageRequest.of(0, limit, Sort.by(Sort.Direction.DESC, "viewCount"));
+
+        List<Post> posts = postRepository.findByCafeOrderByViewCountDesc(cafe, pageable);
+
+        return posts.stream()
+                .map(post -> new PostResponseDTO(post, userId))
+                .collect(Collectors.toList());
     }
 }

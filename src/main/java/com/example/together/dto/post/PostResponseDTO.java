@@ -5,6 +5,8 @@ import com.example.together.domain.PostType;
 import com.example.together.dto.demandSurvey.DemandSurveyResponseDTO;
 import lombok.Getter;
 
+import java.time.LocalDateTime;
+
 @Getter
 public class PostResponseDTO {
     private final Long id;
@@ -20,6 +22,7 @@ public class PostResponseDTO {
     private final boolean isOwner;
 
     private DemandSurveyResponseDTO demandSurvey;
+    private LocalDateTime regDate;
 
     public PostResponseDTO(Post post, Long userId) {
         this.id = post.getId();
@@ -33,6 +36,7 @@ public class PostResponseDTO {
         this.authorName = post.getAuthor().getName();
         this.cafeId = post.getCafe().getId();
         this.isOwner = post.getAuthor().getId().equals(userId);
+        this.regDate = post.getRegDate();
 
         if (post.getDemandSurvey() != null) {
             this.demandSurvey = new DemandSurveyResponseDTO(post.getDemandSurvey());

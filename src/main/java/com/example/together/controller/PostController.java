@@ -10,6 +10,9 @@ import com.example.together.service.UserService;
 import com.example.together.service.cafe.CafeService;
 import com.example.together.service.comment.CommentService;
 import com.example.together.service.post.PostService;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -90,7 +93,9 @@ public class PostController {
     }
 
     @GetMapping("/posts/{postId}")
-    public String getPostDetail(@PathVariable Long cafeId, @PathVariable Long postId, Model model, Principal principal) {
+    public String getPostDetail(@PathVariable Long cafeId, @PathVariable Long postId,
+                                Model model, Principal principal,
+                                HttpServletRequest request, HttpServletResponse response) {
         try {
             boolean isLoggedIn = (principal != null);
 
@@ -98,6 +103,9 @@ public class PostController {
             if (isLoggedIn) {
                 userId = getUserIdFromPrincipal(principal);
             }
+
+            handleViewCount(postId, request, response);
+
 
             PostResponseDTO post = postService.getPostById(postId, userId);
             List<CommentResponseDTO> comments = commentService.getCommentsByPost(postId, userId);
@@ -115,6 +123,38 @@ public class PostController {
             return "error/404";
         }
     }
+
+    private void handleViewCount(Long postId, HttpServletRequest request, HttpServletResponse response) {
+        String postIdString = String.valueOf(postId);
+        Cookie[] cookies = request.getCookies();
+        Cookie postViewCookie = null;
+
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if ("postView".equals(cookie.getName())) {
+                    postViewCookie = cookie;
+                    break;
+                }
+            }
+        }
+
+        if (postViewCookie != null) {
+            if (!postViewCookie.getValue().contains("[" + postIdString + "]")) {
+                postService.increaseViewCount(postId);
+                postViewCookie.setValue(postViewCookie.getValue() + "[" + postIdString + "]");
+                postViewCookie.setPath("/");
+                postViewCookie.setMaxAge(60 * 60 * 24); // 24시간
+                response.addCookie(postViewCookie);
+            }
+        } else {
+            postService.increaseViewCount(postId);
+            Cookie newCookie = new Cookie("postView", "[" + postIdString + "]");
+            newCookie.setPath("/");
+            newCookie.setMaxAge(60 * 60 * 24); // 24시간
+            response.addCookie(newCookie);
+        }
+    }
+
 
     @GetMapping("/posts/{postId}/edit")
     public String showEditForm(@PathVariable Long cafeId, @PathVariable Long postId, Model model, Principal principal) {

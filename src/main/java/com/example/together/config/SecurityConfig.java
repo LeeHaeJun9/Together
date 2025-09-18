@@ -26,20 +26,22 @@ public class SecurityConfig {
 //                .csrf(csrf -> csrf.disable( ))
                 .csrf(Customizer.withDefaults()) // Enable CSRF
                 .authorizeHttpRequests(auth -> auth
+                        // 1. ✅ 정적 리소스를 가장 먼저 허용합니다.
                         .requestMatchers(toStaticResources().atCommonLocations()).permitAll()
-                        .requestMatchers("/api/**").authenticated()
-                        // ✅ 진짜 수정된 부분: /register 와 /member/register 모두 허용
-                        .requestMatchers("/", "/login", "/register", "/member/register", "/member/register/**").permitAll()
-                        .requestMatchers("/member/findId").permitAll()
-                        .requestMatchers("/member/findPw").permitAll()
+                        .requestMatchers("/css/**", "/js/**", "/images/**", "/assets/**", "/lib/**").permitAll()
+
+                        // 2. ✅ 누구나 접근 가능한 공통 경로를 허용합니다.
+                        .requestMatchers("/", "/login", "/register", "/member/register", "/member/register/**", "/member/findId", "/member/findPw", "/admin/login").permitAll()
+
+                        // 3. ✅ 특정 역할(Role)이 필요한 경로를 설정합니다.
                         .requestMatchers("/admin/**").hasRole("ADMIN")
 
-                        // 2. 그 다음 정적 리소스를 허용합니다.
-                        .requestMatchers("/css/**", "/js/**", "/images/**", "/assets/**").permitAll() // toStaticResources() 대신 명시적으로 작성
+                        // 4. ✅ 인증(로그인)이 필요한 경로를 설정합니다.
+                        //    - /meeting/register, /api/** 등 로그인해야만 접근 가능한 페이지
+                        .requestMatchers("/meeting/**").authenticated()
+                        .requestMatchers("/api/**").authenticated()
 
-                        // Fix admin security - require authentication
-                        .requestMatchers("/admin/login").permitAll() // Only login page public
-                        .requestMatchers("/admin/**").hasRole("ADMIN") // Require ADMIN role
+                        // 5. ✅ 위에 해당하지 않는 모든 요청은 로그인한 사용자만 접근 허용
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
