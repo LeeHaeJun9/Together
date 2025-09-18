@@ -194,7 +194,7 @@
       const deadlineDate = new Date(deadline);
       const isExpired = now > deadlineDate;
 
-      fetch(`/api/cafe/${cafeId}/posts/${postId}/demand-survey/${surveyId}/hasVoted?userId=${loggedInUserId}`)
+      fetch(`/api/cafe/${cafeId}/posts/${postId}/demandSurvey/${surveyId}/hasVoted?userId=${loggedInUserId}`)
               .then(response => response.json())
               .then(hasVoted => {
                 if (isExpired || hasVoted) {
@@ -242,7 +242,7 @@
     // 투표 결과를 렌더링하는 함수
     async function showVoteResults() {
       try {
-        const response = await fetch(`/api/cafe/${cafeId}/posts/${postId}/demand-survey/${surveyId}/votes`);
+        const response = await fetch(`/api/cafe/${cafeId}/posts/${postId}/demandSurvey/${surveyId}/votes`);
         if (!response.ok) {
           throw new Error('투표 결과를 가져오는 데 실패했습니다.');
         }
@@ -267,7 +267,7 @@
         return;
       }
       try {
-        const response = await fetch(`/api/cafe/${cafeId}/posts/${postId}/demand-survey/${surveyId}/votes`, {
+        const response = await fetch(`/api/cafe/${cafeId}/posts/${postId}/demandSurvey/${surveyId}/votes`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'

@@ -2,9 +2,13 @@ package com.example.together.controller.cafe;
 
 import com.example.together.domain.CafeApplication;
 import com.example.together.domain.CafeApplicationStatus;
+import com.example.together.dto.PageRequestDTO;
+import com.example.together.dto.PageResponseDTO;
 import com.example.together.dto.cafe.*;
+import com.example.together.dto.meeting.MeetingDTO;
 import com.example.together.service.UserService;
 import com.example.together.service.cafe.CafeService;
+import com.example.together.service.meeting.MeetingService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
@@ -25,6 +29,7 @@ public class CafeController {
 
     private final CafeService cafeService;
     private final UserService userService;
+    private final MeetingService meetingService;
 
     @GetMapping("/main")
     public String mainPage(Model model, Principal principal) {
@@ -404,4 +409,17 @@ public class CafeController {
             return "redirect:/error"; // 예시: 에러 페이지로 리다이렉트
         }
     }
+
+    @GetMapping("/{cafeId}/meetings")
+    public String cafeMeetings(@PathVariable Long cafeId, PageRequestDTO pageRequestDTO, Model model) {
+        log.info("Request for meetings of cafe: " + cafeId);
+
+        PageResponseDTO<MeetingDTO> responseDTO = meetingService.listByCafeId(cafeId, pageRequestDTO);
+
+        model.addAttribute("responseDTO", responseDTO);
+        model.addAttribute("cafeId", cafeId);
+
+        return "meeting/list";
+    }
+
 }

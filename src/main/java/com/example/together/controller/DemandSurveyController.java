@@ -11,7 +11,7 @@ import java.net.URI;
 import java.security.Principal;
 
 @RestController
-@RequestMapping("/cafe/{cafeId}/posts/{postId}/demandSurvey")
+@RequestMapping("/api/cafe/{cafeId}/posts/{postId}/demandSurvey")
 @RequiredArgsConstructor
 public class DemandSurveyController {
 

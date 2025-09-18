@@ -82,6 +82,27 @@ public class MeetingServiceImpl implements MeetingService {
 
     }
 
+    @Override
+    public PageResponseDTO<MeetingDTO> listByCafeId(Long cafeId, PageRequestDTO pageRequestDTO) {
+        // 1. Pageable 객체 생성
+        Pageable pageable = pageRequestDTO.getPageable("meetingDate");
+
+        // 2. Repository를 통해 특정 cafeId에 해당하는 모임 목록을 페이징하여 조회
+        Page<Meeting> result = meetingRepository.findByCafeId(cafeId, pageable);
+
+        // 3. 조회된 Meeting 엔티티 리스트를 MeetingDTO 리스트로 변환
+        List<MeetingDTO> dtoList = result.getContent().stream()
+                .map(meeting -> modelMapper.map(meeting, MeetingDTO.class))
+                .collect(Collectors.toList());
+
+        // 4. PageResponseDTO 객체를 생성하여 반환
+        return PageResponseDTO.<MeetingDTO>withAll()
+                .pageRequestDTO(pageRequestDTO)
+                .dtoList(dtoList)
+                .total((int) result.getTotalElements())
+                .build();
+    }
+
     @Transactional
     public String getUserNicknameById(Long userId) {
         User user = userRepository.findById(userId)

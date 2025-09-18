@@ -9,4 +9,6 @@ public interface VoteService {
     void createVote(Long surveyId, VoteCreateRequestDTO requestDTO, Long voterId);
 
     List<VoteResponseDTO> getVoteResults(Long surveyId);
+
+    boolean hasVoted(Long surveyId, Long userId);
 }
