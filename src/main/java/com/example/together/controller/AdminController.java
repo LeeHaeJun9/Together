@@ -15,7 +15,7 @@ import java.security.Principal;
 public class AdminController {
 
     /**
-     * 관리자 로그인 페이지 - 404 에러 해결
+     * 관리자 로그인 페이지
      */
     @GetMapping("/login")
     public String adminLogin(@RequestParam(value = "error", required = false) String error,
@@ -26,7 +26,7 @@ public class AdminController {
             model.addAttribute("errorMsg", "로그인에 실패했습니다.");
         }
 
-        return "admin/login";  // 기존 admin/dashboard.html 사용
+        return "admin/login";  // 기존 admin/login.html 사용
     }
 
     /**
@@ -35,22 +35,18 @@ public class AdminController {
     @GetMapping("/manager/list")
     public String managerList(Principal principal) {
         log.info("Admin manager list 요청: {}", principal != null ? principal.getName() : "anonymous");
-
-        // 기존 ManagerController로 리다이렉트
-        return "redirect:/admin/dashboard";
+        return "redirect:/manager";
     }
 
     /**
-     * 관리자 로그인 처리 (POST) - 여기에 추가
+     * 관리자 로그인 처리 (POST)
      */
     @PostMapping("/login")
     public String adminLoginProcess(@RequestParam String username,
                                     @RequestParam String password,
                                     Model model) {
         log.info("Admin 로그인 처리 시도: {}", username);
-
-        // Spring Security가 실제 인증 처리
-        return "redirect:/admin/dashboard";
+        return "redirect:/manager";
     }
 
     /**
@@ -58,10 +54,10 @@ public class AdminController {
      */
     @GetMapping("/manager")
     public String manager() {
-        return "admin/manager";  // admin/dashboard.html 템플릿 반환
+        return "manager/manager";
     }
 
-    // ========================== 새로 추가된 메서드들 ==========================
+    // ========================== 관리 페이지들 ==========================
 
     /**
      * 사용자 관리 페이지
@@ -71,16 +67,14 @@ public class AdminController {
         log.info("GET /admin/users - 사용자 관리 페이지 요청");
 
         try {
-            // 기본 데이터 설정 (나중에 실제 서비스 연결)
-            model.addAttribute("totalUsers", 7);  // 로그에서 확인된 사용자 수
+            model.addAttribute("totalUsers", 7);
             model.addAttribute("activeUsers", 7);
-            model.addAttribute("users", null);  // 빈 리스트로 시작
 
-            return "admin/user-management";
+            return "manager/mUser";
         } catch (Exception e) {
             log.error("사용자 관리 페이지 로드 실패", e);
             model.addAttribute("error", "사용자 데이터를 불러오는데 실패했습니다.");
-            return "admin/user-management";
+            return "manager/mUser";
         }
     }
 
@@ -92,14 +86,13 @@ public class AdminController {
         log.info("GET /admin/cafes - 카페 관리 페이지 요청");
 
         try {
-            model.addAttribute("totalCafes", 0);  // 로그에서 확인된 카페 수
-            model.addAttribute("cafes", null);
+            model.addAttribute("totalCafes", 0);
 
-            return "admin/cafe-management";
+            return "manager/mCafe";
         } catch (Exception e) {
             log.error("카페 관리 페이지 로드 실패", e);
             model.addAttribute("error", "카페 데이터를 불러오는데 실패했습니다.");
-            return "admin/cafe-management";
+            return "manager/mCafe";
         }
     }
 
@@ -111,14 +104,11 @@ public class AdminController {
         log.info("GET /admin/trades - 중고거래 관리 페이지 요청");
 
         try {
-            model.addAttribute("totalTrades", 0);  // 로그에서 확인된 거래 수
-            model.addAttribute("trades", null);
-
-            return "admin/trade-management";
+            model.addAttribute("totalTrades", 0);
+            return "manager/mTrade"; // Updated to new template
         } catch (Exception e) {
             log.error("중고거래 관리 페이지 로드 실패", e);
-            model.addAttribute("error", "거래 데이터를 불러오는데 실패했습니다.");
-            return "admin/trade-management";
+            return "redirect:/manager";
         }
     }
 
@@ -132,13 +122,10 @@ public class AdminController {
         try {
             model.addAttribute("totalChatRooms", 0);
             model.addAttribute("activeChatRooms", 0);
-            model.addAttribute("chatRooms", null);
-
-            return "admin/chat-management";
+            return "manager/mChat"; // Updated to new template
         } catch (Exception e) {
             log.error("채팅 관리 페이지 로드 실패", e);
-            model.addAttribute("error", "채팅 데이터를 불러오는데 실패했습니다.");
-            return "admin/chat-management";
+            return "redirect:/manager";
         }
     }
 
@@ -150,17 +137,16 @@ public class AdminController {
         log.info("GET /admin/statistics - 통계 분석 페이지 요청");
 
         try {
-            // 기본 통계 데이터
-            model.addAttribute("userStats", "기본 통계");
-            model.addAttribute("cafeStats", "기본 통계");
-            model.addAttribute("tradeStats", "기본 통계");
-            model.addAttribute("chatStats", "기본 통계");
-
-            return "admin/statistics";
+            model.addAttribute("userCount", 7);
+            model.addAttribute("cafeCount", 0);
+            model.addAttribute("tradeCount", 0);
+            model.addAttribute("meetingCount", 0);
+            model.addAttribute("reportCount", 0);
+            model.addAttribute("chatRoomCount", 0);
+            return "manager/mStats"; // Updated to new template
         } catch (Exception e) {
             log.error("통계 페이지 로드 실패", e);
-            model.addAttribute("error", "통계 데이터를 불러오는데 실패했습니다.");
-            return "admin/statistics";
+            return "redirect:/manager";
         }
     }
 
@@ -172,62 +158,49 @@ public class AdminController {
         log.info("GET /admin/settings - 시스템 설정 페이지 요청");
 
         try {
-            model.addAttribute("systemInfo", "시스템 정보");
-
-            return "admin/system-settings";
+            return "manager/mSettings"; // Updated to new template
         } catch (Exception e) {
             log.error("시스템 설정 페이지 로드 실패", e);
-            model.addAttribute("error", "시스템 설정을 불러오는데 실패했습니다.");
-            return "admin/system-settings";
+            return "redirect:/manager";
         }
     }
 
-    // ========================== 임시 응답 메서드들 ==========================
-    // 실제 서비스가 준비될 때까지 사용할 임시 메서드들
+    // ========================== API 엔드포인트들 ==========================
 
     /**
-     * 사용자 상태 변경 (임시)
+     * 간단한 정보 페이지 (임시)
      */
+    @GetMapping("/info")
+    public String adminInfo(Model model) {
+        model.addAttribute("message", "관리자 기능이 준비 중입니다.");
+        return "manager/manager";
+    }
+
     @PostMapping("/users/{userId}/status")
     @ResponseBody
-    public String updateUserStatus(@PathVariable Long userId,
-                                   @RequestParam String status) {
+    public String updateUserStatus(@PathVariable Long userId, @RequestParam String status) {
         log.info("사용자 상태 변경 요청: userId={}, status={}", userId, status);
-        // 임시로 성공 응답
         return "success";
     }
 
-    /**
-     * 카페 삭제 (임시)
-     */
     @PostMapping("/cafes/{cafeId}/delete")
     @ResponseBody
     public String deleteCafe(@PathVariable Long cafeId) {
         log.info("카페 삭제 요청: cafeId={}", cafeId);
-        // 임시로 성공 응답
         return "success";
     }
 
-    /**
-     * 거래 상태 변경 (임시)
-     */
     @PostMapping("/trades/{tradeId}/status")
     @ResponseBody
-    public String updateTradeStatus(@PathVariable Long tradeId,
-                                    @RequestParam String status) {
+    public String updateTradeStatus(@PathVariable Long tradeId, @RequestParam String status) {
         log.info("거래 상태 변경 요청: tradeId={}, status={}", tradeId, status);
-        // 임시로 성공 응답
         return "success";
     }
 
-    /**
-     * 채팅방 삭제 (임시)
-     */
     @PostMapping("/chats/{chatRoomId}/delete")
     @ResponseBody
     public String deleteChatRoom(@PathVariable Long chatRoomId) {
         log.info("채팅방 삭제 요청: chatRoomId={}", chatRoomId);
-        // 임시로 성공 응답
         return "success";
     }
 }
