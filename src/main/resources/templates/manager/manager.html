@@ -61,7 +61,7 @@
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1000px;
             margin: 2rem auto;
             padding: 0 2rem;
         }
@@ -70,125 +70,138 @@
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
             border-radius: 20px;
-            padding: 2rem;
-            margin-bottom: 2rem;
+            padding: 2.5rem;
+            margin-bottom: 3rem;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
             text-align: center;
         }
 
         .admin-title {
-            font-size: 2.5rem;
+            font-size: 2.8rem;
             font-weight: bold;
             background: linear-gradient(135deg, #667eea, #764ba2);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.8rem;
         }
 
         .admin-subtitle {
             color: #666;
-            font-size: 1.1rem;
+            font-size: 1.2rem;
         }
 
+        /* 2x2 그리드 레이아웃 */
         .dashboard-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-            margin-bottom: 2rem;
+            grid-template-columns: 1fr 1fr;
+            gap: 2.5rem;
+            margin-bottom: 3rem;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
         }
 
         .dashboard-card {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
             border-radius: 20px;
-            padding: 2rem;
+            padding: 2.5rem;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
             transition: transform 0.3s ease, box-shadow 0.3s ease;
             border: 1px solid rgba(255, 255, 255, 0.2);
+            text-align: center;
+            min-height: 280px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         }
 
         .dashboard-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+            transform: translateY(-8px);
+            box-shadow: 0 16px 50px rgba(0, 0, 0, 0.15);
         }
 
         .card-icon {
-            width: 60px;
-            height: 60px;
+            width: 80px;
+            height: 80px;
             background: linear-gradient(135deg, #667eea, #764ba2);
-            border-radius: 15px;
+            border-radius: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 1.5rem;
+            margin: 0 auto 1.5rem auto;
             color: white;
-            font-size: 1.5rem;
+            font-size: 2rem;
         }
 
         .card-title {
-            font-size: 1.4rem;
+            font-size: 1.6rem;
             font-weight: bold;
-            margin-bottom: 0.5rem;
+            margin-bottom: 1rem;
             color: #333;
         }
 
         .card-description {
             color: #666;
-            margin-bottom: 1.5rem;
+            margin-bottom: 2rem;
             line-height: 1.6;
+            font-size: 1rem;
+            flex-grow: 1;
         }
 
         .card-button {
             background: linear-gradient(135deg, #667eea, #764ba2);
             color: white;
             border: none;
-            padding: 0.8rem 1.5rem;
-            border-radius: 10px;
+            padding: 1rem 2rem;
+            border-radius: 12px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
             text-decoration: none;
             display: inline-block;
             text-align: center;
+            font-size: 1rem;
         }
 
         .card-button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
         }
 
         .stats-section {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
             border-radius: 20px;
-            padding: 2rem;
+            padding: 2.5rem;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
             border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         .stats-title {
-            font-size: 1.5rem;
+            font-size: 1.8rem;
             font-weight: bold;
-            margin-bottom: 1.5rem;
+            margin-bottom: 2rem;
             color: #333;
+            text-align: center;
         }
 
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(4, 1fr);
             gap: 1.5rem;
         }
 
         .stat-item {
             text-align: center;
-            padding: 1.5rem;
+            padding: 2rem 1rem;
             background: linear-gradient(135deg, #f8f9ff, #e8ebff);
             border-radius: 15px;
             border: 1px solid rgba(102, 126, 234, 0.1);
         }
 
         .stat-number {
-            font-size: 2rem;
+            font-size: 2.2rem;
             font-weight: bold;
             color: #667eea;
             margin-bottom: 0.5rem;
@@ -196,9 +209,11 @@
 
         .stat-label {
             color: #666;
-            font-size: 0.9rem;
+            font-size: 1rem;
+            font-weight: 500;
         }
 
+        /* 반응형 디자인 */
         @media (max-width: 768px) {
             .nav-links {
                 display: none;
@@ -206,6 +221,8 @@
 
             .dashboard-grid {
                 grid-template-columns: 1fr;
+                gap: 2rem;
+                max-width: 400px;
             }
 
             .stats-grid {
@@ -214,6 +231,35 @@
 
             .container {
                 padding: 0 1rem;
+            }
+
+            .admin-title {
+                font-size: 2.2rem;
+            }
+
+            .dashboard-card {
+                min-height: 250px;
+                padding: 2rem;
+            }
+
+            .card-icon {
+                width: 70px;
+                height: 70px;
+                font-size: 1.8rem;
+            }
+
+            .card-title {
+                font-size: 1.4rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stat-item {
+                padding: 1.5rem 1rem;
             }
         }
     </style>
@@ -241,45 +287,39 @@
 
     <div class="dashboard-grid">
         <div class="dashboard-card">
-            <div class="card-icon">👥</div>
-            <h3 class="card-title">사용자 관리</h3>
-            <p class="card-description">회원 정보를 조회하고 관리할 수 있습니다. 계정 상태 변경 및 권한 설정이 가능합니다.</p>
+            <div>
+                <div class="card-icon">👥</div>
+                <h3 class="card-title">사용자 관리</h3>
+                <p class="card-description">회원 정보를 조회하고 관리할 수 있습니다. 계정 상태 변경 및 권한 설정이 가능합니다.</p>
+            </div>
             <a href="/admin/users" class="card-button">사용자 관리</a>
         </div>
 
         <div class="dashboard-card">
-            <div class="card-icon">☕</div>
-            <h3 class="card-title">카페 관리</h3>
-            <p class="card-description">등록된 카페 정보를 관리하고 새로운 카페를 추가할 수 있습니다.</p>
+            <div>
+                <div class="card-icon">☕</div>
+                <h3 class="card-title">카페 관리</h3>
+                <p class="card-description">등록된 카페 정보를 관리하고 새로운 카페를 추가할 수 있습니다.</p>
+            </div>
             <a href="/admin/cafes" class="card-button">카페 관리</a>
         </div>
 
         <div class="dashboard-card">
-            <div class="card-icon">🛍️</div>
-            <h3 class="card-title">중고거래 관리</h3>
-            <p class="card-description">중고거래 게시글을 모니터링하고 부적절한 콘텐츠를 관리할 수 있습니다.</p>
+            <div>
+                <div class="card-icon">🛍️</div>
+                <h3 class="card-title">중고거래 관리</h3>
+                <p class="card-description">중고거래 게시글을 모니터링하고 부적절한 콘텐츠를 관리할 수 있습니다.</p>
+            </div>
             <a href="/admin/trades" class="card-button">거래 관리</a>
         </div>
 
         <div class="dashboard-card">
-            <div class="card-icon">💬</div>
-            <h3 class="card-title">채팅 관리</h3>
-            <p class="card-description">채팅방을 모니터링하고 신고된 메시지를 처리할 수 있습니다.</p>
-            <a href="/admin/chats" class="card-button">채팅 관리</a>
-        </div>
-
-        <div class="dashboard-card">
-            <div class="card-icon">📊</div>
-            <h3 class="card-title">통계 분석</h3>
-            <p class="card-description">플랫폼 사용 통계와 분석 데이터를 확인할 수 있습니다.</p>
-            <a href="/admin/statistics" class="card-button">통계 보기</a>
-        </div>
-
-        <div class="dashboard-card">
-            <div class="card-icon">⚙️</div>
-            <h3 class="card-title">시스템 설정</h3>
-            <p class="card-description">시스템 전반적인 설정을 관리하고 업데이트할 수 있습니다.</p>
-            <a href="/admin/settings" class="card-button">설정 관리</a>
+            <div>
+                <div class="card-icon">💬</div>
+                <h3 class="card-title">채팅 관리</h3>
+                <p class="card-description">채팅방을 모니터링하고 신고된 메시지를 처리할 수 있습니다. (준비 중)</p>
+            </div>
+            <a href="#" class="card-button" style="background: linear-gradient(135deg, #ccc, #999); cursor: not-allowed;">준비 중</a>
         </div>
     </div>
 
