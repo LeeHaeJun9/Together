@@ -54,4 +54,10 @@ public class VoteController {
         }
     }
 
+    @GetMapping("/hasVoted")
+    public ResponseEntity<Boolean> hasVoted(@PathVariable Long surveyId, @RequestParam Long userId) {
+        boolean hasVoted = voteService.hasVoted(surveyId, userId);
+        return ResponseEntity.ok(hasVoted);
+    }
+
 }

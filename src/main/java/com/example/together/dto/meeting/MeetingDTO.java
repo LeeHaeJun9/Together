@@ -33,18 +33,19 @@ public class MeetingDTO {
 
     private boolean recruiting;
 
-    private Visibility visibility;
+    private Visibility visibility = Visibility.PUBLIC;
 
     private User organizer;
+    private String userId;
 
     private CafeResponseDTO cafe;
-
 
     private LocalDateTime regDate;
 
     private LocalDateTime modDate;
 
     private String address;
+    private String location;
 
 
 }
