@@ -339,4 +339,9 @@ public class MemberController {
         }
         return "member/settings";
     }
+    @GetMapping("/member/login")
+    public String loginPage() {
+        log.info("GET /member/login - 로그인 페이지 요청");
+        return "member/login";
+    }
 }
