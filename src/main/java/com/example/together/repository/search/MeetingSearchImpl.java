@@ -11,6 +11,8 @@ import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport
 
 import java.util.List;
 
+import static com.example.together.domain.QUser.user;
+
 public class MeetingSearchImpl extends QuerydslRepositorySupport implements MeetingSearch {
     public MeetingSearchImpl() {
         super(Meeting.class);
@@ -35,6 +37,8 @@ public class MeetingSearchImpl extends QuerydslRepositorySupport implements Meet
     public Page<Meeting> searchAll(String[] types, String keyword, Pageable pageable) {
         QMeeting meeting = QMeeting.meeting;
         JPQLQuery<Meeting> query = from(meeting);
+
+        query.leftJoin(meeting.organizer, user).fetchJoin();
 
         if((types != null && types.length > 0) && keyword != null) {
             BooleanBuilder booleanBuilder = new BooleanBuilder();

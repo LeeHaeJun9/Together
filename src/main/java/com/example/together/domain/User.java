@@ -41,4 +41,8 @@ public class User extends BaseEntity {
     @Column(nullable = false, length = 20)
     private Status status = Status.ACTIVE;
 
+    @Override
+    public String toString() {
+        return this.userId;
+    }
 }

@@ -65,6 +65,11 @@ public class MeetingController {
     @GetMapping("/register")
     public String meetingRegisterGet(@RequestParam("cafeId") Long cafeId, Model model, Principal principal) { // ✅ Principal 추가
         Long userId = getUserIdFromPrincipal(principal); // ✅ 메소드 사용
+    public void meetingRegisterGet(@RequestParam(required = false) Long cafeId,
+                                   @AuthenticationPrincipal User user,
+                                   @ModelAttribute("pageRequestDTO") PageRequestDTO pageRequestDTO,
+                                   Model model) {
+        MeetingDTO meetingDTO = new MeetingDTO();
 
         if (userId == null) {
             return "redirect:/login";
