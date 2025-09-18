@@ -38,6 +38,31 @@
                         </tbody>
                     </table>
 
+
+
+                    <!--                    페이지 목록 출력 p.482-->
+                    <form id="pageForm" action="/meeting/list" method="get">
+                        <input type="hidden" name="page" value="1" />
+                    </form>
+
+                    <div>
+                        <button type="button" class="btn btn-primary registerBtn" >Register</button>
+                        <div class="float-end">
+                            <ul class="pagination flex-wrap">
+                                <li class="page-item" th:if="${responseDTO.prev}">
+                                    <a class="page-link" th:data-num="${responseDTO.start -1}">Previous</a>
+                                </li>
+                                <th:block th:each="i: ${#numbers.sequence(responseDTO.start, responseDTO.end)}">
+                                    <li th:class="${responseDTO.page == i}?'page-item active':'page-item'" >
+                                        <a class="page-link"  th:data-num="${i}">[[${i}]]</a>
+                                    </li>
+                                </th:block>
+                                <li class="page-item" th:if="${responseDTO.next}">
+                                    <a class="page-link"  th:data-num="${responseDTO.end + 1}">Next</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
 
 
@@ -50,8 +75,30 @@
                         alert("게시글이 등록되었습니다.")
                     }
 
+                    document.querySelector(".registerBtn").addEventListener("click", function (e) {
+                        self.location = `/meeting/register`
+                    }, false)
 
+                    document.querySelector(".pagination").addEventListener("click", function (e) {
+                        e.preventDefault()
+                        e.stopPropagation()
 
+                        const target = e.target
+
+                        if(target.tagName !== "A") {
+                            return
+                        }
+                        const num = target.getAttribute("data-num")
+                        const formObj = document.querySelector("form")
+
+                        const pageInput = formObj.querySelector("input[name=page]");
+                        if (pageInput) {
+                            pageInput.value = num;
+                        } else {
+                            formObj.innerHTML += `<input type='hidden' name='page' value='${num}'>`;
+                        }
+                        formObj.submit();
+                    }, false)
                 </script>
             </div>
         </div>

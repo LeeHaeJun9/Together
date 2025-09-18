@@ -1,5 +1,6 @@
 package com.example.together.service.meeting;
 
+import com.example.together.domain.Cafe;
 import com.example.together.domain.Meeting;
 import com.example.together.domain.User;
 import com.example.together.dto.PageRequestDTO;
@@ -13,6 +14,7 @@ import lombok.extern.log4j.Log4j2;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -31,9 +33,23 @@ public class MeetingServiceImpl implements MeetingService {
 
     @Override
     public Long MeetingCreate(MeetingDTO meetingDTO) {
-        Meeting meeting = modelMapper.map(meetingDTO, Meeting.class);
-        Long id = meetingRepository.save(meeting).getId();
-        return id;
+//        Meeting meeting = modelMapper.map(meetingDTO, Meeting.class);
+//        Long id = meetingRepository.save(meeting).getId();
+//        return id;
+
+        Meeting meeting = dtoToEntity(meetingDTO);
+
+        String username = meetingDTO.getUserId();
+
+        User user = userRepository.findByUserId(username)
+                .orElseThrow(() -> new UsernameNotFoundException("유저를 찾을 수 없습니다."));
+
+        meeting.setOrganizer(user);
+
+        meetingRepository.save(meeting);
+
+        return meeting.getId();
+
     }
 
     @Override
@@ -109,4 +125,25 @@ public class MeetingServiceImpl implements MeetingService {
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
         return user.getNickname();
     }
+
+    private Meeting dtoToEntity(MeetingDTO dto) {
+        Meeting meeting = new Meeting();
+        meeting.setTitle(dto.getTitle());
+        meeting.setContent(dto.getContent());
+        meeting.setMeetingDate(dto.getMeetingDate());
+        meeting.setAddress(dto.getAddress());
+        meeting.setRecruiting(dto.isRecruiting());
+        meeting.setVisibility(dto.getVisibility());
+
+        if (dto.getCafe() != null) {
+            // Cafe 엔티티 변환 처리
+            Cafe cafe = new Cafe();
+            cafe.setId(dto.getCafe().getId());
+            // 필요하면 추가 필드 세팅
+            meeting.setCafe(cafe);
+        }
+
+        return meeting;
+    }
+
 }
