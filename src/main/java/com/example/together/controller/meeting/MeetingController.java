@@ -51,22 +51,34 @@ public class MeetingController {
                                    Model model) {
         MeetingDTO meetingDTO = new MeetingDTO();
 
-//        if (cafeId != null) {
-//            CafeResponseDTO cafeResponse = cafeService.getCafeById(cafeId);
-//            meetingDTO.setCafe(cafeResponse);  // meetingDTO에 cafeResponse 설정
-//        }
+        if (cafeId != null) {
+            CafeResponseDTO cafeResponse = cafeService.getCafeById(cafeId, Long.valueOf(user.getUserId()));
+            meetingDTO.setCafe(cafeResponse);
+        }
 
         model.addAttribute("dto", meetingDTO);
     }
     @PostMapping("/register")
-    public String meetingRegisterPost(@Valid MeetingDTO meetingDTO, BindingResult bindingResult, RedirectAttributes redirectAttributes) {
+    public String meetingRegisterPost(@Valid MeetingDTO meetingDTO,
+                                      BindingResult bindingResult,
+                                      @AuthenticationPrincipal User user,
+                                      RedirectAttributes redirectAttributes) {
         log.info("meetingRegister Post.....");
 
-        if(bindingResult.hasErrors()) {
+        // 유효성 검사 오류 처리
+        if (bindingResult.hasErrors()) {
             log.info("has errors..... meetingRegister Post....");
             redirectAttributes.addFlashAttribute("errors", bindingResult.getAllErrors());
-
             return "redirect:/meeting/register";
+        }
+
+        // 폼에서 cafeId를 hidden 필드로 받아오고, DTO에 CafeResponseDTO를 설정해야 함
+        // (주의: HTML 폼에 <input type="hidden" name="cafe.id" ...>와 같이 필드를 추가해야 함)
+        // 현재는 cafeId가 DTO에 직접 매핑되지 않으므로, 아래와 같은 처리가 필요
+
+        if (meetingDTO.getCafe() != null && meetingDTO.getCafe().getId() != null) {
+            CafeResponseDTO cafeResponse = cafeService.getCafeById(meetingDTO.getCafe().getId(), Long.valueOf(user.getUserId()));
+            meetingDTO.setCafe(cafeResponse);
         }
 
         log.info(meetingDTO);

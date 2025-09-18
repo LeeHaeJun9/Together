@@ -39,11 +39,12 @@ public class MeetingDTO {
 
     private CafeResponseDTO cafe;
 
-    private Address addressId;
 
     private LocalDateTime regDate;
 
     private LocalDateTime modDate;
+
+    private String address;
 
 
 }
