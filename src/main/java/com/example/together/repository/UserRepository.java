@@ -1,5 +1,6 @@
 package com.example.together.repository;
 
+import com.example.together.domain.Status;
 import com.example.together.domain.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -31,4 +32,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     // 닉네임 존재 여부 체크
     boolean existsByNickname(String nickname);
+
+    long countByStatus(Status status);
 }
