@@ -49,8 +49,12 @@
         </div>
 
         <div class="input-group mb-3">
+            <span class="input-group-text">Location</span>
+            <input type="text" name="location" class="form-control" th:value="${dto.location}">
+        </div>
+        <div class="input-group mb-3">
             <span class="input-group-text">Address</span>
-            <input type="text" class="form-control" th:value="${dto.addressId}" readonly>
+            <input type="text" class="form-control" th:value="${dto.address}" readonly>
         </div>
 
 
@@ -61,6 +65,7 @@
 
 
         <div>
+            <span th:text="${dto.visibility} != null and ${dto.visibility} == 'PUBLIC' ? '전체공개' : '카페 공개'"></span> /
             <span th:text="${dto.recruiting} ? '모집 마감' : '모집 중'"></span>
         </div>
 <!--        <div class="form-check">-->
@@ -99,6 +104,45 @@
         <!--                </a>-->
         <!--            </div>-->
         <!--        </div>-->
+
+
+
+        <div class="my-2">
+                <!-- 모집 중일 때: 신청 폼 -->
+                <form th:if="${!dto.recruiting}" th:action="@{/meeting/join}" method="post" style="display: inline;">
+                    <input type="hidden" name="meetingId" th:value="${dto.id}" />
+                    <button type="submit"
+                            class="btn btn-success"
+                            th:text="'신청하기'">
+                        신청하기
+                    </button>
+                </form>
+
+                <!-- 모집 마감일 때: 비활성화된 버튼만 -->
+                <button type="button"
+                        class="btn btn-secondary disabled"
+                        th:if="${dto.recruiting}"
+                        th:text="'모집 마감'">
+                    모집 마감
+                </button>
+
+
+<!--             모임 후기 버튼 (모임 날짜가 오늘 이전일 경우만 보이게) -->
+            <button type="button"
+                    class="btn btn-outline-primary ms-2"
+                    th:if="${dto.meetingDate.isBefore(T(java.time.LocalDateTime).now())}">
+                모임 후기 작성
+            </button>
+            <!-- 모임 후기 버튼 (모임 날짜가 오늘 이전일 경우, 모임 참여 회원만)-->
+<!--            <button type="button"-->
+<!--                    class="btn btn-outline-primary ms-2"-->
+<!--                    th:if="${#authentication.principal != null and isJoinedUser and dto.meetingDate.isBefore(T(java.time.LocalDateTime).now())}"-->
+<!--                    th:onclick="|location.href='@{/meeting/review(meetingId=${dto.id})}'|">-->
+<!--                모임 후기 작성-->
+<!--            </button>-->
+        </div>
+
+
     </div>
 
 

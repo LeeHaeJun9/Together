@@ -46,9 +46,15 @@
                             <span class="input-group-text">meetingDate</span>
                             <input type="datetime-local" name="meetingDate" th:value="*{dto.meetingDate}" class="form-control" placeholder="DateTime">
                         </div>
+
+                        <div class="input-group mb-3">
+                            <span class="input-group-text">Location</span>
+                            <input type="text" name="location" class="form-control" th:value="${dto.location}">
+                        </div>
                         <div class="input-group mb-3">
                             <span class="input-group-text">Address</span>
-                            <input type="text" th:field="*{dto.addressId}" class="form-control" placeholder="address">
+                            <input type="text" th:field="*{dto.address}" id="address" class="form-control" placeholder="주소" >
+                            <button type="button" onclick="execDaumPostcode()" class="btn btn-outline-secondary">주소 찾기</button>
                         </div>
 
                         <div class="input-group mb-3">
@@ -59,24 +65,24 @@
 
                         <div class="form-check">
                             <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" th:field="*{dto.visibility}" id="public" value="PUBLIC">
-                                <label class="form-check-label" for="public">공개</label>
+                                <input class="form-check-input" type="radio" th:field="*{dto.visibility}" id="public" value="PUBLIC" checked>
+                                <label class="form-check-label" for="public">공개(회원전체)</label>
                             </div>
                             <div class="form-check form-check-inline">
                                 <input class="form-check-input" type="radio" th:field="*{dto.visibility}" id="private" value="PRIVATE">
-                                <label class="form-check-label" for="private">비공개</label>
+                                <label class="form-check-label" for="private">비공개(카페 멤버만)</label>
                             </div>
                         </div>
 
 
                         <div class="form-check">
                             <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" th:field="*{dto.recruiting}" id="end" value="true">
-                                <label class="form-check-label" for="public">모집 마감</label>
+                                <input class="form-check-input" type="radio" th:field="*{dto.recruiting}" id="ing" value="false">
+                                <label class="form-check-label" for="ing">모집 중</label>
                             </div>
                             <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" th:field="*{dto.recruiting}" id="ing" value="false">
-                                <label class="form-check-label" for="private">모집 중</label>
+                                <input class="form-check-input" type="radio" th:field="*{dto.recruiting}" id="end" value="true">
+                                <label class="form-check-label" for="end">모집 마감</label>
                             </div>
                         </div>
 
@@ -95,9 +101,20 @@
             </div><!--end card-->
         </div><!-- end col-->
     </div><!-- end row-->
+    <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+    <script>
+        // 함수 이름을 execDaumPostcode()로 통일
+        function execDaumPostcode() {
+            new daum.Postcode({
+                oncomplete: function(data) {
+                    var addr = data.address;
+                    document.getElementById("address").value = addr;
+                }
+            }).open();
+        }
+    </script>
 
 </div>
-
 
 <script layout:fragment="script" th:inline="javascript">
     console.log("meetingModify....")

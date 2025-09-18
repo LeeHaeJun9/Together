@@ -48,6 +48,7 @@ public class MeetingController {
     @GetMapping("/register")
     public void meetingRegisterGet(@RequestParam(required = false) Long cafeId,
                                    @AuthenticationPrincipal User user,
+                                   @ModelAttribute("pageRequestDTO") PageRequestDTO pageRequestDTO,
                                    Model model) {
         MeetingDTO meetingDTO = new MeetingDTO();
 
