@@ -1,5 +1,6 @@
 package com.example.together.service.cafe;
 
+import com.example.together.domain.Cafe;
 import com.example.together.domain.CafeApplication;
 import com.example.together.dto.cafe.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -54,4 +55,11 @@ public interface CafeService {
     // 사용자가 카페 운영자인지 확인하는 메서드
     boolean isCafeOwner(Long cafeId, Long userId);
 
+    List<CafeApplicationResponseDTO> getApplicationsByUserId(Long userId);
+
+    MyJoinedCafesDTO getMyJoinedCafes(Long userId);
+
+    void leaveCafe(Long cafeId, Long userId);
+
+    String getCafeNameById(Long cafeId);
 }

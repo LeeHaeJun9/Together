@@ -18,4 +18,6 @@ public interface CafeApplicationRepository extends JpaRepository<CafeApplication
     List<CafeApplication> findByStatusWithApplicant(@Param("status") CafeApplicationStatus status);
 
     Optional<CafeApplication> findByIdAndStatus(Long id, CafeApplicationStatus status);
+
+    List<CafeApplication> findByApplicantId(Long userId);
 }

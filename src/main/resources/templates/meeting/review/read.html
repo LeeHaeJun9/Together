@@ -5,7 +5,7 @@
       layout:decorate="~{layout/tab.html}">
 
 <div layout:fragment="content">
-    <h1>Meeting Detail</h1>
+    <h1>MeetingReview Detail</h1>
 
     <div class="card-body">
         <div class="input-group mb-3">
@@ -18,20 +18,60 @@
             <input type="text" class="form-control" th:value="${dto.title}" readonly>
         </div>
 
-        <div class="input-group mb-3">
-            <span class="input-group-text">Content</span>
-            <textarea class="form-control col-sm-5" rows="5" readonly>[[${dto.content}]]</textarea>
-        </div>
+
+        <!--    meeting과 연결 필요 또는 MeetingReviewDTO에서 cafe 활성화    -->
+<!--        <div class="input-group mb-3" th:if="*{cafe != null}">-->
+<!--            <span class="input-group-text" >Category</span>-->
+<!--            <input type="text" class="form-control" placeholder="Category" readonly th:value="*{cafe.category}">-->
+<!--        </div>-->
+<!--        <div class="input-group mb-3" th:if="*{cafe != null}">-->
+<!--            <span class="input-group-text">Cafe</span>-->
+<!--            <input type="hidden" th:field="*{cafe.id}" />-->
+<!--            <input type="text" class="form-control" placeholder="Cafe" th:value="*{cafe.name}" readonly>-->
+<!--        </div>-->
+<!--        <div class="input-group mb-3">-->
+<!--            <span class="input-group-text">Cafe</span>-->
+<!--            <input type="text" class="form-control" th:value="${dto.cafe}" readonly>-->
+<!--        </div>-->
+
+<!--        <div class="input-group mb-3" th:if="*{dto.meeting.cafe != null}">-->
+<!--            <span class="input-group-text" >Category</span>-->
+<!--            <input type="text" class="form-control" placeholder="Category" readonly th:value="*{dto.meeting.cafe.category}">-->
+<!--        </div>-->
+<!--        <div class="input-group mb-3" th:if="*{dto.meeting.cafe != null}">-->
+<!--            <span class="input-group-text">Cafe</span>-->
+<!--            <input type="hidden" th:field="*{dto.meeting.cafe.id}" />-->
+<!--            <input type="text" class="form-control" placeholder="Cafe" th:text="${dto.meeting.cafe.name}" readonly>-->
+<!--        </div>-->
+<!--        <div class="input-group mb-3">-->
+<!--            <span class="input-group-text">Cafe</span>-->
+<!--            <input type="text" class="form-control" th:value="${dto.meeting.cafe}" readonly>-->
+<!--        </div>-->
+
 
         <div class="input-group mb-3">
             <span class="input-group-text">Writer</span>
             <input type="text" class="form-control" th:value="${dto.reviewer}" readonly>
         </div>
 
+
         <div class="input-group mb-3">
-            <span class="input-group-text">Cafe</span>
-            <input type="text" class="form-control" th:value="${dto.cafe}" readonly>
+            <span class="input-group-text">MeetingDate</span>
+            <input type="datetime-local" class="form-control" th:value="${dto.meeting != null ? #temporals.format(dto.meeting.meetingDate, 'yyyy-MM-dd') : ''}" readonly>
         </div>
+
+        <div class="input-group mb-3">
+            <span class="input-group-text">Address</span>
+            <input type="text" class="form-control" th:value="${dto.meeting != null && dto.meeting.address != null ? dto.meeting.address.city : ''}" readonly>
+        </div>
+
+
+
+        <div class="input-group mb-3">
+            <span class="input-group-text">Content</span>
+            <textarea class="form-control col-sm-5" rows="5" readonly>[[${dto.content}]]</textarea>
+        </div>
+
 
         <div class="my-4">
             <div class="float-end" th:with="link = ${pageRequestDTO.getLink()}">

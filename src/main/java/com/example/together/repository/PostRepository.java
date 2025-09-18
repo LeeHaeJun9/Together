@@ -13,4 +13,6 @@ public interface PostRepository extends JpaRepository<Post,Long> {
 
     // 특정 카페의 특정 유형(예: 공지사항) 게시글을 조회
     List<Post> findByCafeAndPostType(Cafe cafe, PostType postType);
+
+    void deleteByCafe(Cafe cafe);
 }
