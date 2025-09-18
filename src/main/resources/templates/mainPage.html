@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,11 +13,21 @@
         /* header */
 
         /* 로고(홈으로 이동) */
+        /* 수정된 코드 - 로그인 페이지와 같은 크기 */
         .logo {
+            display: flex;
+            align-items: center;
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
             float: left;
-            width: 20%;
-            height: auto;
             margin: 10px 0;
+        }
+
+        .logo img {
+            height: 45px;
+            width: auto;
+            margin-right: 10px;
         }
 
         /* 상단 바 */
@@ -358,18 +368,33 @@
 </head>
 <body>
 <header>
-    <div class="logo"> <!-- 로고(홈으로 이동) -->
-        <a href="#">
-            <img src="resources/pic/logo.svg" alt="로고">
+    <div class="logo">
+        <a th:href="@{/}">
+            <img th:src="@{/images/moyeora-logo.png}" alt="모여라 로고" />
+            <span>모여라</span>
         </a>
     </div>
-    <nav class="upbar"> <!-- 상단 바 -->
-        <ul>
-            <li><button><a href="#">마이페이지</a></button></li>
-            <li><button><a href="#">로그인</a></button></li>
-            <li><button><a href="#">회원가입</a></button></li>
-        </ul>
-    </nav>
+
+    <nav class="upbar">
+
+        <nav class="upbar">
+            <ul sec:authorize="!isAuthenticated()">
+                <li><button><a th:href="@{/member/login}">로그인</a></button></li>
+                <li><button><a th:href="@{/member/register}">회원가입</a></button></li>
+            </ul>
+            <ul sec:authorize="isAuthenticated() and !hasRole('ADMIN')">
+                <li><button><a th:href="@{/member/mypage}">마이페이지</a></button></li>
+                <li><button><a th:href="@{/logout}">로그아웃</a></button></li>
+            </ul>
+            <ul sec:authorize="hasRole('ADMIN')">
+
+                <li><button><a th:href="@{/member/mypage}">마이페이지</a></button></li>
+                <li><button><a th:href="@{/logout}">로그아웃</a></button></li>
+                <li><button><a th:href="@{/manager}">관리자페이지</a></button></li>
+            </ul>
+        </nav>
+
+
     <div class="banner"> <!-- 배너 -->
         <div class="bannertext"> <!-- 배너텍스트 -->
             <h1>같이 놀 사람? 여기 모여라!</h1>
@@ -383,9 +408,7 @@
                 모임을 만들고, 참여하고, 함께 즐기는 공간,<br>
                 “같이 놀 사람? 여기 모여라!”</P>
         </div>
-        <div class="bannerimg"> <!-- 배너이미지 -->
-            <img src="resources/pic/banner.jpg" alt="배너 이미지">
-        </div>
+
     </div>
 </header>
 
