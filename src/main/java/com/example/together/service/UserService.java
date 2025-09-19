@@ -4,12 +4,14 @@ package com.example.together.service;
 import com.example.together.domain.User;
 import com.example.together.dto.member.memberRegisterDTO;
 import com.example.together.dto.member.RegisterDTO;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 
 public interface UserService {
     // 로그인 관련
     User authenticate(String userId, String password);
-
+    UserDetails loadUserByUsername(String username) throws UsernameNotFoundException;
     // 회원가입 관련
     User register(memberRegisterDTO registerDTO);
     boolean isUserIdExists(String userId);

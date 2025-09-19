@@ -37,21 +37,20 @@ public class MeetingController {
     private final MeetingService meetingService;
     private final UserRepository userRepository;
     private final CafeService cafeService;
-    private final UserEditor userEditor;
     private final UserService userService;
 
-    @InitBinder
-    public void initBinder(WebDataBinder binder) {
-        binder.registerCustomEditor(User.class, userEditor);
-    }
+    // `UserEditor`와 `@InitBinder`는 더 이상 필요하지 않아 제거했습니다.
+    // `MeetingDTO`가 `organizerId`와 `organizerName`을 사용하기 때문에,
+    // 컨트롤러에서 직접 `User` 객체를 바인딩할 필요가 없습니다.
 
+    // Principal 객체에서 사용자 ID를 안전하게 가져오는 헬퍼 메서드
     private Long getUserIdFromPrincipal(Principal principal) {
         if (principal == null) {
-            return null; // ✅ Principal이 null이면 null 반환
+            return null;
         }
-        String userIdString = principal.getName();
-        // userIdString으로 User를 찾고, 해당 User의 고유 ID(Long)를 반환
-        return userService.findByUserId(userIdString).getId();
+        String email = principal.getName();
+        Optional<User> userOptional = userRepository.findByEmail(email);
+        return userOptional.map(User::getId).orElse(null);
     }
 
     @GetMapping("/list")
@@ -63,49 +62,50 @@ public class MeetingController {
 
 
     @GetMapping("/register")
-    public String meetingRegisterGet(@RequestParam("cafeId") Long cafeId, Model model, Principal principal) { // ✅ Principal 추가
-        Long userId = getUserIdFromPrincipal(principal); // ✅ 메소드 사용
-    public void meetingRegisterGet(@RequestParam(required = false) Long cafeId,
-                                   @AuthenticationPrincipal User user,
-                                   @ModelAttribute("pageRequestDTO") PageRequestDTO pageRequestDTO,
-                                   Model model) {
-        MeetingDTO meetingDTO = new MeetingDTO();
+    public String meetingRegisterGet(@RequestParam("cafeId") Long cafeId, Model model, Principal principal) {
+        Long userId = getUserIdFromPrincipal(principal);
 
         if (userId == null) {
             return "redirect:/login";
         }
 
-        Optional<User> userOptional = userRepository.findById(userId);
-
-        if (!userOptional.isPresent()) {
-            return "redirect:/login";
-        }
-
-        User user = userOptional.get();
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
 
         CafeResponseDTO cafeResponse = cafeService.getCafeById(cafeId, user.getId());
 
-        model.addAttribute("meetingDTO", new MeetingDTO());
+        MeetingDTO meetingDTO = new MeetingDTO();
+        // 모임 생성 페이지에서 주최자 정보를 미리 DTO에 채워줍니다.
+        meetingDTO.setOrganizerId(user.getId());
+        meetingDTO.setOrganizerName(user.getUserId());
+
+        model.addAttribute("meetingDTO", meetingDTO);
         model.addAttribute("cafeResponse", cafeResponse);
         model.addAttribute("userName", user.getUserId());
-
 
         return "meeting/register";
     }
     @PostMapping("/register")
     public String meetingRegisterPost(@Valid MeetingDTO meetingDTO,
                                       BindingResult bindingResult,
-                                      Principal principal, // ✅ @AuthenticationPrincipal 대신 Principal 객체 사용
+                                      Principal principal,
                                       @RequestParam(required = false) Long cafeId,
                                       RedirectAttributes redirectAttributes) {
         log.info("meetingRegister Post.....");
 
-        Long userId = getUserIdFromPrincipal(principal); // ✅ Principal을 통해 사용자 ID 가져오기
+        Long userId = getUserIdFromPrincipal(principal);
 
         if (userId == null) {
             log.warn("User is NOT authenticated on POST request. Redirecting to login.");
             return "redirect:/login";
         }
+
+        // 폼 제출 시 주최자 정보가 누락될 경우를 대비해 다시 설정
+        meetingDTO.setOrganizerId(userId);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+        meetingDTO.setOrganizerName(user.getUserId());
+
 
         if (bindingResult.hasErrors()) {
             log.info("has errors..... meetingRegister Post....");
@@ -115,7 +115,7 @@ public class MeetingController {
         }
 
         if (cafeId != null) {
-            CafeResponseDTO cafeResponse = cafeService.getCafeById(cafeId, userId); // ✅ userId 사용
+            CafeResponseDTO cafeResponse = cafeService.getCafeById(cafeId, userId);
             meetingDTO.setCafe(cafeResponse);
         } else {
             log.error("cafeId is null");
@@ -131,33 +131,33 @@ public class MeetingController {
     }
 
     @GetMapping({"/read", "/modify"})
-    public void meetingRead(Long id, PageRequestDTO pageRequestDTO, Model model, Principal principal) { // ✅ Principal 추가
+    public void meetingRead(Long id, PageRequestDTO pageRequestDTO, Model model, Principal principal) {
         Long userId = getUserIdFromPrincipal(principal);
 
         MeetingDTO meetingDTO = meetingService.MeetingDetail(id);
         log.info(meetingDTO);
         model.addAttribute("dto", meetingDTO);
-        model.addAttribute("loggedInUserId", userId); // ✅ loggedInUserId 추가
+        model.addAttribute("loggedInUserId", userId);
     }
     @PostMapping("/modify")
-    public String meetingModify (@ModelAttribute MeetingDTO dto, PageRequestDTO pageRequestDTO, @Valid MeetingDTO meetingDTO, BindingResult bindingResult, RedirectAttributes redirectAttributes, Principal principal) { // ✅ Principal 추가
+    public String meetingModify (@Valid MeetingDTO meetingDTO, BindingResult bindingResult, RedirectAttributes redirectAttributes, Principal principal) {
         log.info("meetingModify Post....." + meetingDTO);
 
-        Long userId = getUserIdFromPrincipal(principal); // ✅ Principal을 통해 사용자 ID 가져오기
+        Long userId = getUserIdFromPrincipal(principal);
         if (userId == null) {
             log.warn("User is NOT authenticated on POST request. Redirecting to login.");
             return "redirect:/login";
         }
 
+        // 주최자 정보가 누락될 경우를 대비해 다시 설정
+        meetingDTO.setOrganizerId(userId);
+
         if(bindingResult.hasErrors()) {
             log.info("has errors..... meetingModify Post....");
-            String link = pageRequestDTO.getLink();
             redirectAttributes.addFlashAttribute("errors", bindingResult.getAllErrors());
             redirectAttributes.addAttribute("id", meetingDTO.getId());
-            return "redirect:/meeting/modify?"+ link;
+            return "redirect:/meeting/modify?id=" + meetingDTO.getId();
         }
-
-        System.out.println("Organizer: " + dto.getOrganizer().getUserId());
 
         meetingService.MeetingModify(meetingDTO);
         redirectAttributes.addFlashAttribute("result", "modified");
@@ -167,9 +167,9 @@ public class MeetingController {
 
 
     @PostMapping("/remove")
-    public String meetingRemove(Long id, RedirectAttributes redirectAttributes, Principal principal) { // ✅ Principal 추가
+    public String meetingRemove(Long id, RedirectAttributes redirectAttributes, Principal principal) {
         log.info("meetingRemove..." + id);
-        Long userId = getUserIdFromPrincipal(principal); // ✅ Principal을 통해 사용자 ID 가져오기
+        Long userId = getUserIdFromPrincipal(principal);
 
         if (userId == null) {
             log.warn("User is NOT authenticated on POST request. Redirecting to login.");

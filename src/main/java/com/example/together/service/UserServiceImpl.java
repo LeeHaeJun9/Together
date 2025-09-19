@@ -30,23 +30,21 @@ public class UserServiceImpl implements UserService, UserDetailsService {
      * Spring Security의 DaoAuthenticationProvider가 이 메서드를 호출하여 사용자 정보를 가져온 후,
      * 비밀번호 비교는 내부적으로 처리합니다. 따라서 이 메서드에서는 비밀번호를 직접 비교할 필요가 없습니다.
      */
+
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        // 1. 사용자 조회 (로그인 ID는 이메일이므로 이메일로 조회합니다.)
-        User user = userRepository.findByEmail(username)
+        // username = 로그인 폼에서 입력한 아이디(userId)
+        User user = userRepository.findByUserId(username)
                 .orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다: " + username));
 
-        // 2. 계정 상태 확인
         if (user.getStatus() != Status.ACTIVE) {
             throw new UsernameNotFoundException("비활성 계정입니다: " + username);
         }
 
-        // 3. UserDetails 객체 생성 및 반환
-        // Spring Security가 이 객체의 password 필드와 사용자가 입력한 비밀번호를 비교합니다.
         return org.springframework.security.core.userdetails.User.builder()
-                .username(user.getEmail()) // Spring Security의 username은 Email로 사용
-                .password(user.getPassword()) // DB에 저장된 해시된 비밀번호를 그대로 전달
-                .roles(user.getSystemRole().name()) // 하드코딩된 "USER" 대신 실제 역할을 사용
+                .username(user.getUserId())          // 시큐리티 세션에 저장될 username
+                .password(user.getPassword())        // 암호화된 비밀번호
+                .roles(user.getSystemRole().name())  // ROLE_USER, ROLE_ADMIN 등
                 .build();
     }
 
@@ -267,4 +265,5 @@ public class UserServiceImpl implements UserService, UserDetailsService {
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
         return user.getNickname();
     }
+
 }
