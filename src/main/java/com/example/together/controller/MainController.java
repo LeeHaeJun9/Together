@@ -2,6 +2,7 @@ package com.example.together.controller;
 
 import com.example.together.domain.Status;
 import com.example.together.domain.SystemRole;
+import com.example.together.domain.User;
 import com.example.together.repository.*;
 
 import jakarta.servlet.http.HttpSession;
@@ -13,6 +14,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
 import java.security.Principal;
+import java.util.Optional;
 
 @Controller
 @RequiredArgsConstructor
@@ -49,20 +51,50 @@ public class MainController {
     }
     // MainController.java의 기존 mypage 메서드를 이것으로 교체
 
+//    @GetMapping("/member/mypage")
+//    public String mypage(Model model, Principal principal) {
+//        log.info("GET /member/mypage - 마이페이지 요청");
+//
+//        // 로그인 체크
+//        if (principal == null) {
+//            return "redirect:/member/login";
+//        }
+//
+//        // 사용자 정보를 모델에 추가
+//        String userId = principal.getName();
+//        model.addAttribute("userId", userId);
+//
+//        return "member/mypage";
+//    }
+
     @GetMapping("/member/mypage")
     public String mypage(Model model, Principal principal) {
         log.info("GET /member/mypage - 마이페이지 요청");
 
-        // 로그인 체크
         if (principal == null) {
             return "redirect:/member/login";
         }
 
-        // 사용자 정보를 모델에 추가
         String userId = principal.getName();
-        model.addAttribute("userId", userId);
 
-        return "member/mypage";
+        // 1. userRepository의 findByUserId 메서드를 호출하여
+        //    데이터베이스에서 사용자 ID에 해당하는 정보를 조회합니다.
+        Optional<User> userOptional = userRepository.findByUserId(userId);
+
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
+
+            // 2. 조회된 User 엔티티에서 이름과 이메일 정보를 가져와 모델에 담습니다.
+            model.addAttribute("userName", user.getName());
+            model.addAttribute("userEmail", user.getEmail());
+
+            log.info("사용자 마이페이지 로딩: {}", userId);
+            return "member/mypage";
+        } else {
+            // 사용자를 찾을 수 없는 경우 예외 처리
+            log.error("데이터베이스에서 사용자 정보를 찾을 수 없습니다: {}", userId);
+            return "error/userNotFound"; // 예시 오류 페이지
+        }
     }
     // MainController.java 클래스 안에 추가할 메서드
 
