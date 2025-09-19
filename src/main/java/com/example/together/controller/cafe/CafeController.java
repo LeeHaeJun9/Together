@@ -424,16 +424,16 @@ public class CafeController {
         }
     }
 
-    @GetMapping("/{cafeId}/meetings")
-    public String cafeMeetings(@PathVariable Long cafeId, PageRequestDTO pageRequestDTO, Model model) {
-        log.info("Request for meetings of cafe: " + cafeId);
-
-        PageResponseDTO<MeetingDTO> responseDTO = meetingService.listByCafeId(cafeId, pageRequestDTO);
-
-        model.addAttribute("responseDTO", responseDTO);
-        model.addAttribute("cafeId", cafeId);
-
-        return "meeting/list";
-    }
+//    @GetMapping("/{cafeId}/meetings")
+//    public String cafeMeetings(@PathVariable Long cafeId, PageRequestDTO pageRequestDTO, Model model) {
+//        log.info("Request for meetings of cafe: " + cafeId);
+//
+//        PageResponseDTO<MeetingDTO> responseDTO = meetingService.listByCafeId(cafeId, pageRequestDTO);
+//
+//        model.addAttribute("responseDTO", responseDTO);
+//        model.addAttribute("cafeId", cafeId);
+//
+//        return "meeting/list";
+//    }
 
 }

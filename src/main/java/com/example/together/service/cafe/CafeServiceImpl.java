@@ -175,12 +175,8 @@ public class CafeServiceImpl implements CafeService {
         // 2. 동적으로 회원 수 계산
         Integer memberCount = membershipRepository.countByCafe(cafe);
 
-        boolean isOwner = false;
-        boolean isMember = false;
-        if (userId != null) {
-            isOwner = cafe.getOwner().getId().equals(userId);
-            isMember = membershipRepository.existsByCafeAndUser(cafe, userRepository.getReferenceById(userId));
-        }
+        boolean isOwner = cafe.getOwner().getId().equals(userId); // userId는 여기에서 null이 아님을 보장
+        boolean isMember = membershipRepository.existsByCafeAndUser(cafe, userRepository.getReferenceById(userId));
 
 
         // 3. 응답 DTO 반환
