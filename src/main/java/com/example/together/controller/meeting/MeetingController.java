@@ -1,5 +1,6 @@
 package com.example.together.controller.meeting;
 
+import com.example.together.domain.RecruitingStatus;
 import com.example.together.domain.User;
 import com.example.together.dto.PageRequestDTO;
 import com.example.together.dto.PageResponseDTO;
@@ -90,6 +91,7 @@ public class MeetingController {
         MeetingDTO meetingDTO = new MeetingDTO();
         meetingDTO.setOrganizerId(user.getId());
         meetingDTO.setOrganizerName(user.getUserId());
+        meetingDTO.setRecruiting(RecruitingStatus.ING);
 
         model.addAttribute("meetingDTO", meetingDTO);
         model.addAttribute("cafeResponse", cafeResponse);
