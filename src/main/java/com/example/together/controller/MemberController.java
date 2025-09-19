@@ -30,7 +30,7 @@ public class MemberController {
     private final UserService userService;
 
     // 회원가입 페이지
-    @GetMapping("/join")
+    @GetMapping("/member/register")
     public String showRegisterForm(Model model) {
         log.info("GET /member/register - 회원가입 페이지 요청");
         model.addAttribute("memberRegisterDTO", new memberRegisterDTO());
