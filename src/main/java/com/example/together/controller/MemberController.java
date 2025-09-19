@@ -30,7 +30,7 @@ public class MemberController {
     private final UserService userService;
 
     // 회원가입 페이지
-    @GetMapping("/member/register")
+    @GetMapping("/join")
     public String showRegisterForm(Model model) {
         log.info("GET /member/register - 회원가입 페이지 요청");
         model.addAttribute("memberRegisterDTO", new memberRegisterDTO());
@@ -38,7 +38,7 @@ public class MemberController {
     }
 
     // 회원가입 처리
-    @PostMapping("/member/register")
+    @PostMapping("/join")
     public String processRegistration(@Valid @ModelAttribute("memberRegisterDTO") memberRegisterDTO registerDTO,
                                       BindingResult bindingResult,
                                       Model model,
@@ -339,9 +339,9 @@ public class MemberController {
         }
         return "member/settings";
     }
-    @GetMapping("/member/login")
+    @GetMapping("/login")
     public String loginPage() {
-        log.info("GET /member/login - 로그인 페이지 요청");
+        log.info("GET /login - 로그인 페이지 요청");
         return "member/login";
     }
 }

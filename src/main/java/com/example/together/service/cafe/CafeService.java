@@ -3,6 +3,7 @@ package com.example.together.service.cafe;
 import com.example.together.domain.Cafe;
 import com.example.together.domain.CafeApplication;
 import com.example.together.dto.cafe.*;
+import com.example.together.dto.calendar.CalendarEventDTO;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -62,4 +63,8 @@ public interface CafeService {
     void leaveCafe(Long cafeId, Long userId);
 
     String getCafeNameById(Long cafeId);
+
+    public List<Cafe> getSimilarCafes(Long cafeId, int limit);
+
+    List<CalendarEventDTO> getCalendarEvents(Long cafeId);
 }

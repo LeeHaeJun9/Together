@@ -242,11 +242,14 @@
     </div>
 
     <form action="/admin/login" method="post">
+        <!-- CSRF 토큰 (Spring Security) - UNCOMMENTED -->
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
         <div class="form-group has-icon">
-            <label for="username">관리자 이메일</label>
+            <label for="email">관리자 이메일</label>
             <input type="email"
                    class="form-control"
-                   id="username"
+                   id="email"
                    name="username"
                    placeholder="admin@together.com"
                    required
@@ -274,9 +277,6 @@
         <button type="submit" class="login-btn">
             <i class="fas fa-sign-in-alt me-2"></i>관리자 로그인
         </button>
-
-<!--        &lt;!&ndash; CSRF 토큰 (Spring Security 사용 시) &ndash;&gt;-->
-<!--        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />-->
     </form>
 
     <div class="security-notice">

@@ -2,9 +2,11 @@ package com.example.together.service.cafe;
 
 import com.example.together.domain.*;
 import com.example.together.dto.cafe.*;
+import com.example.together.dto.calendar.CalendarEventDTO;
 import com.example.together.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -27,6 +29,7 @@ public class CafeServiceImpl implements CafeService {
     private final CafeJoinRequestRepository  cafeJoinRequestRepository;
     private final PostRepository postRepository;
     private final CommentRepository commentRepository;
+    private final CafeCalendarRepository cafeCalendarRepository;
 
 
     @Value("${org.zerock.upload.path}")
@@ -565,5 +568,44 @@ public class CafeServiceImpl implements CafeService {
         return cafeRepository.findById(cafeId)
                 .map(Cafe::getName)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 카페입니다."));
+    }
+
+    @Override
+    public List<Cafe> getSimilarCafes(Long cafeId, int limit) {
+        Cafe currentCafe = cafeRepository.findById(cafeId)
+                .orElseThrow(() -> new IllegalArgumentException("카페를 찾을 수 없습니다."));
+
+        return cafeRepository.findByCategoryAndIdNot(
+                currentCafe.getCategory(),
+                currentCafe.getId(),
+                PageRequest.of(0, limit)
+        );
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<CalendarEventDTO> getCalendarEvents(Long cafeId) {
+        Cafe cafe = cafeRepository.findById(cafeId)
+                .orElseThrow(() -> new IllegalArgumentException("카페를 찾을 수 없습니다."));
+
+        List<CafeCalendar> events = cafeCalendarRepository.findByCafe(cafe);
+
+        return events.stream()
+                .map(this::convertToCalendarEventDTO)
+                .collect(Collectors.toList());
+    }
+
+    private CalendarEventDTO convertToCalendarEventDTO(CafeCalendar calendar) {
+        // Meeting 엔티티가 없는 경우를 고려하여 예외 처리
+        String title = (calendar.getMeeting() != null) ? calendar.getMeeting().getTitle() : "제목 없음";
+        String start = (calendar.getMeeting() != null) ? calendar.getMeeting().getMeetingDate().toString() : null;
+        String url = (calendar.getMeeting() != null) ? "/cafe/" + calendar.getCafe().getId() + "/meetings/" + calendar.getMeeting().getId() : null;
+
+        return CalendarEventDTO.builder()
+                .id(calendar.getId())
+                .title(title)
+                .start(start)
+                .url(url)
+                .build();
     }
 }

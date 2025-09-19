@@ -11,13 +11,17 @@ import com.example.together.dto.cafe.CafeResponseDTO;
 import com.example.together.dto.meeting.MeetingDTO;
 import com.example.together.dto.meeting.MeetingUserDTO;
 import com.example.together.repository.UserRepository;
+import com.example.together.service.UserService;
 import com.example.together.service.cafe.CafeService;
 import com.example.together.service.meeting.MeetingService;
 import com.example.together.service.meeting.MeetingUserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -36,12 +40,20 @@ public class MeetingController {
     private final MeetingService meetingService;
     private final UserRepository userRepository;
     private final CafeService cafeService;
-    private final UserEditor userEditor;
-    private final MeetingUserService meetingUserService;
+    private final UserService userService;
 
-    @InitBinder
-    public void initBinder(WebDataBinder binder) {
-        binder.registerCustomEditor(User.class, userEditor);
+    // `UserEditor`와 `@InitBinder`는 더 이상 필요하지 않아 제거했습니다.
+    // `MeetingDTO`가 `organizerId`와 `organizerName`을 사용하기 때문에,
+    // 컨트롤러에서 직접 `User` 객체를 바인딩할 필요가 없습니다.
+
+    // Principal 객체에서 사용자 ID를 안전하게 가져오는 헬퍼 메서드
+    private Long getUserIdFromPrincipal(Principal principal) {
+        if (principal == null) {
+            return null;
+        }
+        String email = principal.getName();
+        Optional<User> userOptional = userRepository.findByEmail(email);
+        return userOptional.map(User::getId).orElse(null);
     }
 
     @GetMapping("/list")
@@ -53,71 +65,105 @@ public class MeetingController {
 
 
     @GetMapping("/register")
-    public void meetingRegisterGet(@RequestParam(required = false) Long cafeId,
-                                   @AuthenticationPrincipal User user,
-                                   @ModelAttribute("pageRequestDTO") PageRequestDTO pageRequestDTO,
-                                   Model model) {
-        MeetingDTO meetingDTO = new MeetingDTO();
+    public String meetingRegisterGet(@RequestParam("cafeId") Long cafeId, Model model, Principal principal) {
+        Long userId = getUserIdFromPrincipal(principal);
 
-        if (cafeId != null) {
-            CafeResponseDTO cafeResponse = cafeService.getCafeById(cafeId, Long.valueOf(user.getUserId()));
-            meetingDTO.setCafe(cafeResponse);
+        if (userId == null) {
+            return "redirect:/login";
         }
 
-        model.addAttribute("dto", meetingDTO);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
+        CafeResponseDTO cafeResponse = cafeService.getCafeById(cafeId, user.getId());
+
+        MeetingDTO meetingDTO = new MeetingDTO();
+        // 모임 생성 페이지에서 주최자 정보를 미리 DTO에 채워줍니다.
+        meetingDTO.setOrganizerId(user.getId());
+        meetingDTO.setOrganizerName(user.getUserId());
+
+        model.addAttribute("meetingDTO", meetingDTO);
+        model.addAttribute("cafeResponse", cafeResponse);
+        model.addAttribute("userName", user.getUserId());
+
+        return "meeting/register";
     }
     @PostMapping("/register")
     public String meetingRegisterPost(@Valid MeetingDTO meetingDTO,
                                       BindingResult bindingResult,
-                                      @AuthenticationPrincipal User user,
+                                      Principal principal,
+                                      @RequestParam(required = false) Long cafeId,
                                       RedirectAttributes redirectAttributes) {
         log.info("meetingRegister Post.....");
 
-        // 유효성 검사 오류 처리
+        Long userId = getUserIdFromPrincipal(principal);
+
+        if (userId == null) {
+            log.warn("User is NOT authenticated on POST request. Redirecting to login.");
+            return "redirect:/login";
+        }
+
+        // 폼 제출 시 주최자 정보가 누락될 경우를 대비해 다시 설정
+        meetingDTO.setOrganizerId(userId);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+        meetingDTO.setOrganizerName(user.getUserId());
+
+
         if (bindingResult.hasErrors()) {
             log.info("has errors..... meetingRegister Post....");
             redirectAttributes.addFlashAttribute("errors", bindingResult.getAllErrors());
+            redirectAttributes.addAttribute("cafeId", cafeId);
             return "redirect:/meeting/register";
         }
 
-        // 폼에서 cafeId를 hidden 필드로 받아오고, DTO에 CafeResponseDTO를 설정해야 함
-        // (주의: HTML 폼에 <input type="hidden" name="cafe.id" ...>와 같이 필드를 추가해야 함)
-        // 현재는 cafeId가 DTO에 직접 매핑되지 않으므로, 아래와 같은 처리가 필요
-
-        if (meetingDTO.getCafe() != null && meetingDTO.getCafe().getId() != null) {
-            CafeResponseDTO cafeResponse = cafeService.getCafeById(meetingDTO.getCafe().getId(), Long.valueOf(user.getUserId()));
+        if (cafeId != null) {
+            CafeResponseDTO cafeResponse = cafeService.getCafeById(cafeId, userId);
             meetingDTO.setCafe(cafeResponse);
+        } else {
+            log.error("cafeId is null");
+            redirectAttributes.addFlashAttribute("errors", "카페 정보가 누락되었습니다.");
+            return "redirect:/meeting/register";
         }
 
         log.info(meetingDTO);
-        Long id = meetingService.MeetingCreate(meetingDTO);
+        Long id = meetingService.MeetingCreate(meetingDTO, cafeId);
 
         redirectAttributes.addFlashAttribute("result", id);
         return "redirect:/meeting/list";
     }
 
     @GetMapping({"/read", "/modify"})
-    public void meetingRead(Long id, PageRequestDTO pageRequestDTO, Model model) {
+    public void meetingRead(Long id, PageRequestDTO pageRequestDTO, Model model, Principal principal) {
+        Long userId = getUserIdFromPrincipal(principal);
+
         MeetingDTO meetingDTO = meetingService.MeetingDetail(id);
         log.info(meetingDTO);
         model.addAttribute("dto", meetingDTO);
 
         List<MeetingUserDTO> meetingUser = meetingUserService.getMeetingUsersByMeetingId(id);
         model.addAttribute("meetingUser", meetingUser);
+        model.addAttribute("loggedInUserId", userId);
     }
     @PostMapping("/modify")
-    public String meetingModify (@ModelAttribute MeetingDTO dto, PageRequestDTO pageRequestDTO, @Valid MeetingDTO meetingDTO, BindingResult bindingResult, RedirectAttributes redirectAttributes) {
+    public String meetingModify (@Valid MeetingDTO meetingDTO, BindingResult bindingResult, RedirectAttributes redirectAttributes, Principal principal) {
         log.info("meetingModify Post....." + meetingDTO);
+
+        Long userId = getUserIdFromPrincipal(principal);
+        if (userId == null) {
+            log.warn("User is NOT authenticated on POST request. Redirecting to login.");
+            return "redirect:/login";
+        }
+
+        // 주최자 정보가 누락될 경우를 대비해 다시 설정
+        meetingDTO.setOrganizerId(userId);
 
         if(bindingResult.hasErrors()) {
             log.info("has errors..... meetingModify Post....");
-            String link = pageRequestDTO.getLink();
             redirectAttributes.addFlashAttribute("errors", bindingResult.getAllErrors());
             redirectAttributes.addAttribute("id", meetingDTO.getId());
-            return "redirect:/meeting/modify?"+ link;
+            return "redirect:/meeting/modify?id=" + meetingDTO.getId();
         }
-
-        System.out.println("Organizer: " + dto.getOrganizer().getUserId());
 
         meetingService.MeetingModify(meetingDTO);
         redirectAttributes.addFlashAttribute("result", "modified");
@@ -127,8 +173,15 @@ public class MeetingController {
 
 
     @PostMapping("/remove")
-    public String meetingRemove(Long id, RedirectAttributes redirectAttributes) {
+    public String meetingRemove(Long id, RedirectAttributes redirectAttributes, Principal principal) {
         log.info("meetingRemove..." + id);
+        Long userId = getUserIdFromPrincipal(principal);
+
+        if (userId == null) {
+            log.warn("User is NOT authenticated on POST request. Redirecting to login.");
+            return "redirect:/login";
+        }
+
         meetingService.MeetingDelete(id);
         redirectAttributes.addFlashAttribute("result", "removed");
         return "redirect:/meeting/list";
