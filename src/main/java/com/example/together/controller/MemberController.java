@@ -38,7 +38,7 @@ public class MemberController {
     }
 
     // 회원가입 처리
-    @PostMapping("/join")
+    @PostMapping("/member/register")
     public String processRegistration(@Valid @ModelAttribute("memberRegisterDTO") memberRegisterDTO registerDTO,
                                       BindingResult bindingResult,
                                       Model model,
@@ -69,7 +69,7 @@ public class MemberController {
         try {
             userService.register(registerDTO);
             redirectAttributes.addFlashAttribute("message", "회원가입에 성공했습니다. 로그인해주세요.");
-            return "redirect:/main";
+            return "redirect:/mainPage";
         } catch (IllegalArgumentException e) {
             log.warn("회원가입 처리 중 예외 발생: {}", e.getMessage());
             model.addAttribute("error", e.getMessage());
@@ -120,12 +120,12 @@ public class MemberController {
     // 아이디 찾기 요청 처리
     @PostMapping("/member/findId")
     @ResponseBody
-    public Map<String, Object> findId(@RequestBody Map<String, String> request) {
+    public Map<String, Object> findId(@RequestParam("name") String name,
+                                      @RequestParam("email") String email) {
         Map<String, Object> response = new HashMap<>();
 
         try {
-            String name = request.get("name");
-            String email = request.get("email");
+            log.info("아이디 찾기 요청: name = {}, email = {}", name, email);
 
             // 데이터베이스에서 사용자 찾기
             String userId = userService.findUserIdByNameAndEmail(name, email);
@@ -133,18 +133,23 @@ public class MemberController {
             if (userId != null) {
                 response.put("success", true);
                 response.put("userId", userId);
+                response.put("message", "아이디를 찾았습니다.");
+                log.info("아이디 찾기 성공: userId = {}", userId);
             } else {
                 response.put("success", false);
                 response.put("message", "일치하는 회원 정보를 찾을 수 없습니다.");
+                log.warn("아이디 찾기 실패: name = {}, email = {}", name, email);
             }
 
         } catch (Exception e) {
             response.put("success", false);
             response.put("message", "서버 오류가 발생했습니다.");
+            log.error("아이디 찾기 처리 중 오류: {}", e.getMessage());
         }
 
         return response;
     }
+
     // 비밀번호 찾기 페이지 표시
     @GetMapping("/member/findPw")
     public String findPwPage() {

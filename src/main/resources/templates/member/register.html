@@ -3,6 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+
     <title>회원가입 - Together</title>
     <style>
         /* 전체 페이지 스타일 */
@@ -510,10 +514,14 @@
         this.disabled = true;
         this.textContent = '확인중...';
 
+        const token = document.querySelector("meta[name='_csrf']").getAttribute("content");
+        const header = document.querySelector("meta[name='_csrf_header']").getAttribute("content");
+
         fetch('/member/register/check-userid', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
+                [header]: token
             },
             body: 'userId=' + encodeURIComponent(userId)
         })
@@ -556,10 +564,14 @@
         this.disabled = true;
         this.textContent = '확인중...';
 
+        const token = document.querySelector("meta[name='_csrf']").getAttribute("content");
+        const header = document.querySelector("meta[name='_csrf_header']").getAttribute("content");
+
         fetch('/member/register/check-email', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
+                [header]: token
             },
             body: 'email=' + encodeURIComponent(email)
         })
