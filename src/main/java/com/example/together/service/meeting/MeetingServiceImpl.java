@@ -187,7 +187,7 @@ public class MeetingServiceImpl implements MeetingService {
             cafeResponseDTO = CafeResponseDTO.builder()
                     .id(meeting.getCafe().getId())
                     .name(meeting.getCafe().getName())
-                    // 다른 필드들은 필요에 따라 추가
+                    .category(meeting.getCafe().getCategory().name())
                     .build();
         }
 
