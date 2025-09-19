@@ -3,9 +3,11 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-    <meta name="description" content="Together 프로필 관리" />
+    <meta name="description" content="모여라 프로필 관리" />
     <meta name="author" content="" />
-    <title>Together - 프로필 관리</title>
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <title>모여라 - 프로필 관리</title>
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" th:href="@{/assets/favicon.ico}" />
     <!-- Bootstrap CSS -->
@@ -367,6 +369,10 @@
 
 <!-- 프로필 관리 JavaScript -->
 <script>
+    // CSRF 토큰 변수 정의
+    const token = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+    const header = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+
     let originalValues = {}; // 원본 값 저장
 
     // 필드 수정 모드 활성화
@@ -417,6 +423,7 @@
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                [header]: token
             },
             body: JSON.stringify({
                 field: fieldId,
@@ -475,6 +482,7 @@
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                [header]: token
             },
             body: JSON.stringify({
                 currentPassword: currentPassword,
