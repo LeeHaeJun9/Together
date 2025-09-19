@@ -12,6 +12,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @Builder
@@ -27,20 +28,17 @@ public class MeetingReviewDTO {
     @NotEmpty
     private String content;
 
-//    private String reviewer;
-//    private User reviewer;
-    private String reviewer;
-    private String reviewerNickname;
+    private Long reviewerId; // id 번호
+    private String reviewerNickname; // 닉네임
+    private String reviewerUserId; // 유저 아이디
 
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    private Meeting meeting;
     private Long meetingId;
-    private LocalDateTime meetingDateFromMeeting;
+    private LocalDateTime meetingDate;
+    private String meetingLocation;
+    private String meetingAddress;
 
-    private LocalDateTime regDate;
+    private List<String> imageUrls;
 
-    private LocalDateTime modDate;
-
-//    private Cafe cafe;
+    private LocalDateTime regDate;  // 생성일
+    private LocalDateTime modDate;  // 수정일
 }

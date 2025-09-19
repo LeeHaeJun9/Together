@@ -6,6 +6,8 @@ import com.example.together.dto.PageResponseDTO;
 import com.example.together.dto.meeting.MeetingReviewDTO;
 
 public interface MeetingReviewService {
+    MeetingReviewDTO EntitytoDTO(MeetingReview entity);
+
     Long MeetingReview(MeetingReviewDTO meetingReviewDTO); // 모임 후기 작성
     MeetingReviewDTO MeetingReviewDetail(Long id); // 모임 후기 상세
     void MeetingReviewModify(MeetingReviewDTO meetingReviewDTO); // 모임 후기 수정
