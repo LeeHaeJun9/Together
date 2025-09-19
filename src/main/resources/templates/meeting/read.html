@@ -108,24 +108,15 @@
 
 
         <div class="my-2">
-                <!-- 모집 중일 때: 신청 폼 -->
-                <form th:if="${!dto.recruiting}" th:action="@{/meeting/join}" method="post" style="display: inline;">
-                    <input type="hidden" name="meetingId" th:value="${dto.id}" />
-                    <button type="submit"
-                            class="btn btn-success"
-                            th:text="'신청하기'">
-                        신청하기
-                    </button>
-                </form>
-
-                <!-- 모집 마감일 때: 비활성화된 버튼만 -->
-                <button type="button"
-                        class="btn btn-secondary disabled"
-                        th:if="${dto.recruiting}"
-                        th:text="'모집 마감'">
-                    모집 마감
+            <form th:action="@{/meeting/apply}" method="post" style="display: inline;">
+                <input type="hidden" name="meetingId" th:value="${dto.id}" />
+                <button type="submit"
+                        class="btn"
+                        th:classappend="${dto.recruiting} ? 'btn-secondary disabled' : 'btn-success'"
+                        th:disabled="${dto.recruiting}">
+                    <span th:text="${dto.recruiting} ? '모집 마감' : '신청하기'">모집 상태</span>
                 </button>
-
+            </form>
 
 <!--             모임 후기 버튼 (모임 날짜가 오늘 이전일 경우만 보이게) -->
             <button type="button"
@@ -141,6 +132,25 @@
 <!--                모임 후기 작성-->
 <!--            </button>-->
         </div>
+
+        <br>
+        <h5>참가자 목록</h5>
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th>아이디</th>
+                <th>닉네임</th>
+                <th>참가 상태</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="mu : ${meetingUser}">
+                <td th:text="${mu.userIdName}">아이디</td>
+                <td th:text="${mu.nickname}">닉네임</td>
+                <td th:text="${mu.joinStatus}">상태</td>
+            </tr>
+            </tbody>
+        </table>
 
 
     </div>
