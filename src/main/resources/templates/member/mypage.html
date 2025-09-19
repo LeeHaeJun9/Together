@@ -274,8 +274,8 @@
 
         <!-- 사용자 정보 -->
         <div class="user-info">
-            <div class="user-name">홍길동님</div>
-            <div class="user-email">hong@example.com</div>
+            <div class="user-name" th:text="${userName} + '님'">홍길동님</div>
+            <div class="user-email" th:text="${userEmail}">hong@example.com</div>
         </div>
 
         <!-- 메뉴 그리드 -->
