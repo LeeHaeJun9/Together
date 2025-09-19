@@ -1,38 +1,26 @@
 package com.example.together.dto.trade;
 
-import jakarta.validation.constraints.*;
+import com.example.together.domain.Trade;
 import lombok.*;
 
-@Data
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class TradeDTO {
-
   private Long id;
-
-  @NotBlank @Size(max = 255)
   private String title;
+  private String content;
+  private BigDecimal price;
+  private String status;
+  private String sellerNickname;
+  private LocalDateTime regdate;
+  private LocalDateTime moddate;
+  private int favoriteCount;
+  private String thumbnail;
 
-  @NotBlank @Size(max = 255)
-  private String description;
-
-  @NotNull @Positive
-  private Integer price;
-
-  @NotBlank @Size(max = 255)
-  private String thumbnail;      // 썸네일 경로/URL
-
-  @NotBlank
-  private String tradeCategory;  // 카테고리 미정
-
-  @NotBlank
-  private String tradeStatus;    // "FOR_SALE", "RESERVED", "COMPLETED"
-
-  @NotNull
-  private Long sellerId;
-
-  private String regDate;
-
-  private String modDate;
 }

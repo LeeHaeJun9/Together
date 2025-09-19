@@ -2,33 +2,27 @@ package com.example.together.dto.trade;
 
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class TradeReadDTO {
-  private Long id;
-  
+  private Long tno;
   private String title;
-  
-  private String description;
-  
-  private Integer price;
-  
-  private String thumbnail;
-  
-  private String tradeCategory;
-  
-  private String tradeStatus;
-  
-  private Long sellerId;
-  
-  private String regDate;
-  
-  private String modDate;
+  private String content;
+  private int price;
+  private String category;
+  private String writerNickname;
+  private String sellerId;
+  private List<String> imagePaths;
 
-  //이미지 목록
-  private List<String> imageUrls;
+  private LocalDateTime regDate;
+  private LocalDateTime modDate;
+
+  private int likeCount;      // 찜 개수
+  private boolean likedByMe;  // 현재 로그인한 사용자가 찜했는지 여부
 }
+

@@ -1,0 +1,286 @@
+/* ===========================
+   Trade Register – Uploader UI (FINAL)
+   =========================== */
+
+/* 업로드 영역(외곽) */
+.uploader {
+    border: 1px dashed #d0d0d0;
+    border-radius: 12px;
+    padding: 12px;
+    background: #fafafa;
+    transition: background-color .15s ease, border-color .15s ease;
+    width: max-content;      /* 콘텐츠 크기에 맞춤 */
+    max-width: 100%;
+}
+.uploader.dragover {
+    background: #f0f7ff;
+    border-color: #69a6ff;
+}
+
+/* 업로드 버튼(기본) */
+.upload-tile {
+    display: grid;
+    place-items: center;
+    border: 2px dashed #cfd6e4;
+    border-radius: 12px;
+    background: #fff;
+    color: #6b7280;
+    cursor: pointer;
+    transition: border-color .2s ease, color .2s ease, background-color .2s ease, box-shadow .2s ease;
+    user-select: none;
+}
+.upload-tile:hover {
+    border-color: #8ab6ff;
+    color: #3b82f6;
+    background: #f8fbff;
+    box-shadow: 0 4px 16px rgba(59,130,246,.08);
+}
+
+/* 작은 정사각형 변형 */
+.upload-tile--small {
+    width: 120px;       /* 정사각형 가로 */
+    height: 120px;      /* 정사각형 세로 */
+    padding: 0;
+}
+
+/* ===== 레이아웃에 눌리지 않도록 오버라이드 ===== */
+/* 부모가 flex/그리드여도 버튼이 늘어나지 않게 강제 */
+#dropzone { display: block; }                 /* 상위가 flex여도 영향 최소화 */
+#uploadTile {
+    width: 120px;
+    height: 120px;
+    aspect-ratio: 1 / 1;                        /* 보조 안전장치 */
+    padding: 0;
+    margin: 0;                                   /* 중앙정렬 원하면 margin: 0 auto; */
+    display: inline-grid;                        /* stretch 방지 */
+    place-items: center;
+    flex: 0 0 auto;                              /* flex 컨테이너에서 고정 */
+    align-self: flex-start;                      /* stretch 방지 */
+    box-sizing: border-box;
+}
+#uploadTile .text-center { padding: 6px 8px; line-height: 1.2; }
+
+/* 썸네일 그리드 */
+.thumb-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+}
+@media (max-width: 1200px) { .thumb-grid { grid-template-columns: repeat(4, 1fr); } }
+@media (max-width: 992px)  { .thumb-grid { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 576px)  { .thumb-grid { grid-template-columns: repeat(2, 1fr); } }
+
+/* 개별 썸네일 카드 */
+.thumb {
+    position: relative;
+    border-radius: 10px;
+    overflow: hidden;
+    background: #eee;
+    box-shadow: 0 2px 10px rgba(0,0,0,.04);
+}
+.thumb img {
+    width: 100%;
+    height: 130px;
+    object-fit: cover;
+    display: block;
+}
+
+/* 대표 뱃지 */
+.thumb .badge-top {
+    position: absolute;
+    top: 6px;
+    left: 6px;
+}
+
+/* 삭제 버튼 (×) */
+.thumb .remove {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 28px;
+    height: 28px;
+    border: 0;
+    border-radius: 999px;
+    display: grid;
+    place-items: center;
+    background: rgba(0,0,0,.55);
+    color: #fff;
+    cursor: pointer;
+    transition: background-color .15s ease, transform .05s ease;
+}
+.thumb .remove:hover  { background: rgba(0,0,0,.7); }
+.thumb .remove:active { transform: scale(.96); }
+
+/* 업로드 개수 표시 */
+.counter { font-size: .9rem; color: #6b7280; }
+
+/* 레이아웃/오버레이가 클릭을 가로채는 상황 대비 */
+#dropzone, #uploadTile { pointer-events: auto; }
+
+/* 접근성(키보드 포커스) */
+#uploadTile:focus-visible {
+    outline: 3px solid #3b82f6;
+    outline-offset: 2px;
+    box-shadow: 0 0 0 3px rgba(59,130,246,.2);
+}
+
+/* ===========================
+   Trade Register – Uploader UI (FINAL + TYPOGRAPHY)
+   =========================== */
+
+/* ---------- Typography scale ---------- */
+:root {
+    --font-base: 14px;      /* 본문 기본 */
+    --font-sm: 12.5px;      /* 보조/설명 */
+    --font-xs: 11.5px;      /* 아주 작은 보조 */
+    --font-title: 18px;     /* 페이지 타이틀 */
+    --font-label: 13.5px;   /* 입력 라벨 */
+    --font-badge: 11px;     /* 배지/카운터 */
+}
+
+/* 페이지 타이틀(“상품 등록”) */
+.container > .d-flex h3 {
+    font-size: var(--font-title);
+    font-weight: 700;
+    letter-spacing: -.2px;
+    margin-bottom: 0;
+}
+
+/* 폼 라벨 */
+.form-label {
+    font-size: var(--font-label);
+    font-weight: 600;
+    color: #111827;
+    margin-bottom: .35rem;
+}
+
+/* 입력/텍스트영역 기본 폰트 */
+.form-control, .input-group-text, textarea.form-control {
+    font-size: var(--font-base);
+}
+
+/* 도움말/설명문구 */
+.form-text {
+    font-size: var(--font-sm);
+    color: #6b7280;
+}
+
+/* 버튼 */
+.btn { font-size: var(--font-base); }
+.btn-sm { font-size: 12.5px; }
+
+/* 카운터(0/10) */
+.counter {
+    font-size: var(--font-badge);
+    color: #6b7280;
+}
+
+/* 업로드 타일 안의 텍스트 */
+#uploadTile .text-center {
+    padding: 6px 8px;
+    line-height: 1.25;
+    text-align: center;
+}
+#uploadTile .text-center .mb-1 {
+    margin-bottom: .2rem !important;
+    font-size: var(--font-sm);
+}
+#uploadTile .text-center small,
+#uploadTile .text-center div:last-child {
+    font-size: var(--font-sm);
+    color: #6b7280;
+}
+
+/* 대표 배지 */
+.thumb .badge-top {
+    font-size: var(--font-badge);
+}
+
+/* ---------- Uploader layout ---------- */
+.uploader {
+    border: 1px dashed #d0d0d0;
+    border-radius: 12px;
+    padding: 12px;
+    background: #fafafa;
+    transition: background-color .15s ease, border-color .15s ease;
+    width: max-content;
+    max-width: 100%;
+}
+.uploader.dragover {
+    background: #f0f7ff;
+    border-color: #69a6ff;
+}
+
+/* 업로드 버튼(기본/호버) */
+.upload-tile {
+    display: grid;
+    place-items: center;
+    border: 2px dashed #cfd6e4;
+    border-radius: 12px;
+    background: #fff;
+    color: #374151;
+    cursor: pointer;
+    transition: border-color .2s ease, color .2s ease, background-color .2s ease, box-shadow .2s ease;
+    user-select: none;
+}
+.upload-tile:hover {
+    border-color: #8ab6ff;
+    color: #1f4ec9;
+    background: #f8fbff;
+    box-shadow: 0 4px 16px rgba(59,130,246,.08);
+}
+
+/* 작은 정사각형 버튼 강제(레이아웃 영향 방지 포함) */
+.upload-tile--small { width: 120px; height: 120px; padding: 0; }
+#dropzone { display: block; }
+#uploadTile {
+    width: 120px; height: 120px; aspect-ratio: 1/1;
+    padding: 0; margin: 0; display: inline-grid; place-items: center;
+    flex: 0 0 auto; align-self: flex-start; box-sizing: border-box;
+}
+
+/* 썸네일 그리드 */
+.thumb-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+}
+@media (max-width: 1200px) { .thumb-grid { grid-template-columns: repeat(4, 1fr); } }
+@media (max-width: 992px)  { .thumb-grid { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 576px)  { .thumb-grid { grid-template-columns: repeat(2, 1fr); } }
+
+/* 개별 썸네일 카드 */
+.thumb {
+    position: relative;
+    border-radius: 10px;
+    overflow: hidden;
+    background: #eee;
+    box-shadow: 0 2px 10px rgba(0,0,0,.04);
+}
+.thumb img {
+    width: 100%;
+    height: 130px;
+    object-fit: cover;
+    display: block;
+}
+
+/* 삭제 버튼 (×) */
+.thumb .remove {
+    position: absolute; top: 6px; right: 6px;
+    width: 28px; height: 28px; border: 0; border-radius: 999px;
+    display: grid; place-items: center;
+    background: rgba(0,0,0,.55); color: #fff; cursor: pointer;
+    transition: background-color .15s ease, transform .05s ease;
+    font-size: 14px;
+}
+.thumb .remove:hover  { background: rgba(0,0,0,.7); }
+.thumb .remove:active { transform: scale(.96); }
+
+/* 클릭 가로채기 방지 & 포커스 접근성 */
+#dropzone, #uploadTile { pointer-events: auto; }
+#uploadTile:focus-visible {
+    outline: 3px solid #3b82f6;
+    outline-offset: 2px;
+    box-shadow: 0 0 0 3px rgba(59,130,246,.2);
+}
+

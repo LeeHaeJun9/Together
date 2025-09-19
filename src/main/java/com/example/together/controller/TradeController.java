@@ -1,23 +1,29 @@
 package com.example.together.controller;
 
-import com.example.together.dto.trade.TradeDTO;
-import com.example.together.dto.trade.TradeReadDTO;
-import com.example.together.dto.trade.TradeUploadDTO;
+import com.example.together.domain.Trade;
+import com.example.together.dto.trade.*;
+import com.example.together.service.favorite.FavoriteService;
+import com.example.together.service.trade.TradeImageService;
 import com.example.together.service.trade.TradeService;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.http.MediaType;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.http.*;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.multipart.MultipartFile;
 
 
-import java.security.Principal;
+import java.util.Arrays;
 import java.util.List;
+
 
 @Log4j2
 @Controller
@@ -26,77 +32,106 @@ import java.util.List;
 public class TradeController {
 
   private final TradeService tradeService;
+  private final FavoriteService favoriteService;
+  private final TradeImageService tradeImageService;
+
+  @GetMapping
+  public String root() {
+    return "redirect:/trade/list";
+  }
 
   @GetMapping("/list")
-  public void list(String category, String q, Model model) {
-    List<TradeDTO> list = tradeService.listMain(category, q);
-    log.info("list size={}, category={}, q={}", list.size(), category, q);
-    model.addAttribute("list", list);
-    model.addAttribute("category", category);
-    model.addAttribute("q", q);
+  public String list(@RequestParam(defaultValue = "0") int page,
+                     @RequestParam(defaultValue = "10") int size,
+                     @RequestParam(required = false) String q,
+                     Model model) {
+
+    Page<Trade> result = tradeService.findList(PageRequest.of(page, size), q);
+
+    var dtoList = result.getContent().stream()
+        .map(t -> TradeDTO.builder()
+            .id(t.getId())
+            .title(t.getTitle())
+            .content(t.getContent())
+            .price(t.getPrice())
+            .status(t.getStatus() != null ? t.getStatus().name() : "FOR_SALE")
+            .sellerNickname(t.getSellerNickname())
+            .regdate(t.getRegdate())
+            .moddate(t.getModdate())
+            .favoriteCount((int) favoriteService.count(t.getId()))
+            .thumbnail(t.getThumbnail())
+            .build())
+        .toList();
+
+    model.addAttribute("trades", dtoList);
+    model.addAttribute("page", result);
+    return "trade/list";
+  }
+
+  @GetMapping("/read")
+  public String read(@RequestParam("id") Long id, Model model) {
+    Trade trade = tradeService.findOne(id)
+        .orElseThrow(() -> new IllegalArgumentException("해당 게시물이 없습니다: " + id));
+
+    String userId = currentUserId();
+    long favoriteCount = favoriteService.count(id);
+    boolean favored = favoriteService.isFavorited(id, userId);
+
+    model.addAttribute("trade", trade);
+    model.addAttribute("favoriteCount", favoriteCount);
+    model.addAttribute("favored", favored);
+    return "trade/read";
   }
 
   @GetMapping("/register")
-  public void registerGET() {
-
-  }
-
-  @PostMapping(value = "/register", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-  public String registerPost(@Valid TradeUploadDTO tradeUploadDTO,
-                             BindingResult bindingResult,
-                             RedirectAttributes redirectAttributes) {
-    log.info("trade POST register...");
-    if (bindingResult.hasErrors()) {
-      log.info("has errors...");
-      redirectAttributes.addFlashAttribute("errors", bindingResult.getAllErrors());
-      return "redirect:/trade/register";
-    }
-    Long id = tradeService.register(tradeUploadDTO, 1L);
-    redirectAttributes.addFlashAttribute("result", id);
-    return "redirect:/trade/list";
-  }
-
-  @GetMapping("/trade/register")
-  public String registerForm(Model model,
-                             @AuthenticationPrincipal(expression="nickname") String nickname,
-                             java.security.Principal principal) {
-    String writer = (nickname != null && !nickname.isBlank())
-        ? nickname
-        : (principal != null ? principal.getName() : "");
-    model.addAttribute("writerName", writer);
+  public String createForm(Model model) {
+    model.addAttribute("trade", new Trade());
     return "trade/register";
   }
 
-  @GetMapping({"/read", "/modify"})
-  public void read(Long id, Model model) {
-    TradeReadDTO tradeReadDTO = tradeService.read(id);
-    log.info(tradeReadDTO);
-    model.addAttribute("dto", tradeReadDTO);
-  }
-
-  @PostMapping(value = "/modify", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-  public String modify(Long id,
-                       @Valid TradeUploadDTO tradeUploadDTO,
+  @PostMapping("/register")
+  public String create(@ModelAttribute("trade") Trade trade,
                        BindingResult bindingResult,
-                       RedirectAttributes redirectAttributes) {
-    log.info("trade modify post... id={}, dto={}", id, tradeUploadDTO);
+                       @RequestParam("writer") String writer,
+                       @RequestParam(name = "files", required = false) MultipartFile[] files) {
     if (bindingResult.hasErrors()) {
-      log.info("has errors...");
-      redirectAttributes.addFlashAttribute("errors", bindingResult.getAllErrors());
-      redirectAttributes.addAttribute("id", id);
-      return "redirect:/trade/modify";
+      return "trade/register";
     }
-    tradeService.modify(id, tradeUploadDTO, 1L);
-    redirectAttributes.addFlashAttribute("result", "modified");
-    redirectAttributes.addAttribute("id", id);
-    return "redirect:/trade/read";
+
+    if (trade.getThumbnail() == null || trade.getThumbnail().isBlank()) {
+      trade.setThumbnail("/images/no-image.png");
+    }
+
+    trade.setSellerNickname(writer);
+
+    // 1) 글 저장
+    Trade saved = tradeService.create(trade);
+
+    // 2) 이미지 저장 → URL 반환 → 첫 장을 썸네일로 덮어쓰기
+    List<String> urls = List.of();
+    if (files != null && files.length > 0) {
+      urls = tradeImageService.saveImages(saved.getId(), Arrays.asList(files));
+    }
+    if (!urls.isEmpty()) {
+      saved.setThumbnail(urls.get(0));
+      tradeService.update(saved.getId(), saved);
+    }
+
+    return "redirect:/trade/read?id=" + saved.getId();
   }
 
-  @PostMapping("/remove")
-  public String remove(Long id, RedirectAttributes redirectAttributes) {
-    log.info("remove post.. id={}", id);
-    tradeService.remove(id, 1L);
-    redirectAttributes.addFlashAttribute("result", "removed");
+  @PostMapping("/delete")
+  public String delete(@RequestParam("id") Long id) {
+    tradeService.delete(id);
     return "redirect:/trade/list";
   }
+
+  private String currentUserId() {
+    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+    return (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getName()))
+        ? auth.getName()
+        : null;
+  }
 }
+
+

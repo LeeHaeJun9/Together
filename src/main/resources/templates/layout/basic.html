@@ -12,7 +12,6 @@
     <!-- Core theme CSS (includes Bootstrap)-->
     <link th:href="@{/header/css/styles.css}" rel="stylesheet" />
 
-    <!-- ✅ 각 페이지가 자기 CSS를 삽입할 슬롯 -->
     <th:block layout:fragment="page-styles"></th:block>
 </head>
 <body>
@@ -50,8 +49,7 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
 <!-- Core theme JS-->
 <script th:src="@{/header/js/scripts.js}"></script>
-<th:block layout:fragment="script">
+<th:block layout:fragment="script"></th:block>
 
-</th:block>
 </body>
 </html>
