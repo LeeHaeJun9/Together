@@ -203,7 +203,7 @@
         </div>
 
         <!-- 실제 동작하는 폼 (AJAX 사용) -->
-        <form id="findPwForm">
+        <form th:action="@{/member/findPw}" method="post">
             <!-- 아이디 -->
             <div class="mb-3">
                 <label class="form-label">아이디</label>

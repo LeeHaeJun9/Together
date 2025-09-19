@@ -78,6 +78,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     /**
      * 프로필 업데이트
      * JPA의 변경 감지(Dirty Checking) 기능을 활용하도록 수정했습니다.
+     *
      * @Transactional 환경에서 엔티티를 조회하고 setter로 필드를 변경하면, 트랜잭션이 끝날 때 자동으로 UPDATE 쿼리가 실행됩니다.
      */
     @Override
@@ -266,4 +267,48 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         return user.getNickname();
     }
 
+    @Override
+    @Transactional
+    public boolean updateTempPassword(String userId, String tempPassword) {
+        try {
+            User user = findByUserId(userId);
+            if (user == null) {
+                log.warn("임시 비밀번호 업데이트 실패: 사용자를 찾을 수 없음 - userId = {}", userId);
+                return false;
+            }
+
+            // 임시 비밀번호 암호화 후 저장
+            String encodedTempPassword = passwordEncoder.encode(tempPassword);
+            user.setPassword(encodedTempPassword);
+
+            userRepository.save(user);
+
+            log.info("임시 비밀번호 업데이트 성공: userId = {}", userId);
+            return true;
+
+        } catch (Exception e) {
+            log.error("임시 비밀번호 업데이트 실패: userId = {}, error = {}", userId, e.getMessage());
+            return false;
+        }
+    }
+    @Override
+    @Transactional
+    public void updateUserPassword(String userId, String newPassword) {
+        System.out.println("updateUserPassword 호출됨: userId=" + userId + ", newPassword=" + newPassword);
+
+        Optional<User> userOpt = userRepository.findByUserId(userId);
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+            System.out.println("사용자 찾음: " + user.getUserId());
+
+            String encodedPassword = passwordEncoder.encode(newPassword);
+            System.out.println("암호화된 비밀번호: " + encodedPassword);
+
+            user.setPassword(encodedPassword);
+            User savedUser = userRepository.save(user);
+            System.out.println("저장 완료: " + savedUser.getUserId());
+        } else {
+            System.out.println("사용자를 찾을 수 없음: " + userId);
+        }
+    }
 }

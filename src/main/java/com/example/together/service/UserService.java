@@ -35,5 +35,8 @@ public interface UserService {
     boolean isAdmin(Long adminId);
 
     String getUserNicknameById(Long userId);
+    boolean updateTempPassword(String userId, String tempPassword);
+    void updateUserPassword(String userId, String newPassword);
+
 }
 
