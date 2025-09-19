@@ -1,5 +1,9 @@
 package com.example.together.service.meeting;
 
-public interface MeetingUserService {
+import com.example.together.dto.meeting.MeetingUserDTO;
 
+import java.util.List;
+
+public interface MeetingUserService {
+    List<MeetingUserDTO> getMeetingUsersByMeetingId(Long meetingId);
 }

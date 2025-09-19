@@ -3,14 +3,17 @@ package com.example.together.controller.meeting;
 
 import com.example.together.config.UserEditor;
 import com.example.together.domain.Cafe;
+import com.example.together.domain.MeetingUser;
 import com.example.together.domain.User;
 import com.example.together.dto.PageRequestDTO;
 import com.example.together.dto.PageResponseDTO;
 import com.example.together.dto.cafe.CafeResponseDTO;
 import com.example.together.dto.meeting.MeetingDTO;
+import com.example.together.dto.meeting.MeetingUserDTO;
 import com.example.together.repository.UserRepository;
 import com.example.together.service.cafe.CafeService;
 import com.example.together.service.meeting.MeetingService;
+import com.example.together.service.meeting.MeetingUserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -22,6 +25,9 @@ import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.security.Principal;
+import java.util.List;
+
 @Controller
 @RequestMapping("/meeting")
 @Log4j2
@@ -31,6 +37,7 @@ public class MeetingController {
     private final UserRepository userRepository;
     private final CafeService cafeService;
     private final UserEditor userEditor;
+    private final MeetingUserService meetingUserService;
 
     @InitBinder
     public void initBinder(WebDataBinder binder) {
@@ -94,6 +101,9 @@ public class MeetingController {
         MeetingDTO meetingDTO = meetingService.MeetingDetail(id);
         log.info(meetingDTO);
         model.addAttribute("dto", meetingDTO);
+
+        List<MeetingUserDTO> meetingUser = meetingUserService.getMeetingUsersByMeetingId(id);
+        model.addAttribute("meetingUser", meetingUser);
     }
     @PostMapping("/modify")
     public String meetingModify (@ModelAttribute MeetingDTO dto, PageRequestDTO pageRequestDTO, @Valid MeetingDTO meetingDTO, BindingResult bindingResult, RedirectAttributes redirectAttributes) {
@@ -122,5 +132,26 @@ public class MeetingController {
         meetingService.MeetingDelete(id);
         redirectAttributes.addFlashAttribute("result", "removed");
         return "redirect:/meeting/list";
+    }
+
+    @PostMapping("/apply")
+    public String meetingApply(@RequestParam Long meetingId,
+                               Principal principal,  // <-- Principal로 변경
+                               RedirectAttributes redirectAttributes) {
+
+        String userId = principal.getName();  // 로그인한 아이디 얻기
+        User user = userRepository.findByUserId(userId)
+                .orElseThrow(() -> new RuntimeException("사용자 정보가 없습니다."));
+
+        // user로 신청 처리
+        try {
+            meetingService.applyToMeeting(user, meetingId);
+            redirectAttributes.addFlashAttribute("message", "모임 신청이 완료되었습니다.");
+        } catch (IllegalStateException e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+        }
+
+        redirectAttributes.addAttribute("id", meetingId);
+        return "redirect:/meeting/read?id=" + meetingId;
     }
 }

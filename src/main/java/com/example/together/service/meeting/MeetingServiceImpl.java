@@ -1,12 +1,11 @@
 package com.example.together.service.meeting;
 
-import com.example.together.domain.Cafe;
-import com.example.together.domain.Meeting;
-import com.example.together.domain.User;
+import com.example.together.domain.*;
 import com.example.together.dto.PageRequestDTO;
 import com.example.together.dto.PageResponseDTO;
 import com.example.together.dto.meeting.MeetingDTO;
 import com.example.together.repository.MeetingRepository;
+import com.example.together.repository.MeetingUserRepository;
 import com.example.together.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +29,7 @@ public class MeetingServiceImpl implements MeetingService {
     private final ModelMapper modelMapper;
     private final MeetingRepository meetingRepository;
     private final UserRepository userRepository;
+    private final MeetingUserRepository meetingUserRepository;
 
     @Override
     public Long MeetingCreate(MeetingDTO meetingDTO) {
@@ -97,6 +97,38 @@ public class MeetingServiceImpl implements MeetingService {
                 .build();
 
     }
+
+    @Override
+    @Transactional
+    public void applyToMeeting(User user, Long meetingId) {
+        Meeting meeting = meetingRepository.findById(meetingId)
+                .orElseThrow(() -> new IllegalArgumentException("모임이 존재하지 않습니다."));
+
+        // 중복 신청 방지
+        if (meetingUserRepository.existsByUserAndMeeting(user, meeting)) {
+            throw new IllegalStateException("이미 이 모임에 신청하셨습니다.");
+        }
+        if (meeting.isRecruiting()) {
+            throw new IllegalStateException("모집이 마감된 모임입니다.");
+        }
+
+        MeetingUser meetingUser = MeetingUser.builder()
+                .user(user)
+                .meeting(meeting)
+                .joinStatus(MeetingJoinStatus.ACCEPTED)
+                .build();
+
+        log.info("Applying user {} to meeting {}", user.getUserId(), meetingId);
+
+        meetingUserRepository.save(meetingUser);
+    }
+
+    public List<MeetingUser> getApplicantsByMeeting(Long meetingId) {
+        Meeting meeting = meetingRepository.findById(meetingId)
+                .orElseThrow(() -> new IllegalArgumentException("모임이 존재하지 않습니다."));
+        return meetingUserRepository.findByMeeting(meeting);
+    }
+
 
     @Override
     public PageResponseDTO<MeetingDTO> listByCafeId(Long cafeId, PageRequestDTO pageRequestDTO) {
