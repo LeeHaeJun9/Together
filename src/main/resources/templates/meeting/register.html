@@ -1,7 +1,4 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layout/tab.html}">
 
 <head>
     <meta charset="UTF-8">
@@ -11,7 +8,6 @@
 </head>
 <body>
 
-<div layout:fragment="content">
 <div class="container mt-5">
     <h1>Meeting Register</h1>
     <div class="card-body">
@@ -39,17 +35,17 @@
             </div>
             <div class="input-group mb-3">
                 <span class="input-group-text">사용자</span>
-                <input type="text" class="form-control" placeholder="Name" th:value="${userName}" readonly>
+                <input type="text" class="form-control" placeholder="Name" th:value="${#authentication.principal.username}" readonly>
             </div>
 
 
-            <div class="input-group mb-3">
-                <span class="input-group-text">Content</span>
-                <!-- ✅ th:field를 *{content}로 수정하여 meetingDTO에 직접 바인딩 -->
-                <textarea class="form-control col-sm-5" rows="5" th:field="*{content}"></textarea>
-                <span class="input-group-text">Writer</span>
-                <input type="text" name="userId" class="form-control" th:value="${#authentication.principal.username}" readonly>
-            </div>
+<!--            <div class="input-group mb-3">-->
+<!--                <span class="input-group-text">Content</span>-->
+<!--                &lt;!&ndash; ✅ th:field를 *{content}로 수정하여 meetingDTO에 직접 바인딩 &ndash;&gt;-->
+<!--                <textarea class="form-control col-sm-5" rows="5" th:field="*{content}"></textarea>-->
+<!--&lt;!&ndash;                <span class="input-group-text">Writer</span>&ndash;&gt;-->
+<!--&lt;!&ndash;                <input type="text" name="userId" class="form-control" th:value="${#authentication.principal.username}" readonly>&ndash;&gt;-->
+<!--            </div>-->
 
 
             <div class="input-group mb-3">
@@ -58,10 +54,10 @@
                 <input type="datetime-local" th:field="*{meetingDate}" class="form-control">
             </div>
 
-            <div class="input-group mb-3">
-                <span class="input-group-text">Location</span>
-                <input type="text" name="location" class="form-control" th:value="${dto.location}">
-            </div>
+<!--            <div class="input-group mb-3">-->
+<!--                <span class="input-group-text">Location</span>-->
+<!--                <input type="text" name="location" class="form-control" th:value="${location}">-->
+<!--            </div>-->
             <div class="input-group mb-3">
                 <span class="input-group-text">Address</span>
                 <!-- ✅ th:field를 *{address}로 수정하여 meetingDTO에 직접 바인딩 -->
@@ -71,7 +67,7 @@
 
             <div class="input-group mb-3">
                 <span class="input-group-text">Content</span>
-                <textarea class="form-control col-sm-5" rows="5" th:field="*{dto.content}"></textarea>
+                <textarea class="form-control col-sm-5" rows="5" th:field="*{content}"></textarea>
             </div>
 
 
@@ -82,34 +78,20 @@
                     <label class="form-check-label" for="public">공개</label>
                 </div>
                 <div class="form-check form-check-inline">
-                    <!-- ✅ th:field를 *{visibility}로 수정하여 meetingDTO에 직접 바인딩 -->
                     <input class="form-check-input" type="radio" th:field="*{visibility}" id="private" value="PRIVATE">
-                    <label class="form-check-label" for="private">비공개</label>
-                    <input class="form-check-input" type="radio" th:field="*{dto.visibility}" id="public" value="PUBLIC" checked>
-                    <label class="form-check-label" for="public">공개(회원전체)</label>
-                </div>
-                <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="radio" th:field="*{dto.visibility}" id="private" value="PRIVATE">
-                    <label class="form-check-label" for="private">비공개(카페 멤버만)</label>
+                    <label for="private">비공개</label>
                 </div>
             </div>
 
 
             <div class="form-check">
                 <div class="form-check form-check-inline">
-                    <!-- ✅ th:field를 *{recruiting}로 수정하여 meetingDTO에 직접 바인딩 -->
+                    <input class="form-check-input" type="radio" th:field="*{recruiting}" id="ing" value="false" checked>
+                    <label for="ing">모집 중</label>
+                </div>
+                <div class="form-check form-check-inline">
                     <input class="form-check-input" type="radio" th:field="*{recruiting}" id="end" value="true">
-                    <label class="form-check-label" for="end">모집 마감</label>
-                </div>
-                <div class="form-check form-check-inline">
-                    <!-- ✅ th:field를 *{recruiting}로 수정하여 meetingDTO에 직접 바인딩 -->
-                    <input class="form-check-input" type="radio" th:field="*{recruiting}" id="ing" value="false">
-                    <input class="form-check-input" type="radio" th:field="*{dto.recruiting}" id="ing" value="false">
-                    <label class="form-check-label" for="ing">모집 중</label>
-                </div>
-                <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="radio" th:field="*{dto.recruiting}" id="end" value="true">
-                    <label class="form-check-label" for="end">모집 마감</label>
+                    <label for="end">모집 마감</label>
                 </div>
             </div>
 
@@ -141,4 +123,3 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-</html>

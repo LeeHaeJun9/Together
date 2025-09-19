@@ -1,9 +1,6 @@
 package com.example.together.service.meeting;
 
-import com.example.together.domain.Cafe;
-import com.example.together.domain.CafeCalendar;
-import com.example.together.domain.Meeting;
-import com.example.together.domain.User;
+import com.example.together.domain.*;
 import com.example.together.dto.PageRequestDTO;
 import com.example.together.dto.PageResponseDTO;
 import com.example.together.dto.meeting.MeetingDTO;
