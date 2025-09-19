@@ -44,16 +44,31 @@ public class MeetingController {
     }
 
     @GetMapping("/list")
-    public void meetingList(PageRequestDTO pageRequestDTO, Model model) {
-        PageResponseDTO<MeetingDTO> responseDTO = meetingService.list(pageRequestDTO);
+    public void meetingList(@RequestParam("cafeId") Long cafeId, PageRequestDTO pageRequestDTO, Model model, Principal principal) {
+
+        // 1. 특정 카페의 모임 목록을 조회합니다.
+        PageResponseDTO<MeetingDTO> responseDTO = meetingService.listByCafeId(cafeId, pageRequestDTO);
         log.info(responseDTO);
         model.addAttribute("responseDTO", responseDTO);
+
+        // 2. 로그인 여부에 따라 다른 메서드를 호출합니다.
+        CafeResponseDTO cafeResponse;
+        if (principal != null) {
+            // 로그인된 사용자
+            User user = getUserFromPrincipal(principal);
+            cafeResponse = cafeService.getCafeById(cafeId, user.getId());
+        } else {
+            // 익명 사용자
+            cafeResponse = cafeService.getCafeById(cafeId);
+        }
+
+        model.addAttribute("cafeResponse", cafeResponse);
     }
 
     @GetMapping("/register")
     public String meetingRegisterGet(@RequestParam("cafeId") Long cafeId, Model model, Principal principal, PageRequestDTO pageRequestDTO) {
         User user = getUserFromPrincipal(principal);
-        if (user == null) return "redirect:/login";
+
 
         CafeResponseDTO cafeResponse = cafeService.getCafeById(cafeId, user.getId());
 
@@ -83,19 +98,21 @@ public class MeetingController {
             return "redirect:/login";
         }
 
-        meetingDTO.setOrganizerId(user.getId());
-        meetingDTO.setOrganizerName(user.getUserId());
+        // ✅ 로그인된 사용자의 ID를 DTO의 userId 필드에 직접 설정
+        meetingDTO.setUserId(user.getUserId());
 
         if (bindingResult.hasErrors()) {
-            log.info("has errors..... meetingRegister Post....");
+            bindingResult.getFieldErrors().forEach(fe -> {
+                log.info(fe.getField() + " : " + fe.getDefaultMessage());
+            });
             redirectAttributes.addFlashAttribute("errors", bindingResult.getAllErrors());
             redirectAttributes.addAttribute("cafeId", cafeId);
             return "redirect:/meeting/register";
         }
 
         if (cafeId != null) {
-            CafeResponseDTO cafeResponse = cafeService.getCafeById(cafeId, user.getId());
-            meetingDTO.setCafe(cafeResponse);
+            // CafeResponseDTO를 DTO에 설정하는 부분은 Service에서 처리하므로 삭제합니다.
+            // meetingDTO.setCafe(cafeResponse);
         } else {
             log.error("cafeId is null");
             redirectAttributes.addFlashAttribute("errors", "카페 정보가 누락되었습니다.");

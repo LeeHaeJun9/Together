@@ -35,7 +35,8 @@
             </div>
             <div class="input-group mb-3">
                 <span class="input-group-text">사용자</span>
-                <input type="text" class="form-control" placeholder="Name" th:value="${#authentication.principal.username}" readonly>
+                <input type="text" class="form-control" th:value="${#authentication.principal.username}" readonly>
+                <input type="hidden" th:field="*{userId}" th:value="${#authentication.principal.username}" />
             </div>
 
 
@@ -73,9 +74,8 @@
 
             <div class="form-check">
                 <div class="form-check form-check-inline">
-                    <!-- ✅ th:field를 *{visibility}로 수정하여 meetingDTO에 직접 바인딩 -->
-                    <input class="form-check-input" type="radio" th:field="*{visibility}" id="public" value="PUBLIC">
-                    <label class="form-check-label" for="public">공개</label>
+                    <input class="form-check-input" type="radio" th:field="*{visibility}" id="public" value="PUBLIC" checked>
+                    <label for="public">공개</label>
                 </div>
                 <div class="form-check form-check-inline">
                     <input class="form-check-input" type="radio" th:field="*{visibility}" id="private" value="PRIVATE">
@@ -84,13 +84,14 @@
             </div>
 
 
+
             <div class="form-check">
                 <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="radio" th:field="*{recruiting}" id="ing" value="false" checked>
+                    <input class="form-check-input" type="radio" th:field="*{recruiting}" id="ing" value="ING" checked>
                     <label for="ing">모집 중</label>
                 </div>
                 <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="radio" th:field="*{recruiting}" id="end" value="true">
+                    <input class="form-check-input" type="radio" th:field="*{recruiting}" id="end" value="END">
                     <label for="end">모집 마감</label>
                 </div>
             </div>

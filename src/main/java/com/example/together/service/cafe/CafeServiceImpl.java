@@ -175,10 +175,12 @@ public class CafeServiceImpl implements CafeService {
         // 2. 동적으로 회원 수 계산
         Integer memberCount = membershipRepository.countByCafe(cafe);
 
-        boolean isOwner = cafe.getOwner().getId().equals(userId);
-
-        User user = userRepository.getReferenceById(userId);
-        boolean isMember = membershipRepository.existsByCafeAndUser(cafe, user);
+        boolean isOwner = false;
+        boolean isMember = false;
+        if (userId != null) {
+            isOwner = cafe.getOwner().getId().equals(userId);
+            isMember = membershipRepository.existsByCafeAndUser(cafe, userRepository.getReferenceById(userId));
+        }
 
 
         // 3. 응답 DTO 반환
@@ -194,6 +196,29 @@ public class CafeServiceImpl implements CafeService {
                 cafe.getCafeThumbnail(),
                 isOwner,
                 isMember
+        );
+    }
+
+    @Override
+    public CafeResponseDTO getCafeById(Long cafeId) {
+        // userId가 없는 경우를 위한 메서드
+        Cafe cafe = cafeRepository.findById(cafeId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 카페입니다."));
+        Integer memberCount = membershipRepository.countByCafe(cafe);
+
+        // isOwner와 isMember는 항상 false로 설정
+        return new CafeResponseDTO(
+                cafe.getId(),
+                cafe.getName(),
+                cafe.getDescription(),
+                cafe.getCategory().name(),
+                cafe.getRegDate(),
+                cafe.getOwner().getId(),
+                memberCount,
+                cafe.getCafeImage(),
+                cafe.getCafeThumbnail(),
+                false, // isOwner
+                false  // isMember
         );
     }
 

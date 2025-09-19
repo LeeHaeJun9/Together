@@ -28,25 +28,21 @@
                         <tr th:each="dto:${responseDTO.dtoList}">
                             <th scope="row">[[${dto.id}]]</th>
                             <td>
-                                <!--                                [[${dto.title}]]-->
                                 <a th:href="|@{/meeting/read(id = ${dto.id})}&${link}|" class="text-decoration-none">[[${dto.title}]]</a>
                             </td>
-                            <td>[[${dto.organizer}]]</td>
-                            <!--                            날짜 포맷팅 p.481-->
+                            <td>[[${dto.organizerName}]]</td>
                             <td>[[${#temporals.format(dto.meetingDate, 'yyyy-MM-dd')}]]</td>
                         </tr>
                         </tbody>
                     </table>
 
-
-
-                    <!--                    페이지 목록 출력 p.482-->
                     <form id="pageForm" action="/meeting/list" method="get">
-                        <input type="hidden" name="page" value="1" />
+                        <input type="hidden" name="page" th:value="${responseDTO.page}" />
+                        <input type="hidden" name="cafeId" th:value="${cafeResponse.id}" />
                     </form>
 
                     <div>
-                        <button type="button" class="btn btn-primary registerBtn" >Register</button>
+                        <button type="button" class="btn btn-primary registerBtn" th:data-cafe-id="${cafeResponse.id}">Register</button>
                         <div class="float-end">
                             <ul class="pagination flex-wrap">
                                 <li class="page-item" th:if="${responseDTO.prev}">
@@ -65,18 +61,21 @@
                     </div>
                 </div>
 
-
                 <script layout:fragment="script" th:inline="javascript">
                     console.log("meetingList....")
 
                     const result = [[${result}]]
                     if(result) {
-                        // alert(result + " 게시글이 등록되었습니다.")
                         alert("게시글이 등록되었습니다.")
                     }
 
                     document.querySelector(".registerBtn").addEventListener("click", function (e) {
-                        self.location = `/meeting/register`
+                        const cafeId = this.getAttribute("data-cafe-id");
+                        if (cafeId) {
+                            self.location = `/meeting/register?cafeId=${cafeId}`;
+                        } else {
+                            alert("카페 정보를 찾을 수 없습니다.");
+                        }
                     }, false)
 
                     document.querySelector(".pagination").addEventListener("click", function (e) {
@@ -90,13 +89,7 @@
                         }
                         const num = target.getAttribute("data-num")
                         const formObj = document.querySelector("form")
-
-                        const pageInput = formObj.querySelector("input[name=page]");
-                        if (pageInput) {
-                            pageInput.value = num;
-                        } else {
-                            formObj.innerHTML += `<input type='hidden' name='page' value='${num}'>`;
-                        }
+                        formObj.querySelector("input[name=page]").value = num;
                         formObj.submit();
                     }, false)
                 </script>

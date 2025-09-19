@@ -3,18 +3,16 @@ package com.example.together.service.meeting;
 import com.example.together.domain.*;
 import com.example.together.dto.PageRequestDTO;
 import com.example.together.dto.PageResponseDTO;
+import com.example.together.dto.cafe.CafeResponseDTO;
 import com.example.together.dto.meeting.MeetingDTO;
 import com.example.together.repository.CafeCalendarRepository;
 import com.example.together.repository.CafeRepository;
 import com.example.together.repository.MeetingRepository;
 import com.example.together.repository.MeetingUserRepository;
 import com.example.together.repository.UserRepository;
-import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.modelmapper.Converter;
-import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -30,67 +28,42 @@ import java.util.stream.Collectors;
 @Transactional
 public class MeetingServiceImpl implements MeetingService {
 
-    private final ModelMapper modelMapper;
     private final MeetingRepository meetingRepository;
     private final UserRepository userRepository;
     private final MeetingUserRepository meetingUserRepository;
     private final CafeRepository cafeRepository;
     private final CafeCalendarRepository cafeCalendarRepository;
 
-    @PostConstruct
-    public void setupModelMapper() {
-        // Integer -> Boolean 변환을 위한 Converter 생성
-        Converter<Integer, Boolean> integerToBooleanConverter = context -> {
-            Integer source = context.getSource();
-            return source != null && source == 1; // 1은 true, 0은 false로 간주
-        };
-
-        // User -> Long 변환을 위한 Converter 생성 (DTO로 변환할 때 사용)
-        Converter<User, Long> userToLongConverter = context -> {
-            User source = context.getSource();
-            return source != null ? source.getId() : null;
-        };
-
-        // DTO -> User 변환을 위한 Converter 생성 (엔티티로 변환할 때 사용)
-        Converter<Long, User> longToUserConverter = context -> {
-            Long source = context.getSource();
-            return userRepository.findById(source).orElse(null);
-        };
-
-        // Meeting 엔티티 -> MeetingDTO 매핑 설정
-        modelMapper.typeMap(Meeting.class, MeetingDTO.class).addMappings(mapper -> {
-            mapper.using(integerToBooleanConverter).map(Meeting::isRecruiting, MeetingDTO::setRecruiting);
-            mapper.using(integerToBooleanConverter).map(Meeting::getVisibility, MeetingDTO::setVisibility);
-            mapper.using(userToLongConverter).map(Meeting::getOrganizer, MeetingDTO::setOrganizerId);
-            mapper.map(src -> src.getOrganizer().getUserId(), MeetingDTO::setOrganizerName);
-        });
-
-        // MeetingDTO -> Meeting 엔티티 매핑 설정
-        modelMapper.typeMap(MeetingDTO.class, Meeting.class).addMappings(mapper -> {
-            mapper.using(longToUserConverter).map(MeetingDTO::getOrganizerId, Meeting::setOrganizer);
-        });
-    }
-
     @Override
     public Long MeetingCreate(MeetingDTO meetingDTO, Long cafeId) {
-        // 1. DTO를 엔티티로 변환합니다. 이때 ModelMapper의 매핑 규칙을 따릅니다.
-        //    (organizerId -> User 객체로 자동 변환)
-        Meeting meeting = modelMapper.map(meetingDTO, Meeting.class);
+        // 1. DTO에서 엔티티로 직접 변환합니다.
+        // DTO에 있는 userId를 사용하여 User 엔티티를 찾습니다.
+        User organizer = userRepository.findByUserId(meetingDTO.getUserId())
+                .orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다."));
 
-        // 2. Cafe 객체를 직접 가져와 설정합니다.
-        Cafe cafe = cafeRepository.findById(meetingDTO.getCafe().getId())
+        // cafeId를 사용하여 Cafe 엔티티를 찾습니다.
+        Cafe cafe = cafeRepository.findById(cafeId)
                 .orElseThrow(() -> new IllegalArgumentException("카페를 찾을 수 없습니다."));
-        meeting.setCafe(cafe);
 
-        // 3. Meeting 테이블에 저장합니다.
+        // 빌더 패턴으로 Meeting 엔티티를 생성하고 organizer와 cafe를 직접 설정합니다.
+        Meeting meeting = Meeting.builder()
+                .title(meetingDTO.getTitle())
+                .content(meetingDTO.getContent())
+                .meetingDate(meetingDTO.getMeetingDate())
+                .recruiting(meetingDTO.getRecruiting())
+                .visibility(meetingDTO.getVisibility())
+                .address(meetingDTO.getAddress())
+                .organizer(organizer)
+                .cafe(cafe)
+                .build();
+
         Long savedMeetingId = meetingRepository.save(meeting).getId();
 
-        // 4. 캘린더 이벤트를 생성하여 CafeCalendar 테이블에 저장합니다.
+        // 2. 캘린더 이벤트를 생성하여 CafeCalendar 테이블에 저장합니다.
         CafeCalendar calendarEvent = CafeCalendar.builder()
                 .cafe(cafe)
                 .meeting(meeting)
                 .build();
-
         cafeCalendarRepository.save(calendarEvent);
 
         return savedMeetingId;
@@ -100,23 +73,25 @@ public class MeetingServiceImpl implements MeetingService {
     public MeetingDTO MeetingDetail(Long id) {
         Optional<Meeting> result = meetingRepository.findById(id);
         Meeting meeting = result.orElseThrow(() -> new IllegalArgumentException("Meeting not found with ID: " + id));
-        // PostConstruct에 설정된 ModelMapper 사용
-        return modelMapper.map(meeting, MeetingDTO.class);
+        // 엔티티를 DTO로 직접 변환하는 헬퍼 메서드 사용
+        return entityToDto(meeting);
     }
 
     @Override
     public void MeetingModify(MeetingDTO meetingDTO) {
         Optional<Meeting> result = meetingRepository.findById(meetingDTO.getId());
         Meeting meeting = result.orElseThrow(() -> new IllegalArgumentException("Meeting not found with ID: " + meetingDTO.getId()));
+
+        // DTO의 변경사항을 엔티티의 change 메서드를 통해 직접 반영합니다.
         meeting.change(
                 meetingDTO.getTitle(),
                 meetingDTO.getContent(),
                 meetingDTO.getMeetingDate(),
-                meetingDTO.isRecruiting(),
+                meetingDTO.getRecruiting(),
                 meetingDTO.getVisibility(),
                 meetingDTO.getAddress()
         );
-        // @Transactional 어노테이션이 변경 사항을 자동으로 커밋하지만, 명시적으로 저장하는 것도 좋은 방법입니다.
+
         meetingRepository.save(meeting);
     }
 
@@ -133,16 +108,15 @@ public class MeetingServiceImpl implements MeetingService {
 
         Page<Meeting> result = meetingRepository.searchAll(types, keyword, pageable);
 
+        // 엔티티 리스트를 DTO 리스트로 직접 변환합니다.
         List<MeetingDTO> dtoList = result.getContent().stream()
-                // PostConstruct에 설정된 ModelMapper 사용
-                .map(meeting -> modelMapper.map(meeting, MeetingDTO.class)).collect(Collectors.toList());
+                .map(this::entityToDto).collect(Collectors.toList());
 
         return PageResponseDTO.<MeetingDTO>withAll()
                 .pageRequestDTO(pageRequestDTO)
                 .dtoList(dtoList)
                 .total((int)result.getTotalElements())
                 .build();
-
     }
 
     @Override
@@ -155,7 +129,9 @@ public class MeetingServiceImpl implements MeetingService {
         if (meetingUserRepository.existsByUserAndMeeting(user, meeting)) {
             throw new IllegalStateException("이미 이 모임에 신청하셨습니다.");
         }
-        if (meeting.isRecruiting()) {
+
+        // Enum으로 변경되었으므로, Enum 상수를 사용하여 모집 상태를 확인합니다.
+        if (meeting.getRecruiting() == RecruitingStatus.END) {
             throw new IllegalStateException("모집이 마감된 모임입니다.");
         }
 
@@ -176,22 +152,15 @@ public class MeetingServiceImpl implements MeetingService {
         return meetingUserRepository.findByMeeting(meeting);
     }
 
-
     @Override
     public PageResponseDTO<MeetingDTO> listByCafeId(Long cafeId, PageRequestDTO pageRequestDTO) {
-        // 1. Pageable 객체 생성
         Pageable pageable = pageRequestDTO.getPageable("meetingDate");
-
-        // 2. Repository를 통해 특정 cafeId에 해당하는 모임 목록을 페이징하여 조회
         Page<Meeting> result = meetingRepository.findByCafeId(cafeId, pageable);
 
-        // 3. 조회된 Meeting 엔티티 리스트를 MeetingDTO 리스트로 변환
         List<MeetingDTO> dtoList = result.getContent().stream()
-                // PostConstruct에 설정된 ModelMapper 사용
-                .map(meeting -> modelMapper.map(meeting, MeetingDTO.class))
+                .map(this::entityToDto)
                 .collect(Collectors.toList());
 
-        // 4. PageResponseDTO 객체를 생성하여 반환
         return PageResponseDTO.<MeetingDTO>withAll()
                 .pageRequestDTO(pageRequestDTO)
                 .dtoList(dtoList)
@@ -204,5 +173,37 @@ public class MeetingServiceImpl implements MeetingService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
         return user.getNickname();
+    }
+
+    // 엔티티를 DTO로 변환하는 헬퍼 메서드
+    private MeetingDTO entityToDto(Meeting meeting) {
+        // organizer가 null일 경우를 대비하여 NullPointerException 방지
+        Long organizerId = (meeting.getOrganizer() != null) ? meeting.getOrganizer().getId() : null;
+        String organizerName = (meeting.getOrganizer() != null) ? meeting.getOrganizer().getUserId() : null;
+
+        // Cafe가 null일 경우를 대비하여 NullPointerException 방지
+        CafeResponseDTO cafeResponseDTO = null;
+        if (meeting.getCafe() != null) {
+            cafeResponseDTO = CafeResponseDTO.builder()
+                    .id(meeting.getCafe().getId())
+                    .name(meeting.getCafe().getName())
+                    // 다른 필드들은 필요에 따라 추가
+                    .build();
+        }
+
+        return MeetingDTO.builder()
+                .id(meeting.getId())
+                .title(meeting.getTitle())
+                .content(meeting.getContent())
+                .meetingDate(meeting.getMeetingDate())
+                .recruiting(meeting.getRecruiting())
+                .visibility(meeting.getVisibility())
+                .address(meeting.getAddress())
+                .organizerId(organizerId)
+                .organizerName(organizerName)
+                .cafe(cafeResponseDTO)
+                .regDate(meeting.getRegDate())
+                .modDate(meeting.getModDate())
+                .build();
     }
 }

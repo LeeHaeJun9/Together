@@ -87,9 +87,9 @@
                         <li class="nav-item" th:if="${cafe.isMember}">
                             <a class="nav-link" th:href="@{/cafe/{cafeId}/meetings(cafeId=${cafe.id})}">모임</a>
                         </li>
-                        <li class="nav-item" th:if="${cafe.isMember}">
-                            <a class="nav-link" th:href="@{/meeting/register(cafeId=${cafe.id})}">모임 만들기</a>
-                        </li>
+<!--                        <li class="nav-item" th:if="${cafe.isMember}">-->
+<!--                            <a class="nav-link" th:href="@{/meeting/register(cafeId=${cafe.id})}">모임 만들기</a>-->
+<!--                        </li>-->
                         <li class="nav-item" th:if="${cafe.isOwner}">
                             <a class="nav-link" th:href="@{/cafe/my/cafe/{cafeId}/joinRequests(cafeId=${cafe.id})}">가입 신청 목록</a>
                         </li>

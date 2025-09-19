@@ -25,7 +25,8 @@ public class Meeting extends BaseEntity {
     @Column(nullable = false)
     private LocalDateTime meetingDate;
 
-    private boolean recruiting;
+    @Enumerated(EnumType.STRING)
+    private RecruitingStatus recruiting;
 
     @Enumerated(EnumType.STRING)
     private Visibility visibility;
@@ -40,7 +41,7 @@ public class Meeting extends BaseEntity {
 //    private Address addressId;
     private String address;
 
-    public void change(String title, String content, LocalDateTime meetingDate, boolean recruiting, Visibility visibility, String address) {
+    public void change(String title, String content, LocalDateTime meetingDate, RecruitingStatus recruiting, Visibility visibility, String address) {
         this.title = title;
         this.content = content;
         this.meetingDate = meetingDate;

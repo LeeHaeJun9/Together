@@ -1,9 +1,6 @@
 package com.example.together.dto.meeting;
 
-import com.example.together.domain.Address;
-import com.example.together.domain.Cafe;
-import com.example.together.domain.User;
-import com.example.together.domain.Visibility;
+import com.example.together.domain.*;
 import com.example.together.dto.cafe.CafeResponseDTO;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -29,11 +26,11 @@ public class MeetingDTO {
     @NotEmpty
     private String content;
 
-    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     @NotNull
+    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     private LocalDateTime meetingDate;
 
-    private boolean recruiting;
+    private RecruitingStatus recruiting;
 
     private Visibility visibility = Visibility.PUBLIC;
 

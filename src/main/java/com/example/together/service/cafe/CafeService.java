@@ -23,6 +23,7 @@ public interface CafeService {
 
     // 특정 ID의 카페 조회
 //    CafeResponseDTO getCafeById(Long cafeId);
+    CafeResponseDTO getCafeById(Long cafeId);
 
     CafeResponseDTO getCafeById(Long cafeId, Long userId);
 
