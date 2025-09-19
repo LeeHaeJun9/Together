@@ -202,5 +202,6 @@ public class AdminController {
     public String deleteChatRoom(@PathVariable Long chatRoomId) {
         log.info("채팅방 삭제 요청: chatRoomId={}", chatRoomId);
         return "success";
+
     }
 }
