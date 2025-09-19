@@ -11,9 +11,11 @@ import com.example.together.repository.CafeCalendarRepository;
 import com.example.together.repository.CafeRepository;
 import com.example.together.repository.MeetingRepository;
 import com.example.together.repository.UserRepository;
+import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.modelmapper.Converter;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -36,16 +38,56 @@ public class MeetingServiceImpl implements MeetingService {
     private final CafeRepository cafeRepository;
     private final CafeCalendarRepository cafeCalendarRepository;
 
+    @PostConstruct
+    public void setupModelMapper() {
+        // Integer -> Boolean 변환을 위한 Converter 생성
+        Converter<Integer, Boolean> integerToBooleanConverter = context -> {
+            Integer source = context.getSource();
+            return source != null && source == 1; // 1은 true, 0은 false로 간주
+        };
+
+        // User -> Long 변환을 위한 Converter 생성 (DTO로 변환할 때 사용)
+        Converter<User, Long> userToLongConverter = context -> {
+            User source = context.getSource();
+            return source != null ? source.getId() : null;
+        };
+
+        // DTO -> User 변환을 위한 Converter 생성 (엔티티로 변환할 때 사용)
+        Converter<Long, User> longToUserConverter = context -> {
+            Long source = context.getSource();
+            return userRepository.findById(source).orElse(null);
+        };
+
+        // Meeting 엔티티 -> MeetingDTO 매핑 설정
+        modelMapper.typeMap(Meeting.class, MeetingDTO.class).addMappings(mapper -> {
+            mapper.using(integerToBooleanConverter).map(Meeting::isRecruiting, MeetingDTO::setRecruiting);
+            mapper.using(integerToBooleanConverter).map(Meeting::getVisibility, MeetingDTO::setVisibility);
+            mapper.using(userToLongConverter).map(Meeting::getOrganizer, MeetingDTO::setOrganizerId);
+            mapper.map(src -> src.getOrganizer().getUserId(), MeetingDTO::setOrganizerName);
+        });
+
+        // MeetingDTO -> Meeting 엔티티 매핑 설정
+        modelMapper.typeMap(MeetingDTO.class, Meeting.class).addMappings(mapper -> {
+            mapper.using(longToUserConverter).map(MeetingDTO::getOrganizerId, Meeting::setOrganizer);
+        });
+    }
+
+
     @Override
     public Long MeetingCreate(MeetingDTO meetingDTO, Long cafeId) {
-        // 1. DTO를 엔티티로 변환하여 Meeting 테이블에 저장합니다.
+        // 1. DTO를 엔티티로 변환합니다. 이때 ModelMapper의 매핑 규칙을 따릅니다.
+        //    (organizerId -> User 객체로 자동 변환)
         Meeting meeting = modelMapper.map(meetingDTO, Meeting.class);
-        Long savedMeetingId = meetingRepository.save(meeting).getId();
 
-        // 2. 캘린더 이벤트를 생성하여 CafeCalendar 테이블에 저장합니다. (핵심)
+        // 2. Cafe 객체를 직접 가져와 설정합니다.
         Cafe cafe = cafeRepository.findById(meetingDTO.getCafe().getId())
                 .orElseThrow(() -> new IllegalArgumentException("카페를 찾을 수 없습니다."));
+        meeting.setCafe(cafe);
 
+        // 3. Meeting 테이블에 저장합니다.
+        Long savedMeetingId = meetingRepository.save(meeting).getId();
+
+        // 4. 캘린더 이벤트를 생성하여 CafeCalendar 테이블에 저장합니다.
         CafeCalendar calendarEvent = CafeCalendar.builder()
                 .cafe(cafe)
                 .meeting(meeting)
@@ -54,38 +96,20 @@ public class MeetingServiceImpl implements MeetingService {
         cafeCalendarRepository.save(calendarEvent);
 
         return savedMeetingId;
-    public Long MeetingCreate(MeetingDTO meetingDTO) {
-//        Meeting meeting = modelMapper.map(meetingDTO, Meeting.class);
-//        Long id = meetingRepository.save(meeting).getId();
-//        return id;
-
-        Meeting meeting = dtoToEntity(meetingDTO);
-
-        String username = meetingDTO.getUserId();
-
-        User user = userRepository.findByUserId(username)
-                .orElseThrow(() -> new UsernameNotFoundException("유저를 찾을 수 없습니다."));
-
-        meeting.setOrganizer(user);
-
-        meetingRepository.save(meeting);
-
-        return meeting.getId();
-
     }
 
     @Override
     public MeetingDTO MeetingDetail(Long id) {
         Optional<Meeting> result = meetingRepository.findById(id);
-        Meeting meeting = result.orElseThrow();
-        MeetingDTO meetingDTO = modelMapper.map(meeting, MeetingDTO.class);
-        return meetingDTO;
+        Meeting meeting = result.orElseThrow(() -> new IllegalArgumentException("Meeting not found with ID: " + id));
+        // PostConstruct에 설정된 ModelMapper 사용
+        return modelMapper.map(meeting, MeetingDTO.class);
     }
 
     @Override
     public void MeetingModify(MeetingDTO meetingDTO) {
         Optional<Meeting> result = meetingRepository.findById(meetingDTO.getId());
-        Meeting meeting = result.orElseThrow();
+        Meeting meeting = result.orElseThrow(() -> new IllegalArgumentException("Meeting not found with ID: " + meetingDTO.getId()));
         meeting.change(
                 meetingDTO.getTitle(),
                 meetingDTO.getContent(),
@@ -94,6 +118,8 @@ public class MeetingServiceImpl implements MeetingService {
                 meetingDTO.getVisibility(),
                 meetingDTO.getAddress()
         );
+        // @Transactional 어노테이션이 변경 사항을 자동으로 커밋하지만, 명시적으로 저장하는 것도 좋은 방법입니다.
+        meetingRepository.save(meeting);
     }
 
     @Override
@@ -110,6 +136,7 @@ public class MeetingServiceImpl implements MeetingService {
         Page<Meeting> result = meetingRepository.searchAll(types, keyword, pageable);
 
         List<MeetingDTO> dtoList = result.getContent().stream()
+                // PostConstruct에 설정된 ModelMapper 사용
                 .map(meeting -> modelMapper.map(meeting, MeetingDTO.class)).collect(Collectors.toList());
 
         return PageResponseDTO.<MeetingDTO>withAll()
@@ -130,6 +157,7 @@ public class MeetingServiceImpl implements MeetingService {
 
         // 3. 조회된 Meeting 엔티티 리스트를 MeetingDTO 리스트로 변환
         List<MeetingDTO> dtoList = result.getContent().stream()
+                // PostConstruct에 설정된 ModelMapper 사용
                 .map(meeting -> modelMapper.map(meeting, MeetingDTO.class))
                 .collect(Collectors.toList());
 
@@ -147,25 +175,4 @@ public class MeetingServiceImpl implements MeetingService {
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
         return user.getNickname();
     }
-
-    private Meeting dtoToEntity(MeetingDTO dto) {
-        Meeting meeting = new Meeting();
-        meeting.setTitle(dto.getTitle());
-        meeting.setContent(dto.getContent());
-        meeting.setMeetingDate(dto.getMeetingDate());
-        meeting.setAddress(dto.getAddress());
-        meeting.setRecruiting(dto.isRecruiting());
-        meeting.setVisibility(dto.getVisibility());
-
-        if (dto.getCafe() != null) {
-            // Cafe 엔티티 변환 처리
-            Cafe cafe = new Cafe();
-            cafe.setId(dto.getCafe().getId());
-            // 필요하면 추가 필드 세팅
-            meeting.setCafe(cafe);
-        }
-
-        return meeting;
-    }
-
 }

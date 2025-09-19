@@ -35,7 +35,8 @@ public class MeetingDTO {
 
     private Visibility visibility = Visibility.PUBLIC;
 
-    private User organizer;
+    private Long organizerId;
+    private String organizerName;
     private String userId;
 
     private CafeResponseDTO cafe;
