@@ -2,6 +2,7 @@ package com.example.together.service.meeting;
 
 import com.example.together.domain.Meeting;
 import com.example.together.domain.MeetingReview;
+import com.example.together.domain.MeetingReviewImage;
 import com.example.together.domain.User;
 import com.example.together.dto.PageRequestDTO;
 import com.example.together.dto.PageResponseDTO;
@@ -17,6 +18,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -30,6 +32,30 @@ public class MeetingReviewServiceImpl implements MeetingReviewService {
     private final MeetingReviewRepository meetingReviewRepository;
     private final MeetingRepository meetingRepository;
     private final UserRepository userRepository;
+
+
+    public MeetingReviewDTO EntitytoDTO(MeetingReview mtReview) {
+//        List<String> imageUrls = entity.getImages().stream()
+//                .map(MeetingReviewImage::getUrl)  // getUrl() 메서드 가정
+//                .collect(Collectors.toList());
+
+        Meeting meeting = mtReview.getMeeting();
+
+        return MeetingReviewDTO.builder()
+                .id(mtReview.getId())
+                .title(mtReview.getTitle())
+                .content(mtReview.getContent())
+                .reviewerId(mtReview.getReviewer().getId())
+                .reviewerNickname(mtReview.getReviewer().getNickname())
+                .reviewerUserId(mtReview.getReviewer().getUserId())
+                .meetingId(meeting != null ? meeting.getId() : null)
+                .meetingDate(meeting != null ? meeting.getMeetingDate() : null)
+                .meetingAddress(meeting != null ? meeting.getAddress() : null)
+                .regDate(mtReview.getRegDate())
+                .modDate(mtReview.getModDate())
+                .build();
+    }
+
 
 
     @Override
@@ -64,15 +90,15 @@ public class MeetingReviewServiceImpl implements MeetingReviewService {
     // 모임 리뷰는 검색 기능 없음
     @Override
     public PageResponseDTO<MeetingReviewDTO> list(PageRequestDTO pageRequestDTO) {
-//        String[] types = pageRequestDTO.getTypes();
-//        String keyword = pageRequestDTO.getKeyword();
-
+        String[] types = pageRequestDTO.getTypes();
+        String keyword = pageRequestDTO.getKeyword();
         Pageable pageable = pageRequestDTO.getPageable("id");
 
         Page<MeetingReview> result = meetingReviewRepository.findAll(pageable);
 
         List<MeetingReviewDTO> dtoList = result.getContent().stream()
-                .map(meetingReview -> modelMapper.map(meetingReview, MeetingReviewDTO.class)).collect(Collectors.toList());
+                .map(this::EntitytoDTO)
+                .collect(Collectors.toList());
 
         return PageResponseDTO.<MeetingReviewDTO>withAll()
                 .pageRequestDTO(pageRequestDTO)

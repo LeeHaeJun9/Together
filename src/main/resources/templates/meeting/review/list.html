@@ -21,7 +21,9 @@
                             <th scope="col">Id</th>
                             <th scope="col">Title</th>
                             <th scope="col">Writer</th>
-                            <th scope="col">Meeting</th>
+                            <th scope="col">닉네임</th>
+                            <th scope="col">작성날짜</th>
+                            <th scope="col">썸네일</th>
                         </tr>
                         </thead>
                         <tbody th:with="link = ${pageRequestDTO.getLink()}">
@@ -30,25 +32,75 @@
                             <td>
                                 <a th:href="|@{/meeting/review/read(id = ${dto.id})}&${link}|" class="text-decoration-none">[[${dto.title}]]</a>
                             </td>
-                            <td>[[${dto.reviewer}]]</td>
-                            <td>[[${dto.meetingId}]]</td>
+                            <td>[[${dto.reviewerUserId}]]</td>
+                            <td>[[${dto.reviewerNickname}]]</td>
+                            <td th:text="${#temporals.format(dto.regDate, 'yyyy-MM-dd HH:mm')}"></td>
+                            <td></td>
                         </tr>
                         </tbody>
                     </table>
 
+                    <!--                    페이지 목록 출력 p.482-->
+                    <form id="pageForm" action="/meeting/list" method="get">
+                        <input type="hidden" name="page" value="1" />
+                    </form>
+
+                    <div>
+                        <button type="button" class="btn btn-primary registerBtn" >Register</button>
+                        <div class="float-end">
+                            <ul class="pagination flex-wrap">
+                                <li class="page-item" th:if="${responseDTO.prev}">
+                                    <a class="page-link" th:data-num="${responseDTO.start -1}">Previous</a>
+                                </li>
+                                <th:block th:each="i: ${#numbers.sequence(responseDTO.start, responseDTO.end)}">
+                                    <li th:class="${responseDTO.page == i}?'page-item active':'page-item'" >
+                                        <a class="page-link"  th:data-num="${i}">[[${i}]]</a>
+                                    </li>
+                                </th:block>
+                                <li class="page-item" th:if="${responseDTO.next}">
+                                    <a class="page-link"  th:data-num="${responseDTO.end + 1}">Next</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
+
+
+                <script layout:fragment="script" th:inline="javascript">
+                    console.log("meetingList....")
+
+                    const result = [[${result}]]
+                    if(result) {
+                        // alert(result + " 게시글이 등록되었습니다.")
+                        alert("게시글이 등록되었습니다.")
+                    }
+
+                    document.querySelector(".registerBtn").addEventListener("click", function (e) {
+                        self.location = `/meeting/review/register`
+                    }, false)
+
+                    document.querySelector(".pagination").addEventListener("click", function (e) {
+                        e.preventDefault()
+                        e.stopPropagation()
+
+                        const target = e.target
+
+                        if(target.tagName !== "A") {
+                            return
+                        }
+                        const num = target.getAttribute("data-num")
+                        const formObj = document.querySelector("form")
+
+                        const pageInput = formObj.querySelector("input[name=page]");
+                        if (pageInput) {
+                            pageInput.value = num;
+                        } else {
+                            formObj.innerHTML += `<input type='hidden' name='page' value='${num}'>`;
+                        }
+                        formObj.submit();
+                    }, false)
+                </script>
             </div>
         </div>
     </div>
 </div>
-
-<script layout:fragment="script" th:inline="javascript">
-    console.log("mtReviewList....")
-
-    const result = [[${result}]]
-    if(result) {
-        // alert(result + " 게시글이 등록되었습니다.")
-        alert("게시글이 등록되었습니다.")
-    }
-
-</script>
