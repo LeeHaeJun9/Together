@@ -94,6 +94,7 @@ public class MemberController {
         boolean exists = userService.isEmailExists(email);
         return exists ? "{\"available\": false}" : "{\"available\": true}";
     }
+
     @GetMapping("/member/myCafes")
     public String myCafes(Model model, Principal principal) {
         if (principal != null) {
@@ -286,6 +287,7 @@ public class MemberController {
 
         return response;
     }
+
     // 거래 내역 페이지 표시
     @GetMapping("/member/myTrade")
     public String myTradePage(Model model, Principal principal) {
@@ -302,6 +304,7 @@ public class MemberController {
         }
         return "member/myTrade";
     }
+
     // 나의 모임 페이지 표시
     @GetMapping("/member/myMeetings")
     public String myMeetingsPage(Model model, Principal principal) {
@@ -318,6 +321,7 @@ public class MemberController {
         }
         return "member/myMeetings";
     }
+
     // 찜한 상품 페이지 표시
     @GetMapping("/member/favorites")
     public String favoritesPage(Model model, Principal principal) {
@@ -335,6 +339,7 @@ public class MemberController {
         }
         return "member/favorites";
     }
+
     // 계정 설정 페이지 표시
     @GetMapping("/member/settings")
     public String settingsPage(Model model, Principal principal) {
@@ -346,9 +351,56 @@ public class MemberController {
         }
         return "member/settings";
     }
+
     @GetMapping("/login")
     public String loginPage() {
         log.info("GET /login - 로그인 페이지 요청");
         return "member/login";
+    }
+
+    @PostMapping("/member/deleteUser")
+    public String deleteUser(Principal principal, RedirectAttributes redirectAttributes) {
+        if (principal != null) {
+            String userId = principal.getName();
+            User user = userService.findByUserId(userId);  // 먼저 User 엔티티 조회
+            if (user != null) {
+                userService.deleteUser(user.getId());  // Long 타입 ID 사용
+                redirectAttributes.addFlashAttribute("message", "회원탈퇴가 완료되었습니다.");
+                return "redirect:/login";
+            }
+        }
+        redirectAttributes.addFlashAttribute("error", "회원탈퇴 처리 중 오류가 발생했습니다.");
+        return "redirect:/member/profile";
+    }
+
+    // 회원탈퇴 페이지 표시
+    @GetMapping("/member/deleteUser")
+    public String deleteUserPage(Model model, Principal principal) {
+        if (principal != null) {
+            String userId = principal.getName();
+            User user = userService.findByUserId(userId);
+            model.addAttribute("user", user);
+            log.info("회원탈퇴 페이지 요청: userId = {}", userId);
+        }
+        return "member/deleteUser";
+    }
+
+    // 마이페이지 메인
+    @GetMapping("/mypage")
+    public String myPage(Model model, Principal principal) {
+        if (principal != null) {
+            String userId = principal.getName();
+            User user = userService.findByUserId(userId);
+            model.addAttribute("user", user);
+
+            // 임시 데이터 (실제 구현 전)
+            model.addAttribute("favoriteCount", 0);
+            model.addAttribute("tradeCount", 0);
+            model.addAttribute("cafeCount", 0);
+            model.addAttribute("meetingCount", 0);
+
+            log.info("마이페이지 요청: userId = {}", userId);
+        }
+        return "member/mypage";  // mypage.html 템플릿으로 이동
     }
 }
