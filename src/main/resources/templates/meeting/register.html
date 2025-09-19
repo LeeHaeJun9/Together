@@ -16,7 +16,7 @@
 <div class="container mt-5">
     <h1>Meeting Register</h1>
     <div class="card-body">
-        <form th:action="@{/meeting/register}" th:object="${meetingDTO}" method="post">
+        <form th:action="@{/cafe/{cafeId}/meeting/register(cafeId=${cafeResponse.id})}" th:object="${meetingDTO}" method="post">
             <!-- ✅ CSRF 토큰을 hidden 필드로 추가 -->
             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
             <!-- ✅ 카페 ID는 cafeResponse 객체에서 가져옴 -->
@@ -79,7 +79,7 @@
 
             <div class="form-check">
                 <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="radio" th:field="*{visibility}" id="public" value="PUBLIC" checked>
+                    <input class="form-check-input" type="radio" th:field="*{visibility}" id="public" value="PUBLIC">
                     <label for="public">공개</label>
                 </div>
                 <div class="form-check form-check-inline">
@@ -102,7 +102,7 @@
             </div>
 
             <div class="my-4">
-                <a th:href="@{/meeting/list(cafeId=${cafeResponse.id}, page=${pageRequestDTO.page}, type=${pageRequestDTO.type}, keyword=${pageRequestDTO.keyword})}">
+                <a th:href="@{/cafe/{cafeId}/meetings(cafeId=${cafeResponse.id}, page=${pageRequestDTO.page}, type=${pageRequestDTO.type}, keyword=${pageRequestDTO.keyword})}">
                     <button type="button" class="btn btn-primary">List</button>
                 </a>
                 <div class="float-end">

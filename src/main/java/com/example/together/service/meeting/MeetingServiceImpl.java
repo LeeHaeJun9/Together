@@ -128,6 +128,7 @@ public class MeetingServiceImpl implements MeetingService {
         // 중복 신청 방지
         if (meetingUserRepository.existsByUserAndMeeting(user, meeting)) {
             throw new IllegalStateException("이미 이 모임에 신청하셨습니다.");
+
         }
 
         // Enum으로 변경되었으므로, Enum 상수를 사용하여 모집 상태를 확인합니다.
