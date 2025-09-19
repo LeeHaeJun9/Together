@@ -62,7 +62,7 @@
             <div class="input-group mb-3">
                 <span class="input-group-text">Address</span>
                 <!-- ✅ th:field를 *{address}로 수정하여 meetingDTO에 직접 바인딩 -->
-                <input type="text" th:field="*{address}" id="address" class="form-control" placeholder="주소" >
+                <input type="text" th:field="*{address}" id="address" class="form-control" placeholder="주소" readonly>
                 <button type="button" onclick="execDaumPostcode()" class="btn btn-outline-secondary">주소 찾기</button>
             </div>
 

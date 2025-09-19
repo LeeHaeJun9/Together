@@ -24,7 +24,7 @@ import java.security.Principal;
 import java.util.List;
 
 @Controller
-@RequestMapping("/meeting")
+//@RequestMapping("/meeting")
 @Log4j2
 @RequiredArgsConstructor
 public class MeetingController {
@@ -43,29 +43,44 @@ public class MeetingController {
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다: " + userId));
     }
 
-    @GetMapping("/list")
-    public void meetingList(@RequestParam("cafeId") Long cafeId, PageRequestDTO pageRequestDTO, Model model, Principal principal) {
+    @GetMapping("/meeting/list")
+    public void meetingListByRequestParam(@RequestParam("cafeId") Long cafeId, PageRequestDTO pageRequestDTO, Model model, Principal principal) {
+        processMeetingList(cafeId, pageRequestDTO, model, principal);
+    }
 
+    // Case 2: 카페 상세 페이지의 "모임" 탭에서 클릭하여 /cafe/{cafeId}/meetings 형태로 요청할 때
+    // 중요: @RequestMapping을 /cafe로 옮기거나, 여기만 특정 경로를 처리하도록 재정의합니다.
+    // 여기서는 @RequestMapping("/meeting")을 유지하면서, 이 메서드만 다른 경로를 처리하도록 합니다.
+    @GetMapping("/cafe/{cafeId}/meetings") // << 이 매핑을 추가합니다.
+    public String meetingListByPathVariable(@PathVariable("cafeId") Long cafeId, PageRequestDTO pageRequestDTO, Model model, Principal principal) {
+        // 실제 로직은 중복을 피하기 위해 별도의 private 메서드로 분리하는 것이 좋습니다.
+        processMeetingList(cafeId, pageRequestDTO, model, principal);
+        return "meeting/list"; // 템플릿 이름을 명시적으로 반환
+    }
+
+
+    // 두 메서드에서 공통으로 사용될 로직을 분리
+    private void processMeetingList(Long cafeId, PageRequestDTO pageRequestDTO, Model model, Principal principal) {
         // 1. 특정 카페의 모임 목록을 조회합니다.
         PageResponseDTO<MeetingDTO> responseDTO = meetingService.listByCafeId(cafeId, pageRequestDTO);
         log.info(responseDTO);
         model.addAttribute("responseDTO", responseDTO);
 
-        // 2. 로그인 여부에 따라 다른 메서드를 호출합니다.
+        // 2. 로그인 여부에 따라 다른 getCafeById 메서드를 호출합니다.
         CafeResponseDTO cafeResponse;
         if (principal != null) {
             // 로그인된 사용자
             User user = getUserFromPrincipal(principal);
             cafeResponse = cafeService.getCafeById(cafeId, user.getId());
         } else {
-            // 익명 사용자
+            // 익명 사용자 (userId 없이 호출)
             cafeResponse = cafeService.getCafeById(cafeId);
         }
 
         model.addAttribute("cafeResponse", cafeResponse);
     }
 
-    @GetMapping("/register")
+    @GetMapping("/meeting/register")
     public String meetingRegisterGet(@RequestParam("cafeId") Long cafeId, Model model, Principal principal, PageRequestDTO pageRequestDTO) {
         User user = getUserFromPrincipal(principal);
 
@@ -84,21 +99,22 @@ public class MeetingController {
         return "meeting/register";
     }
 
-    @PostMapping("/register")
+    @PostMapping("/meeting/register")
     public String meetingRegisterPost(@Valid MeetingDTO meetingDTO,
                                       BindingResult bindingResult,
                                       Principal principal,
-                                      @RequestParam(required = false) Long cafeId,
+                                      @RequestParam("cafeId") Long cafeId,
                                       RedirectAttributes redirectAttributes) {
         log.info("meetingRegister Post.....");
 
         User user = getUserFromPrincipal(principal);
         if (user == null) {
             log.warn("User is NOT authenticated on POST request. Redirecting to login.");
+            // 리다이렉트 시 cafeId도 함께 전달하여 /meeting/register GET 요청 시 cafeId를 사용할 수 있게 합니다.
+            redirectAttributes.addAttribute("cafeId", cafeId);
             return "redirect:/login";
         }
 
-        // ✅ 로그인된 사용자의 ID를 DTO의 userId 필드에 직접 설정
         meetingDTO.setUserId(user.getUserId());
 
         if (bindingResult.hasErrors()) {
@@ -106,16 +122,7 @@ public class MeetingController {
                 log.info(fe.getField() + " : " + fe.getDefaultMessage());
             });
             redirectAttributes.addFlashAttribute("errors", bindingResult.getAllErrors());
-            redirectAttributes.addAttribute("cafeId", cafeId);
-            return "redirect:/meeting/register";
-        }
-
-        if (cafeId != null) {
-            // CafeResponseDTO를 DTO에 설정하는 부분은 Service에서 처리하므로 삭제합니다.
-            // meetingDTO.setCafe(cafeResponse);
-        } else {
-            log.error("cafeId is null");
-            redirectAttributes.addFlashAttribute("errors", "카페 정보가 누락되었습니다.");
+            redirectAttributes.addAttribute("cafeId", cafeId); // 오류 시에도 cafeId 유지
             return "redirect:/meeting/register";
         }
 
@@ -123,10 +130,11 @@ public class MeetingController {
         Long id = meetingService.MeetingCreate(meetingDTO, cafeId);
 
         redirectAttributes.addFlashAttribute("result", id);
+        redirectAttributes.addAttribute("cafeId", cafeId); // 성공 시에도 cafeId 유지
         return "redirect:/meeting/list";
     }
 
-    @GetMapping({"/read", "/modify"})
+    @GetMapping({"/meeting/read", "/meeting/modify"})
     public void meetingRead(Long id, PageRequestDTO pageRequestDTO, Model model, Principal principal) {
         User user = getUserFromPrincipal(principal);
 
@@ -139,7 +147,7 @@ public class MeetingController {
         model.addAttribute("loggedInUserId", user != null ? user.getId() : null);
     }
 
-    @PostMapping("/modify")
+    @PostMapping("/meeting/modify")
     public String meetingModify(@Valid MeetingDTO meetingDTO,
                                 BindingResult bindingResult,
                                 RedirectAttributes redirectAttributes,
@@ -167,7 +175,7 @@ public class MeetingController {
         return "redirect:/meeting/read";
     }
 
-    @PostMapping("/remove")
+    @PostMapping("/meeting/remove")
     public String meetingRemove(Long id, RedirectAttributes redirectAttributes, Principal principal) {
         log.info("meetingRemove..." + id);
 
@@ -182,7 +190,7 @@ public class MeetingController {
         return "redirect:/meeting/list";
     }
 
-    @PostMapping("/apply")
+    @PostMapping("/meeting/apply")
     public String meetingApply(@RequestParam Long meetingId,
                                Principal principal,
                                RedirectAttributes redirectAttributes) {
