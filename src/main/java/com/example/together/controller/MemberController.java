@@ -154,14 +154,12 @@ public class MemberController {
     // 비밀번호 찾기 요청 처리 (임시 비밀번호 발급)
     @PostMapping("/member/findPw")
     @ResponseBody
-    public Map<String, Object> findPassword(@RequestBody Map<String, String> request) {
+    public Map<String, Object> findPassword(@RequestParam String userId,
+                                            @RequestParam String email,
+                                            @RequestParam String name) {
         Map<String, Object> response = new HashMap<>();
 
         try {
-            String userId = request.get("userId");
-            String email = request.get("email");
-            String name = request.get("name");
-
             // 사용자 정보 확인 (임시로 간단하게 구현)
             boolean userExists = userService.isUserIdExists(userId) &&
                     userService.isEmailExists(email);
@@ -169,6 +167,8 @@ public class MemberController {
             if (userExists) {
                 // 임시 비밀번호 생성 (간단한 랜덤 문자열)
                 String tempPassword = "temp" + System.currentTimeMillis() % 10000;
+
+                userService.updateUserPassword(userId, tempPassword);
 
                 response.put("success", true);
                 response.put("tempPassword", tempPassword);
@@ -190,6 +190,8 @@ public class MemberController {
 
         return response;
     }
+
+
     // 프로필 페이지 표시
     @GetMapping("/member/profile")
     public String profilePage(Model model, Principal principal) {
