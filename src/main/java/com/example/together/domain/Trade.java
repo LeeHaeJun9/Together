@@ -2,75 +2,63 @@ package com.example.together.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
+
 
 @Entity
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
-public class Trade extends BaseEntity {
+@Table(name = "trade")
+@Getter @Setter
+@NoArgsConstructor @AllArgsConstructor @Builder
+public class Trade {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
+  // 제목
   @Column(nullable = false, length = 255)
   private String title;
 
-  @Column(nullable = false, length = 255)
+  // 본문(내용)
+  @Lob
+  @Column(name = "content")
+  private String content;
+
+  // 설명(별도 칼럼이 있다면 NOT NULL 회피 위해 기본값이라도 넣어주기)
+  @Column(name = "description")
   private String description;
 
-  @Column(nullable = false)
-  private Integer price;
+  // 가격
+  @Column
+  private BigDecimal price;
 
-  @Column(nullable = false, length = 255)
+  // 상태
+  public enum Status { FOR_SALE, RESERVED, SOLD_OUT }
+  @Enumerated(EnumType.STRING)
+  @Column(nullable = false)
+  private Status status = Status.FOR_SALE;
+
+  // 판매자 닉네임
+  @Column(name = "seller_nickname", length = 100)
+  private String sellerNickname;
+
+  // 썸네일 (nullable 허용 권장; NOT NULL이면 컨트롤러에서 기본값 세팅)
+  @Column(name = "thumbnail", length = 1024)
   private String thumbnail;
 
-  @Enumerated(EnumType.STRING)
-  @Column(nullable = false, length = 20)
-  private TradeStatus tradeStatus = TradeStatus.FOR_SALE;
+  @CreationTimestamp
+  @Column(updatable = false)
+  private LocalDateTime regdate;
 
-  @Enumerated(EnumType.STRING)
-  @Column(nullable = false, length = 30)
-  private TradeCategory tradeCategory;
-
-
-  @ManyToOne(fetch = FetchType.LAZY, optional = false)
-  private User seller;
-
-  @OneToMany(mappedBy = "trade", cascade = CascadeType.ALL, orphanRemoval = true)
-  @OrderBy("sortOrder ASC, id ASC")
-  @Builder.Default
-  private List<TradeImage> images = new ArrayList<>();
-
-  public void modify(String title,
-                     String description,
-                     Integer price,
-                     TradeCategory category,
-                     TradeStatus status,
-                     String thumbnail) {
-    this.title = title;
-    this.description = description;
-    this.price = price;
-    this.tradeCategory = category;
-    this.tradeStatus = status;
-    this.thumbnail = thumbnail;
-  }
-
-  public void clearImages() {
-    if (this.images != null) this.images.clear();
-  }
-
-  public void addImage(String imageUrl, Integer sortOrder) {
-    TradeImage img = TradeImage.builder()
-        .imageUrl(imageUrl)
-        .sortOrder(sortOrder)
-        .trade(this)
-        .build();
-    this.images.add(img);
-  }
+  @UpdateTimestamp
+  private LocalDateTime moddate;
 }
+
+
+
+

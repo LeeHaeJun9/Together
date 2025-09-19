@@ -9,6 +9,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Table(name = "trade_image")
 public class TradeImage {
 
   @Id
@@ -18,8 +19,10 @@ public class TradeImage {
   @Column(nullable = false, length = 1024)
   private String imageUrl;
 
+  @Column(nullable = false)
   private Integer sortOrder;
 
   @ManyToOne(fetch = FetchType.LAZY, optional = false)
+  @JoinColumn(name = "trade_id")
   private Trade trade;
 }
