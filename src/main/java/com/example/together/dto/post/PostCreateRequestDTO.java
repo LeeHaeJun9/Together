@@ -15,6 +15,9 @@ public class PostCreateRequestDTO {
     private PostType postType = PostType.GENERAL;
     private String image;
     private Long cafeId;
+    private boolean pinned;
 
     private DemandSurveyCreateRequestDTO demandSurvey;
+
+
 }

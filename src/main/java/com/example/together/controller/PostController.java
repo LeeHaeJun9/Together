@@ -55,7 +55,7 @@ public class PostController {
         return "post/list";
     }
 
-    @GetMapping("/posts/create")
+    @GetMapping("/posts/register")
     public String showCreateForm(@PathVariable Long cafeId, Model model, Principal principal) {
         Long userId = getUserIdFromPrincipal(principal);
 
@@ -65,10 +65,10 @@ public class PostController {
         model.addAttribute("postCreateRequestDTO", new PostCreateRequestDTO());
         model.addAttribute("isOwner", isOwner);
 
-        return "post/create";
+        return "post/register";
     }
 
-    @PostMapping("/posts/create")
+    @PostMapping("/posts/register")
     public String createPost(@PathVariable Long cafeId,
                              @ModelAttribute PostCreateRequestDTO requestDTO,
                              @RequestParam("imageFile") MultipartFile imageFile,

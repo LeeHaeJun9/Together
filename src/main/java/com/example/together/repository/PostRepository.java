@@ -20,4 +20,6 @@ public interface PostRepository extends JpaRepository<Post,Long> {
     List<Post> findTop5ByCafeAndPostTypeOrderByRegDateDesc(Cafe cafe, PostType postType);
 
     List<Post> findByCafeOrderByViewCountDesc(Cafe cafe, Pageable pageable);
+
+    List<Post> findByCafeOrderByPinnedDescRegDateDesc(Cafe cafe);
 }

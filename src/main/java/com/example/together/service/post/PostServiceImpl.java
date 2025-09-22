@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 @Service
@@ -68,14 +69,15 @@ public class PostServiceImpl implements PostService {
                 .image(imageUrl)
                 .viewCount(0)
                 .postType(requestDTO.getPostType())
-                .pinned(false)
+                .pinned(requestDTO.isPinned())
                 .author(author)
                 .cafe(cafe)
                 .build();
 
         Post savedPost = postRepository.save(post);
 
-        if (requestDTO.getPostType() == PostType.NOTICE && requestDTO.getDemandSurvey() != null) {
+        // ✅ 수정된 부분: 게시글 유형이 DEMAND일 때만 수요조사를 생성합니다.
+        if (requestDTO.getPostType() == PostType.DEMAND && requestDTO.getDemandSurvey() != null) {
             DemandSurvey demandSurvey = DemandSurvey.builder()
                     .title(requestDTO.getDemandSurvey().getTitle())
                     .content(requestDTO.getDemandSurvey().getContent())
@@ -91,13 +93,28 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<PostResponseDTO> getPostsByCafe(Long cafeId, Long userId) {
         Cafe cafe = cafeRepository.findById(cafeId)
                 .orElseThrow(() -> new IllegalArgumentException("카페를 찾을 수 없습니다."));
-        List<Post> posts = postRepository.findByCafe(cafe);
-        return posts.stream()
 
-                .map(post -> new PostResponseDTO(post, userId))
+        List<Post> posts = postRepository.findByCafeOrderByPinnedDescRegDateDesc(cafe);
+
+        AtomicInteger originalIndex = new AtomicInteger(1);
+
+        return posts.stream()
+                .map(post -> {
+                    PostResponseDTO dto = new PostResponseDTO(post, userId);
+                    boolean isPinned = post.isPinned(); // pinned 상태 변수에 저장
+                    int currentOriginalIndex = 0; // 초기화
+
+                    if (!isPinned) {
+                        currentOriginalIndex = originalIndex.getAndIncrement();
+                        dto.setOriginalIndex(currentOriginalIndex);
+                    }
+
+                    return dto;
+                })
                 .collect(Collectors.toList());
     }
 

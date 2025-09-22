@@ -1,0 +1,135 @@
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background-color: #f8f9fa;
+}
+main {
+    flex-grow: 1;
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+}
+.container {
+    max-width: 900px; /* 컨테이너 너비 제한 */
+}
+.post-header-container {
+    border-bottom: 2px solid #dee2e6;
+    padding-bottom: 1rem;
+    margin-bottom: 2rem;
+}
+.post-header-container h1 {
+    font-weight: bold;
+    color: #212529;
+    margin-bottom: 0.5rem;
+}
+.post-meta {
+    font-size: 0.9rem;
+    color: #6c757d;
+}
+.post-content-section {
+    background-color: white;
+    padding: 2.5rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+.post-content {
+    white-space: pre-wrap;
+    line-height: 1.8;
+    font-size: 1.1rem;
+    color: #343a40;
+}
+.post-content img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 1.5rem auto;
+    border-radius: 0.25rem;
+}
+.comment-section {
+    background-color: white;
+    padding: 2rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+.comment-item {
+    border-bottom: 1px solid #e9ecef;
+    padding: 1rem 0;
+}
+.comment-item:last-child {
+    border-bottom: none;
+}
+.comment-meta {
+    font-size: 0.875rem;
+    color: #6c757d;
+}
+.demand-survey-section {
+    background-color: #f1f3f5;
+    padding: 20px;
+    border-radius: 8px;
+    margin-top: 2rem;
+}
+.btn-custom-primary {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+    color: white;
+    transition: background-color 0.2s;
+}
+.btn-custom-primary:hover {
+    background-color: #0b5ed7;
+    border-color: #0a58ca;
+    color: white;
+}
+.btn-custom-secondary {
+    background-color: #6c757d;
+    border-color: #6c757d;
+    color: white;
+    transition: background-color 0.2s;
+}
+.btn-custom-secondary:hover {
+    background-color: #5c636a;
+    border-color: #565e64;
+    color: white;
+}
+.btn-custom-danger {
+    background-color: #dc3545;
+    border-color: #dc3545;
+    color: white;
+    transition: background-color 0.2s;
+}
+.btn-custom-danger:hover {
+    background-color: #c82333;
+    border-color: #bd2130;
+    color: white;
+}
+.btn-custom-info {
+    background-color: #17a2b8;
+    border-color: #17a2b8;
+    color: white;
+    transition: background-color 0.2s;
+}
+.btn-custom-info:hover {
+    background-color: #138496;
+    border-color: #117a8b;
+    color: white;
+}
+/* 모달 스타일 */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1050;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.5);
+}
+.modal-content {
+    background-color: #fff;
+    margin: 10% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 500px;
+    max-width: 90%;
+    border-radius: 8px;
+}
