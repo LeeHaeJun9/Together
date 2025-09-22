@@ -23,64 +23,56 @@ body {
     padding: 0 1rem;
 }
 
-/* Header & Navigation */
-.header-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1rem 0;
-}
-.logo-section {
-    display: flex;
-    align-items: center;
-    text-decoration: none;
-    color: var(--text-color);
-    font-size: 1.5rem;
-    font-weight: bold;
-}
-.logo-section img {
-    height: 40px;
-    margin-right: 0.5rem;
-}
-.nav-links {
-    list-style: none;
-    display: flex;
-    gap: 1rem;
-    margin: 0;
-    padding: 0;
-}
-.nav-link button {
-    background: none;
-    border: none;
-    font-size: 1rem;
-    cursor: pointer;
-    color: var(--text-color);
-    transition: color 0.3s;
-}
-.nav-link button:hover {
-    color: var(--primary-color);
-}
 
 /* Hero Section */
 .hero-section {
-    background-color: #e9ecef;
     padding: 3rem 1rem;
     border-radius: 10px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
     margin-bottom: 2rem;
 }
-.hero-section h1 {
+
+/* ✅ Flexbox를 사용하여 자식 요소를 좌우로 정렬 */
+.hero-content {
+    display: flex;
+    align-items: center; /* 세로 중앙 정렬 */
+    gap: 2rem; /* 텍스트와 이미지 사이 간격 */
+}
+
+.text-column {
+    flex: 1; /* 남은 공간을 채우도록 */
+    text-align: left; /* 텍스트 정렬 */
+}
+
+.text-column h1 {
     font-size: 2.5rem;
     font-weight: 700;
     color: var(--primary-color);
 }
-.hero-section p {
+.text-column p {
     font-size: 1.25rem;
     max-width: 800px;
     margin-bottom: 1.5rem;
+    color: var(--text-color);
+}
+
+/* ✅ 이미지 칼럼 스타일 */
+.image-column {
+    flex: 1; /* 남은 공간을 채우도록 */
+    text-align: center;
+}
+
+.banner-image {
+    max-width: 100%;
+    height: auto;
+    border-radius: 10px;
+}
+
+/* ✅ 반응형 디자인 추가: 화면이 좁을 때 위아래로 정렬 */
+@media (max-width: 768px) {
+    .hero-content {
+        flex-direction: column;
+        text-align: center;
+    }
 }
 
 /* Main Content Sections */
@@ -198,27 +190,4 @@ body {
     background-color: rgba(255, 255, 255, 1);
 }
 
-/* Footer */
-.footer {
-    background-color: var(--text-color);
-    color: white;
-    padding: 2rem 0;
-    text-align: center;
-}
-.footer-links {
-    list-style: none;
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 1.5rem;
-    margin: 0 0 1rem 0;
-    padding: 0;
-}
-.footer-links a {
-    color: white;
-    text-decoration: none;
-    transition: color 0.3s;
-}
-.footer-links a:hover {
-    color: var(--primary-color);
-}
+
