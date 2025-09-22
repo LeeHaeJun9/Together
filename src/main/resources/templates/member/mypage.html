@@ -258,9 +258,8 @@
             </div>
             <div class="col-auto">
                 <div class="nav-links">
-                    <a href="/login">로그인</a> /
-                    <a href="/register">회원가입</a> /
-                    <a href="/mypage">마이페이지</a>
+                    <span th:text="${userName} + '님'">사용자님</span> /
+                    <a href="/logout">로그아웃</a>
                 </div>
             </div>
         </div>

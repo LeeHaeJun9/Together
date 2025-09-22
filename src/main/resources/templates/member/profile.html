@@ -228,15 +228,18 @@
         <div class="row align-items-center">
             <div class="col">
                 <div class="logo">
+                    <a href="/mainPage" onclick="window.location.href='/mainPage'; return false;"
+                       style="text-decoration: none; color: inherit; display: flex; align-items: center; cursor: pointer;">
                     <img src="/images/moyeora-logo.png" alt="모여라 로고" />
                     <span>모여라</span>
+                    </a>
                 </div>
             </div>
             <div class="col-auto">
                 <div class="nav-links">
-                    <a href="/login">로그인</a> /
-                    <a href="/member/register">회원가입</a> /
-                    <a href="/mypage">마이페이지</a>
+                    <a href="/mainPage">홈</a> /
+                    <span th:text="${userName} + '님'">사용자님</span> /
+                    <a href="/logout">로그아웃</a>
                 </div>
             </div>
         </div>
