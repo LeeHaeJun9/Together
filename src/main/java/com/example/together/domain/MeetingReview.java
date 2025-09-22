@@ -3,6 +3,7 @@ package com.example.together.domain;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,6 +32,10 @@ public class MeetingReview extends BaseEntity {
     @ManyToOne(optional = true)
     private Meeting meeting;
 
+    private LocalDateTime meetingDate;
+    private String meetingLocation;
+    private String meetingAddress;
+
 //    @ManyToOne(fetch = FetchType.LAZY)
 //    private Cafe cafe;
 
@@ -38,8 +43,11 @@ public class MeetingReview extends BaseEntity {
     private List<MeetingReviewImage> images = new ArrayList<>();
 
 
-    public void change(String title, String content) {
+    public void change(String title, String content, LocalDateTime meetingDate, String meetingLocation, String meetingAddress) {
         this.title = title;
         this.content = content;
+        this.meetingDate = meetingDate;
+        this.meetingLocation = meetingLocation;
+        this.meetingAddress = meetingAddress;
     }
 }

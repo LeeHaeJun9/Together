@@ -46,7 +46,7 @@
 
                         <div class="input-group mb-3">
                             <span class="input-group-text">meetingDate</span>
-                            <input type="datetime-local" name="meetingDate" th:value="${dto.meeting != null ? #temporals.format(dto.meeting.meetingDate, 'yyyy-MM-dd') : ''}" class="form-control">
+                            <input type="datetime-local" name="meetingDate" th:value="*{dto.meetingDate}" class="form-control">
                         </div>
                         <div class="input-group mb-3">
                             <span class="input-group-text">Location</span>

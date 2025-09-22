@@ -106,7 +106,6 @@ public class MeetingReviewController {
         model.addAttribute("userName", user.getUserId());
         model.addAttribute("pageRequestDTO", pageRequestDTO);
 
-
         return "meeting/review/register";
     }
     @PostMapping("/register")
@@ -147,7 +146,10 @@ public class MeetingReviewController {
             MeetingReview review = meetingReviewService.writeReview(
                     userId,
                     meetingReviewDTO.getTitle(),
-                    meetingReviewDTO.getContent()
+                    meetingReviewDTO.getContent(),
+                    meetingReviewDTO.getMeetingDate(),
+                    meetingReviewDTO.getMeetingLocation(),
+                    meetingReviewDTO.getMeetingAddress()
             );
             reviewId = review.getId();
         }

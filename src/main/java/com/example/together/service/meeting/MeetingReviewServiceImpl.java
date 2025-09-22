@@ -19,6 +19,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
@@ -54,9 +55,9 @@ public class MeetingReviewServiceImpl implements MeetingReviewService {
                 .reviewerNickname(mtReview.getReviewer().getNickname())
                 .reviewerUserId(mtReview.getReviewer().getUserId())
                 .meetingId(meetingDTO != null ? meetingDTO.getId() : null)
-                .meetingDate(meetingDTO != null ? meetingDTO.getMeetingDate() : null)
-                .meetingAddress(meetingDTO != null ? meetingDTO.getAddress() : null)
-                .meetingLocation(meetingDTO != null ? meetingDTO.getLocation() : null)
+                .meetingDate(meetingDTO != null ? meetingDTO.getMeetingDate() : mtReview.getMeetingDate())
+                .meetingAddress(meetingDTO != null ? meetingDTO.getAddress() : mtReview.getMeetingAddress())
+                .meetingLocation(meetingDTO != null ? meetingDTO.getLocation() : mtReview.getMeetingLocation())
                 .regDate(mtReview.getRegDate())
                 .modDate(mtReview.getModDate())
                 .build();
@@ -83,7 +84,15 @@ public class MeetingReviewServiceImpl implements MeetingReviewService {
     public void MeetingReviewModify(MeetingReviewDTO meetingReviewDTO) {
         Optional<MeetingReview> review = meetingReviewRepository.findById(meetingReviewDTO.getId());
         MeetingReview meetingReview = review.orElseThrow();
-        meetingReview.change(meetingReviewDTO.getTitle(), meetingReviewDTO.getContent());
+
+        meetingReview.change(
+                meetingReviewDTO.getTitle(),
+                meetingReviewDTO.getContent(),
+                meetingReviewDTO.getMeetingDate(),
+                meetingReviewDTO.getMeetingLocation(),
+                meetingReviewDTO.getMeetingAddress()
+        );
+
         meetingReviewRepository.save(meetingReview);
     }
 
@@ -133,14 +142,18 @@ public class MeetingReviewServiceImpl implements MeetingReviewService {
     }
     @Override
     @Transactional
-    public MeetingReview writeReview(String userId, String title, String content) {
+    public MeetingReview writeReview(String userId, String title, String content, LocalDateTime meetingDate, String meetingLocation, String meetingAddress) {
         User user = userRepository.findByUserId(userId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 유저가 없습니다. userId=" + userId));
+
 
         MeetingReview review = MeetingReview.builder()
                 .title(title)
                 .content(content)
                 .reviewer(user)
+                .meetingDate(meetingDate)
+                .meetingLocation(meetingLocation)
+                .meetingAddress(meetingAddress)
                 .build();
 
         return meetingReviewRepository.save(review);
@@ -160,6 +173,7 @@ public class MeetingReviewServiceImpl implements MeetingReviewService {
                 .content(meeting.getContent())
                 .meetingDate(meeting.getMeetingDate())
                 .address(meeting.getAddress())
+                .location(meeting.getLocation())
                 .organizerId(meeting.getOrganizer().getId())
                 .organizerName(meeting.getOrganizer().getName())
                 .userId(meeting.getOrganizer().getUserId())

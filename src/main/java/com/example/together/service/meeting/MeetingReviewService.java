@@ -6,6 +6,8 @@ import com.example.together.dto.PageResponseDTO;
 import com.example.together.dto.meeting.MeetingDTO;
 import com.example.together.dto.meeting.MeetingReviewDTO;
 
+import java.time.LocalDateTime;
+
 public interface MeetingReviewService {
     MeetingReviewDTO EntitytoDTO(MeetingReview entity);
 
@@ -16,7 +18,7 @@ public interface MeetingReviewService {
 
     PageResponseDTO<MeetingReviewDTO> list(PageRequestDTO pageRequestDTO);
     MeetingReview createReview(String userId, Long meetingId, String title, String content);
-    MeetingReview writeReview(String userId, String title, String content);
+    public MeetingReview writeReview(String userId, String title, String content, LocalDateTime meetingDate, String meetingLocation, String meetingAddress);
 
     MeetingDTO getMeetingDTOById(Long meetingId);
 }

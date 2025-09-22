@@ -147,7 +147,16 @@ public class MeetingController {
 
         List<MeetingUserDTO> meetingUser = meetingUserService.getMeetingUsersByMeetingId(id);
         model.addAttribute("meetingUser", meetingUser);
+
+        Long userId = user != null ? user.getId() : null;
         model.addAttribute("loggedInUserId", user != null ? user.getId() : null);
+
+        // 로그인한 사용자가 모임에 참여했는지 확인
+        boolean isJoinedUser = false;
+        if (userId != null) {
+            isJoinedUser = meetingUserService.isUserJoined(id, userId);
+        }
+        model.addAttribute("isJoinedUser", isJoinedUser);
 
         CafeResponseDTO cafeResponse;
         if (user != null) {
@@ -239,6 +248,26 @@ public class MeetingController {
         try {
             meetingService.applyToMeeting(user, meetingId);
             redirectAttributes.addFlashAttribute("message", "모임 신청이 완료되었습니다.");
+        } catch (IllegalStateException e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+        }
+
+        redirectAttributes.addAttribute("id", meetingId);
+        return "redirect:/cafe/{cafeId}/meeting/read?id=" + meetingId;
+    }
+
+    @PostMapping("/meeting/cancel")
+    public String meetingCancel(@RequestParam Long meetingId,
+                                Principal principal,
+                                RedirectAttributes redirectAttributes) {
+        User user = getUserFromPrincipal(principal);
+        if (user == null) {
+            return "redirect:/login";
+        }
+
+        try {
+            meetingService.cancelMeeting(user, meetingId);
+            redirectAttributes.addFlashAttribute("message", "모임 신청이 취소되었습니다.");
         } catch (IllegalStateException e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
         }

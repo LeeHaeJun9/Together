@@ -1,6 +1,7 @@
 package com.example.together.service.meeting;
 
 import com.example.together.domain.Meeting;
+import com.example.together.domain.MeetingJoinStatus;
 import com.example.together.domain.MeetingUser;
 import com.example.together.domain.User;
 import com.example.together.dto.meeting.MeetingUserDTO;
@@ -45,4 +46,11 @@ public class MeetingUserServiceImpl implements MeetingUserService{
                 })
                 .collect(Collectors.toList());
     }
+
+    @Override
+    @Transactional
+    public boolean isUserJoined(Long meetingId, Long userId) {
+        return meetingUserRepository.existsByMeetingIdAndUserIdAndJoinStatus(meetingId, userId, MeetingJoinStatus.ACCEPTED);
+    }
+
 }

@@ -38,8 +38,8 @@ public class MeetingReviewDTO {
     private String meetingLocation;
     private String meetingAddress;
 
-    private String address;
-    private String location;
+//    private String address;
+//    private String location;
 
     private List<String> imageUrls;
 
