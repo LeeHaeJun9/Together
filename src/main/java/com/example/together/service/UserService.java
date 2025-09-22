@@ -6,6 +6,8 @@ import com.example.together.dto.member.memberRegisterDTO;
 import com.example.together.dto.member.RegisterDTO;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.web.multipart.MultipartFile;
+
 
 public interface UserService {
     // 로그인 관련
@@ -36,4 +38,8 @@ public interface UserService {
     String getUserNicknameById(Long userId);
     boolean updateTempPassword(String userId, String tempPassword);
     void updateUserPassword(String userId, String newPassword);
+
+    String uploadProfilePhoto(String userId, MultipartFile photo);
+
 }
+

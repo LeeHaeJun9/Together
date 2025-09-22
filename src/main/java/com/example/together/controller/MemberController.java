@@ -1,21 +1,20 @@
 package com.example.together.controller;
 
 import com.example.together.domain.User;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RequestBody;
-
 import com.example.together.dto.member.memberRegisterDTO;
 import com.example.together.service.UserService;
-import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import java.security.Principal;
 import java.util.ArrayList;
@@ -109,9 +108,6 @@ public class MemberController {
         return "member/myCafes";
     }
 
-    @Autowired
-//    private UserService userService; // 사용자 서비스
-
     // 아이디 찾기 페이지 표시
     @GetMapping("/member/findId")
     public String findIdPage() {
@@ -197,17 +193,87 @@ public class MemberController {
         return response;
     }
 
-
     // 프로필 페이지 표시
     @GetMapping("/member/profile")
     public String profilePage(Model model, Principal principal) {
         if (principal != null) {
             String userId = principal.getName();
             User user = userService.findByUserId(userId);
-            model.addAttribute("user", user);
-            log.info("프로필 페이지 요청: userId = {}", userId);
+
+            if (user != null) {
+                model.addAttribute("user", user);
+                // 사용자 이름을 명시적으로 추가 (null 방지)
+                String userName = user.getName() != null ? user.getName() : user.getUserId();
+                model.addAttribute("userName", userName);
+                log.info("프로필 페이지 요청: userId = {}, userName = {}", userId, userName);
+            } else {
+                log.warn("사용자 정보를 찾을 수 없습니다: userId = {}", userId);
+                return "redirect:/login";
+            }
+        } else {
+            log.warn("로그인하지 않은 사용자가 프로필 페이지에 접근");
+            return "redirect:/login";
         }
         return "member/profile";
+    }
+
+    // 프로필 사진 업로드
+    @PostMapping("/member/profile/photo")
+    @ResponseBody
+    public Map<String, Object> uploadProfilePhoto(@RequestParam("photo") MultipartFile photo,
+                                                  Principal principal) {
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            if (principal == null) {
+                response.put("success", false);
+                response.put("message", "로그인이 필요합니다.");
+                return response;
+            }
+
+            if (photo.isEmpty()) {
+                response.put("success", false);
+                response.put("message", "파일을 선택해주세요.");
+                return response;
+            }
+
+            // 파일 크기 제한 (5MB)
+            if (photo.getSize() > 5 * 1024 * 1024) {
+                response.put("success", false);
+                response.put("message", "파일 크기는 5MB 이하여야 합니다.");
+                return response;
+            }
+
+            // 이미지 파일 형식 확인
+            String contentType = photo.getContentType();
+            if (contentType == null || !contentType.startsWith("image/")) {
+                response.put("success", false);
+                response.put("message", "이미지 파일만 업로드 가능합니다.");
+                return response;
+            }
+
+            String userId = principal.getName();
+
+            // UserService에서 사진 업로드 처리
+            String photoUrl = userService.uploadProfilePhoto(userId, photo);
+
+            if (photoUrl != null) {
+                response.put("success", true);
+                response.put("photoUrl", photoUrl);
+                response.put("message", "프로필 사진이 성공적으로 업데이트되었습니다.");
+                log.info("프로필 사진 업로드 성공: userId = {}, photoUrl = {}", userId, photoUrl);
+            } else {
+                response.put("success", false);
+                response.put("message", "프로필 사진 업로드에 실패했습니다.");
+            }
+
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", "서버 오류가 발생했습니다.");
+            log.error("프로필 사진 업로드 오류: {}", e.getMessage());
+        }
+
+        return response;
     }
 
     // 개별 필드 업데이트

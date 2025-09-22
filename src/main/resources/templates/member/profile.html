@@ -255,9 +255,18 @@
         <!-- 프로필 헤더 -->
         <div class="profile-header">
             <div class="row align-items-center">
+
                 <div class="col-auto">
-                    <div class="profile-photo">프로필<br>사진</div>
+                    <div class="profile-photo" onclick="document.getElementById('photoInput').click();" style="cursor: pointer;">
+                        <img th:if="${user.profilePhoto != null}"
+                             th:src="${user.profilePhoto}"
+                             alt="Profile Photo"
+                             style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover;">
+                        <span th:if="${user.profilePhoto == null}">프로필<br>사진</span>
+                    </div>
+                    <input type="file" id="photoInput" name="photo" accept="image/*" style="display: none;">
                 </div>
+
                 <div class="col">
                     <div class="profile-info">
                         <h5 th:text="${user != null ? user.nickname : '사용자'}">사용자</h5>
@@ -266,7 +275,7 @@
                 </div>
                 <div class="col-auto">
                     <div class="profile-buttons">
-                        <button class="btn btn-secondary btn-profile">이미지 변경</button>
+                        <button class="btn btn-secondary btn-profile" onclick="document.getElementById('photoInput').click();">이미지 변경</button>
                         <a href="/member/deleteUser" class="btn btn-danger btn-profile">회원 탈퇴</a>
                     </div>
                 </div>
@@ -527,6 +536,48 @@
         // 페이지 최상단으로 스크롤
         window.scrollTo(0, 0);
     }
+    // Profile photo upload functionality
+    document.getElementById('photoInput').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const formData = new FormData();
+            formData.append('photo', file);
+
+            // Create headers object with CSRF token
+            const headers = {};
+            headers[header] = token;  // Add CSRF token here!
+            headers['X-Requested-With'] = 'XMLHttpRequest';
+
+            fetch('/member/profile/photo', {
+                method: 'POST',
+                body: formData,
+                headers: headers  // Use the headers object with CSRF token
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Update the profile photo immediately
+                        const img = document.querySelector('.profile-photo img');
+                        if (img) {
+                            img.src = data.photoUrl;
+                        } else {
+                            // If no img exists, create one and replace the span
+                            const profileDiv = document.querySelector('.profile-photo');
+                            profileDiv.innerHTML = `<img src="${data.photoUrl}" alt="Profile Photo" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover;">`;
+                        }
+                        alert('프로필 사진이 업데이트되었습니다.');
+                    } else {
+                        alert('업로드 실패: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('업로드 중 오류가 발생했습니다.');
+                });
+        }
+    });
+
+
 </script>
 </body>
 </html>
