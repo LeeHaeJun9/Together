@@ -68,7 +68,6 @@
         <div class="container px-4 px-lg-5 my-5 page-header-content text-white">
             <div class="text-center">
                 <h1 class="fw-bolder" th:text="${cafe.name}">카페 이름</h1>
-                <p class="lead mb-0" th:text="${cafe.description}">카페 설명</p>
             </div>
         </div>
     </header>
@@ -109,6 +108,14 @@
         </div>
     </div>
 
+    <div class="row gx-4 gx-lg-5 mb-4">
+        <div class="col-lg-12">
+            <div class="card p-4">
+                <p class="card-text text-muted" th:text="${cafe.description}">카페 설명입니다.</p>
+            </div>
+        </div>
+    </div>
+
     <div class="row gx-4 gx-lg-5">
         <div class="col-lg-8">
             <section th:if="${cafe.isMember}">
@@ -119,7 +126,7 @@
                     </div>
                 </div>
             </section>
-            <section th:if="${cafe.isMember}">
+            <section>
                 <div class="card mb-4">
                     <div class="card-header">최신 공지 & 이벤트</div>
                     <div class="card-body">
@@ -128,14 +135,19 @@
                         </div>
                         <ul th:unless="${#lists.isEmpty(latestNotices)}" class="list-group list-group-flush">
                             <li th:each="notice : ${latestNotices}" class="list-group-item d-flex justify-content-between align-items-center">
-                                <a th:href="@{/cafe/{cafeId}/posts/{postId}(cafeId=${cafe.id}, postId=${notice.id})}" th:text="${notice.title}">공지 제목</a>
+                                <a th:href="${cafe.isMember} ? @{/cafe/{cafeId}/posts/{postId}(cafeId=${cafe.id}, postId=${notice.id})} : '#'"
+                                   th:onclick="${!cafe.isMember} ? 'alert(\'카페에 가입해야 게시글을 볼 수 있습니다.\'); return false;' : ''"
+                                   th:text="${notice.title}">
+                                    공지 제목
+                                </a>
                                 <small class="text-muted" th:text="${#temporals.format(notice.regDate, 'yyyy-MM-dd')}"></small>
                             </li>
                         </ul>
                     </div>
                 </div>
             </section>
-            <section th:if="${cafe.isMember}">
+
+            <section>
                 <div class="card mb-4">
                     <div class="card-header">인기 게시글</div>
                     <div class="card-body">
@@ -144,7 +156,11 @@
                         </div>
                         <ul th:unless="${#lists.isEmpty(popularPosts)}" class="list-group list-group-flush">
                             <li th:each="post : ${popularPosts}" class="list-group-item d-flex justify-content-between align-items-center">
-                                <a th:href="@{/cafe/{cafeId}/posts/{postId}(cafeId=${cafe.id}, postId=${post.id})}" th:text="${post.title}">인기 게시글 제목</a>
+                                <a th:href="${cafe.isMember} ? @{/cafe/{cafeId}/posts/{postId}(cafeId=${cafe.id}, postId=${post.id})} : '#'"
+                                   th:onclick="${!cafe.isMember} ? 'alert(\'카페에 가입해야 게시글을 볼 수 있습니다.\'); return false;' : ''"
+                                   th:text="${post.title}">
+                                    인기 게시글 제목
+                                </a>
                                 <small class="text-muted">조회수: <span th:text="${post.viewCount}"></span></small>
                             </li>
                         </ul>

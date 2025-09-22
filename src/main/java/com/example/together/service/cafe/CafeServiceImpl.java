@@ -629,4 +629,56 @@ public class CafeServiceImpl implements CafeService {
                 .url(url)
                 .build();
     }
+
+    @Override
+    public List<CafeCategory> getAllCategories() {
+        return List.of(CafeCategory.values());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<CafeResponseDTO> getRecommendedCafes(int limit) {
+        // ✅ 수정: `findTop`을 `findBy`로 변경
+        List<Cafe> recommendedCafes = cafeRepository.findByOrderByMemberCountDesc(PageRequest.of(0, limit));
+
+        // 2. 엔티티 리스트를 DTO 리스트로 변환하여 반환합니다.
+        return recommendedCafes.stream()
+                .map(cafe -> new CafeResponseDTO(
+                        cafe.getId(),
+                        cafe.getName(),
+                        cafe.getDescription(),
+                        cafe.getCategory().getKoreanName(),
+                        cafe.getRegDate(),
+                        cafe.getOwner().getId(),
+                        cafe.getMemberCount(),
+                        cafe.getCafeImage(),
+                        cafe.getCafeThumbnail(),
+                        false,
+                        false
+                ))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<CafeResponseDTO> getCafesByCategory(CafeCategory category) {
+        // 1. Repository를 사용하여 해당 카테고리의 카페 엔티티 목록을 조회합니다.
+        List<Cafe> cafes = cafeRepository.findByCategory(category);
+
+        // 2. 조회된 엔티티 목록을 DTO 목록으로 변환하여 반환합니다.
+        return cafes.stream()
+                .map(cafe -> new CafeResponseDTO(
+                        cafe.getId(),
+                        cafe.getName(),
+                        cafe.getDescription(),
+                        cafe.getCategory().name(), // 카테고리 이름 (Enum)
+                        cafe.getRegDate(),
+                        cafe.getOwner().getId(),
+                        cafe.getMemberCount(),
+                        cafe.getCafeImage(),
+                        cafe.getCafeThumbnail(),
+                        false, // isOwner
+                        false  // isMember
+                ))
+                .collect(Collectors.toList());
+    }
 }

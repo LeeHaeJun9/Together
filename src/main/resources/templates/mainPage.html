@@ -3,636 +3,339 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Project1 메인</title>
+    <title>Together - 소모임 서비스</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <style>
-        body{
-            width: 85vw;
-            margin: 0 auto;
+        :root {
+            --primary-color: #4CAF50;
+            --secondary-color: #6c757d;
+            --background-color: #f8f9fa;
+            --card-background: #ffffff;
+            --text-color: #212529;
+            --hover-color: #388E3C;
+            --border-color: #e0e0e0;
         }
 
-        /* header */
-
-        /* 로고(홈으로 이동) */
-        /* 수정된 코드 - 로그인 페이지와 같은 크기 */
-        .logo {
-            display: flex;
-            align-items: center;
-            font-size: 18px;
-            font-weight: bold;
-            color: #333;
-            float: left;
-            margin: 10px 0;
-        }
-
-        .logo img {
-            height: 45px;
-            width: auto;
-            margin-right: 10px;
-        }
-
-        /* 상단 바 */
-        .upbar {
-            float: right;
-        }
-        .upbar ul {
-            list-style: none;
-            margin: 50px 20px;
-        }
-        /* 창이 500px 이하일 때 */
-        @media screen and (max-width: 500px) {
-            .upbar ul {
-                margin: 50px 0;
-            }
-        }
-        .upbar ul li {
-            float: left;
-            margin: 2px;
-        }
-        .upbar button {
-            border: none;
-            background: none;
-            font-size: 18px;
-        }
-        a {
-            text-decoration: none;
-            color: black;
-        }
-        a:visited {
-            color: inherit;
-            text-decoration: none;
-        }
-
-        /* 배너 */
-        .banner {
-            display: flex;
-            justify-content: center;
-            width: 100%;
-        }
-        .bannertext {
-            clear: both;
-            float: left;
-            width: 500px;
-            padding: 10px;
-        }
-        .banner p {
-            padding: 0px 10px;
-            font-size: 18px;
-        }
-        .bannerimg img{
-            width: 100%;
-            height: 100%;
-            max-height: 400px;
-            object-fit: contain;
-            object-position: right;
-            float: right;
-        }
-
-        /* 창이 1000px 이하일 때 */
-        @media screen and (max-width: 1100px) {
-            .banner {
-                flex-direction: column;
-                align-items: center;
-            }
-            .bannertext {
-                width: 500px;
-                float: none;
-                margin: 0 auto;
-            }
-            .bannerimg img {
-                width: 100%;
-                max-height: 350px;
-                float: none;
-            }
-        }
-
-        /* 창이 500px 이하일 때 */
-        @media screen and (max-width: 500px) {
-            .bannerimg img {
-                display: none;
-            }
-        }
-
-
-        /* main */
-        main {
-            clear: both;
-            margin-top: 20px;
-        }
-        section {
-            margin-top: 20px;
-        }
-        fieldset {
-            /*border: none;*/
-            text-align: center;
-            border-radius: 30px;
-        }
-        legend h1 {
-            padding: 0px 20px 0px;
-        }
-
-        /* 검색창 */
-        .outline {
-            border: none;
-        }
-        .search {
-            display: flex;
-            justify-content: center;
-            height: 60px;
-            margin: 0 0 20px;
-        }
-        .search select {
-            width: 150px;
-            border-radius: 50px 0 0 50px;
-            font-size: 16px;
-            padding-left: 30px;
-            text-align: center;
-        }
-        .search select optgroup {
-            text-align: left;
-        }
-        .search input {
-            width: 50%;
-            border-radius: 0;
-            font-size: 16px;
-            padding: 20px;
-            box-shadow: none
-        }
-        .search button {
-            width: 100px;
-            border-radius: 0 50px 50px 0;
-            font-size: 16px;
-            background: none;
-        }
-        .search button:hover {
-            background-color: rgba(204, 204, 204, 0.2);
-        }
-        .search button img {
-            display: block;
-            max-width: 100%;
-            height: 80%;
-            margin: 0 auto;
-        }
-        .box {
-            font-size: 16px;
-            border: 1px solid #ccc;
-        }
-
-        /* 인기검색창 */
-        .keyword {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 50px;
-        }
-        .keyword ul {
-            list-style: none;
-            display: flex;
-            flex-direction: row;
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            margin: 0;
             padding: 0;
         }
-        .keyword h3 {
-            margin: 10px;
-        }
-        .keyword ul button {
-            float: left;
-            margin: 10px;
-            width: 90%;
-            border-radius: 50px;
-            font-size: 16px;
-            background: none;
-            border: 1.8px solid #ccc;
-        }
-        .keyword ul button:hover {
-            background-color: rgba(204, 204, 204, 0.3);
-        }
 
-        /* 카테고리로 찾기 */
-        .category {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            column-gap: 30px;
-            padding: 0px 60px;
-            text-align: center
-        }
-        .item {
-            text-align: center;
-            margin-bottom: 20px;
-            position: relative;
-            overflow: hidden;
-        }
-        .item img {
-            width: 100%;
-            height: 240px;
-            object-fit: cover;
-            border-radius: 40px;
-        }
-        .item a {
-            text-decoration: none;
-        }
-        /* 글자 올라오기 */
-        .caption {
-            color: white;
-            background-color: rgba(0, 0, 0, 0.6);
-            width: 100%;
-            height: 240px;
-            font-size: 30px;
-            line-height: 8em;
-            opacity: 0;
-            transition: all 0.5s ease-in-out;
-            position: absolute;
-            top: 0;
-            left: 0;
-
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 40px;
-        }
-        .item a:hover .caption {
-            opacity: 1;
-            border-radius: 40px;
-        }
-
-        .dosidong {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-            justify-content: center;
-            width: 100%;
-            max-width: 700px;
-            box-sizing: border-box;
-            margin: 30px auto;
-        }
-        .dosidong div {
-            display: flex;
-            justify-content: center;
-        }
-        .dosidong div select {
-            width: 150px;
-            height: 70px;
-            font-size: 18px;
-            padding-left: 10px;
-            margin: 0 20px 20px;
-            border-radius: 20px;
-            border: #ccc 2px solid;
-        }
-        /* 모임 자동 추천 슬라이더 버전*/
         .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        /* Header & Navigation */
+        .header-top {
             display: flex;
-            justify-content: center;
+            justify-content: space-between;
             align-items: center;
-            gap: 10px;
-            margin: 40px auto;
-            box-sizing: border-box;
-            padding: 0 20px;
+            padding: 1rem 0;
+        }
+        .logo-section {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            color: var(--text-color);
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        .logo-section img {
+            height: 40px;
+            margin-right: 0.5rem;
+        }
+        .nav-links {
+            list-style: none;
+            display: flex;
+            gap: 1rem;
+            margin: 0;
+            padding: 0;
+        }
+        .nav-link button {
+            background: none;
+            border: none;
+            font-size: 1rem;
+            cursor: pointer;
+            color: var(--text-color);
+            transition: color 0.3s;
+        }
+        .nav-link button:hover {
+            color: var(--primary-color);
+        }
+
+        /* Hero Section */
+        .hero-section {
+            background-color: #e9ecef;
+            padding: 3rem 1rem;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .hero-section h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+        .hero-section p {
+            font-size: 1.25rem;
+            max-width: 800px;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Main Content Sections */
+        .section-title {
+            text-align: center;
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 1.5rem;
+            color: var(--primary-color);
+        }
+
+        /* Category Grid */
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        @media (max-width: 768px) {
+            .category-grid {
+                /* 화면이 좁을 땐 2개의 열로 변경 */
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        .category-item {
+            text-align: center;
+            text-decoration: none;
+            color: var(--text-color);
+            transition: transform 0.3s, box-shadow 0.3s;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+        .category-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+        }
+        .category-item img {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+        .category-caption {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: 0.5rem;
+            background-color: rgba(0, 0, 0, 0.6);
+            color: white;
+            font-weight: bold;
+            font-size: 1rem;
+        }
+
+        /* Recommended Groups Slider */
+        .slider-section {
+            margin-bottom: 7rem;
+        }
+        .slider-container {
+            position: relative;
         }
         .slider-wrapper {
-            width: 100%;
+            display: flex;
             overflow: hidden;
+            scroll-behavior: smooth;
+            gap: 1rem;
         }
-        .recom {
-            display: flex;
-            transition: transform 0.3s ease-in-out;
-            gap: 20px;
-        }
-        .card {
-            width: calc((100% - (20px * 4)) / 4);
-            height: 200px;
-            background-color: #ccc;
+        .slider-card {
+            min-width: 250px;
+            flex: 0 0 auto;
+            background-color: var(--card-background);
             border-radius: 10px;
-            flex-shrink: 0;
-            display: flex;
-            justify-content: center;
-            align-items: flex-end;
-            font-weight: bold;
-            font-size: 18px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s;
         }
-        .card img {
+        .slider-card:hover {
+            transform: scale(1.02);
+        }
+        .slider-card img {
             width: 100%;
-            height: 100%;
+            height: 150px;
             object-fit: cover;
-            border-radius: 10px;
+            border-radius: 10px 10px 0 0;
         }
-        .prev, .next {
-            background-color: white;
-            border: 1px solid #ccc;
-            font-size: 30px;
-            cursor: pointer; /* 커서 모양 바꾸기 */
-            padding: 10px 15px;
-            border-radius: 8px;
+        .card-body {
+            padding: 1rem;
+        }
+        .card-body h5 {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin: 0 0 0.5rem;
+        }
+        .card-body p {
+            font-size: 0.9rem;
+            color: var(--secondary-color);
+            margin: 0;
+        }
+        .slider-button {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: rgba(255, 255, 255, 0.8);
+            border: 1px solid var(--border-color);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            z-index: 10;
+        }
+        .slider-button.prev { left: -20px; }
+        .slider-button.next { right: -20px; }
+        .slider-button:hover {
+            background-color: rgba(255, 255, 255, 1);
         }
 
-        /* 푸터 */
+        /* Footer */
         .footer {
-            margin: 30px 0px;
-            padding: 40px 20px;
-            font-size: 14px;
-            color: #555;
+            background-color: var(--text-color);
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
         }
-        .footer-container {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-between;
-            max-width: 1200px;
-            margin: auto;
-        }
-        .footer-section {
-            margin: 10px;
-            width: 250px;
-        }
-        .footer-section h4 {
-            font-size: 16px;
-            margin-bottom: 10px;
-        }
-        .footer-section ul {
+        .footer-links {
             list-style: none;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            margin: 0 0 1rem 0;
             padding: 0;
         }
-        .footer-section ul li {
-            margin-bottom: 6px;
-        }
-        .footer-section ul li a {
+        .footer-links a {
+            color: white;
             text-decoration: none;
-            color: #555;
+            transition: color 0.3s;
         }
-        .footer-section ul li a:hover {
-            text-decoration: underline;
-        }
-        .footer-bottom {
-            text-align: center;
-            margin-top: 30px;
-            padding-bottom: 30px;
-            font-size: 13px;
-            color: #999;
+        .footer-links a:hover {
+            color: var(--primary-color);
         }
     </style>
 </head>
 <body>
-<header>
-    <div class="logo">
-        <a th:href="@{/}">
-            <img th:src="@{/images/moyeora-logo.png}" alt="모여라 로고" />
+
+<header class="container">
+    <div class="header-top">
+        <a th:href="@{/}" class="logo-section">
+            <img th:src="@{/images/moyeora-logo.png}" alt="Together 로고" />
             <span>모여라</span>
         </a>
-    </div>
-
-    <nav class="upbar">
-
-        <nav class="upbar">
-            <ul sec:authorize="!isAuthenticated()">
-                <li><button><a th:href="@{/member/login}">로그인</a></button></li>
-                <li><button><a th:href="@{/member/register}">회원가입</a></button></li>
+        <nav>
+            <ul class="nav-links" sec:authorize="!isAuthenticated()">
+                <li class="nav-link"><button><a th:href="@{/member/login}">로그인</a></button></li>
+                <li class="nav-link"><button><a th:href="@{/member/register}">회원가입</a></button></li>
             </ul>
-            <ul sec:authorize="isAuthenticated() and !hasRole('ADMIN')">
-                <li><button><a th:href="@{/member/mypage}">마이페이지</a></button></li>
-                <li><button><a th:href="@{/logout}">로그아웃</a></button></li>
+            <ul class="nav-links" sec:authorize="isAuthenticated() and !hasRole('ADMIN')">
+                <li class="nav-link"><button><a th:href="@{/member/mypage}">마이페이지</a></button></li>
+                <li class="nav-link"><button><a th:href="@{/logout}">로그아웃</a></button></li>
             </ul>
-            <ul sec:authorize="hasRole('ADMIN')">
-
-                <li><button><a th:href="@{/member/mypage}">마이페이지</a></button></li>
+            <ul class="nav-links" sec:authorize="hasRole('ADMIN')">
+                <li class="nav-link"><button><a th:href="@{/member/mypage}">마이페이지</a></button></li>
                 <li><button><a th:href="@{/logout}">로그아웃</a></button></li>
-                <li><button><a th:href="@{/manager}">관리자페이지</a></button></li>
-                <li><button><a th:href="@{/cafe/admin/applications}">카페 가입 승인</a></button></li>
+                <li class="nav-link"><button><a th:href="@{/manager}">관리자페이지</a></button></li>
+                <li class="nav-link"><button><a th:href="@{/cafe/admin/applications}">카페 가입 승인</a></button></li>
             </ul>
         </nav>
-
-
-    <div class="banner"> <!-- 배너 -->
-        <div class="bannertext"> <!-- 배너텍스트 -->
-            <h1>같이 놀 사람? 여기 모여라!</h1>
-            <P><b>누구나 쉽게, 어디서든 가볍게.</b><br>
-                같은 관심사만 있으면 지역은 상관없어요.<br>
-                산책, 독서, 보드게임, 전시회 등<br>
-                시간과 일정이 맞는 사람들끼리 모이면 그게 바로 소모임!</P>
-            <p>우리 동네뿐 아니라 근처 도시, 여행지에서도<br>
-                마음 맞는 사람들과 자연스럽게 어울릴 수 있어요.</p>
-            <p>관심사로 연결된 사람들이 모여<br>
-                모임을 만들고, 참여하고, 함께 즐기는 공간,<br>
-                “같이 놀 사람? 여기 모여라!”</P>
-        </div>
-
     </div>
 </header>
 
 <main>
-    <section> <!-- 검색창 -->
-        <form>
-            <fieldset class="outline">
-                <div class="search">
-                    <select class="box" name="option"> <!-- 지역, 성별, 연령 검색 어떻게 구현? -->
-                        <optgroup label="성별">
-                            <option value="male">남성</option>
-                            <option value="female">여성</option>
-                        </optgroup>
-                        <optgroup label="연령">
-                            <option value="age10">10대</option>
-                            <option value="age2030">20대~30대</option>
-                            <option value="age4060">40대~60대</option>
-                            <option value="age70+">70대 이상</option>
-                        </optgroup>
-                    </select>
-                    <input type="search" class="box" placeholder=" 관심사가 무엇인가요?">
-                    <button type="submit" class="box"><img src="resources/pic/search.png"></button>
-                </div>
-                <div class="keyword">  <!-- 인기검색어 -->
-                    <h3>인기검색어</h3>
-                    <ul>
-                        <li><button>런닝크루</button></li>
-                        <li><button>뜨개질</button></li>
-                        <li><button>모루인형</button></li>
-                        <li><button>강아지 산책</button></li>
-                        <li><button>천안 모임</button></li>
-                        <li><button>밋업</button></li>
-                        <li><button>달리기</button></li>
-                        <!-- <li><button>키워드1</button></li> -->
-                    </ul>
-                </div>
-            </fieldset>
-        </form>
+    <section class="hero-section">
+        <h1>같이 놀 사람? 여기 모여라!</h1>
+        <p>
+            누구나 쉽게, 어디서든 가볍게. 같은 관심사만 있으면 지역은 상관없어요. 산책, 독서, 보드게임 등 마음 맞는 사람들과 자연스럽게 어울릴 수 있는 공간입니다.
+        </p>
     </section>
-    <section> <!-- 카테고리로 찾기 -->
-        <fieldset>
-            <legend><h1>카테고리 검색</h1></legend>
-            <div class="category">
-                <div class="item">
-                    <a href="board/list" style="text-decoration: none;"><img src="resources/pic/hobby.jpg">
-                        <div class="caption">전체</div></a>
+
+    <section class="container slider-section">
+        <h2 class="section-title">추천 카페</h2>
+        <div class="slider-container">
+            <button class="slider-button prev"><i class="fas fa-chevron-left"></i></button>
+            <div class="slider-wrapper" id="recom-slider">
+                <div th:each="cafe : ${recomCafes}" class="slider-card">
+                    <a th:href="@{/cafe/{cafeId}(cafeId=${cafe.id})}">
+                        <img th:src="@{${cafe.cafeThumbnail ?: '/images/default-cafe.png'}}" th:alt="${cafe.name} + ' 카페 이미지'" />
+                        <div class="card-body">
+                            <h5 th:text="${cafe.name}">모임 이름</h5>
+                            <p th:text="${cafe.description}">모임 설명</p>
+                        </div>
+                    </a>
                 </div>
-                <div class="item">
-                    <a href="board/list?types=c&keyword=운동"><img src="resources/pic/sports.jpg">
-                        <div class="caption">운동</div></a>
-                </div>
-                <div class="item">
-                    <a href="board/list?types=c&keyword=예술"><img src="resources/pic/arts.jpg">
-                        <div class="caption">예술</div></a>
-                </div>
-                <div class="item">
-                    <a href="board/list?types=c&keyword=음악"><img src="resources/pic/musics.jpg">
-                        <div class="caption">음악</div></a>
-                </div>
-                <div class="item">
-                    <a href="board/list?types=c&keyword=반려동물"><img src="resources/pic/pets.jpg">
-                        <div class="caption">반려동물</div></a>
-                </div>
-                <div class="item">
-                    <a href="board/list?types=c&keyword=수집"><img src="resources/pic/collect.jpg">
-                        <div class="caption">수집</div></a>
-                </div>
-                <div class="item">
-                    <a href="board/list?types=c&keyword=언어"><img src="resources/pic/comunicate.jpg">
-                        <div class="caption">언어</div></a>
-                </div>
-                <div class="item">
-                    <a href="board/list?types=c&keyword=요리"><img src="resources/pic/cook.jpg">
-                        <div class="caption">요리</div></a>
+                <div th:if="${#lists.isEmpty(recomCafes)}" class="slider-card" style="min-width: 100%; text-align: center; display: flex; align-items: center; justify-content: center;">
+                    <p class="text-muted">추천 모임이 아직 없습니다.</p>
                 </div>
             </div>
-        </fieldset>
+            <button class="slider-button next"><i class="fas fa-chevron-right"></i></button>
+        </div>
     </section>
-    <section> <!-- 지역으로 찾기 -->
-        <fieldset>
-            <legend><h1>지역 검색</h1></legend>
-            <div class="dosidong">
-                <div>
-                    <select>
-                        <optgroup label="도/특별시/광역시">
-                            <option value="">전체</option>
-                            <option value="">서울특별시</option>
-                            <option value="">부산광역시</option>
-                            <option value="">인천광역시</option>
-                            <option value="">대구광역시</option>
-                            <option value="">대전광역시</option>
-                            <option value="">광주광역시</option>
-                            <option value="">세종특별자치시</option>
-                            <option value="">경기도</option>
-                            <option value="" selected>충청남도</option>
-                            <option value="">충청북도</option>
-                            <option value="">전라남도</option>
-                            <option value="">전라북도</option>
-                            <option value="">경상남도</option>
-                            <option value="">경상북도</option>
-                            <option value="">강원특별자치도</option>
-                            <option value="">전북특별자치도</option>
-                            <option value="">제주특별자치도</option>
-                        </optgroup>
-                    </select>
-                </div>
-                <div>
-                    <select>
-                        <optgroup label="시/군/구">
-                            <option value="">전체</option>
-                        </optgroup>
-                        <optgroup label="충청남도">
-                            <option value="">전체</option>
-                            <option value="">천안시</option>
-                            <option value="">아산시</option>
-                            <option value="">공주시</option>
-                            <option value="">보령시</option>
-                            <option value="">서산시</option>
-                            <option value="">논산시</option>
-                            <option value="">계룡시</option>
-                            <option value="">당진시</option>
-                            <option value="">금산군</option>
-                            <option value="">부여군</option>
-                            <option value="">서천군</option>
-                            <option value="">청양군</option>
-                            <option value="">홍성군</option>
-                            <option value="">예산군</option>
-                            <option value="">태안군</option>
-                        </optgroup>
-                        <optgroup label="충청북도">
-                            <option value="">전체</option>
-                        </optgroup>
-                    </select>
-                </div>
-                <div>
-                    <select>
-                        <optgroup label="정렬">  <!-- 지역으로 할거면 읍/면/동 -->
-                            <option value="">Top 10</option>
-                            <option value="">뜨고 있는 모임</option>
-                            <option value="">새로 만들어진 모임</option>
-                            <option value="">최근 회원이 모집된 모임</option>
-                        </optgroup>
-                    </select>
-                </div>
-            </div>
-            <!-- 모임 자동 추천 / 슬라이드 형식-->
-            <div class="container">
-                <button class="prev">«</button>
-                <div class="slider-wrapper">
-                    <div class="recom">
-                        <div class="card"><img src="resources/pic/card1.jpg"></div>
-                        <div class="card"><img src="resources/pic/card2.jpg"></div>
-                        <div class="card"><img src="resources/pic/card3.jpg"></div>
-                        <div class="card"><img src="resources/pic/card4.jpg"></div>
-                        <div class="card"><img src="resources/pic/card5.jpg"></div>
-                        <div class="card"><img src="resources/pic/card6.jpg"></div>
-                        <div class="card"><img src="resources/pic/card7.jpg"></div>
-                        <div class="card"><img src="resources/pic/card8.jpg"></div>
-                        <div class="card"><img src="resources/pic/card9.jpg"></div>
-                        <div class="card"><img src="resources/pic/card10.jpg"></div>
-                    </div>
-                </div>
-                <button class="next">»</button>
-            </div>
-        </fieldset>
+
+    <section class="container">
+        <h2 class="section-title">카테고리별 탐색</h2>
+        <div class="category-grid">
+            <a th:href="@{/cafe/list(category='ALL')}" class="category-item">
+                <img th:src="@{/images/category-all.png}" alt="전체" />
+                <div class="category-caption">전체</div>
+            </a>
+            <a th:each="category : ${categories}" th:href="@{/cafe/list(category=${category.name()})}" class="category-item">
+                <img th:src="@{${category.imageUrl}}" th:alt="${category.koreanName} + ' 카테고리 이미지'" />
+                <div class="category-caption" th:text="${category.koreanName}">카테고리명</div>
+            </a>
+        </div>
     </section>
 </main>
 
-<!-- 푸터 -->
 <footer class="footer">
-    <div class="footer-container">
-        <div class="footer-section">
-            <h4>회사 정보</h4>
-            <p>회사명: 모여라 </p>
-            <p>사업자등록번호: 123-45-67890</p>
-            <p>주소: 충청남도 천안시 서북구 봉정로 345</p>
+    <div class="container">
+        <ul class="footer-links">
+            <li><a href="#">회사소개</a></li>
+            <li><a href="#">이용약관</a></li>
+            <li><a href="#">개인정보처리방침</a></li>
+            <li><a href="#">고객센터</a></li>
+        </ul>
+        <div class="footer-bottom">
+            <p>&copy; 2025 Together. All rights reserved.</p>
         </div>
-        <div class="footer-section">
-            <h4>고객센터</h4>
-            <p>전화: 041-1234-5678</p>
-            <p>이메일: email@gmail.com</p>
-            <p>운영시간: 평일 09:00 ~ 18:00</p>
-        </div>
-        <div class="footer-section">
-            <h4>바로가기</h4>
-            <ul>
-                <li><a href="#">회사 소개</a></li>
-                <li><a href="#">이용약관</a></li>
-                <li><a href="#">개인정보처리방침</a></li>
-                <li><a href="#">문의하기</a></li>
-            </ul>
-        </div>
-    </div>
-    <div class="footer-bottom">
-        <p>&copy; 2025 예시회사. All rights reserved.</p>
     </div>
 </footer>
 
-<script> // 스크립트 작동이 안됨
-// 모임 자동 추천, 슬라이드 형
-const track = document.querySelector('.recom');
-const prev = document.querySelector('.prev');
-const next = document.querySelector('.next');
-const card = document.querySelectorAll('.card').length;
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // 추천 모임 슬라이더 스크립트
+        const slider = document.getElementById('recom-slider');
+        const prevButton = document.querySelector('.slider-button.prev');
+        const nextButton = document.querySelector('.slider-button.next');
 
-let currentIndex = 0;
-const visibleCards = 4; // 한 번에 보여줄 카드 수
-const totalCards = 10;
-const cardPercent = 100 / visibleCards;
+        // 슬라이더 버튼 클릭 이벤트
+        nextButton.addEventListener('click', () => {
+            const cardWidth = slider.querySelector('.slider-card').offsetWidth;
+            slider.scrollBy({ left: cardWidth + 16, behavior: 'smooth' });
+        });
 
-next.addEventListener('click', () => {
-    if (currentIndex < totalCards - visibleCards) {
-        currentIndex++;
-        track.style.transform = `translateX(-${currentIndex * cardPercent}%)`;
-    }
-});
-
-prev.addEventListener('click', () => {
-    if (currentIndex > 0) {
-        currentIndex--;
-        track.style.transform =  `translateX(-${currentIndex * cardPercent}%)`
-    }
-});
+        prevButton.addEventListener('click', () => {
+            const cardWidth = slider.querySelector('.slider-card').offsetWidth;
+            slider.scrollBy({ left: -(cardWidth + 16), behavior: 'smooth' });
+        });
+    });
 </script>
+
 </body>
 </html>

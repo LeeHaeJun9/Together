@@ -5,6 +5,7 @@ import com.example.together.domain.SystemRole;
 import com.example.together.domain.User;
 import com.example.together.repository.*;
 
+import com.example.together.service.cafe.CafeService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,15 +40,25 @@ public class MainController {
     @Autowired
     private ChatRoomRepository chatRoomRepository;
 
+    private final CafeService cafeService;
+
     // 메인페이지
     @GetMapping("/mainPage")
     public String mainPage(Model model, Principal principal) {
-        log.info("GET /main - 메인페이지 요청");
+        log.info("GET /mainPage - 메인페이지 요청");
 
-        // 메인페이지 데이터 추가 (예: 인기 카페 목록 등)
-        model.addAttribute("message", "모여라에 오신 것을 환영합니다!");
+        // 1. 추천 카페 목록을 가져와서 모델에 추가 (예: 8개)
+        model.addAttribute("recomCafes", cafeService.getRecommendedCafes(8));
 
-        return "mainPage";  // mainPage.html
+        // 2. 카테고리 목록을 가져와서 모델에 추가
+        model.addAttribute("categories", cafeService.getAllCategories());
+
+        // 로그인 여부에 따른 메시지 처리 (선택 사항)
+        String message = (principal != null) ?
+                "환영합니다, " + principal.getName() + "님!" : "모여라에 오신 것을 환영합니다!";
+        model.addAttribute("message", message);
+
+        return "mainPage";
     }
     // MainController.java의 기존 mypage 메서드를 이것으로 교체
 

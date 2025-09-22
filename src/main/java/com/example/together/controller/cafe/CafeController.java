@@ -3,6 +3,7 @@ package com.example.together.controller.cafe;
 import com.example.together.domain.Cafe;
 import com.example.together.domain.CafeApplication;
 import com.example.together.domain.CafeApplicationStatus;
+import com.example.together.domain.CafeCategory;
 import com.example.together.dto.PageRequestDTO;
 import com.example.together.dto.PageResponseDTO;
 import com.example.together.dto.cafe.*;
@@ -218,10 +219,36 @@ public class CafeController {
         }
     }
 
+//    @GetMapping("/list")
+//    public String listAllCafes(Model model, Principal principal) {
+//        // userId는 개인화된 정보가 필요할 때만 사용. 현재는 getAllCafes()가 userId를 받지 않으므로 제거.
+//        List<CafeResponseDTO> cafes = cafeService.getAllCafes();
+//        model.addAttribute("cafes", cafes);
+//        return "cafe/list";
+//    }
+
     @GetMapping("/list")
-    public String listAllCafes(Model model, Principal principal) {
-        // userId는 개인화된 정보가 필요할 때만 사용. 현재는 getAllCafes()가 userId를 받지 않으므로 제거.
-        List<CafeResponseDTO> cafes = cafeService.getAllCafes();
+    public String listAllCafes(@RequestParam(value = "category", required = false) String categoryName, Model model) {
+        log.info("GET /cafe/list 요청. 카테고리: {}", categoryName);
+
+        List<CafeResponseDTO> cafes;
+
+        if (categoryName == null || categoryName.equalsIgnoreCase("ALL")) {
+            // 'ALL' 카테고리 또는 매개변수가 없을 경우 모든 카페 조회
+            cafes = cafeService.getAllCafes();
+        } else {
+            // 특정 카테고리 이름으로 카페 조회
+            try {
+                // 문자열 카테고리 이름으로 Enum 변환
+                CafeCategory cafeCategory = CafeCategory.valueOf(categoryName.toUpperCase());
+                cafes = cafeService.getCafesByCategory(cafeCategory);
+            } catch (IllegalArgumentException e) {
+                // 유효하지 않은 카테고리 이름일 경우, 모든 카페 목록을 보여주거나 에러 페이지로 리다이렉트
+                log.error("잘못된 카테고리 이름: {}", categoryName);
+                cafes = cafeService.getAllCafes();
+            }
+        }
+
         model.addAttribute("cafes", cafes);
         return "cafe/list";
     }
