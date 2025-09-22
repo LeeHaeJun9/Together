@@ -26,6 +26,7 @@ public class Post extends BaseEntity{
     private int viewCount;
 
     @Enumerated(EnumType.STRING)
+    @Column(length = 300)
     private PostType postType;
 
     private boolean pinned;
