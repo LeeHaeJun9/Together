@@ -30,7 +30,11 @@
                         <tr th:each="dto:${responseDTO.dtoList}">
                             <th scope="row">[[${dto.id}]]</th>
                             <td>
-                                <a th:href="|@{/meeting/review/read(id = ${dto.id})}&${link}|" class="text-decoration-none">[[${dto.title}]]</a>
+<!--                                <a th:href="|@{/cafe/{cafeId}/meeting/review/read((id = ${dto.id})}&${link}|" class="text-decoration-none">[[${dto.title}]]</a>-->
+                                <a th:href="@{/cafe/{cafeId}/meeting/review/read(cafeId=${cafeResponse.id}, id=${dto.id}, page=${pageRequestDTO.page}, size=${pageRequestDTO.size})}"
+                                   class="text-decoration-none">
+                                    [[${dto.title}]]
+                                </a>
                             </td>
                             <td>[[${dto.reviewerUserId}]]</td>
                             <td>[[${dto.reviewerNickname}]]</td>
@@ -41,12 +45,13 @@
                     </table>
 
                     <!--                    페이지 목록 출력 p.482-->
-                    <form id="pageForm" action="/meeting/list" method="get">
+                    <form id="pageForm" th:action="@{/cafe/{cafeId}/meeting/review/list(cafeId=${cafeResponse.id})}" method="get">
                         <input type="hidden" name="page" value="1" />
                     </form>
 
                     <div>
-                        <button type="button" class="btn btn-primary registerBtn" >Register</button>
+<!--                        <button type="button" class="btn btn-primary registerBtn">Register</button>-->
+                        <button type="button" class="btn btn-primary registerBtn" th:data-cafe-id="${cafeResponse.id}">Register</button>
                         <div class="float-end">
                             <ul class="pagination flex-wrap">
                                 <li class="page-item" th:if="${responseDTO.prev}">
@@ -76,7 +81,12 @@
                     }
 
                     document.querySelector(".registerBtn").addEventListener("click", function (e) {
-                        self.location = `/meeting/review/register`
+                        const cafeId = this.getAttribute("data-cafe-id");
+                        if (cafeId) {
+                            self.location = `/cafe/${cafeId}/meeting/review/register`;
+                        } else {
+                            alert("카페 정보를 찾을 수 없습니다.");
+                        }
                     }, false)
 
                     document.querySelector(".pagination").addEventListener("click", function (e) {

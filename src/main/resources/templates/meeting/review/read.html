@@ -18,53 +18,25 @@
             <input type="text" class="form-control" th:value="${dto.title}" readonly>
         </div>
 
-
-        <!--    meeting과 연결 필요 또는 MeetingReviewDTO에서 cafe 활성화    -->
-<!--        <div class="input-group mb-3" th:if="*{cafe != null}">-->
-<!--            <span class="input-group-text" >Category</span>-->
-<!--            <input type="text" class="form-control" placeholder="Category" readonly th:value="*{cafe.category}">-->
-<!--        </div>-->
-<!--        <div class="input-group mb-3" th:if="*{cafe != null}">-->
-<!--            <span class="input-group-text">Cafe</span>-->
-<!--            <input type="hidden" th:field="*{cafe.id}" />-->
-<!--            <input type="text" class="form-control" placeholder="Cafe" th:value="*{cafe.name}" readonly>-->
-<!--        </div>-->
-<!--        <div class="input-group mb-3">-->
-<!--            <span class="input-group-text">Cafe</span>-->
-<!--            <input type="text" class="form-control" th:value="${dto.cafe}" readonly>-->
-<!--        </div>-->
-
-<!--        <div class="input-group mb-3" th:if="*{dto.meeting.cafe != null}">-->
-<!--            <span class="input-group-text" >Category</span>-->
-<!--            <input type="text" class="form-control" placeholder="Category" readonly th:value="*{dto.meeting.cafe.category}">-->
-<!--        </div>-->
-<!--        <div class="input-group mb-3" th:if="*{dto.meeting.cafe != null}">-->
-<!--            <span class="input-group-text">Cafe</span>-->
-<!--            <input type="hidden" th:field="*{dto.meeting.cafe.id}" />-->
-<!--            <input type="text" class="form-control" placeholder="Cafe" th:text="${dto.meeting.cafe.name}" readonly>-->
-<!--        </div>-->
-<!--        <div class="input-group mb-3">-->
-<!--            <span class="input-group-text">Cafe</span>-->
-<!--            <input type="text" class="form-control" th:value="${dto.meeting.cafe}" readonly>-->
-<!--        </div>-->
-
-
         <div class="input-group mb-3">
             <span class="input-group-text">Writer</span>
-            <input type="text" class="form-control" th:value="${dto.reviewer}" readonly>
+            <input type="text" name="reviewer" class="form-control" th:value="${dto.reviewerUserId}" readonly>
+            <input type="text" name="reviewer" class="form-control" th:value="${dto.reviewerNickname}" readonly>
         </div>
 
 
         <div class="input-group mb-3">
             <span class="input-group-text">MeetingDate</span>
-            <input type="datetime-local" class="form-control" th:value="${dto.meeting != null ? #temporals.format(dto.meeting.meetingDate, 'yyyy-MM-dd') : ''}" readonly>
+            <input type="datetime-local" class="form-control" th:value="${#temporals.format(dto.meetingDate, 'yyyy-MM-dd')}" readonly>
         </div>
-
+        <div class="input-group mb-3">
+            <span class="input-group-text">Location</span>
+            <input type="text" name="location" class="form-control" th:value="${dto.meetingLocation}" readonly>
+        </div>
         <div class="input-group mb-3">
             <span class="input-group-text">Address</span>
-            <input type="text" class="form-control" th:value="${dto.meeting != null && dto.meeting.address != null ? dto.meeting.address.city : ''}" readonly>
+            <input type="text" class="form-control" th:value="${dto.meetingAddress}" readonly>
         </div>
-
 
 
         <div class="input-group mb-3">
@@ -75,12 +47,12 @@
 
         <div class="my-4">
             <div class="float-end" th:with="link = ${pageRequestDTO.getLink()}">
-                <a th:href="|@{/meeting/review/list}?${link}|" class="text-decoration-none">
+                <a th:href="@{/cafe/{cafeId}/meeting/review/list(cafeId=${cafeResponse.id}, page=${pageRequestDTO.page}, type=${pageRequestDTO.type}, keyword=${pageRequestDTO.keyword})}">
                     <button type="button" class="btn btn-primary">List</button>
                 </a>
-                <a th:href="|@{/meeting/review/modify(id=${dto.id})}&${link}|" class="text-decoration-none">
+                <a th:href="|@{/cafe/{cafeId}/meeting/review/modify(cafeId=${cafeResponse.id}, id=${dto.id})}&${link}|" class="text-decoration-none">
                     <button type="button" class="btn btn-secondary">Modify</button>
-                </a>
+
             </div>
         </div>
 

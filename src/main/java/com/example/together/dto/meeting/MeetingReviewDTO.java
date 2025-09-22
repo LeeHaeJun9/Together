@@ -32,10 +32,14 @@ public class MeetingReviewDTO {
     private String reviewerNickname; // 닉네임
     private String reviewerUserId; // 유저 아이디
 
+    private Meeting meeting;
     private Long meetingId;
     private LocalDateTime meetingDate;
     private String meetingLocation;
     private String meetingAddress;
+
+    private String address;
+    private String location;
 
     private List<String> imageUrls;
 

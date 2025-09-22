@@ -45,8 +45,9 @@ public class MeetingController {
     }
 
     @GetMapping("/meeting/list")
-    public void meetingListByRequestParam(@PathVariable("cafeId") Long cafeId, PageRequestDTO pageRequestDTO, Model model, Principal principal) {
+    public String meetingListByRequestParam(@PathVariable("cafeId") Long cafeId, PageRequestDTO pageRequestDTO, Model model, Principal principal) {
         processMeetingList(cafeId, pageRequestDTO, model, principal);
+        return "meeting/list";
     }
 
     // Case 2: 카페 상세 페이지의 "모임" 탭에서 클릭하여 /cafe/{cafeId}/meetings 형태로 요청할 때

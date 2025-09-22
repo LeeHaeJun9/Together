@@ -3,6 +3,7 @@ package com.example.together.service.meeting;
 import com.example.together.domain.MeetingReview;
 import com.example.together.dto.PageRequestDTO;
 import com.example.together.dto.PageResponseDTO;
+import com.example.together.dto.meeting.MeetingDTO;
 import com.example.together.dto.meeting.MeetingReviewDTO;
 
 public interface MeetingReviewService {
@@ -15,4 +16,7 @@ public interface MeetingReviewService {
 
     PageResponseDTO<MeetingReviewDTO> list(PageRequestDTO pageRequestDTO);
     MeetingReview createReview(String userId, Long meetingId, String title, String content);
+    MeetingReview writeReview(String userId, String title, String content);
+
+    MeetingDTO getMeetingDTOById(Long meetingId);
 }

@@ -15,7 +15,7 @@
                     MeetingReview Modify
                 </div>
                 <div class="card-body">
-                    <form th:action="@{/meeting/review/modify}" method="post" id="f1">
+                    <form th:action="@{/cafe/{cafeId}/meeting/review/modify(cafeId=${cafeResponse.id})}" method="post" id="f1">
                         <div class="input-group mb-3">
                             <span class="input-group-text">id</span>
                             <input type="text" class="form-control" th:value="${dto.id}" name="id" readonly>
@@ -25,45 +25,37 @@
                             <input type="text" class="form-control" name="title" th:value="${dto.title}">
                         </div>
 
-                        <!--           이건 왜 되지?             -->
-                        <div class="input-group mb-3" th:if="*{cafe != null}">
-                            <span class="input-group-text" >Category</span>
-                            <input type="text" class="form-control" placeholder="Category" readonly th:value="*{cafe.category}">
-                        </div>
-                        <div class="input-group mb-3" th:if="*{cafe != null}">
-                            <span class="input-group-text">Cafe</span>
-                            <input type="hidden" th:field="*{cafe.id}" />
-                            <input type="text" class="form-control" placeholder="Cafe" th:value="*{cafe.name}" readonly>
-                        </div>
+<!--                        <div class="input-group mb-3" th:if="*{cafe != null}">-->
+<!--                            <span class="input-group-text" >Category</span>-->
+<!--                            <input type="text" class="form-control" placeholder="Category" readonly th:value="*{cafe.category}">-->
+<!--                        </div>-->
+<!--                        <div class="input-group mb-3" th:if="*{cafe != null}">-->
+<!--                            <span class="input-group-text">Cafe</span>-->
+<!--                            <input type="hidden" th:field="*{cafe.id}" />-->
+<!--                            <input type="text" class="form-control" placeholder="Cafe" th:value="*{cafe.name}" readonly>-->
+<!--                        </div>-->
                         <div class="input-group mb-3">
                             <span class="input-group-text">Writer</span>
-                            <input type="text" name="organizer" class="form-control" th:value="${#authentication.principal.username}" readonly>
+                            <input type="text" name="reviewer" class="form-control" th:value="${#authentication.principal.username}" readonly>
                         </div>
 
-
-                        <!--   모임 후기에서는 모임의 정보를 받아와야 하기 때문에 미팅 정보를 불러오는 대신 수정 불가    -->
                         <div class="input-group mb-3">
                             <span class="input-group-text">meetingDate</span>
-                            <input type="datetime-local" th:value="${dto.meeting != null ? #temporals.format(dto.meeting.meetingDate, 'yyyy-MM-dd') : ''}" class="form-control" readonly >
+                            <input type="datetime-local" name="meetingDate" th:value="${dto.meeting != null ? #temporals.format(dto.meeting.meetingDate, 'yyyy-MM-dd') : ''}" class="form-control">
+                        </div>
+                        <div class="input-group mb-3">
+                            <span class="input-group-text">Location</span>
+                            <input type="text" class="form-control" th:field="${dto.meetingLocation}">
                         </div>
                         <div class="input-group mb-3">
                             <span class="input-group-text">Address</span>
-                            <input type="text" th:value="${dto.meeting != null && dto.meeting.address != null ? dto.meeting.address.city : ''}" class="form-control" readonly>
+                            <input type="text" th:field="${dto.meetingAddress}" id="address" class="form-control" placeholder="주소" >
+                            <button type="button" onclick="execDaumPostcode()" class="btn btn-outline-secondary">주소 찾기</button>
                         </div>
-
-                        <!--   또는 본인이 직접 입력 가능 DTO, 엔티티 수정    -->
-<!--                        <div class="input-group mb-3">-->
-<!--                            <span class="input-group-text">meetingDate</span>-->
-<!--                            <input type="datetime-local" th:value="${dto.meeting != null ? #temporals.format(dto.meeting.meetingDate, 'yyyy-MM-dd') : ''}" class="form-control" readonly >-->
-<!--                        </div>-->
-<!--                        <div class="input-group mb-3">-->
-<!--                            <span class="input-group-text">Address</span>-->
-<!--                            <input type="text" th:value="${dto.meeting != null && dto.meeting.address != null ? dto.meeting.address.city : ''}" class="form-control" readonly>-->
-<!--                        </div>-->
 
                         <div class="input-group mb-3">
                             <span class="input-group-text">Content</span>
-                            <textarea class="form-control col-sm-5" rows="5" name="content">[[${dto.content}]]</textarea>
+                            <textarea class="form-control col-sm-5" rows="5" th:field="${dto.content}"></textarea>
                         </div>
 
                         <div class="my-4">
@@ -80,6 +72,19 @@
             </div><!--end card-->
         </div><!-- end col-->
     </div><!-- end row-->
+    <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+    <script>
+        // 함수 이름을 execDaumPostcode()로 통일
+        function execDaumPostcode() {
+            new daum.Postcode({
+                oncomplete: function(data) {
+                    var addr = data.address;
+                    document.getElementById("address").value = addr;
+                }
+            }).open();
+        }
+    </script>
+
 </div>
 
 
@@ -98,15 +103,15 @@
         alert(errorMsg)
     }
 
-
-    const link = [[${pageRequestDTO.getLink()}]]
+    const cafeId = [[${cafeResponse.id}]];
+    const link = [[${pageRequestDTO.getLink()}]];
     const formObj = document.querySelector("#f1")
 
     document.querySelector(".modBtn").addEventListener("click", function (e) {
         e.preventDefault()
         e.stopPropagation()
 
-        formObj.action = `/meeting/review/modify?${link}`
+        formObj.action = `/cafe/${cafeId}/meeting/review/modify?${link}`
         formObj.method = 'post'
         formObj.submit()
     }, false)
@@ -115,7 +120,7 @@
         e.stopPropagation()
         e.preventDefault()
 
-        formObj.action = `/meeting/review/remove`
+        formObj.action = `/cafe/${cafeId}/meeting/review/remove`
         formObj.method = 'post'
         formObj.submit()
     }, false)
@@ -125,7 +130,7 @@
         e.stopPropagation()
 
         formObj.reset()
-        self.location = `/meeting/review/list?${link}`
+        self.location = `/cafe/${cafeId}/meeting/review/list?${link}`
     }, false)
 
 </script>
