@@ -224,7 +224,7 @@ public class MeetingController {
 
         meetingService.MeetingDelete(id);
         redirectAttributes.addFlashAttribute("result", "removed");
-        return "redirect:/meeting/list";
+        return "redirect:/cafe/" + cafeId + "/meetings";
     }
 
     @PostMapping("/meeting/apply")

@@ -97,6 +97,11 @@ public class MeetingServiceImpl implements MeetingService {
 
     @Override
     public void MeetingDelete(Long id) {
+        Optional<CafeCalendar> calendarEntry = cafeCalendarRepository.findByMeetingId(id);
+
+
+        calendarEntry.ifPresent(cafeCalendarRepository::delete);
+
         meetingRepository.deleteById(id);
     }
 
