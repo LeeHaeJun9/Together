@@ -45,7 +45,7 @@
 
         <div class="input-group mb-3">
             <span class="input-group-text">Location</span>
-            <input type="text" name="location" class="form-control" th:value="${dto.location}">
+            <input type="text" name="location" class="form-control" th:value="${dto.location}" readonly>
         </div>
         <div class="input-group mb-3">
             <span class="input-group-text">Address</span>
@@ -60,8 +60,9 @@
 
 
         <div>
-            <span th:text="${dto.visibility} != null and ${dto.visibility} == 'PUBLIC' ? '전체공개' : '카페 공개'"></span> /
-            <span th:text="${dto.recruiting} ? '모집 마감' : '모집 중'"></span>
+            <span th:text="${dto.visibility != null and dto.visibility.name() == 'PUBLIC'} ? '전체 공개' : '카페 공개'"></span>
+            /
+            <span th:text="${dto.recruiting != null and dto.recruiting.name() == 'END'} ? '모집 마감' : '모집 중'"></span>
         </div>
 <!--        <div class="form-check">-->
 <!--            <div class="form-check form-check-inline">-->
@@ -79,10 +80,10 @@
 
         <div class="my-4">
             <div class="float-end" th:with="link = ${pageRequestDTO.getLink()}">
-                <a th:href="|@{/meeting/list}?${link}|" class="text-decoration-none">
+                <a th:href="|@{/cafe/{cafeId}/meetings(cafeId=${cafeResponse.id})}?${link}|" class="text-decoration-none">
                     <button type="button" class="btn btn-primary">List</button>
                 </a>
-                <a th:href="|@{/meeting/modify(id=${dto.id})}&${link}|" class="text-decoration-none">
+                <a th:href="|@{/cafe/{cafeId}/meeting/modify(cafeId=${cafeResponse.id}, id=${dto.id})}&${link}|" class="text-decoration-none">
                     <button type="button" class="btn btn-secondary">Modify</button>
                 </a>
             </div>
@@ -103,29 +104,29 @@
 
 
         <div class="my-2">
-            <form th:action="@{/meeting/apply}" method="post" style="display: inline;">
+            <form th:action="@{/cafe/{cafeId}/meeting/apply(cafeId=${cafeResponse.id})}" method="post" style="display: inline;">
                 <input type="hidden" name="meetingId" th:value="${dto.id}" />
-                <button type="submit"
-                        class="btn"
-                        th:classappend="${dto.recruiting} ? 'btn-secondary disabled' : 'btn-success'"
-                        th:disabled="${dto.recruiting}">
-                    <span th:text="${dto.recruiting} ? '모집 마감' : '신청하기'">모집 상태</span>
+                <button type="submit" class="btn"
+                        th:classappend="(${dto.meetingDate.isBefore(T(java.time.LocalDateTime).now())} or ${dto.recruiting.name() == 'END'}) ? 'btn-secondary disabled' : 'btn-success'"
+                        th:disabled="${dto.meetingDate.isBefore(T(java.time.LocalDateTime).now())} or ${dto.recruiting.name() == 'END'}">
+                    <span th:text="(${dto.meetingDate.isBefore(T(java.time.LocalDateTime).now())} or ${dto.recruiting.name() == 'END'}) ? '모집 마감' : '신청하기'">모집 상태</span>
                 </button>
             </form>
 
-<!--             모임 후기 버튼 (모임 날짜가 오늘 이전일 경우만 보이게) -->
+
+            <!--             모임 후기 버튼 (모임 날짜가 오늘 이전일 경우만 보이게) -->
             <button type="button"
                     class="btn btn-outline-primary ms-2"
                     th:if="${dto.meetingDate.isBefore(T(java.time.LocalDateTime).now())}">
                 모임 후기 작성
             </button>
             <!-- 모임 후기 버튼 (모임 날짜가 오늘 이전일 경우, 모임 참여 회원만)-->
-<!--            <button type="button"-->
-<!--                    class="btn btn-outline-primary ms-2"-->
-<!--                    th:if="${#authentication.principal != null and isJoinedUser and dto.meetingDate.isBefore(T(java.time.LocalDateTime).now())}"-->
-<!--                    th:onclick="|location.href='@{/meeting/review(meetingId=${dto.id})}'|">-->
-<!--                모임 후기 작성-->
-<!--            </button>-->
+            <button type="button"
+                    class="btn btn-outline-primary ms-2"
+                    th:if="${isJoinedUser} and ${dto.meetingDate.isBefore(T(java.time.LocalDateTime).now())}"
+                    th:onclick="|location.href='@{/meeting/review(meetingId=${dto.id})}'|">
+                모임 후기 작성
+            </button>
         </div>
 
         <br>
@@ -133,6 +134,7 @@
         <table class="table table-striped">
             <thead>
             <tr>
+                <th>넘버</th>
                 <th>아이디</th>
                 <th>닉네임</th>
                 <th>참가 상태</th>
@@ -140,6 +142,7 @@
             </thead>
             <tbody>
             <tr th:each="mu : ${meetingUser}">
+                <td th:text="${mu.id}">아이디</td>
                 <td th:text="${mu.userIdName}">아이디</td>
                 <td th:text="${mu.nickname}">닉네임</td>
                 <td th:text="${mu.joinStatus}">상태</td>

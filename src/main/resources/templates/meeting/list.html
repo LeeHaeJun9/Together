@@ -28,7 +28,7 @@
                         <tr th:each="dto:${responseDTO.dtoList}">
                             <th scope="row">[[${dto.id}]]</th>
                             <td>
-                                <a th:href="|@{/meeting/read(id = ${dto.id})}&${link}|" class="text-decoration-none">[[${dto.title}]]</a>
+                                <a th:href="|@{/cafe/{cafeId}/meeting/read(cafeId=${cafeResponse.id} ,id = ${dto.id})}&${link}|" class="text-decoration-none">[[${dto.title}]]</a>
                             </td>
                             <td>[[${dto.organizerName}]]</td>
                             <td>[[${#temporals.format(dto.meetingDate, 'yyyy-MM-dd')}]]</td>
@@ -72,7 +72,7 @@
                     document.querySelector(".registerBtn").addEventListener("click", function (e) {
                         const cafeId = this.getAttribute("data-cafe-id");
                         if (cafeId) {
-                            self.location = `/meeting/register?cafeId=${cafeId}`;
+                            self.location = `meeting/register`;
                         } else {
                             alert("카페 정보를 찾을 수 없습니다.");
                         }

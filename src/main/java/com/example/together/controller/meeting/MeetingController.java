@@ -25,7 +25,7 @@ import java.security.Principal;
 import java.util.List;
 
 @Controller
-//@RequestMapping("/meeting")
+@RequestMapping("/cafe/{cafeId}")
 @Log4j2
 @RequiredArgsConstructor
 public class MeetingController {
@@ -45,14 +45,14 @@ public class MeetingController {
     }
 
     @GetMapping("/meeting/list")
-    public void meetingListByRequestParam(@RequestParam("cafeId") Long cafeId, PageRequestDTO pageRequestDTO, Model model, Principal principal) {
+    public void meetingListByRequestParam(@PathVariable("cafeId") Long cafeId, PageRequestDTO pageRequestDTO, Model model, Principal principal) {
         processMeetingList(cafeId, pageRequestDTO, model, principal);
     }
 
     // Case 2: 카페 상세 페이지의 "모임" 탭에서 클릭하여 /cafe/{cafeId}/meetings 형태로 요청할 때
     // 중요: @RequestMapping을 /cafe로 옮기거나, 여기만 특정 경로를 처리하도록 재정의합니다.
     // 여기서는 @RequestMapping("/meeting")을 유지하면서, 이 메서드만 다른 경로를 처리하도록 합니다.
-    @GetMapping("/cafe/{cafeId}/meetings") // << 이 매핑을 추가합니다.
+    @GetMapping("/meetings") // << 이 매핑을 추가합니다.
     public String meetingListByPathVariable(@PathVariable("cafeId") Long cafeId, PageRequestDTO pageRequestDTO, Model model, Principal principal) {
         // 실제 로직은 중복을 피하기 위해 별도의 private 메서드로 분리하는 것이 좋습니다.
         processMeetingList(cafeId, pageRequestDTO, model, principal);
@@ -82,7 +82,7 @@ public class MeetingController {
     }
 
     @GetMapping("/meeting/register")
-    public String meetingRegisterGet(@RequestParam("cafeId") Long cafeId, Model model, Principal principal, PageRequestDTO pageRequestDTO) {
+    public String meetingRegisterGet(@PathVariable("cafeId") Long cafeId, Model model, Principal principal, PageRequestDTO pageRequestDTO) {
         User user = getUserFromPrincipal(principal);
 
 
@@ -105,7 +105,7 @@ public class MeetingController {
     public String meetingRegisterPost(@Valid MeetingDTO meetingDTO,
                                       BindingResult bindingResult,
                                       Principal principal,
-                                      @RequestParam("cafeId") Long cafeId,
+                                      @PathVariable("cafeId") Long cafeId,
                                       RedirectAttributes redirectAttributes) {
         log.info("meetingRegister Post.....");
 
@@ -125,7 +125,7 @@ public class MeetingController {
             });
             redirectAttributes.addFlashAttribute("errors", bindingResult.getAllErrors());
             redirectAttributes.addAttribute("cafeId", cafeId); // 오류 시에도 cafeId 유지
-            return "redirect:/meeting/register";
+            return "redirect:/cafe/{cafeId}/meeting/register";
         }
 
         log.info(meetingDTO);
@@ -133,11 +133,11 @@ public class MeetingController {
 
         redirectAttributes.addFlashAttribute("result", id);
         redirectAttributes.addAttribute("cafeId", cafeId); // 성공 시에도 cafeId 유지
-        return "redirect:/meeting/list";
+        return "redirect:/cafe/{cafeId}/meetings";
     }
 
-    @GetMapping({"/meeting/read", "/meeting/modify"})
-    public void meetingRead(Long id, PageRequestDTO pageRequestDTO, Model model, Principal principal) {
+    @GetMapping("/meeting/read")
+    public String meetingRead(@PathVariable Long cafeId, Long id, PageRequestDTO pageRequestDTO, Model model, Principal principal) {
         User user = getUserFromPrincipal(principal);
 
         MeetingDTO meetingDTO = meetingService.MeetingDetail(id);
@@ -147,13 +147,47 @@ public class MeetingController {
         List<MeetingUserDTO> meetingUser = meetingUserService.getMeetingUsersByMeetingId(id);
         model.addAttribute("meetingUser", meetingUser);
         model.addAttribute("loggedInUserId", user != null ? user.getId() : null);
+
+        CafeResponseDTO cafeResponse;
+        if (user != null) {
+            cafeResponse = cafeService.getCafeById(cafeId, user.getId());
+        } else {
+            cafeResponse = cafeService.getCafeById(cafeId);
+        }
+        model.addAttribute("cafeResponse", cafeResponse);
+
+        return "meeting/read";
     }
 
+
+    @GetMapping( "/meeting/modify")
+    public String meetingModifyGet(@PathVariable Long cafeId, Long id, PageRequestDTO pageRequestDTO, Model model, Principal principal) {
+        User user = getUserFromPrincipal(principal);
+
+        MeetingDTO meetingDTO = meetingService.MeetingDetail(id);
+        log.info(meetingDTO);
+        model.addAttribute("dto", meetingDTO);
+
+        List<MeetingUserDTO> meetingUser = meetingUserService.getMeetingUsersByMeetingId(id);
+        model.addAttribute("meetingUser", meetingUser);
+        model.addAttribute("loggedInUserId", user != null ? user.getId() : null);
+
+        CafeResponseDTO cafeResponse;
+        if (user != null) {
+            cafeResponse = cafeService.getCafeById(cafeId, user.getId());
+        } else {
+            cafeResponse = cafeService.getCafeById(cafeId);
+        }
+        model.addAttribute("cafeResponse", cafeResponse);
+
+        return "meeting/modify";
+    }
     @PostMapping("/meeting/modify")
-    public String meetingModify(@Valid MeetingDTO meetingDTO,
-                                BindingResult bindingResult,
-                                RedirectAttributes redirectAttributes,
-                                Principal principal) {
+    public String meetingModifyPost(@PathVariable Long cafeId,
+                                    @Valid MeetingDTO meetingDTO,
+                                    BindingResult bindingResult,
+                                    RedirectAttributes redirectAttributes,
+                                    Principal principal) {
         log.info("meetingModify Post....." + meetingDTO);
 
         User user = getUserFromPrincipal(principal);
@@ -168,17 +202,17 @@ public class MeetingController {
             log.info("has errors..... meetingModify Post....");
             redirectAttributes.addFlashAttribute("errors", bindingResult.getAllErrors());
             redirectAttributes.addAttribute("id", meetingDTO.getId());
-            return "redirect:/meeting/modify?id=" + meetingDTO.getId();
+            return "redirect:/cafe/{cafeId}/meeting/modify?id=" + meetingDTO.getId();
         }
 
         meetingService.MeetingModify(meetingDTO);
         redirectAttributes.addFlashAttribute("result", "modified");
         redirectAttributes.addAttribute("id", meetingDTO.getId());
-        return "redirect:/meeting/read";
+        return "redirect:/cafe/{cafeId}/meeting/read";
     }
 
     @PostMapping("/meeting/remove")
-    public String meetingRemove(Long id, RedirectAttributes redirectAttributes, Principal principal) {
+    public String meetingRemove(@PathVariable Long cafeId, Long id, RedirectAttributes redirectAttributes, Principal principal) {
         log.info("meetingRemove..." + id);
 
         User user = getUserFromPrincipal(principal);
@@ -209,6 +243,6 @@ public class MeetingController {
         }
 
         redirectAttributes.addAttribute("id", meetingId);
-        return "redirect:/meeting/read?id=" + meetingId;
+        return "redirect:/cafe/{cafeId}/meeting/read?id=" + meetingId;
     }
 }
