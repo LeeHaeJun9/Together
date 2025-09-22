@@ -13,7 +13,10 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Optional;
 
 @Slf4j
@@ -100,50 +103,6 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
         // user.builder()로 새 객체를 만들 필요 없이, 변경된 user 엔티티가 자동으로 저장됩니다.
         return user;
-    }
-
-    /**
-     * 개별 필드 업데이트
-     */
-    @Override
-    @Transactional
-    public boolean updateUserField(String userId, String field, String value) {
-        try {
-            User user = findByUserId(userId);
-            if (user == null) {
-                return false;
-            }
-
-            // 필드별로 업데이트 처리
-            switch (field) {
-                case "nickname":
-                    user.setNickname(value);
-                    break;
-                case "name":
-                    user.setName(value);
-                    break;
-                case "email":
-                    // 이메일 중복 확인 (본인 제외)
-                    if (isEmailExistsExcludeUser(value, userId)) {
-                        return false; // 중복된 이메일
-                    }
-                    user.setEmail(value);
-                    break;
-                case "phone":
-                    user.setPhone(value);
-                    break;
-                default:
-                    return false; // 지원하지 않는 필드
-            }
-
-            userRepository.save(user);
-            return true;
-
-        } catch (Exception e) {
-            log.error("사용자 정보 업데이트 실패: userId = {}, field = {}, error = {}",
-                    userId, field, e.getMessage());
-            return false;
-        }
     }
 
     /**
@@ -291,6 +250,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
             return false;
         }
     }
+
     @Override
     @Transactional
     public void updateUserPassword(String userId, String newPassword) {
@@ -309,6 +269,95 @@ public class UserServiceImpl implements UserService, UserDetailsService {
             System.out.println("저장 완료: " + savedUser.getUserId());
         } else {
             System.out.println("사용자를 찾을 수 없음: " + userId);
+        }
+    }
+
+    /**
+     * 프로필 사진 업로드 메서드 - 수정된 버전
+     * 프로젝트 루트의 uploads 폴더에 파일을 저장합니다.
+     */
+    @Override
+    public String uploadProfilePhoto(String userId, MultipartFile photo) {
+        try {
+            // 프로젝트 루트의 uploads 폴더에 저장 (수정된 부분)
+            String currentDir = System.getProperty("user.dir");
+            String uploadDir = currentDir + File.separator + "uploads" + File.separator + "profile" + File.separator;
+
+            // 폴더가 없으면 생성
+            File directory = new File(uploadDir);
+            if (!directory.exists()) {
+                boolean created = directory.mkdirs();
+                log.info("업로드 디렉토리 생성: {}, 성공: {}", uploadDir, created);
+            }
+
+            // 파일 확장자 가져오기
+            String originalFilename = photo.getOriginalFilename();
+            String extension = "";
+            if (originalFilename != null && originalFilename.contains(".")) {
+                extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+            } else {
+                extension = ".jpg"; // 기본 확장자
+            }
+
+            // 새 파일명 생성
+            String newFilename = userId + "_" + System.currentTimeMillis() + extension;
+
+            // 파일 저장
+            File targetFile = new File(uploadDir, newFilename);
+            photo.transferTo(targetFile);
+
+            log.info("프로필 사진 업로드 성공: {}", targetFile.getAbsolutePath());
+
+            // 웹에서 접근 가능한 경로 반환
+            return "/uploads/profile/" + newFilename;
+
+        } catch (IOException e) {
+            log.error("프로필 사진 업로드 중 파일 저장 실패: " + e.getMessage(), e);
+            throw new RuntimeException("파일 업로드에 실패했습니다.", e);
+        }
+    }
+
+    @Override
+    @Transactional
+    public boolean updateUserField(String userId, String field, String value) {
+        try {
+            User user = findByUserId(userId);
+            if (user == null) {
+                return false;
+            }
+
+            // 필드별로 업데이트 처리
+            switch (field) {
+                case "nickname":
+                    user.setNickname(value);
+                    break;
+                case "name":
+                    user.setName(value);
+                    break;
+                case "email":
+                    // 이메일 중복 확인 (본인 제외)
+                    if (isEmailExistsExcludeUser(value, userId)) {
+                        return false; // 중복된 이메일
+                    }
+                    user.setEmail(value);
+                    break;
+                case "phone":
+                    user.setPhone(value);
+                    break;
+                case "profilePhoto":
+                    user.setProfilePhoto(value);
+                    break;
+                default:
+                    return false; // 지원하지 않는 필드
+            }
+
+            userRepository.save(user);
+            return true;
+
+        } catch (Exception e) {
+            log.error("사용자 정보 업데이트 실패: userId = {}, field = {}, error = {}",
+                    userId, field, e.getMessage());
+            return false;
         }
     }
 }

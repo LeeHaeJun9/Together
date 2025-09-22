@@ -16,6 +16,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
     @Value("${org.zerock.upload.path}")
     private String uploadPath;
 
+
+
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry.addResourceHandler("/upload/**")
@@ -30,6 +32,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
                 .addResourceLocations("classpath:/static/assets/");
         registry.addResourceHandler("/lib/**")
                 .addResourceLocations("classpath:/static/lib/");
+        registry.addResourceHandler("/uploads/**")
+                .addResourceLocations("file:/uploads/");
     }
 
     private final StringToUserConverter stringToUserConverter;
@@ -44,3 +48,5 @@ public class WebMvcConfig implements WebMvcConfigurer {
     }
 
 }
+
+

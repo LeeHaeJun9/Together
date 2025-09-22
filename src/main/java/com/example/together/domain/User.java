@@ -45,4 +45,15 @@ public class User extends BaseEntity {
     public String toString() {
         return this.userId;
     }
+
+    @Column(name = "profile_photo")
+    private String profilePhoto;
+
+    public void setProfilePhoto(String profilePhoto) {
+        this.profilePhoto = profilePhoto;
+    }
+
+    public String getProfilePhoto() {
+        return profilePhoto;
+    }
 }
