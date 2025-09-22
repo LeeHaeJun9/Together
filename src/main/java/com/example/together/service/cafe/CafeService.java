@@ -2,6 +2,7 @@ package com.example.together.service.cafe;
 
 import com.example.together.domain.Cafe;
 import com.example.together.domain.CafeApplication;
+import com.example.together.domain.CafeCategory;
 import com.example.together.dto.cafe.*;
 import com.example.together.dto.calendar.CalendarEventDTO;
 import org.springframework.web.multipart.MultipartFile;
@@ -68,4 +69,12 @@ public interface CafeService {
     public List<Cafe> getSimilarCafes(Long cafeId, int limit);
 
     List<CalendarEventDTO> getCalendarEvents(Long cafeId);
+
+    // 모든 카페 카테고리 목록을 반환
+    List<CafeCategory> getAllCategories();
+
+    // 추천 카페 목록을 반환
+    List<CafeResponseDTO> getRecommendedCafes(int limit);
+
+    List<CafeResponseDTO> getCafesByCategory(CafeCategory cafeCategory);
 }
