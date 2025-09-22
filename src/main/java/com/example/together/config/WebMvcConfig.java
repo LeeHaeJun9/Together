@@ -7,8 +7,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.format.FormatterRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import org.springframework.context.annotation.Configuration;
+
 
 @Configuration
 public class WebMvcConfig implements WebMvcConfigurer {
@@ -33,7 +32,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
         registry.addResourceHandler("/lib/**")
                 .addResourceLocations("classpath:/static/lib/");
         registry.addResourceHandler("/uploads/**")
-                .addResourceLocations("file:/uploads/");
+                .addResourceLocations("file:" + System.getProperty("user.dir") + "/uploads/");
     }
 
     private final StringToUserConverter stringToUserConverter;
