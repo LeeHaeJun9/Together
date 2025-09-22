@@ -7,18 +7,18 @@
         </a>
         <nav>
             <ul class="nav-links" sec:authorize="!isAuthenticated()">
-                <li class="nav-link"><button><a th:href="@{/member/login}">로그인</a></button></li>
-                <li class="nav-link"><button><a th:href="@{/member/register}">회원가입</a></button></li>
+                <li class="nav-link"><a th:href="@{/member/login}">로그인</a></li>
+                <li class="nav-link"><a th:href="@{/member/register}">회원가입</a></li>
             </ul>
             <ul class="nav-links" sec:authorize="isAuthenticated() and !hasRole('ADMIN')">
-                <li class="nav-link"><button><a th:href="@{/member/mypage}">마이페이지</a></button></li>
-                <li class="nav-link"><button><a th:href="@{/logout}">로그아웃</a></button></li>
+                <li class="nav-link"><a th:href="@{/member/mypage}">마이페이지</a></li>
+                <li class="nav-link"><a th:href="@{/logout}">로그아웃</a></li>
             </ul>
             <ul class="nav-links" sec:authorize="hasRole('ADMIN')">
-                <li class="nav-link"><button><a th:href="@{/member/mypage}">마이페이지</a></button></li>
-                <li><button><a th:href="@{/logout}">로그아웃</a></button></li>
-                <li class="nav-link"><button><a th:href="@{/manager}">관리자페이지</a></button></li>
-                <li class="nav-link"><button><a th:href="@{/cafe/admin/applications}">카페 가입 승인</a></button></li>
+                <li class="nav-link"><a th:href="@{/member/mypage}">마이페이지</a></li>
+                <li><a th:href="@{/logout}">로그아웃</a></li>
+                <li class="nav-link"><a th:href="@{/manager}">관리자페이지</a></li>
+                <li class="nav-link"><a th:href="@{/cafe/admin/applications}">카페 가입 승인</a></li>
             </ul>
         </nav>
     </div>

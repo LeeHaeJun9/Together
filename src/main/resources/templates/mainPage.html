@@ -13,10 +13,17 @@
 
 <main>
     <section class="hero-section">
-        <h1>같이 놀 사람? 여기 모여라!</h1>
-        <p>
-            누구나 쉽게, 어디서든 가볍게. 같은 관심사만 있으면 지역은 상관없어요. 산책, 독서, 보드게임 등 마음 맞는 사람들과 자연스럽게 어울릴 수 있는 공간입니다.
-        </p>
+        <div class="container hero-content">
+            <div class="text-column">
+                <h1>같이 놀 사람? 여기 모여라!</h1>
+                <p>
+                    누구나 쉽게, 어디서든 가볍게. 같은 관심사만 있으면 지역은 상관없어요. 산책, 독서, 보드게임 등 마음 맞는 사람들과 자연스럽게 어울릴 수 있는 공간입니다.
+                </p>
+            </div>
+            <div class="image-column">
+                <img th:src="@{/images/banner.jpg}" alt="모임 일러스트" class="banner-image">
+            </div>
+        </div>
     </section>
 
     <section class="container slider-section">
