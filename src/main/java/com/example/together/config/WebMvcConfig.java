@@ -33,7 +33,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
         registry.addResourceHandler("/lib/**")
                 .addResourceLocations("classpath:/static/lib/");
         registry.addResourceHandler("/uploads/**")
-                .addResourceLocations("file:/uploads/");
+                .addResourceLocations("file:" + System.getProperty("user.dir") + "/uploads/");
     }
 
     private final StringToUserConverter stringToUserConverter;
