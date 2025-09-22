@@ -6,6 +6,7 @@ import com.example.together.domain.MeetingReviewImage;
 import com.example.together.domain.User;
 import com.example.together.dto.PageRequestDTO;
 import com.example.together.dto.PageResponseDTO;
+import com.example.together.dto.meeting.MeetingDTO;
 import com.example.together.dto.meeting.MeetingReviewDTO;
 import com.example.together.repository.MeetingRepository;
 import com.example.together.repository.MeetingReviewRepository;
@@ -40,6 +41,10 @@ public class MeetingReviewServiceImpl implements MeetingReviewService {
 //                .collect(Collectors.toList());
 
         Meeting meeting = mtReview.getMeeting();
+        MeetingDTO meetingDTO = null;
+        if (meeting != null) {
+            meetingDTO = getMeetingDTOById(meeting.getId());
+        }
 
         return MeetingReviewDTO.builder()
                 .id(mtReview.getId())
@@ -48,9 +53,10 @@ public class MeetingReviewServiceImpl implements MeetingReviewService {
                 .reviewerId(mtReview.getReviewer().getId())
                 .reviewerNickname(mtReview.getReviewer().getNickname())
                 .reviewerUserId(mtReview.getReviewer().getUserId())
-                .meetingId(meeting != null ? meeting.getId() : null)
-                .meetingDate(meeting != null ? meeting.getMeetingDate() : null)
-                .meetingAddress(meeting != null ? meeting.getAddress() : null)
+                .meetingId(meetingDTO != null ? meetingDTO.getId() : null)
+                .meetingDate(meetingDTO != null ? meetingDTO.getMeetingDate() : null)
+                .meetingAddress(meetingDTO != null ? meetingDTO.getAddress() : null)
+                .meetingLocation(meetingDTO != null ? meetingDTO.getLocation() : null)
                 .regDate(mtReview.getRegDate())
                 .modDate(mtReview.getModDate())
                 .build();
@@ -67,10 +73,10 @@ public class MeetingReviewServiceImpl implements MeetingReviewService {
 
     @Override
     public MeetingReviewDTO MeetingReviewDetail(Long id) {
-        Optional<MeetingReview> review = meetingReviewRepository.findById(id);
-        MeetingReview meetingReview = review.orElseThrow();
-        MeetingReviewDTO meetingReviewDTO = modelMapper.map(meetingReview, MeetingReviewDTO.class);
-        return meetingReviewDTO;
+        Optional<MeetingReview> result = meetingReviewRepository.findById(id);
+        MeetingReview review = result.orElseThrow(() -> new IllegalArgumentException("Meeting not found with ID: " + id));
+//        엔티티를 DTO로 직접 변환하는 헬퍼 메서드 사용
+        return EntitytoDTO(review);
     }
 
     @Override
@@ -125,4 +131,42 @@ public class MeetingReviewServiceImpl implements MeetingReviewService {
 
         return meetingReviewRepository.save(review);
     }
+    @Override
+    @Transactional
+    public MeetingReview writeReview(String userId, String title, String content) {
+        User user = userRepository.findByUserId(userId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 유저가 없습니다. userId=" + userId));
+
+        MeetingReview review = MeetingReview.builder()
+                .title(title)
+                .content(content)
+                .reviewer(user)
+                .build();
+
+        return meetingReviewRepository.save(review);
+    }
+
+    public MeetingDTO getMeetingDTOById(Long meetingId) {
+        Meeting meeting = meetingRepository.findById(meetingId)
+                .orElseThrow(() -> new IllegalArgumentException("Meeting not found with id: " + meetingId));
+        // 엔티티 -> DTO 변환 로직 필요
+        return entityToDTO(meeting);
+    }
+
+    private MeetingDTO entityToDTO(Meeting meeting) {
+        return MeetingDTO.builder()
+                .id(meeting.getId())
+                .title(meeting.getTitle())
+                .content(meeting.getContent())
+                .meetingDate(meeting.getMeetingDate())
+                .address(meeting.getAddress())
+                .organizerId(meeting.getOrganizer().getId())
+                .organizerName(meeting.getOrganizer().getName())
+                .userId(meeting.getOrganizer().getUserId())
+                // 필요한 필드 추가
+                .build();
+    }
+
+
+
 }

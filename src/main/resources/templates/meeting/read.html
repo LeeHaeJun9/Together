@@ -30,7 +30,7 @@
 
         <div class="input-group mb-3">
             <span class="input-group-text">Writer</span>
-            <input type="text" name="organizer" class="form-control" th:value="${#authentication.principal.username}" readonly>
+            <input type="text" name="organizer" class="form-control" th:value="${dto.organizerName}" readonly>
         </div>
 <!--        <div class="input-group mb-3">-->
 <!--            <span class="input-group-text">Writer</span>-->
@@ -115,14 +115,14 @@
 
 
             <!--             모임 후기 버튼 (모임 날짜가 오늘 이전일 경우만 보이게) -->
-            <button type="button"
-                    class="btn btn-outline-primary ms-2"
-                    th:if="${dto.meetingDate.isBefore(T(java.time.LocalDateTime).now())}">
-                모임 후기 작성
-            </button>
+<!--            <button type="button"-->
+<!--                    class="btn btn-outline-primary ms-2"-->
+<!--                    th:if="${dto.meetingDate.isBefore(T(java.time.LocalDateTime).now())}">-->
+<!--                모임 후기 작성-->
+<!--            </button>-->
             <!-- 모임 후기 버튼 (모임 날짜가 오늘 이전일 경우, 모임 참여 회원만)-->
             <button type="button"
-                    class="btn btn-outline-primary ms-2"
+                    class="btn btn-outline-primary ms-2 reviewBtn"
                     th:if="${isJoinedUser} and ${dto.meetingDate.isBefore(T(java.time.LocalDateTime).now())}"
                     th:onclick="|location.href='@{/meeting/review(meetingId=${dto.id})}'|">
                 모임 후기 작성

@@ -27,7 +27,8 @@ public class MeetingReview extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     private User reviewer;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+//    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(optional = true)
     private Meeting meeting;
 
 //    @ManyToOne(fetch = FetchType.LAZY)
