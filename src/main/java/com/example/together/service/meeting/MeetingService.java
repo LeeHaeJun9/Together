@@ -16,7 +16,9 @@ public interface MeetingService {
 
     PageResponseDTO<MeetingDTO> list(PageRequestDTO pageRequestDTO);
     PageResponseDTO<MeetingDTO> listByCafeId(Long cafeId, PageRequestDTO pageRequestDTO);
+
     void applyToMeeting(User user, Long meetingId);
+    void cancelMeeting(User user, Long meetingId);
     List<MeetingUser> getApplicantsByMeeting(Long meetingId);
     String getUserNicknameById(Long userId);
 }

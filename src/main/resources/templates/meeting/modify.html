@@ -56,7 +56,7 @@
 
                         <div class="input-group mb-3">
                             <span class="input-group-text">Location</span>
-                            <input type="text" name="location" class="form-control" th:value="${dto.location}">
+                            <input type="text" name="location" class="form-control" th:value="*{dto.location}">
                         </div>
                         <div class="input-group mb-3">
                             <span class="input-group-text">Address</span>

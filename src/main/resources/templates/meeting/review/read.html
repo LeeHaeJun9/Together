@@ -35,7 +35,7 @@
 
         <div class="input-group mb-3">
             <span class="input-group-text">MeetingDate</span>
-            <input type="datetime-local" class="form-control" th:value="${#temporals.format(dto.meetingDate, 'yyyy-MM-dd')}" readonly>
+            <input type="datetime-local" class="form-control" th:value="${dto.meetingDate}" readonly>
         </div>
         <div class="input-group mb-3">
             <span class="input-group-text">Location</span>
