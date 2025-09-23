@@ -316,48 +316,79 @@ public class UserServiceImpl implements UserService, UserDetailsService {
             throw new RuntimeException("파일 업로드에 실패했습니다.", e);
         }
     }
+    // UserServiceImpl.java 파일에 추가할 메소드들
+// Add these methods to your UserServiceImpl.java file
+
+    // UserServiceImpl.java 파일에 추가할 메소드들
+// Add these methods to your UserServiceImpl.java file
 
     @Override
-    @Transactional
     public boolean updateUserField(String userId, String field, String value) {
         try {
-            User user = findByUserId(userId);
-            if (user == null) {
+            Optional<User> userOptional = userRepository.findByUserId(userId);
+            if (userOptional.isEmpty()) {
+                log.warn("사용자를 찾을 수 없습니다: userId = {}", userId);
                 return false;
             }
 
+            User user = userOptional.get();
+
             // 필드별로 업데이트 처리
             switch (field) {
-                case "nickname":
-                    user.setNickname(value);
-                    break;
-                case "name":
-                    user.setName(value);
-                    break;
                 case "email":
-                    // 이메일 중복 확인 (본인 제외)
-                    if (isEmailExistsExcludeUser(value, userId)) {
-                        return false; // 중복된 이메일
+                    // 이메일 중복 확인 (현재 사용자 제외)
+                    if (isEmailExistsForOtherUser(value, user.getId())) {
+                        log.warn("이미 사용 중인 이메일: email = {}", value);
+                        return false;
                     }
                     user.setEmail(value);
                     break;
+
+                case "nickname":
+                    // 닉네임 유효성 검사 (2-10자)
+                    if (value == null || value.trim().length() < 2 || value.trim().length() > 10) {
+                        log.warn("유효하지 않은 닉네임: nickname = {}", value);
+                        return false;
+                    }
+                    user.setName(value.trim());
+                    break;
+
                 case "phone":
+                    // 전화번호 형식 검사 (010-XXXX-XXXX)
+                    if (value != null && !value.matches("^010-\\d{4}-\\d{4}$")) {
+                        log.warn("유효하지 않은 전화번호 형식: phone = {}", value);
+                        return false;
+                    }
                     user.setPhone(value);
                     break;
-                case "profilePhoto":
-                    user.setProfilePhoto(value);
-                    break;
+
                 default:
-                    return false; // 지원하지 않는 필드
+                    log.warn("지원하지 않는 필드: field = {}", field);
+                    return false;
             }
 
             userRepository.save(user);
+            log.info("사용자 정보 업데이트 성공: userId = {}, field = {}", userId, field);
             return true;
 
         } catch (Exception e) {
-            log.error("사용자 정보 업데이트 실패: userId = {}, field = {}, error = {}",
+            log.error("사용자 정보 업데이트 중 오류 발생: userId = {}, field = {}, error = {}",
                     userId, field, e.getMessage());
             return false;
         }
+    }
+
+    /**
+     * 다른 사용자가 해당 이메일을 사용 중인지 확인
+     * Check if email is used by another user
+     */
+    private boolean isEmailExistsForOtherUser(String email, Long currentUserId) {
+        Optional<User> existingUserOptional = userRepository.findByEmail(email);
+        if (existingUserOptional.isEmpty()) {
+            return false;
+        }
+
+        User existingUser = existingUserOptional.get();
+        return !existingUser.getId().equals(currentUserId);
     }
 }

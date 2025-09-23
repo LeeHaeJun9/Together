@@ -277,6 +277,8 @@ public class MemberController {
     }
 
     // 개별 필드 업데이트
+    // MemberController.java의 updateProfile 메소드 개선
+
     @PostMapping("/member/profile/update")
     @ResponseBody
     public Map<String, Object> updateProfile(@RequestBody Map<String, String> request,
@@ -294,16 +296,31 @@ public class MemberController {
             String field = request.get("field");
             String value = request.get("value");
 
-            // 필드별 업데이트 처리
+            // 입력값 유효성 검사
+            if (field == null || value == null) {
+                response.put("success", false);
+                response.put("message", "필수 정보가 누락되었습니다.");
+                return response;
+            }
+
+            // 필드별 추가 유효성 검사
+            String validationError = validateField(field, value);
+            if (validationError != null) {
+                response.put("success", false);
+                response.put("message", validationError);
+                return response;
+            }
+
+            // 필드 업데이트 처리
             boolean success = userService.updateUserField(userId, field, value);
 
             if (success) {
                 response.put("success", true);
-                response.put("message", "정보가 성공적으로 수정되었습니다.");
+                response.put("message", getSuccessMessage(field));
                 log.info("프로필 수정 성공: userId = {}, field = {}", userId, field);
             } else {
                 response.put("success", false);
-                response.put("message", "정보 수정에 실패했습니다.");
+                response.put("message", getErrorMessage(field));
             }
 
         } catch (Exception e) {
@@ -313,6 +330,54 @@ public class MemberController {
         }
 
         return response;
+    }
+
+    /**
+     * 필드별 유효성 검사
+     */
+    private String validateField(String field, String value) {
+        switch (field) {
+            case "email":
+                if (!value.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
+                    return "올바른 이메일 형식이 아닙니다.";
+                }
+                break;
+            case "nickname":
+                if (value.trim().length() < 2 || value.trim().length() > 10) {
+                    return "닉네임은 2-10자 사이여야 합니다.";
+                }
+                break;
+            case "phone":
+                if (!value.matches("^010-\\d{4}-\\d{4}$")) {
+                    return "전화번호는 010-XXXX-XXXX 형식이어야 합니다.";
+                }
+                break;
+        }
+        return null;
+    }
+
+    /**
+     * 성공 메시지 반환
+     */
+    private String getSuccessMessage(String field) {
+        switch (field) {
+            case "email": return "이메일이 성공적으로 변경되었습니다.";
+            case "nickname": return "닉네임이 성공적으로 변경되었습니다.";
+            case "phone": return "전화번호가 성공적으로 변경되었습니다.";
+            default: return "정보가 성공적으로 수정되었습니다.";
+        }
+    }
+
+    /**
+     * 오류 메시지 반환
+     */
+    private String getErrorMessage(String field) {
+        switch (field) {
+            case "email": return "이메일 변경에 실패했습니다. 이미 사용 중인 이메일일 수 있습니다.";
+            case "nickname": return "닉네임 변경에 실패했습니다.";
+            case "phone": return "전화번호 변경에 실패했습니다.";
+            default: return "정보 수정에 실패했습니다.";
+        }
     }
 
     // 비밀번호 변경
