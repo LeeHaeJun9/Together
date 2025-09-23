@@ -38,7 +38,6 @@ public class MeetingReviewController {
     private final CafeService cafeService;
     private final UserRepository userRepository;
     private final MeetingUserService meetingUserService;
-    private final MeetingReviewReplyService meetingReviewReplyService;
 
     private User getUserFromPrincipal(Principal principal) {
         if (principal == null) return null;
@@ -181,8 +180,8 @@ public class MeetingReviewController {
         model.addAttribute("cafeResponse", cafeResponse);
 
         Long userId = (user != null) ? user.getId() : null;
-        List<MeetingReviewReplyDTO> replyList = meetingReviewReplyService.getList(id, userId);
-        model.addAttribute("replyList", replyList);
+//        List<MeetingReviewReplyDTO> replyList = meetingReviewReplyService.getList(id, userId);
+//        model.addAttribute("replyList", replyList);
 
         return "meeting/review/read";
     }
