@@ -174,7 +174,7 @@ public class CafeServiceImpl implements CafeService {
     }
 
     @Override
-    public CafeResponseDTO getCafeById(Long cafeId, Long userId) {
+    public CafeResponseDTO getCafeInfoWithMembership(Long cafeId, Long userId) {
         // 1. Cafe 엔티티 조회
         Cafe cafe = cafeRepository.findById(cafeId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 카페입니다."));
@@ -203,7 +203,7 @@ public class CafeServiceImpl implements CafeService {
     }
 
     @Override
-    public CafeResponseDTO getCafeById(Long cafeId) {
+    public CafeResponseDTO getBasicCafeInfo(Long cafeId) {
         // userId가 없는 경우를 위한 메서드
         Cafe cafe = cafeRepository.findById(cafeId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 카페입니다."));
