@@ -9,12 +9,16 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public class WebMvcConfig implements WebMvcConfigurer {
 
-    @Value("${org.zerock.upload.path}")
-    private String uploadPath;
+  @Value("${app.upload-path:file:./uploads}")
+  private String uploadPath;
 
-    @Override
+  @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        registry.addResourceHandler("/upload/**")
-                .addResourceLocations("file:///" + uploadPath + "/");
+      String root = "file:///C:/upload/";
+      registry.addResourceHandler("/upload/**")
+          .addResourceLocations(root);
+
+    registry.addResourceHandler("/files/**")
+        .addResourceLocations(uploadPath.endsWith("/")? uploadPath : uploadPath + "/");
     }
 }

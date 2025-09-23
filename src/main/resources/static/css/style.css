@@ -297,3 +297,6 @@ header {
 .btn-primary-like:hover{ filter:brightness(.95); }
 .btn-outline-like:hover{ background:#f9fafb; }
 
+.carousel-img { width:100%; aspect-ratio:16/9; object-fit:cover; border-radius:12px; }
+
+
