@@ -20,7 +20,9 @@
                     MeetingReview Modify
                 </div>
                 <div class="card-body">
-                    <form th:action="@{/cafe/{cafeId}/meeting/review/modify(cafeId=${cafeResponse.id})}" method="post" id="f1">
+                    <form th:action="@{/cafe/{cafeId}/meeting/review/modify(cafeId=${cafeResponse.id})}" method="post" id="f1" enctype="multipart/form-data">
+                        <input type="hidden" name="id" th:value="${dto.id}">
+
                         <div class="input-group mb-3">
                             <span class="input-group-text">id</span>
                             <input type="text" class="form-control" th:value="${dto.id}" name="id" readonly>
@@ -63,6 +65,32 @@
                             <textarea class="form-control col-sm-5" rows="5" th:field="${dto.content}"></textarea>
                         </div>
 
+                        <div class="mb-3">
+                            <label class="form-label-custom">기존 이미지:</label>
+                            <div class="d-flex flex-wrap existingImages" th:if="${dto.imageList != null and not #lists.isEmpty(dto.imageList)}">
+                                <div th:each="image : ${dto.imageList}" class="p-2 position-relative existing-image-container">
+                                    <img th:src="@{/upload/display(fileName='s_' + ${image.uuid} + '_' + ${image.fileName})}"
+                                         alt="Review Image"
+                                         class="img-fluid rounded"
+                                         style="max-width: 100px; height: auto;">
+                                    <button type="button" class="btn-close remove-image-btn" aria-label="Close" th:data-uuid="${image.uuid}" style="position: absolute; top: 0; right: 0;"></button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="input-group mb-3">
+                            <span class="input-group-text">새 이미지</span>
+                            <input type="file" name="files" class="form-control" multiple>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col">
+                                <div class="container-fluid d-flex newUploadResult" style="flex-wrap: wrap;">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="removed-images"></div>
+
                         <div class="my-4">
                             <div class="float-end">
                                 <button type="button" class="btn btn-primary listBtn">List</button>
@@ -71,15 +99,12 @@
                             </div>
                         </div>
                     </form>
-
-
                 </div><!--end card body-->
             </div><!--end card-->
         </div><!-- end col-->
     </div><!-- end row-->
     <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
     <script>
-        // 함수 이름을 execDaumPostcode()로 통일
         function execDaumPostcode() {
             new daum.Postcode({
                 oncomplete: function(data) {
@@ -89,53 +114,83 @@
             }).open();
         }
     </script>
-
 </div>
 
-
 <script layout:fragment="script" th:inline="javascript">
-    console.log("mtReviewModify....")
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log("mtReviewModify....");
 
-    const errors = [[${errors}]]
-    console.log(errors)
-
-    let errorMsg = ''
-
-    if(errors){
-        for (let i = 0; i < errors.length; i++) {
-            errorMsg += `${errors[i].field}은(는) ${errors[i].code} \n`
+        const errors = [[${errors}]];
+        if (errors) {
+            let errorMsg = '';
+            errors.forEach(err => {
+                errorMsg += `${err.field}은(는) ${err.code} \n`;
+            });
+            alert(errorMsg);
         }
-        alert(errorMsg)
-    }
 
-    const cafeId = [[${cafeResponse.id}]];
-    const link = [[${pageRequestDTO.getLink()}]];
-    const formObj = document.querySelector("#f1")
+        const cafeId = [[${cafeResponse.id}]];
+        const link = [[${pageRequestDTO.getLink()}]];
+        const formObj = document.querySelector("#f1");
 
-    document.querySelector(".modBtn").addEventListener("click", function (e) {
-        e.preventDefault()
-        e.stopPropagation()
+        const newFileInput = document.querySelector("input[name='files']");
+        const newUploadResult = document.querySelector(".newUploadResult");
+        const removedImagesContainer = document.querySelector("#removed-images");
 
-        formObj.action = `/cafe/${cafeId}/meeting/review/modify?${link}`
-        formObj.method = 'post'
-        formObj.submit()
-    }, false)
+        // ✅ 새로운 이미지 미리보기 로직 (register.html과 동일)
+        newFileInput.addEventListener("change", (e) => {
+            const files = e.target.files;
+            if (!files.length) return;
+            newUploadResult.innerHTML = '';
+            Array.from(files).forEach(file => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = document.createElement("img");
+                    img.src = e.target.result;
+                    img.classList.add("card-img-top", "m-1");
+                    img.style.cssText = "width: 100px; height: 100px;";
+                    newUploadResult.appendChild(img);
+                };
+                reader.readAsDataURL(file);
+            });
+        });
 
-    document.querySelector(".removeBtn").addEventListener("click", function (e) {
-        e.stopPropagation()
-        e.preventDefault()
+        // ✅ 기존 이미지 삭제 로직
+        document.querySelectorAll('.remove-image-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const uuid = this.getAttribute('data-uuid');
+                const container = this.closest('.existing-image-container');
+                container.remove();
 
-        formObj.action = `/cafe/${cafeId}/meeting/review/remove`
-        formObj.method = 'post'
-        formObj.submit()
-    }, false)
+                const hiddenInput = document.createElement('input');
+                hiddenInput.type = 'hidden';
+                hiddenInput.name = 'removedImageUuids';
+                hiddenInput.value = uuid;
+                removedImagesContainer.appendChild(hiddenInput);
+            });
+        });
 
-    document.querySelector(".listBtn").addEventListener("click", function (e) {
-        e.preventDefault()
-        e.stopPropagation()
+        // 폼 제출 버튼 이벤트
+        document.querySelector(".modBtn").addEventListener("click", function (e) {
+            e.preventDefault();
+            formObj.action = `/cafe/${cafeId}/meeting/review/modify?${link}`;
+            formObj.method = 'post';
+            formObj.submit();
+        });
 
-        formObj.reset()
-        self.location = `/cafe/${cafeId}/meeting/review/list?${link}`
-    }, false)
+        document.querySelector(".removeBtn").addEventListener("click", function (e) {
+            e.preventDefault();
+            if (confirm("정말로 리뷰를 삭제하시겠습니까?")) {
+                formObj.action = `/cafe/${cafeId}/meeting/review/remove`;
+                formObj.method = 'post';
+                formObj.submit();
+            }
+        });
 
+        document.querySelector(".listBtn").addEventListener("click", function (e) {
+            e.preventDefault();
+            formObj.reset();
+            self.location = `/cafe/${cafeId}/meeting/review/list?${link}`;
+        });
+    });
 </script>

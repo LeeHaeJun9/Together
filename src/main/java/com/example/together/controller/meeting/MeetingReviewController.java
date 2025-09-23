@@ -1,14 +1,12 @@
 package com.example.together.controller.meeting;
 
 import com.example.together.domain.MeetingReview;
-import com.example.together.domain.RecruitingStatus;
 import com.example.together.domain.User;
 import com.example.together.dto.PageRequestDTO;
 import com.example.together.dto.PageResponseDTO;
 import com.example.together.dto.cafe.CafeResponseDTO;
 import com.example.together.dto.meeting.MeetingDTO;
 import com.example.together.dto.meeting.MeetingReviewDTO;
-import com.example.together.dto.meeting.MeetingUserDTO;
 import com.example.together.repository.UserRepository;
 import com.example.together.service.UserService;
 import com.example.together.service.cafe.CafeService;
@@ -17,6 +15,7 @@ import com.example.together.service.meeting.MeetingUserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
@@ -39,6 +38,7 @@ public class MeetingReviewController {
     private final CafeService cafeService;
     private final UserRepository userRepository;
     private final MeetingUserService meetingUserService;
+    private final MeetingReviewReplyService meetingReviewReplyService;
 
     private User getUserFromPrincipal(Principal principal) {
         if (principal == null) return null;
@@ -108,13 +108,14 @@ public class MeetingReviewController {
 
         return "meeting/review/register";
     }
-    @PostMapping("/register")
+    @PostMapping(value = "/register", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public String mtReviewRegisterPost(@PathVariable("cafeId") Long cafeId,
-                                       @Valid MeetingReviewDTO meetingReviewDTO,
+                                       @Valid @ModelAttribute MeetingReviewDTO meetingReviewDTO,
                                        BindingResult bindingResult,
                                        RedirectAttributes redirectAttributes,
                                        @AuthenticationPrincipal UserDetails userDetails) {
         log.info("mtReviewRegister Post.....");
+        log.info("DTO: " + meetingReviewDTO);
 
         if(bindingResult.hasErrors()) {
             log.info("has errors..... mtReviewRegister Post....");
@@ -134,22 +135,24 @@ public class MeetingReviewController {
         // 서비스 호출 시 DTO + 로그인한 사용자 아이디 넘기기
         if (meetingReviewDTO.getMeetingId() != null) {
             // ✅ createReview (모임 리뷰 등록)
-            MeetingReview review = meetingReviewService.createReview(
+            MeetingReview review = meetingReviewService.createReviewWithImages(
                     userId,
                     meetingReviewDTO.getMeetingId(),
                     meetingReviewDTO.getTitle(),
-                    meetingReviewDTO.getContent()
+                    meetingReviewDTO.getContent(),
+                    meetingReviewDTO.getFiles()
             );
             reviewId = review.getId();
         } else {
             // ✅ writeReview (임의 리뷰 작성)
-            MeetingReview review = meetingReviewService.writeReview(
+            MeetingReview review = meetingReviewService.writeReviewWithImages(
                     userId,
                     meetingReviewDTO.getTitle(),
                     meetingReviewDTO.getContent(),
                     meetingReviewDTO.getMeetingDate(),
                     meetingReviewDTO.getMeetingLocation(),
-                    meetingReviewDTO.getMeetingAddress()
+                    meetingReviewDTO.getMeetingAddress(),
+                    meetingReviewDTO.getFiles()
             );
             reviewId = review.getId();
         }
@@ -169,10 +172,6 @@ public class MeetingReviewController {
         log.info(meetingReviewDTO);
         model.addAttribute("dto", meetingReviewDTO);
 
-//        List<MeetingUserDTO> meetingUser = meetingUserService.getMeetingUsersByMeetingId(id);
-//        model.addAttribute("meetingUser", meetingUser);
-//        model.addAttribute("loggedInUserId", user != null ? user.getId() : null);
-
         CafeResponseDTO cafeResponse;
         if (user != null) {
             cafeResponse = cafeService.getCafeById(cafeId, user.getId());
@@ -180,6 +179,10 @@ public class MeetingReviewController {
             cafeResponse = cafeService.getCafeById(cafeId);
         }
         model.addAttribute("cafeResponse", cafeResponse);
+
+        Long userId = (user != null) ? user.getId() : null;
+        List<MeetingReviewReplyDTO> replyList = meetingReviewReplyService.getList(id, userId);
+        model.addAttribute("replyList", replyList);
 
         return "meeting/review/read";
     }
@@ -206,8 +209,13 @@ public class MeetingReviewController {
 
         return "meeting/review/modify";
     }
-    @PostMapping("/modify")
-    public String mtReviewModifyPost (@PathVariable Long cafeId, PageRequestDTO pageRequestDTO, @Valid MeetingReviewDTO meetingReviewDTO, BindingResult bindingResult, RedirectAttributes redirectAttributes) {
+    @PostMapping(value = "/modify", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public String mtReviewModifyPost (@PathVariable Long cafeId,
+                                      PageRequestDTO pageRequestDTO,
+                                      @Valid @ModelAttribute MeetingReviewDTO meetingReviewDTO,
+                                      BindingResult bindingResult,
+                                      RedirectAttributes redirectAttributes,
+                                      @AuthenticationPrincipal UserDetails userDetails) {
         log.info("mtReviewModify Post....." + meetingReviewDTO);
 
         if(bindingResult.hasErrors()) {
@@ -218,7 +226,10 @@ public class MeetingReviewController {
             return "redirect:/cafe/{cafeId}/meeting/review/modify?"+ link;
         }
 
-        meetingReviewService.MeetingReviewModify(meetingReviewDTO);
+        String userId = userDetails.getUsername();
+        meetingReviewService.modifyReviewWithImages(userId, meetingReviewDTO);
+//        meetingReviewService.MeetingReviewModify(meetingReviewDTO);
+
         redirectAttributes.addFlashAttribute("result", "modified");
         redirectAttributes.addAttribute("id", meetingReviewDTO.getId());
         return "redirect:/cafe/{cafeId}/meeting/review/read";

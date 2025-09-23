@@ -10,6 +10,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -38,10 +39,9 @@ public class MeetingReviewDTO {
     private String meetingLocation;
     private String meetingAddress;
 
-//    private String address;
-//    private String location;
-
-    private List<String> imageUrls;
+    private List<MultipartFile> files;
+    private List<MeetingReviewImageDTO> imageList; // 이미지 리스트
+    private List<String> removedImageUuids; // 삭제할 이미지 리스트
 
     private LocalDateTime regDate;  // 생성일
     private LocalDateTime modDate;  // 수정일

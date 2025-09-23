@@ -93,7 +93,8 @@
                 <a th:href="|@{/cafe/{cafeId}/meetings(cafeId=${cafeResponse.id})}?${link}|" class="text-decoration-none">
                     <button type="button" class="btn btn-primary">List</button>
                 </a>
-                <a th:href="|@{/cafe/{cafeId}/meeting/modify(cafeId=${cafeResponse.id}, id=${dto.id})}&${link}|" class="text-decoration-none">
+                <a th:if="${#authentication.principal != null and #authentication.principal.username == dto.organizerName}"
+                   th:href="|@{/cafe/{cafeId}/meeting/modify(cafeId=${cafeResponse.id}, id=${dto.id})}&${link}|" class="text-decoration-none">
                     <button type="button" class="btn btn-secondary">Modify</button>
                 </a>
             </div>
