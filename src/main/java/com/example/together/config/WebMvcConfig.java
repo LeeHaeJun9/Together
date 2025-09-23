@@ -12,9 +12,16 @@ import org.springframework.format.FormatterRegistry;
 @Configuration
 public class WebMvcConfig implements WebMvcConfigurer {
 
-    @Value("${org.zerock.upload.path}")
-    private String uploadPath;
+  @Value("${app.upload-path:file:./uploads}")
+  private String uploadPath;
+  @Override
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+      String root = "file:///C:/upload/";
+      registry.addResourceHandler("/upload/**")
+          .addResourceLocations(root);
 
+    registry.addResourceHandler("/files/**")
+        .addResourceLocations(uploadPath.endsWith("/")? uploadPath : uploadPath + "/");
 
 
     @Override
@@ -39,6 +46,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
     public WebMvcConfig(StringToUserConverter stringToUserConverter) {
         this.stringToUserConverter = stringToUserConverter;
+
     }
 
     @Override

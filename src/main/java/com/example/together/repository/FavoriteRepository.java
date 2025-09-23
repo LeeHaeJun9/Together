@@ -1,24 +1,24 @@
 package com.example.together.repository;
 
 import com.example.together.domain.Favorite;
-import com.example.together.domain.Trade;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
-
 
 public interface FavoriteRepository extends JpaRepository<Favorite, Long> {
 
-  // trade_id 기준 개수
+  boolean existsByTrade_IdAndUser_Id(Long tradeId, Long userId);
   long countByTrade_Id(Long tradeId);
+  Optional<Favorite> findByTrade_IdAndUser_Id(Long tradeId, Long userId);
 
-  // user_id + trade_id 조합 존재 여부
-  boolean existsByTrade_IdAndUser_UserId(Long tradeId, String userId);
+  // PK 기반 조회 (trade 즉시 로딩)
+  @Query("select f from Favorite f join fetch f.trade t where f.user.id = :userId order by f.id desc")
+  List<Favorite> findAllWithTradeByUserIdOrderByIdDesc(@Param("userId") Long userId);
 
-  // user_id + trade_id로 단건 조회
-  Optional<Favorite> findByTrade_IdAndUser_UserId(Long tradeId, String userId);
-
-  // user_id + trade_id로 삭제
-  long deleteByTrade_IdAndUser_UserId(Long tradeId, String userId);
+  // 로그인ID 기반 조회 (레거시 데이터용)
+  @Query("select f from Favorite f join fetch f.trade t join f.user u where u.userId = :loginId order by f.id desc")
+  List<Favorite> findAllWithTradeByUserLoginIdOrderByIdDesc(@Param("loginId") String loginId);
 }
-

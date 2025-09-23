@@ -3,15 +3,16 @@ package com.example.together.domain;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Table(
     name = "favorite",
-    // DB에 유니크가 없다면 JPA 레벨에서라도 중복 방지 (선택)
-    uniqueConstraints = @UniqueConstraint(name = "uk_favorite_user_trade", columnNames = {"user_id", "trade_id"})
+    uniqueConstraints = @UniqueConstraint(
+        name = "uk_favorite_trade_user",
+        columnNames = {"trade_id", "user_id"}
+    )
 )
 @Getter @Setter
 @NoArgsConstructor @AllArgsConstructor @Builder
@@ -20,17 +21,15 @@ public class Favorite {
   @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @UpdateTimestamp
-  private LocalDateTime moddate;
-
-  @CreationTimestamp
-  private LocalDateTime regdate;
-
-  @ManyToOne(fetch = FetchType.LAZY, optional = true)
-  @JoinColumn(name = "trade_id", foreignKey = @ForeignKey(name = "FKn9ec7rhkkwvk3jqam42hitvvi"))
+  @ManyToOne(fetch = FetchType.LAZY, optional = false)
+  @JoinColumn(name = "trade_id", nullable = false)
   private Trade trade;
 
-  @ManyToOne(fetch = FetchType.LAZY, optional = true)
-  @JoinColumn(name = "user_id", foreignKey = @ForeignKey(name = "FKh3f2dg11ibnht4fvnmx60jcif"))
+  // ⚠️ FK(Long)만 유지합니다. 문자열 컬럼 매핑 금지!
+  @ManyToOne(fetch = FetchType.LAZY, optional = false)
+  @JoinColumn(name = "user_id", nullable = false)
   private User user;
+
+  @CreationTimestamp
+  private LocalDateTime createdAt;
 }

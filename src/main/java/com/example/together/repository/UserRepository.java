@@ -3,6 +3,8 @@ package com.example.together.repository;
 import com.example.together.domain.Status;
 import com.example.together.domain.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
@@ -32,6 +34,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     // 닉네임 존재 여부 체크
     boolean existsByNickname(String nickname);
+
+    @Query("select u from User u where u.userId = :username")
+    Optional<User> findByUsername(@Param("username") String username);
 
     long countByStatus(Status status);
 }
