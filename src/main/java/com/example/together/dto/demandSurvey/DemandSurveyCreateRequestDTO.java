@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 public class DemandSurveyCreateRequestDTO {
+    private Long id;
     private String title;
     private String content;
     private LocalDateTime deadline;

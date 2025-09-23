@@ -37,14 +37,6 @@ public class CafeController {
     private final MeetingService meetingService;
     private final PostService postService;
 
-    @GetMapping("/main")
-    public String mainPage(Model model, Principal principal) {
-        log.info("GET /main - 메인페이지 요청");
-        List<CafeResponseDTO> cafes = cafeService.getAllCafes();
-        model.addAttribute("cafes", cafes);
-        return "mainpage";
-    }
-
     private Long getLoggedInUserId(Principal principal) {
         if (principal == null) {
             // 로그인되지 않은 사용자는 null을 반환하여 서비스 계층에서 처리하도록 합니다.
@@ -68,11 +60,11 @@ public class CafeController {
         return "cafe/applicationStatus";
     }
 
-    @GetMapping("/apply-form")
-    public String showApplyForm(Model model) {
-        model.addAttribute("cafeCreateRequestDTO", new CafeCreateRequestDTO());
-        return "cafe/applyForm"; // cafe/applyForm.html 뷰
-    }
+//    @GetMapping("/apply-form")
+//    public String showApplyForm(Model model) {
+//        model.addAttribute("cafeCreateRequestDTO", new CafeCreateRequestDTO());
+//        return "cafe/applyForm"; // cafe/applyForm.html 뷰
+//    }
 
     @GetMapping("/admin/applications")
     public String getPendingApplications(Model model) {

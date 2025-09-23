@@ -10,6 +10,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class PostCreateRequestDTO {
+    private Long id;
     private String title;
     private String content;
     private PostType postType = PostType.GENERAL;
