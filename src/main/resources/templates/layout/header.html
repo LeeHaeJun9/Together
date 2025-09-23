@@ -16,7 +16,7 @@
             </ul>
             <ul class="nav-links" sec:authorize="hasRole('ADMIN')">
                 <li class="nav-link"><a th:href="@{/member/mypage}">마이페이지</a></li>
-                <li><a th:href="@{/logout}">로그아웃</a></li>
+                <li class="nav-link"><a th:href="@{/logout}">로그아웃</a></li>
                 <li class="nav-link"><a th:href="@{/manager}">관리자페이지</a></li>
                 <li class="nav-link"><a th:href="@{/cafe/admin/applications}">카페 가입 승인</a></li>
             </ul>
