@@ -1,6 +1,8 @@
 package com.example.together.controller;
 
+import com.example.together.domain.Cafe;
 import com.example.together.domain.PostType;
+import com.example.together.dto.cafe.CafeResponseDTO;
 import com.example.together.dto.comment.CommentCreateRequestDTO;
 import com.example.together.dto.comment.CommentResponseDTO;
 import com.example.together.dto.comment.CommentUpdateRequestDTO;
@@ -54,16 +56,20 @@ public class PostController {
                                  Model model,
                                  Principal principal) {
 
+        Long userId = getUserIdFromPrincipal(principal);
+
+        CafeResponseDTO cafe = cafeService.getCafeInfoWithMembership(cafeId, userId);
+
         // Pageable 객체 생성 (페이지 번호와 크기 설정)
         Pageable pageable = PageRequest.of(page, size);
 
-        Long userId = getUserIdFromPrincipal(principal);
 
         // 서비스 메서드 호출: Pageable 객체를 전달하고 Page 객체를 반환받음
         Page<PostResponseDTO> postsPage = postService.getPostsByCafe(cafeId, userId, pageable);
 
         String cafeName = cafeService.getCafeNameById(cafeId);
 
+        model.addAttribute("cafe", cafe);
         model.addAttribute("cafeId", cafeId);
         model.addAttribute("posts", postsPage); // Page 객체를 모델에 추가
         model.addAttribute("cafeName", cafeName);

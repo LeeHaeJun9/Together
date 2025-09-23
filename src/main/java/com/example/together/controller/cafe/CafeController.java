@@ -269,7 +269,7 @@ public class CafeController {
         if (userId != null) {
             userNickname = userService.getUserNicknameById(userId);
         }
-        CafeResponseDTO response = cafeService.getCafeById(cafeId, userId);
+        CafeResponseDTO response = cafeService.getCafeInfoWithMembership(cafeId, userId);
         model.addAttribute("cafe", response);
         model.addAttribute("userNickname", userNickname);
         model.addAttribute("latestNotices", latestNotices);
@@ -287,7 +287,7 @@ public class CafeController {
         }
 
         try {
-            CafeResponseDTO cafe = cafeService.getCafeById(cafeId, userId);
+            CafeResponseDTO cafe = cafeService.getCafeInfoWithMembership(cafeId, userId);
             if (!cafe.isOwner()) {
                 model.addAttribute("error", "수정 권한이 없습니다.");
                 return "error/access-denied"; // TODO: 실제 오류 페이지 경로로 변경
@@ -363,6 +363,8 @@ public class CafeController {
         }
         Long userId = getLoggedInUserId(principal);
 
+        CafeResponseDTO cafe = cafeService.getCafeInfoWithMembership(cafeId, userId);
+
         // 권한 확인: 요청한 사용자가 해당 카페의 소유자인지 확인
         if (!cafeService.isCafeOwner(cafeId, userId)) {
             model.addAttribute("error", "해당 카페의 관리자만 접근할 수 있습니다.");
@@ -372,6 +374,7 @@ public class CafeController {
         List<CafeJoinRequestResponseDTO> requests = cafeService.getPendingJoinRequests(cafeId);
         model.addAttribute("cafeId", cafeId);
         model.addAttribute("requests", requests);
+        model.addAttribute("cafe", cafe);
         return "cafe/admin/joinRequestList";
 
     }

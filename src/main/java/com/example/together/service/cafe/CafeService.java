@@ -26,9 +26,9 @@ public interface CafeService {
 
     // 특정 ID의 카페 조회
 //    CafeResponseDTO getCafeById(Long cafeId);
-    CafeResponseDTO getCafeById(Long cafeId);
+    CafeResponseDTO getBasicCafeInfo(Long cafeId);
 
-    CafeResponseDTO getCafeById(Long cafeId, Long userId);
+    CafeResponseDTO getCafeInfoWithMembership(Long cafeId, Long userId);
 
     // 검토 대기 중인 모든 신청 목록 조회
     List<CafeApplication> getPendingApplications();
