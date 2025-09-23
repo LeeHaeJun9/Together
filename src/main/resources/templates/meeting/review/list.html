@@ -49,7 +49,13 @@
                             <td>[[${dto.reviewerUserId}]]</td>
                             <td>[[${dto.reviewerNickname}]]</td>
                             <td th:text="${#temporals.format(dto.regDate, 'yyyy-MM-dd HH:mm')}"></td>
-                            <td></td>
+                            <td>
+                                <th:block th:if="${dto.imageList != null and not #lists.isEmpty(dto.imageList)}">
+                                    <img th:src="@{/upload/display(fileName='s_' + ${dto.imageList[0].uuid} + '_' + ${dto.imageList[0].fileName})}"
+                                         alt="Review Thumbnail"
+                                         style="width: 50px; height: 50px; object-fit: cover;">
+                                </th:block>
+                            </td>
                         </tr>
                         </tbody>
                     </table>

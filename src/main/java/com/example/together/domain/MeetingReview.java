@@ -13,6 +13,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@ToString
 public class MeetingReview extends BaseEntity {
 
     @Id
@@ -39,9 +40,10 @@ public class MeetingReview extends BaseEntity {
 //    @ManyToOne(fetch = FetchType.LAZY)
 //    private Cafe cafe;
 
-    @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "review", cascade = {CascadeType.ALL}, fetch = FetchType.LAZY, orphanRemoval = true)
+    @Builder.Default
+    @OrderBy("sortOrder ASC")
     private List<MeetingReviewImage> images = new ArrayList<>();
-
 
     public void change(String title, String content, LocalDateTime meetingDate, String meetingLocation, String meetingAddress) {
         this.title = title;
@@ -49,5 +51,20 @@ public class MeetingReview extends BaseEntity {
         this.meetingDate = meetingDate;
         this.meetingLocation = meetingLocation;
         this.meetingAddress = meetingAddress;
+    }
+
+    public void addImage(String uuid, String fileName) {
+        MeetingReviewImage reviewImage = MeetingReviewImage.builder()
+                .uuid(uuid)
+                .fileName(fileName)
+                .review(this)
+                .sortOrder(images.size())
+                .build();
+        images.add(reviewImage);
+    }
+
+    public void removeImage(MeetingReviewImage image) {
+        this.images.remove(image);
+        image.setReview(null); // 양방향 관계에서 참조 끊기
     }
 }
