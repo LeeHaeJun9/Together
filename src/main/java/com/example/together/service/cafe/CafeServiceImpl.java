@@ -620,7 +620,10 @@ public class CafeServiceImpl implements CafeService {
         // Meeting 엔티티가 없는 경우를 고려하여 예외 처리
         String title = (calendar.getMeeting() != null) ? calendar.getMeeting().getTitle() : "제목 없음";
         String start = (calendar.getMeeting() != null) ? calendar.getMeeting().getMeetingDate().toString() : null;
-        String url = (calendar.getMeeting() != null) ? "/cafe/" + calendar.getCafe().getId() + "/meetings/" + calendar.getMeeting().getId() : null;
+        String url = null;
+        if (calendar.getMeeting() != null) {
+            url = "/cafe/" + calendar.getCafe().getId() + "/meeting/read?id=" + calendar.getMeeting().getId() + "&page=1&size=10";
+        }
 
         return CalendarEventDTO.builder()
                 .id(calendar.getId())

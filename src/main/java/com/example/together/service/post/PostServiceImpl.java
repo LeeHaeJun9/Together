@@ -148,10 +148,9 @@ public class PostServiceImpl implements PostService {
             throw new IllegalStateException("게시글을 수정할 권한이 없습니다.");
         }
 
-        String newImageUrl = post.getImage(); // 기존 이미지 URL을 유지
+        String newImageUrl = post.getImage();
         if (newImage != null && !newImage.isEmpty()) {
             try {
-                // 기존 이미지 삭제 (선택 사항: 서버 공간 절약)
                 if (post.getImage() != null) {
                     String oldImageName = post.getImage().substring("/upload/".length());
                     File oldFile = new File(uploadPath, oldImageName);
@@ -160,7 +159,6 @@ public class PostServiceImpl implements PostService {
                     }
                 }
 
-                // 새 이미지 저장
                 String fileName = UUID.randomUUID().toString() + "_" + newImage.getOriginalFilename();
                 File destinationFile = new File(uploadPath, fileName);
                 newImage.transferTo(destinationFile);
@@ -172,40 +170,41 @@ public class PostServiceImpl implements PostService {
 
         post.setTitle(requestDTO.getTitle());
         post.setContent(requestDTO.getContent());
-        post.setImage(newImageUrl); // 이미지 URL 업데이트
+        post.setImage(newImageUrl);
         post.setPostType(requestDTO.getPostType());
+        post.setPinned(requestDTO.isPinned());
 
-        if (requestDTO.getPostType() == PostType.NOTICE) {
-            if (requestDTO.getDemandSurvey() != null) {
+        // --- 게시글 유형에 따른 수요조사 로직 분기 ---
+        if (requestDTO.getPostType() == PostType.DEMAND) {
+            // 유형이 DEMAND일 때: 수요조사 데이터 업데이트 또는 생성
+            if (requestDTO.getDemandSurvey() == null) {
+                throw new IllegalArgumentException("수요조사 게시글에는 수요조사 정보가 필수입니다.");
+            }
+
+            if (post.getDemandSurvey() != null) {
+                // 기존 수요조사가 있으면 업데이트
                 DemandSurvey existingSurvey = post.getDemandSurvey();
-                if (existingSurvey != null) {
-                    // 기존 수요조사가 있으면 업데이트
-                    existingSurvey.setTitle(requestDTO.getDemandSurvey().getTitle());
-                    existingSurvey.setContent(requestDTO.getDemandSurvey().getContent());
-                    existingSurvey.setDeadline(requestDTO.getDemandSurvey().getDeadline());
-                    existingSurvey.setVoteType(requestDTO.getDemandSurvey().getVoteType());
-                } else {
-                    // 기존 수요조사가 없으면 새로 생성
-                    DemandSurvey newSurvey = DemandSurvey.builder()
-                            .title(requestDTO.getDemandSurvey().getTitle())
-                            .content(requestDTO.getDemandSurvey().getContent())
-                            .deadline(requestDTO.getDemandSurvey().getDeadline())
-                            .voteType(requestDTO.getDemandSurvey().getVoteType())
-                            .post(post)
-                            .author(post.getAuthor())
-                            .build();
-                    demandSurveyRepository.save(newSurvey);
-                    post.setDemandSurvey(newSurvey);
-                }
+                existingSurvey.update(
+                        requestDTO.getDemandSurvey().getTitle(),
+                        requestDTO.getDemandSurvey().getContent(),
+                        requestDTO.getDemandSurvey().getDeadline(),
+                        requestDTO.getDemandSurvey().getVoteType()
+                );
             } else {
-                // 기존 수요조사 데이터 삭제
-                if (post.getDemandSurvey() != null) {
-                    demandSurveyRepository.delete(post.getDemandSurvey());
-                    post.setDemandSurvey(null);
-                }
+                // 기존 수요조사가 없으면 새로 생성
+                DemandSurvey newSurvey = DemandSurvey.builder()
+                        .title(requestDTO.getDemandSurvey().getTitle())
+                        .content(requestDTO.getDemandSurvey().getContent())
+                        .deadline(requestDTO.getDemandSurvey().getDeadline())
+                        .voteType(requestDTO.getDemandSurvey().getVoteType())
+                        .post(post)
+                        .author(post.getAuthor())
+                        .build();
+                demandSurveyRepository.save(newSurvey);
+                post.setDemandSurvey(newSurvey);
             }
         } else {
-            // 게시글 유형이 GENERAL로 변경되었을 경우, 기존 수요조사 삭제
+            // 유형이 DEMAND가 아닐 때: 기존 수요조사 데이터 삭제
             if (post.getDemandSurvey() != null) {
                 demandSurveyRepository.delete(post.getDemandSurvey());
                 post.setDemandSurvey(null);
