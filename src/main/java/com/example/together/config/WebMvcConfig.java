@@ -14,15 +14,15 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
   @Value("${app.upload-path:file:./uploads}")
   private String uploadPath;
-  @Override
-    public void addResourceHandlers(ResourceHandlerRegistry registry) {
-      String root = "file:///C:/upload/";
-      registry.addResourceHandler("/upload/**")
-          .addResourceLocations(root);
 
-    registry.addResourceHandler("/files/**")
-        .addResourceLocations(uploadPath.endsWith("/")? uploadPath : uploadPath + "/");
-
+//  @Override
+//    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+//      String root = "file:///C:/upload/";
+//      registry.addResourceHandler("/upload/**")
+//          .addResourceLocations(root);
+//
+//    registry.addResourceHandler("/files/**")
+//        .addResourceLocations(uploadPath.endsWith("/")? uploadPath : uploadPath + "/");
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
