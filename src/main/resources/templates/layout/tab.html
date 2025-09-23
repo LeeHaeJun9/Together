@@ -8,9 +8,9 @@
     <meta name="author" content="" />
     <title>Bare - Start Bootstrap Template</title>
     <!-- Favicon-->
-    <link rel="icon" type="image/x-icon" th:href="@{/header/assets/favicon.ico}" />
+    <link rel="icon" type="image/x-icon" th:href="@{/assets/favicon.ico}" />
     <!-- Core theme CSS (includes Bootstrap)-->
-    <link th:href="@{/header/css/styles.css}" rel="stylesheet" />
+    <link th:href="@{/css/style.css}" rel="stylesheet" />
 </head>
 <body>
 <!-- header -->
@@ -41,13 +41,13 @@
 <div>
     <ul class="nav nav-tabs">
         <li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="#">Active</a>
+            <a class="nav-link active" aria-current="page" href="#">카페 홈</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="#">Link</a>
+            <a class="nav-link" href="http://localhost:8080/meeting/list">모임목록</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="#">Link</a>
+            <a class="nav-link" href="http://localhost:8080/meeting/review/list">모임후기</a>
         </li>
         <li class="nav-item">
             <a class="nav-link disabled" aria-disabled="true">Disabled</a>
@@ -66,7 +66,7 @@
 <!-- Bootstrap core JS-->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
 <!-- Core theme JS-->
-<script th:src="@{/header/js/scripts.js}"></script>
+<script th:src="@{/js/scripts.js}"></script>
 <th:block layout:fragment="script">
 
 </th:block>

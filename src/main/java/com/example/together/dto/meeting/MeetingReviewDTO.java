@@ -10,8 +10,10 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @Builder
@@ -27,14 +29,20 @@ public class MeetingReviewDTO {
     @NotEmpty
     private String content;
 
-    private User reviewer;
+    private Long reviewerId; // id 번호
+    private String reviewerNickname; // 닉네임
+    private String reviewerUserId; // 유저 아이디
 
-    @ManyToOne(fetch = FetchType.LAZY)
     private Meeting meeting;
+    private Long meetingId;
+    private LocalDateTime meetingDate;
+    private String meetingLocation;
+    private String meetingAddress;
 
-    private LocalDateTime regDate;
+    private List<MultipartFile> files;
+    private List<MeetingReviewImageDTO> imageList; // 이미지 리스트
+    private List<String> removedImageUuids; // 삭제할 이미지 리스트
 
-    private LocalDateTime modDate;
-
-    private Cafe cafe;
+    private LocalDateTime regDate;  // 생성일
+    private LocalDateTime modDate;  // 수정일
 }

@@ -1,5 +1,6 @@
 package com.example.together.repository;
 
+import com.example.together.domain.Status;
 import com.example.together.domain.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -37,6 +38,5 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query("select u from User u where u.userId = :username")
     Optional<User> findByUsername(@Param("username") String username);
 
-
-
+    long countByStatus(Status status);
 }

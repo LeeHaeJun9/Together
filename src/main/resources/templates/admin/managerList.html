@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>관리자 목록</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .add-btn {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+
+        .add-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .table-container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: bold;
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        tr:hover {
+            background-color: #f9f9f9;
+        }
+
+        .status {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .status.active {
+            background: #e8f5e8;
+            color: #4CAF50;
+        }
+
+        .status.inactive {
+            background: #ffebee;
+            color: #f44336;
+        }
+
+        .role {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .role.super {
+            background: #fff3e0;
+            color: #ff9800;
+        }
+
+        .role.normal {
+            background: #e3f2fd;
+            color: #2196f3;
+        }
+
+        .action-btn {
+            padding: 8px 12px;
+            margin: 0 2px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+
+        .edit-btn {
+            background: #2196f3;
+            color: white;
+        }
+
+        .edit-btn:hover {
+            background: #1976d2;
+        }
+
+        .delete-btn {
+            background: #f44336;
+            color: white;
+        }
+
+        .delete-btn:hover {
+            background: #d32f2f;
+        }
+
+        .search-bar {
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+    </style>
+</head>
+<body>
+<div class="header">
+    <h1>👥 관리자 목록</h1>
+    <button class="add-btn" onclick="goToRegister()">➕ 새 관리자 등록</button>
+</div>
+
+<div class="search-bar">
+    <input type="text" class="search-input" placeholder="🔍 관리자 이름, 이메일로 검색..." onkeyup="searchManagers()">
+</div>
+
+<div class="table-container">
+    <table id="managerTable">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>이름</th>
+            <th>이메일</th>
+            <th>권한</th>
+            <th>상태</th>
+            <th>등록일</th>
+            <th>마지막 로그인</th>
+            <th>작업</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>1</td>
+            <td>김철수</td>
+            <td>admin@test.com</td>
+            <td><span class="role super">최고관리자</span></td>
+            <td><span class="status active">활성</span></td>
+            <td>2024-01-15</td>
+            <td>2024-03-20 14:30</td>
+            <td>
+                <button class="action-btn edit-btn" onclick="editManager(1)">수정</button>
+                <button class="action-btn delete-btn" onclick="deleteManager(1)">삭제</button>
+            </td>
+        </tr>
+        <tr>
+            <td>2</td>
+            <td>이영희</td>
+            <td>manager1@test.com</td>
+            <td><span class="role normal">일반관리자</span></td>
+            <td><span class="status active">활성</span></td>
+            <td>2024-02-10</td>
+            <td>2024-03-19 09:15</td>
+            <td>
+                <button class="action-btn edit-btn" onclick="editManager(2)">수정</button>
+                <button class="action-btn delete-btn" onclick="deleteManager(2)">삭제</button>
+            </td>
+        </tr>
+        <tr>
+            <td>3</td>
+            <td>박민수</td>
+            <td>manager2@test.com</td>
+            <td><span class="role normal">일반관리자</span></td>
+            <td><span class="status inactive">비활성</span></td>
+            <td>2024-03-01</td>
+            <td>2024-03-15 16:45</td>
+            <td>
+                <button class="action-btn edit-btn" onclick="editManager(3)">수정</button>
+                <button class="action-btn delete-btn" onclick="deleteManager(3)">삭제</button>
+            </td>
+        </tr>
+        <tr>
+            <td>4</td>
+            <td>최정미</td>
+            <td>manager3@test.com</td>
+            <td><span class="role normal">일반관리자</span></td>
+            <td><span class="status active">활성</span></td>
+            <td>2024-03-05</td>
+            <td>2024-03-18 11:20</td>
+            <td>
+                <button class="action-btn edit-btn" onclick="editManager(4)">수정</button>
+                <button class="action-btn delete-btn" onclick="deleteManager(4)">삭제</button>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<script>
+    // 새 관리자 등록 페이지로 이동
+    function goToRegister() {
+        window.location.href = '/admin/manager/register';
+    }
+
+    // 관리자 수정
+    function editManager(id) {
+        alert(`관리자 ${id}번을 수정합니다.`);
+        // 실제로는 수정 페이지로 이동
+        // window.location.href = `editManager.html?id=${id}`;
+    }
+
+    // 관리자 삭제
+    function deleteManager(id) {
+        if (confirm('정말로 이 관리자를 삭제하시겠습니까?')) {
+            // 테이블에서 해당 행 삭제
+            const row = event.target.closest('tr');
+            row.remove();
+            alert('관리자가 삭제되었습니다.');
+        }
+    }
+
+    // 관리자 검색
+    function searchManagers() {
+        const input = event.target;
+        const filter = input.value.toLowerCase();
+        const table = document.getElementById('managerTable');
+        const rows = table.getElementsByTagName('tr');
+
+        // 헤더를 제외한 모든 행 검색
+        for (let i = 1; i < rows.length; i++) {
+            const nameCell = rows[i].getElementsByTagName('td')[1];
+            const emailCell = rows[i].getElementsByTagName('td')[2];
+
+            if (nameCell && emailCell) {
+                const nameText = nameCell.textContent.toLowerCase();
+                const emailText = emailCell.textContent.toLowerCase();
+
+                if (nameText.includes(filter) || emailText.includes(filter)) {
+                    rows[i].style.display = '';
+                } else {
+                    rows[i].style.display = 'none';
+                }
+            }
+        }
+    }
+
+    // 페이지 로드 시 환영 메시지
+    window.addEventListener('load', function() {
+        console.log('관리자 목록 페이지가 로드되었습니다.');
+    });
+</script>
+</body>
+</html>

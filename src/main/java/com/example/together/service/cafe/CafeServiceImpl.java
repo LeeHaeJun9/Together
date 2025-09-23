@@ -1,22 +1,32 @@
 package com.example.together.service.cafe;
 
 import com.example.together.domain.*;
+import com.example.together.dto.PageRequestDTO;
+import com.example.together.dto.PageResponseDTO;
 import com.example.together.dto.cafe.*;
+import com.example.together.dto.calendar.CalendarEventDTO;
 import com.example.together.repository.*;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
+@Log4j2
 public class CafeServiceImpl implements CafeService {
 
     private final CafeRepository cafeRepository;
@@ -24,6 +34,9 @@ public class CafeServiceImpl implements CafeService {
     private final MembershipRepository membershipRepository;
     private final CafeApplicationRepository  cafeApplicationRepository;
     private final CafeJoinRequestRepository  cafeJoinRequestRepository;
+    private final PostRepository postRepository;
+    private final CommentRepository commentRepository;
+    private final CafeCalendarRepository cafeCalendarRepository;
 
 
     @Value("${org.zerock.upload.path}")
@@ -169,10 +182,8 @@ public class CafeServiceImpl implements CafeService {
         // 2. 동적으로 회원 수 계산
         Integer memberCount = membershipRepository.countByCafe(cafe);
 
-        boolean isOwner = cafe.getOwner().getId().equals(userId);
-
-        User user = userRepository.getReferenceById(userId);
-        boolean isMember = membershipRepository.existsByCafeAndUser(cafe, user);
+        boolean isOwner = cafe.getOwner().getId().equals(userId); // userId는 여기에서 null이 아님을 보장
+        boolean isMember = membershipRepository.existsByCafeAndUser(cafe, userRepository.getReferenceById(userId));
 
 
         // 3. 응답 DTO 반환
@@ -188,6 +199,29 @@ public class CafeServiceImpl implements CafeService {
                 cafe.getCafeThumbnail(),
                 isOwner,
                 isMember
+        );
+    }
+
+    @Override
+    public CafeResponseDTO getCafeById(Long cafeId) {
+        // userId가 없는 경우를 위한 메서드
+        Cafe cafe = cafeRepository.findById(cafeId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 카페입니다."));
+        Integer memberCount = membershipRepository.countByCafe(cafe);
+
+        // isOwner와 isMember는 항상 false로 설정
+        return new CafeResponseDTO(
+                cafe.getId(),
+                cafe.getName(),
+                cafe.getDescription(),
+                cafe.getCategory().name(),
+                cafe.getRegDate(),
+                cafe.getOwner().getId(),
+                memberCount,
+                cafe.getCafeImage(),
+                cafe.getCafeThumbnail(),
+                false, // isOwner
+                false  // isMember
         );
     }
 
@@ -386,6 +420,12 @@ public class CafeServiceImpl implements CafeService {
             throw new IllegalAccessException("카페를 삭제할 권한이 없습니다.");
         }
 
+        commentRepository.deleteByPostIn(postRepository.findByCafe(cafe));
+
+        postRepository.deleteByCafe(cafe);
+
+        cafeJoinRequestRepository.deleteByCafe(cafe);
+
         membershipRepository.deleteByCafe(cafe);
 
         // 데이터베이스에서 카페 삭제
@@ -490,5 +530,272 @@ public class CafeServiceImpl implements CafeService {
         return cafeRepository.findById(cafeId)
                 .map(cafe -> cafe.getOwner().getId().equals(userId))
                 .orElse(false);
+    }
+
+    @Transactional(readOnly = true)
+    public List<CafeApplicationResponseDTO> getApplicationsByUserId(Long userId) {
+        // CafeApplicationRepository를 사용하여 특정 사용자 ID에 해당하는 신청서 목록을 찾습니다.
+        List<CafeApplication> applications = cafeApplicationRepository.findByApplicantId(userId);
+
+        // 조회된 엔티티 목록을 DTO 목록으로 변환하여 반환합니다.
+        return applications.stream()
+                .map(CafeApplicationResponseDTO::fromEntity)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public MyJoinedCafesDTO getMyJoinedCafes(Long userId) {
+        // 1. 해당 사용자의 모든 Membership 정보를 조회합니다.
+        List<Membership> memberships = membershipRepository.findByUserId(userId);
+
+        // 2. 가입한 카페들의 카테고리별 통계를 계산합니다.
+        long totalCafes = memberships.size();
+        long musicCafes = memberships.stream()
+                .filter(m -> m.getCafe().getCategory() == CafeCategory.MUSIC)
+                .count();
+        long sportsCafes = memberships.stream()
+                .filter(m -> m.getCafe().getCategory() == CafeCategory.SPORTS)
+                .count();
+        long studyCafes = memberships.stream()
+                .filter(m -> m.getCafe().getCategory() == CafeCategory.STUDY)
+                .count();
+
+        // 3. 통계와 가입 목록을 DTO에 담아 반환합니다.
+        return MyJoinedCafesDTO.builder()
+                .memberships(memberships)
+                .totalCafes(totalCafes)
+                .musicCafes(musicCafes)
+                .sportsCafes(sportsCafes)
+                .studyCafes(studyCafes)
+                .build();
+    }
+
+    @Transactional
+    public void leaveCafe(Long cafeId, Long userId) {
+        // 1. 카페 및 사용자 존재 여부 확인
+        Cafe cafe = cafeRepository.findById(cafeId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 카페입니다."));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+
+        // 2. 해당 카페의 소유자인지 확인 (소유자는 탈퇴할 수 없음)
+        if (cafe.getOwner().getId().equals(userId)) {
+            throw new IllegalStateException("카페 소유자는 탈퇴할 수 없습니다. 카페를 삭제하거나 소유권을 이전하세요.");
+        }
+
+        // 3. 해당 사용자의 멤버십 정보 찾기
+        Membership membership = membershipRepository.findByCafeAndUser(cafe, user)
+                .orElseThrow(() -> new IllegalArgumentException("해당 카페의 회원이 아닙니다."));
+
+        // 4. 멤버십 정보 삭제
+        membershipRepository.delete(membership);
+    }
+
+    @Override
+    public String getCafeNameById(Long cafeId) {
+        return cafeRepository.findById(cafeId)
+                .map(Cafe::getName)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 카페입니다."));
+    }
+
+    @Override
+    public List<Cafe> getSimilarCafes(Long cafeId, int limit) {
+        Cafe currentCafe = cafeRepository.findById(cafeId)
+                .orElseThrow(() -> new IllegalArgumentException("카페를 찾을 수 없습니다."));
+
+        return cafeRepository.findByCategoryAndIdNot(
+                currentCafe.getCategory(),
+                currentCafe.getId(),
+                PageRequest.of(0, limit)
+        );
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<CalendarEventDTO> getCalendarEvents(Long cafeId) {
+        Cafe cafe = cafeRepository.findById(cafeId)
+                .orElseThrow(() -> new IllegalArgumentException("카페를 찾을 수 없습니다."));
+
+        List<CafeCalendar> events = cafeCalendarRepository.findByCafe(cafe);
+
+        return events.stream()
+                .map(this::convertToCalendarEventDTO)
+                .collect(Collectors.toList());
+    }
+
+    private CalendarEventDTO convertToCalendarEventDTO(CafeCalendar calendar) {
+        // Meeting 엔티티가 없는 경우를 고려하여 예외 처리
+        String title = (calendar.getMeeting() != null) ? calendar.getMeeting().getTitle() : "제목 없음";
+        String start = (calendar.getMeeting() != null) ? calendar.getMeeting().getMeetingDate().toString() : null;
+        String url = null;
+        if (calendar.getMeeting() != null) {
+            url = "/cafe/" + calendar.getCafe().getId() + "/meeting/read?id=" + calendar.getMeeting().getId() + "&page=1&size=10";
+        }
+
+        return CalendarEventDTO.builder()
+                .id(calendar.getId())
+                .title(title)
+                .start(start)
+                .url(url)
+                .build();
+    }
+
+    @Override
+    public List<CafeCategory> getAllCategories() {
+        return List.of(CafeCategory.values());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<CafeResponseDTO> getRecommendedCafes(int limit) {
+        // ✅ 수정: `findTop`을 `findBy`로 변경
+        List<Cafe> recommendedCafes = cafeRepository.findByOrderByMemberCountDesc(PageRequest.of(0, limit));
+
+        // 2. 엔티티 리스트를 DTO 리스트로 변환하여 반환합니다.
+        return recommendedCafes.stream()
+                .map(cafe -> new CafeResponseDTO(
+                        cafe.getId(),
+                        cafe.getName(),
+                        cafe.getDescription(),
+                        cafe.getCategory().getKoreanName(),
+                        cafe.getRegDate(),
+                        cafe.getOwner().getId(),
+                        cafe.getMemberCount(),
+                        cafe.getCafeImage(),
+                        cafe.getCafeThumbnail(),
+                        false,
+                        false
+                ))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<CafeResponseDTO> getCafesByCategory(CafeCategory category) {
+        // 1. Repository를 사용하여 해당 카테고리의 카페 엔티티 목록을 조회합니다.
+        List<Cafe> cafes = cafeRepository.findByCategory(category);
+
+        // 2. 조회된 엔티티 목록을 DTO 목록으로 변환하여 반환합니다.
+        return cafes.stream()
+                .map(cafe -> new CafeResponseDTO(
+                        cafe.getId(),
+                        cafe.getName(),
+                        cafe.getDescription(),
+                        cafe.getCategory().name(), // 카테고리 이름 (Enum)
+                        cafe.getRegDate(),
+                        cafe.getOwner().getId(),
+                        cafe.getMemberCount(),
+                        cafe.getCafeImage(),
+                        cafe.getCafeThumbnail(),
+                        false, // isOwner
+                        false  // isMember
+                ))
+                .collect(Collectors.toList());
+    }
+
+//    @Override
+//    @Transactional(readOnly = true)
+//    public PageResponseDTO<CafeResponseDTO> getCafeList(PageRequestDTO pageRequestDTO) {
+//
+//        // 1. DTO에서 Pageable 객체 생성
+//        Pageable pageable = pageRequestDTO.getPageable("regDate");
+//
+//        // 2. Repository의 searchAll 메서드를 호출하여 키워드 검색 수행
+//        //    키워드는 DTO에서 가져오고, 카테고리 목록은 null로 전달합니다.
+//        Page<Cafe> result = cafeRepository.searchAll(
+//                pageRequestDTO.getKeyword(),
+//                null, // 카테고리 검색이 아니므로 null 전달
+//                pageable
+//        );
+//
+//        // 3. Page<Cafe>를 DTO 리스트로 변환
+//        List<CafeResponseDTO> dtoList = result.getContent().stream()
+//                .map(this::convertToCafeResponseDTO)
+//                .collect(Collectors.toList());
+//
+//        // 4. PageResponseDTO 생성 및 반환
+//        return PageResponseDTO.<CafeResponseDTO>withAll()
+//                .pageRequestDTO(pageRequestDTO)
+//                .dtoList(dtoList)
+//                .total((int) result.getTotalElements())
+//                .build();
+//    }
+//
+//    /**
+//     * 특정 카테고리로 필터링된 카페 목록을 페이징하여 반환합니다.
+//     */
+//    @Override
+//    @Transactional(readOnly = true)
+//    public PageResponseDTO<CafeResponseDTO> getCafeListByCategory(CafeCategory cafeCategory, PageRequestDTO pageRequestDTO) {
+//
+//        // 1. DTO에서 Pageable 객체 생성
+//        Pageable pageable = pageRequestDTO.getPageable("regDate");
+//
+//        // 2. Repository의 searchAll 메서드를 호출하여 카테고리 검색 수행
+//        //    키워드는 null로 전달하고, 카테고리 목록을 전달합니다.
+//        Page<Cafe> result = cafeRepository.searchAll(
+//                null, // 카테고리 검색이므로 키워드는 null
+//                Arrays.asList(cafeCategory), // 카테고리 목록 전달
+//                pageable
+//        );
+//
+//        // 3. Page<Cafe>를 DTO 리스트로 변환
+//        List<CafeResponseDTO> dtoList = result.getContent().stream()
+//                .map(this::convertToCafeResponseDTO)
+//                .collect(Collectors.toList());
+//
+//        // 4. PageResponseDTO 생성 및 반환
+//        return PageResponseDTO.<CafeResponseDTO>withAll()
+//                .pageRequestDTO(pageRequestDTO)
+//                .dtoList(dtoList)
+//                .total((int) result.getTotalElements())
+//                .build();
+//    }
+
+    @Override
+    public PageResponseDTO<CafeResponseDTO> getCafeListWithFilters(PageRequestDTO pageRequestDTO, CafeCategory category) {
+
+        String keyword = pageRequestDTO.getKeyword();
+        String[] typeArr = pageRequestDTO.getTypes();
+
+        Pageable pageable = pageRequestDTO.getPageable("regDate");
+        if (typeArr == null) {
+            keyword = null;
+        }
+        List<CafeCategory> categoryList = (category != null) ? List.of(category) : null;
+
+        // CafeRepository의 searchAll 메서드를 호출하여 검색
+        Page<Cafe> result = cafeRepository.searchAll(
+                pageRequestDTO.getKeyword(),
+                categoryList,
+                pageable
+        );
+
+        // DTO 변환 및 PageResponseDTO 반환 로직...
+        List<CafeResponseDTO> dtoList = result.getContent().stream()
+                .map(this::convertToCafeResponseDTO)
+                .collect(Collectors.toList());
+
+        return PageResponseDTO.<CafeResponseDTO>withAll()
+                .pageRequestDTO(pageRequestDTO)
+                .dtoList(dtoList)
+                .total((int) result.getTotalElements())
+                .build();
+    }
+
+    // DTO 변환을 위한 헬퍼 메서드 추가
+    private CafeResponseDTO convertToCafeResponseDTO(Cafe cafe) {
+        return new CafeResponseDTO(
+                cafe.getId(),
+                cafe.getName(),
+                cafe.getDescription(),
+                cafe.getCategory().name(),
+                cafe.getRegDate(),
+                cafe.getOwner().getId(),
+                cafe.getMemberCount(),
+                cafe.getCafeImage(),
+                cafe.getCafeThumbnail(),
+                false,
+                false
+        );
     }
 }

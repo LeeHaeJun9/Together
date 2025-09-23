@@ -1,7 +1,12 @@
 package com.example.together.service.cafe;
 
+import com.example.together.domain.Cafe;
 import com.example.together.domain.CafeApplication;
+import com.example.together.domain.CafeCategory;
+import com.example.together.dto.PageRequestDTO;
+import com.example.together.dto.PageResponseDTO;
 import com.example.together.dto.cafe.*;
+import com.example.together.dto.calendar.CalendarEventDTO;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -21,6 +26,7 @@ public interface CafeService {
 
     // 특정 ID의 카페 조회
 //    CafeResponseDTO getCafeById(Long cafeId);
+    CafeResponseDTO getCafeById(Long cafeId);
 
     CafeResponseDTO getCafeById(Long cafeId, Long userId);
 
@@ -54,4 +60,29 @@ public interface CafeService {
     // 사용자가 카페 운영자인지 확인하는 메서드
     boolean isCafeOwner(Long cafeId, Long userId);
 
+    List<CafeApplicationResponseDTO> getApplicationsByUserId(Long userId);
+
+    MyJoinedCafesDTO getMyJoinedCafes(Long userId);
+
+    void leaveCafe(Long cafeId, Long userId);
+
+    String getCafeNameById(Long cafeId);
+
+    public List<Cafe> getSimilarCafes(Long cafeId, int limit);
+
+    List<CalendarEventDTO> getCalendarEvents(Long cafeId);
+
+    // 모든 카페 카테고리 목록을 반환
+    List<CafeCategory> getAllCategories();
+
+    // 추천 카페 목록을 반환
+    List<CafeResponseDTO> getRecommendedCafes(int limit);
+
+    List<CafeResponseDTO> getCafesByCategory(CafeCategory cafeCategory);
+
+//    PageResponseDTO<CafeResponseDTO> getCafeList(PageRequestDTO pageRequestDTO);
+//
+//    PageResponseDTO<CafeResponseDTO> getCafeListByCategory(CafeCategory cafeCategory, PageRequestDTO pageRequestDTO);
+
+    PageResponseDTO<CafeResponseDTO> getCafeListWithFilters(PageRequestDTO pageRequestDTO, CafeCategory cafeCategory);
 }

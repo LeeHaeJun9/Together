@@ -3,6 +3,7 @@ package com.example.together.service.vote;
 import com.example.together.domain.DemandSurvey;
 import com.example.together.domain.User;
 import com.example.together.domain.Vote;
+import com.example.together.domain.VoteType;
 import com.example.together.dto.vote.VoteCreateRequestDTO;
 import com.example.together.dto.vote.VoteResponseDTO;
 import com.example.together.repository.DemandSurveyRepository;
@@ -13,7 +14,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -52,16 +55,46 @@ public class VoteServiceImpl implements VoteService {
     @Override
     @Transactional(readOnly = true)
     public List<VoteResponseDTO> getVoteResults(Long surveyId) {
-        // ✅ 수요조사 존재 여부 확인
-        demandSurveyRepository.findById(surveyId)
+        // 1. 수요조사 존재 여부와 투표 유형 확인
+        DemandSurvey survey = demandSurveyRepository.findById(surveyId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 설문조사입니다."));
 
-        // 투표 결과를 집계하는 커스텀 쿼리 실행 (VoteRepository에 추가 필요)
-        List<Object[]> results = voteRepository.countVotesByOption(surveyId);
+        // 2. 해당 수요조사의 모든 투표를 가져옵니다.
+        List<Vote> votes = voteRepository.findBySurveyId(surveyId);
 
-        // 집계된 결과를 DTO로 변환하여 반환
-        return results.stream()
-                .map(result -> new VoteResponseDTO((String) result[0], (Long) result[1]))
-                .collect(Collectors.toList());
+        // 3. 결과를 옵션별로 그룹화합니다.
+        Map<String, List<Vote>> votesByOption = votes.stream()
+                .collect(Collectors.groupingBy(Vote::getOption));
+
+        List<VoteResponseDTO> results = new ArrayList<>();
+
+        // 4. 투표 유형에 따라 DTO를 구성합니다.
+        for (Map.Entry<String, List<Vote>> entry : votesByOption.entrySet()) {
+            String option = entry.getKey();
+            List<Vote> votesForOption = entry.getValue();
+
+            VoteResponseDTO.VoteResponseDTOBuilder builder = VoteResponseDTO.builder()
+                    .option(option)
+                    .count((long) votesForOption.size());
+
+            // 5. 공개 투표(PUBLIC)인 경우 투표자 닉네임을 추가
+            if (survey.getVoteType() == VoteType.PUBLIC) {
+                List<String> nicknames = votesForOption.stream()
+                        .map(vote -> vote.getVoter().getNickname())
+                        .collect(Collectors.toList());
+                builder.voterNicknames(nicknames);
+            }
+
+            results.add(builder.build());
+        }
+
+        return results;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public boolean hasVoted(Long surveyId, Long userId) {
+        // ✅ 변경된 메서드 이름으로 호출
+        return voteRepository.existsBySurveyIdAndVoterId(surveyId, userId);
     }
 }

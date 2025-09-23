@@ -1,10 +1,19 @@
 package com.example.together.controller.cafe;
 
+import com.example.together.domain.Cafe;
 import com.example.together.domain.CafeApplication;
 import com.example.together.domain.CafeApplicationStatus;
+import com.example.together.domain.CafeCategory;
+import com.example.together.dto.PageRequestDTO;
+import com.example.together.dto.PageResponseDTO;
 import com.example.together.dto.cafe.*;
+import com.example.together.dto.calendar.CalendarEventDTO;
+import com.example.together.dto.meeting.MeetingDTO;
+import com.example.together.dto.post.PostResponseDTO;
 import com.example.together.service.UserService;
 import com.example.together.service.cafe.CafeService;
+import com.example.together.service.meeting.MeetingService;
+import com.example.together.service.post.PostService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
@@ -25,14 +34,8 @@ public class CafeController {
 
     private final CafeService cafeService;
     private final UserService userService;
-
-    @GetMapping("/main")
-    public String mainPage(Model model, Principal principal) {
-        log.info("GET /main - 메인페이지 요청");
-        List<CafeResponseDTO> cafes = cafeService.getAllCafes();
-        model.addAttribute("cafes", cafes);
-        return "mainpage";
-    }
+    private final MeetingService meetingService;
+    private final PostService postService;
 
     private Long getLoggedInUserId(Principal principal) {
         if (principal == null) {
@@ -57,11 +60,11 @@ public class CafeController {
         return "cafe/applicationStatus";
     }
 
-    @GetMapping("/apply-form")
-    public String showApplyForm(Model model) {
-        model.addAttribute("cafeCreateRequestDTO", new CafeCreateRequestDTO());
-        return "cafe/applyForm"; // cafe/applyForm.html 뷰
-    }
+//    @GetMapping("/apply-form")
+//    public String showApplyForm(Model model) {
+//        model.addAttribute("cafeCreateRequestDTO", new CafeCreateRequestDTO());
+//        return "cafe/applyForm"; // cafe/applyForm.html 뷰
+//    }
 
     @GetMapping("/admin/applications")
     public String getPendingApplications(Model model) {
@@ -209,10 +212,47 @@ public class CafeController {
     }
 
     @GetMapping("/list")
-    public String listAllCafes(Model model, Principal principal) {
-        // userId는 개인화된 정보가 필요할 때만 사용. 현재는 getAllCafes()가 userId를 받지 않으므로 제거.
-        List<CafeResponseDTO> cafes = cafeService.getAllCafes();
-        model.addAttribute("cafes", cafes);
+    public String listAllCafes(
+            @RequestParam(value = "category", required = false) String categoryName,
+            @RequestParam(value = "size", defaultValue = "6", required = false) int size,
+            @RequestParam(value = "type", required = false) String type,
+            @RequestParam(value = "keyword", required = false) String keyword,
+            Model model,
+            PageRequestDTO pageRequestDTO) {
+
+        log.info("GET /cafe/list 요청. 카테고리: {}", categoryName);
+
+        // 요청받은 size 값을 pageRequestDTO에 설정
+        pageRequestDTO.setSize(size);
+
+        // type과 keyword를 PageRequestDTO에 직접 설정
+        pageRequestDTO.setType(type);
+        pageRequestDTO.setKeyword(keyword);
+
+        PageResponseDTO<CafeResponseDTO> responseDTO;
+        CafeCategory cafeCategory = null;
+
+        if (categoryName != null && !categoryName.equalsIgnoreCase("ALL")) {
+            try {
+                cafeCategory = CafeCategory.valueOf(categoryName.toUpperCase());
+                // 카테고리 필터링 시 type과 keyword는 사용하지 않으므로 null로 초기화
+                pageRequestDTO.setType(null);
+                pageRequestDTO.setKeyword(null);
+            } catch (IllegalArgumentException e) {
+                log.error("잘못된 카테고리 이름: {}", categoryName);
+                // 잘못된 카테고리일 경우 필터링 조건을 모두 제거
+                cafeCategory = null;
+                pageRequestDTO.setType(null);
+                pageRequestDTO.setKeyword(null);
+            }
+        }
+
+        // 통합된 서비스 메서드 사용
+        responseDTO = cafeService.getCafeListWithFilters(pageRequestDTO, cafeCategory);
+
+        model.addAttribute("pageResponseDTO", responseDTO);
+        model.addAttribute("categories", CafeCategory.values());
+
         return "cafe/list";
     }
 
@@ -221,12 +261,21 @@ public class CafeController {
         Long userId = (principal != null) ? getLoggedInUserId(principal) : null; // 로그인된 사용자 ID (없으면 null)
         String userNickname = null;
 
+        List<PostResponseDTO> latestNotices = postService.getLatestNotices(cafeId, userId);
+        List<PostResponseDTO> popularPosts = postService.getPopularPosts(cafeId, 5, userId);
+        List<Cafe> similarCafes = cafeService.getSimilarCafes(cafeId, 3);
+        List<CalendarEventDTO> events = cafeService.getCalendarEvents(cafeId);
+
         if (userId != null) {
             userNickname = userService.getUserNicknameById(userId);
         }
         CafeResponseDTO response = cafeService.getCafeById(cafeId, userId);
         model.addAttribute("cafe", response);
         model.addAttribute("userNickname", userNickname);
+        model.addAttribute("latestNotices", latestNotices);
+        model.addAttribute("popularPosts", popularPosts);
+        model.addAttribute("similarCafes", similarCafes);
+        model.addAttribute("calendarEvents", events);
         return "cafe/detail";
     }
 
@@ -344,6 +393,64 @@ public class CafeController {
 
             // 오류 발생 시에는 임시로 기존 URL로 리다이렉트
             return "redirect:/cafe/my/cafe/joinRequests";
+        }
+    }
+
+    @GetMapping("/myApplications")
+    public String showMyApplications(Model model, Principal principal) {
+        if (principal == null) {
+            // 로그인하지 않은 사용자는 로그인 페이지로 리다이렉트
+            return "redirect:/login";
+        }
+
+        Long userId = getLoggedInUserId(principal);
+
+        // CafeService를 통해 사용자의 모든 신청 내역을 가져옵니다.
+        List<CafeApplicationResponseDTO> myApplications = cafeService.getApplicationsByUserId(userId);
+
+        // 뷰(Thymeleaf)로 전달하기 위해 모델에 추가
+        model.addAttribute("userApplications", myApplications);
+
+        // 신청 목록을 보여줄 뷰 템플릿의 경로를 반환합니다.
+        return "cafe/myApplicationList"; // 예시: cafe/myApplicationList.html
+    }
+
+    @GetMapping("/my/joined-cafes")
+    public String showMyJoinedCafes(Model model, Principal principal) {
+        if (principal == null) {
+            return "redirect:/login";
+        }
+
+        Long userId = getLoggedInUserId(principal);
+
+        System.out.println("로그인된 사용자 ID: " + userId);
+
+        MyJoinedCafesDTO myCafesData = cafeService.getMyJoinedCafes(userId);
+
+        // ✅ HTML 템플릿에서 사용할 수 있도록 모델에 데이터를 추가합니다.
+        model.addAttribute("cafes", myCafesData.getMemberships());
+        model.addAttribute("totalCafes", myCafesData.getTotalCafes());
+        model.addAttribute("musicCafes", myCafesData.getMusicCafes());
+        model.addAttribute("sportsCafes", myCafesData.getSportsCafes());
+        model.addAttribute("studyCafes", myCafesData.getStudyCafes());
+
+        return "cafe/myCafes"; // Thymeleaf 템플릿 파일 이름
+    }
+
+    @PostMapping("/{cafeId}/leave")
+    @ResponseBody // API 요청임을 나타내기 위해 @ResponseBody 사용
+    public String leaveCafe(@PathVariable Long cafeId, Principal principal) {
+        if (principal == null) {
+            return "redirect:/login"; // 로그인되지 않았으면 로그인 페이지로 리다이렉트
+        }
+        Long userId = getLoggedInUserId(principal);
+        try {
+            cafeService.leaveCafe(cafeId, userId);
+            return "redirect:/cafe/list"; // 탈퇴 후 카페 목록 페이지로 리다이렉트
+        } catch (Exception e) {
+            // 오류 처리: 에러 페이지로 리디렉션하거나 JSON 응답 반환
+            log.error("Failed to leave cafe {}: {}", cafeId, e.getMessage());
+            return "redirect:/error"; // 예시: 에러 페이지로 리다이렉트
         }
     }
 }

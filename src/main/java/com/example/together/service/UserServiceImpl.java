@@ -13,7 +13,10 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Optional;
 
 @Slf4j
@@ -30,23 +33,21 @@ public class UserServiceImpl implements UserService, UserDetailsService {
      * Spring Security의 DaoAuthenticationProvider가 이 메서드를 호출하여 사용자 정보를 가져온 후,
      * 비밀번호 비교는 내부적으로 처리합니다. 따라서 이 메서드에서는 비밀번호를 직접 비교할 필요가 없습니다.
      */
+
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        // 1. 사용자 조회
+        // username = 로그인 폼에서 입력한 아이디(userId)
         User user = userRepository.findByUserId(username)
                 .orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다: " + username));
 
-        // 2. 계정 상태 확인
         if (user.getStatus() != Status.ACTIVE) {
             throw new UsernameNotFoundException("비활성 계정입니다: " + username);
         }
 
-        // 3. UserDetails 객체 생성 및 반환
-        // Spring Security가 이 객체의 password 필드와 사용자가 입력한 비밀번호를 비교합니다.
         return org.springframework.security.core.userdetails.User.builder()
-                .username(user.getUserId())
-                .password(user.getPassword()) // DB에 저장된 해시된 비밀번호를 그대로 전달
-                .roles(user.getSystemRole().name()) // 하드코딩된 "USER" 대신 실제 역할을 사용
+                .username(user.getUserId())          // 시큐리티 세션에 저장될 username
+                .password(user.getPassword())        // 암호화된 비밀번호
+                .roles(user.getSystemRole().name())  // ROLE_USER, ROLE_ADMIN 등
                 .build();
     }
 
@@ -80,6 +81,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     /**
      * 프로필 업데이트
      * JPA의 변경 감지(Dirty Checking) 기능을 활용하도록 수정했습니다.
+     *
      * @Transactional 환경에서 엔티티를 조회하고 setter로 필드를 변경하면, 트랜잭션이 끝날 때 자동으로 UPDATE 쿼리가 실행됩니다.
      */
     @Override
@@ -101,50 +103,6 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
         // user.builder()로 새 객체를 만들 필요 없이, 변경된 user 엔티티가 자동으로 저장됩니다.
         return user;
-    }
-
-    /**
-     * 개별 필드 업데이트
-     */
-    @Override
-    @Transactional
-    public boolean updateUserField(String userId, String field, String value) {
-        try {
-            User user = findByUserId(userId);
-            if (user == null) {
-                return false;
-            }
-
-            // 필드별로 업데이트 처리
-            switch (field) {
-                case "nickname":
-                    user.setNickname(value);
-                    break;
-                case "name":
-                    user.setName(value);
-                    break;
-                case "email":
-                    // 이메일 중복 확인 (본인 제외)
-                    if (isEmailExistsExcludeUser(value, userId)) {
-                        return false; // 중복된 이메일
-                    }
-                    user.setEmail(value);
-                    break;
-                case "phone":
-                    user.setPhone(value);
-                    break;
-                default:
-                    return false; // 지원하지 않는 필드
-            }
-
-            userRepository.save(user);
-            return true;
-
-        } catch (Exception e) {
-            log.error("사용자 정보 업데이트 실패: userId = {}, field = {}, error = {}",
-                    userId, field, e.getMessage());
-            return false;
-        }
     }
 
     /**
@@ -266,5 +224,172 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
         return user.getNickname();
+    }
+
+    @Override
+    @Transactional
+    public boolean updateTempPassword(String userId, String tempPassword) {
+        try {
+            User user = findByUserId(userId);
+            if (user == null) {
+                log.warn("임시 비밀번호 업데이트 실패: 사용자를 찾을 수 없음 - userId = {}", userId);
+                return false;
+            }
+
+            // 임시 비밀번호 암호화 후 저장
+            String encodedTempPassword = passwordEncoder.encode(tempPassword);
+            user.setPassword(encodedTempPassword);
+
+            userRepository.save(user);
+
+            log.info("임시 비밀번호 업데이트 성공: userId = {}", userId);
+            return true;
+
+        } catch (Exception e) {
+            log.error("임시 비밀번호 업데이트 실패: userId = {}, error = {}", userId, e.getMessage());
+            return false;
+        }
+    }
+
+    @Override
+    @Transactional
+    public void updateUserPassword(String userId, String newPassword) {
+        System.out.println("updateUserPassword 호출됨: userId=" + userId + ", newPassword=" + newPassword);
+
+        Optional<User> userOpt = userRepository.findByUserId(userId);
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+            System.out.println("사용자 찾음: " + user.getUserId());
+
+            String encodedPassword = passwordEncoder.encode(newPassword);
+            System.out.println("암호화된 비밀번호: " + encodedPassword);
+
+            user.setPassword(encodedPassword);
+            User savedUser = userRepository.save(user);
+            System.out.println("저장 완료: " + savedUser.getUserId());
+        } else {
+            System.out.println("사용자를 찾을 수 없음: " + userId);
+        }
+    }
+
+    /**
+     * 프로필 사진 업로드 메서드 - 수정된 버전
+     * 프로젝트 루트의 uploads 폴더에 파일을 저장합니다.
+     */
+    @Override
+    public String uploadProfilePhoto(String userId, MultipartFile photo) {
+        try {
+            // 프로젝트 루트의 uploads 폴더에 저장 (수정된 부분)
+            String currentDir = System.getProperty("user.dir");
+            String uploadDir = currentDir + File.separator + "uploads" + File.separator + "profile" + File.separator;
+
+            // 폴더가 없으면 생성
+            File directory = new File(uploadDir);
+            if (!directory.exists()) {
+                boolean created = directory.mkdirs();
+                log.info("업로드 디렉토리 생성: {}, 성공: {}", uploadDir, created);
+            }
+
+            // 파일 확장자 가져오기
+            String originalFilename = photo.getOriginalFilename();
+            String extension = "";
+            if (originalFilename != null && originalFilename.contains(".")) {
+                extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+            } else {
+                extension = ".jpg"; // 기본 확장자
+            }
+
+            // 새 파일명 생성
+            String newFilename = userId + "_" + System.currentTimeMillis() + extension;
+
+            // 파일 저장
+            File targetFile = new File(uploadDir, newFilename);
+            photo.transferTo(targetFile);
+
+            log.info("프로필 사진 업로드 성공: {}", targetFile.getAbsolutePath());
+
+            // 웹에서 접근 가능한 경로 반환
+            return "/uploads/profile/" + newFilename;
+
+        } catch (IOException e) {
+            log.error("프로필 사진 업로드 중 파일 저장 실패: " + e.getMessage(), e);
+            throw new RuntimeException("파일 업로드에 실패했습니다.", e);
+        }
+    }
+    // UserServiceImpl.java 파일에 추가할 메소드들
+// Add these methods to your UserServiceImpl.java file
+
+    // UserServiceImpl.java 파일에 추가할 메소드들
+// Add these methods to your UserServiceImpl.java file
+
+    @Override
+    public boolean updateUserField(String userId, String field, String value) {
+        try {
+            Optional<User> userOptional = userRepository.findByUserId(userId);
+            if (userOptional.isEmpty()) {
+                log.warn("사용자를 찾을 수 없습니다: userId = {}", userId);
+                return false;
+            }
+
+            User user = userOptional.get();
+
+            // 필드별로 업데이트 처리
+            switch (field) {
+                case "email":
+                    // 이메일 중복 확인 (현재 사용자 제외)
+                    if (isEmailExistsForOtherUser(value, user.getId())) {
+                        log.warn("이미 사용 중인 이메일: email = {}", value);
+                        return false;
+                    }
+                    user.setEmail(value);
+                    break;
+
+                case "nickname":
+                case "name":
+                    // 닉네임 유효성 검사 (2-10자)
+                    if (value == null || value.trim().length() < 2 || value.trim().length() > 10) {
+                        log.warn("유효하지 않은 닉네임: nickname = {}", value);
+                        return false;
+                    }
+                    user.setName(value.trim());
+                    break;
+
+                case "phone":
+                    // 전화번호 형식 검사 (010-XXXX-XXXX)
+                    if (value != null && !value.matches("^010-\\d{4}-\\d{4}$")) {
+                        log.warn("유효하지 않은 전화번호 형식: phone = {}", value);
+                        return false;
+                    }
+                    user.setPhone(value);
+                    break;
+
+                default:
+                    log.warn("지원하지 않는 필드: field = {}", field);
+                    return false;
+            }
+
+            userRepository.save(user);
+            log.info("사용자 정보 업데이트 성공: userId = {}, field = {}", userId, field);
+            return true;
+
+        } catch (Exception e) {
+            log.error("사용자 정보 업데이트 중 오류 발생: userId = {}, field = {}, error = {}",
+                    userId, field, e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * 다른 사용자가 해당 이메일을 사용 중인지 확인
+     * Check if email is used by another user
+     */
+    private boolean isEmailExistsForOtherUser(String email, Long currentUserId) {
+        Optional<User> existingUserOptional = userRepository.findByEmail(email);
+        if (existingUserOptional.isEmpty()) {
+            return false;
+        }
+
+        User existingUser = existingUserOptional.get();
+        return !existingUser.getId().equals(currentUserId);
     }
 }

@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>중고거래 관리 - 모여라 Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .admin-header {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+        }
+        .trade-card {
+            transition: all 0.3s;
+            border-left: 4px solid #28a745;
+        }
+        .trade-card:hover {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .trade-thumbnail {
+            width: 60px;
+            height: 60px;
+            border-radius: 8px;
+            object-fit: cover;
+        }
+        .status-for-sale { color: #28a745; }
+        .status-reserved { color: #ffc107; }
+        .status-completed { color: #17a2b8; }
+        .status-reported { color: #dc3545; }
+        .filter-section {
+            background-color: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+        }
+        .table-responsive {
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .btn-action {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.875rem;
+            margin: 0.125rem;
+        }
+        .sidebar {
+            background-color: #f8f9fa;
+            min-height: calc(100vh - 200px);
+            border-radius: 10px;
+        }
+        .nav-link {
+            color: #495057;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        .nav-link:hover {
+            background-color: #e9ecef;
+            color: #28a745;
+        }
+        .nav-link.active {
+            background-color: #28a745;
+            color: white;
+        }
+        .category-badge {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+        }
+        .price-text {
+            font-size: 0.875rem;
+            color: #28a745;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+<!-- Admin Header -->
+<div class="admin-header">
+    <div class="container-fluid">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h2><i class="fas fa-handshake me-2"></i>중고거래 관리</h2>
+                <p class="mb-0">플랫폼의 중고거래를 관리하고 모니터링하세요</p>
+            </div>
+            <div class="col-md-4 text-end">
+                <a href="/manager/manager" class="btn btn-light me-2">
+                    <i class="fas fa-tachometer-alt"></i> 대시보드
+                </a>
+                <div class="dropdown d-inline">
+                    <button class="btn btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-user-shield"></i> 관리자님
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="/mypage">마이페이지</a></li>
+                        <li><a class="dropdown-item" href="/main">사용자 모드</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="/logout">로그아웃</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-2">
+            <div class="sidebar p-3">
+                <nav class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/manager/manager">
+                            <i class="fas fa-tachometer-alt me-2"></i>대시보드
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/manager/mUser">
+                            <i class="fas fa-users me-2"></i>회원 관리
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/manager/mCafe">
+                            <i class="fas fa-coffee me-2"></i>카페 관리
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/manager/mTrade">
+                            <i class="fas fa-handshake me-2"></i>거래 관리
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/manager/mMeeting">
+                            <i class="fas fa-calendar-alt me-2"></i>모임 관리
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/manager/mReport">
+                            <i class="fas fa-exclamation-triangle me-2"></i>신고 관리
+                        </a>
+                    </li>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-10">
+            <!-- Statistics -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="card bg-success text-white">
+                        <div class="card-body text-center">
+                            <i class="fas fa-handshake fa-2x mb-2"></i>
+                            <h4 th:text="${totalTrades ?: 156}">156</h4>
+                            <small>총 거래수</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-primary text-white">
+                        <div class="card-body text-center">
+                            <i class="fas fa-shopping-cart fa-2x mb-2"></i>
+                            <h4 th:text="${activeTrades ?: 42}">42</h4>
+                            <small>판매 중</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-info text-white">
+                        <div class="card-body text-center">
+                            <i class="fas fa-check-circle fa-2x mb-2"></i>
+                            <h4 th:text="${completedTrades ?: 98}">98</h4>
+                            <small>거래 완료</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-warning text-white">
+                        <div class="card-body text-center">
+                            <i class="fas fa-exclamation-triangle fa-2x mb-2"></i>
+                            <h4 th:text="${reportedTrades ?: 3}">3</h4>
+                            <small>신고된 거래</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Search and Filter Section -->
+            <div class="filter-section">
+                <form method="get" action="/admin/trades">
+                    <div class="row align-items-end">
+                        <div class="col-md-3">
+                            <label class="form-label">검색</label>
+                            <input type="text" class="form-control" name="search"
+                                   placeholder="상품명, 설명" th:value="${searchTerm}">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">상태</label>
+                            <select class="form-select" name="status">
+                                <option value="">전체</option>
+                                <option value="FOR_SALE" th:selected="${status == 'FOR_SALE'}">판매중</option>
+                                <option value="RESERVED" th:selected="${status == 'RESERVED'}">예약중</option>
+                                <option value="COMPLETED" th:selected="${status == 'COMPLETED'}">거래완료</option>
+                                <option value="REPORTED" th:selected="${status == 'REPORTED'}">신고됨</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">카테고리</label>
+                            <select class="form-select" name="category">
+                                <option value="">전체</option>
+                                <option value="BOOKS" th:selected="${category == 'BOOKS'}">도서</option>
+                                <option value="ELECTRONICS" th:selected="${category == 'ELECTRONICS'}">전자제품</option>
+                                <option value="FASHION" th:selected="${category == 'FASHION'}">패션</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">정렬</label>
+                            <select class="form-select" name="sort">
+                                <option value="regDate" th:selected="${sort == 'regDate'}">등록일순</option>
+                                <option value="title" th:selected="${sort == 'title'}">제목순</option>
+                                <option value="price" th:selected="${sort == 'price'}">가격순</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <button type="submit" class="btn btn-success me-2">
+                                <i class="fas fa-search"></i> 검색
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary" onclick="resetFilters()">
+                                <i class="fas fa-undo"></i> 초기화
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Bulk Actions -->
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                    <button class="btn btn-outline-primary btn-sm" onclick="selectAll()">
+                        <i class="fas fa-check-square"></i> 전체선택
+                    </button>
+                    <button class="btn btn-outline-danger btn-sm" onclick="bulkHide()">
+                        <i class="fas fa-eye-slash"></i> 선택 숨김
+                    </button>
+                    <button class="btn btn-outline-warning btn-sm" onclick="bulkReport()">
+                        <i class="fas fa-flag"></i> 선택 신고처리
+                    </button>
+                </div>
+                <div>
+                    <span class="text-muted">총 <strong th:text="${totalCount ?: 156}">156</strong>개의 거래</span>
+                </div>
+            </div>
+
+            <!-- Trade Table -->
+            <div class="card">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                        <tr>
+                            <th><input type="checkbox" id="selectAllCheckbox"></th>
+                            <th>이미지</th>
+                            <th>상품정보</th>
+                            <th>카테고리</th>
+                            <th>판매자</th>
+                            <th>가격</th>
+                            <th>상태</th>
+                            <th>등록일</th>
+                            <th>관리</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="trade : ${trades}" th:if="${trades != null and !trades.isEmpty()}">
+                            <td>
+                                <input type="checkbox" class="trade-checkbox" th:value="${trade.id}">
+                            </td>
+                            <td>
+                                <img th:src="${trade.thumbnail ?: '/images/default-product.png'}"
+                                     alt="상품 이미지" class="trade-thumbnail">
+                            </td>
+                            <td>
+                                <strong th:text="${trade.title}">아이폰 14 Pro</strong>
+                                <br><small class="text-muted" th:text="${#strings.abbreviate(trade.description, 30)}">상품 설명...</small>
+                            </td>
+                            <td>
+                                    <span class="badge category-badge"
+                                          th:class="${trade.category == 'BOOKS' ? 'bg-info' :
+                                                       trade.category == 'ELECTRONICS' ? 'bg-warning' : 'bg-primary'}"
+                                          th:text="${trade.category == 'BOOKS' ? '도서' :
+                                                       trade.category == 'ELECTRONICS' ? '전자제품' : '패션'}">
+                                        전자제품
+                                    </span>
+                            </td>
+                            <td>
+                                <span th:text="${trade.seller.nickname}">판매자</span>
+                                <br><small class="text-muted" th:text="${trade.seller.userId}">seller123</small>
+                            </td>
+                            <td>
+                                <span class="price-text" th:text="${#numbers.formatDecimal(trade.price, 0, 0)} + '원'">150,000원</span>
+                            </td>
+                            <td>
+                                    <span class="badge"
+                                          th:class="${trade.status == 'FOR_SALE' ? 'bg-success' :
+                                                       trade.status == 'RESERVED' ? 'bg-warning' :
+                                                       trade.status == 'COMPLETED' ? 'bg-info' : 'bg-danger'}"
+                                          th:text="${trade.status == 'FOR_SALE' ? '판매중' :
+                                                       trade.status == 'RESERVED' ? '예약중' :
+                                                       trade.status == 'COMPLETED' ? '완료' : '신고됨'}">
+                                        판매중
+                                    </span>
+                            </td>
+                            <td th:text="${#temporals.format(trade.regDate, 'yyyy-MM-dd')}">2024-01-15</td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    <button class="btn btn-outline-info btn-action"
+                                            th:onclick="|viewTradeDetail(${trade.id})|">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="btn btn-outline-warning btn-action"
+                                            th:onclick="|hideTrade(${trade.id})|">
+                                        <i class="fas fa-eye-slash"></i>
+                                    </button>
+                                    <button class="btn btn-outline-danger btn-action"
+                                            th:onclick="|reportTrade(${trade.id})|">
+                                        <i class="fas fa-flag"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        <!-- Empty State -->
+                        <tr th:if="${trades == null or trades.isEmpty()}">
+                            <td colspan="9" class="text-center py-4">
+                                <i class="fas fa-handshake fa-3x text-muted mb-3"></i>
+                                <br><span class="text-muted">조건에 맞는 거래가 없습니다.</span>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Pagination -->
+            <nav th:if="${totalPages > 1}" aria-label="Trade pagination" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item" th:class="${currentPage == 0} ? 'disabled'">
+                        <a class="page-link" th:href="@{/admin/trades(page=${currentPage - 1}, search=${searchTerm}, status=${status}, category=${category}, sort=${sort})}">이전</a>
+                    </li>
+                    <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                        th:class="${i == currentPage} ? 'active'">
+                        <a class="page-link"
+                           th:href="@{/admin/trades(page=${i}, search=${searchTerm}, status=${status}, category=${category}, sort=${sort})}"
+                           th:text="${i + 1}">1</a>
+                    </li>
+                    <li class="page-item" th:class="${currentPage == totalPages - 1} ? 'disabled'">
+                        <a class="page-link" th:href="@{/admin/trades(page=${currentPage + 1}, search=${searchTerm}, status=${status}, category=${category}, sort=${sort})}">다음</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+<!-- Trade Detail Modal -->
+<div class="modal fade" id="tradeDetailModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">거래 상세 정보</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="tradeDetailContent">
+                <!-- Trade detail content will be loaded here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-warning" id="modalHideBtn">숨김</button>
+                <button type="button" class="btn btn-danger" id="modalReportBtn">신고처리</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Filter reset function
+    function resetFilters() {
+        window.location.href = '/admin/trades';
+    }
+
+    // Select all function
+    function selectAll() {
+        const checkboxes = document.querySelectorAll('.trade-checkbox');
+        const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = selectAllCheckbox.checked;
+        });
+    }
+
+    // Bulk operations
+    function bulkHide() {
+        const selectedTrades = getSelectedTrades();
+        if (selectedTrades.length === 0) {
+            alert('숨길 거래를 선택해주세요.');
+            return;
+        }
+        if (confirm(`선택한 ${selectedTrades.length}개의 거래를 숨기시겠습니까?`)) {
+            // API call for bulk hide
+            console.log('Hiding trades:', selectedTrades);
+            location.reload();
+        }
+    }
+
+    function bulkReport() {
+        const selectedTrades = getSelectedTrades();
+        if (selectedTrades.length === 0) {
+            alert('신고처리할 거래를 선택해주세요.');
+            return;
+        }
+        const reason = prompt('신고 사유를 입력해주세요:');
+        if (reason && confirm(`선택한 ${selectedTrades.length}개의 거래를 신고처리하시겠습니까?`)) {
+            // API call for bulk report
+            console.log('Reporting trades:', selectedTrades, 'Reason:', reason);
+            location.reload();
+        }
+    }
+
+    function getSelectedTrades() {
+        const checkboxes = document.querySelectorAll('.trade-checkbox:checked');
+        return Array.from(checkboxes).map(cb => cb.value);
+    }
+
+    // Individual trade actions
+    function viewTradeDetail(tradeId) {
+        // Load trade detail via AJAX and show modal
+        fetch(`/api/admin/trades/${tradeId}`)
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('tradeDetailContent').innerHTML = `
+                    <div class="row">
+                        <div class="col-md-4">
+                            <img src="${data.thumbnail || '/images/default-product.png'}"
+                                 class="img-fluid rounded mb-3" style="width: 100%;">
+                            <h6>거래 정보</h6>
+                            <p><strong>카테고리:</strong> ${data.category}</p>
+                            <p><strong>판매자:</strong> ${data.seller.name} (${data.seller.userId})</p>
+                            <p><strong>가격:</strong> ${data.price.toLocaleString()}원</p>
+                            <p><strong>등록일:</strong> ${data.regDate}</p>
+                            <p><strong>상태:</strong> ${data.status}</p>
+                        </div>
+                        <div class="col-md-8">
+                            <h5>${data.title}</h5>
+                            <p class="text-muted">${data.description}</p>
+
+                            <h6>거래 기록</h6>
+                            <div class="table-responsive">
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>활동</th>
+                                            <th>내용</th>
+                                            <th>일시</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>상품 등록</td>
+                                            <td>판매 시작</td>
+                                            <td>2024-01-20</td>
+                                        </tr>
+                                        <tr>
+                                            <td>문의</td>
+                                            <td>buyer123이 문의</td>
+                                            <td>2024-01-19</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <h6>이미지 갤러리</h6>
+                            <div class="row">
+                                <div class="col-md-3 mb-2" th:each="image : ${data.images}">
+                                    <img src="${image}" class="img-fluid rounded" style="cursor: pointer;"
+                                         onclick="window.open(this.src, '_blank')">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                // Set button event handlers
+                document.getElementById('modalHideBtn').onclick = () => hideTrade(tradeId);
+                document.getElementById('modalReportBtn').onclick = () => reportTrade(tradeId);
+
+                new bootstrap.Modal(document.getElementById('tradeDetailModal')).show();
+            })
+            .catch(error => {
+                alert('거래 정보를 불러오는데 실패했습니다.');
+            });
+    }
+
+    function hideTrade(tradeId) {
+        if (confirm('이 거래를 숨기시겠습니까?')) {
+            fetch(`/admin/trades/${tradeId}/hide`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            })
+                .then(response => {
+                    if (response.ok) {
+                        alert('거래가 숨겨졌습니다.');
+                        location.reload();
+                    } else {
+                        alert('숨김 처리에 실패했습니다.');
+                    }
+                });
+        }
+    }
+
+    function reportTrade(tradeId) {
+        const reason = prompt('신고 사유를 입력해주세요:');
+        if (reason && confirm('이 거래를 신고처리하시겠습니까?')) {
+            fetch(`/admin/trades/${tradeId}/report`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ reason: reason })
+            })
+                .then(response => {
+                    if (response.ok) {
+                        alert('거래가 신고처리되었습니다.');
+                        location.reload();
+                    } else {
+                        alert('신고 처리에 실패했습니다.');
+                    }
+                });
+        }
+    }
+
+    // Select all checkbox functionality
+    document.getElementById('selectAllCheckbox').addEventListener('change', function() {
+        const checkboxes = document.querySelectorAll('.trade-checkbox');
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = this.checked;
+        });
+    });
+</script>
+</body>
+</html>

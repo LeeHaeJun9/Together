@@ -15,5 +15,7 @@ public interface VoteRepository extends JpaRepository<Vote, Long> {
     @Query("SELECT v.option, COUNT(v) FROM Vote v WHERE v.survey.id = :surveyId GROUP BY v.option")
     List<Object[]> countVotesByOption(@Param("surveyId") Long surveyId);
 
+    boolean existsBySurveyIdAndVoterId(Long surveyId, Long voterId);
 
+    List<Vote> findBySurveyId(Long surveyId);
 }

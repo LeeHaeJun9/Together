@@ -1,0 +1,85 @@
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background-color: #f8f9fa;
+}
+main {
+    flex-grow: 1;
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+}
+
+.page-header-container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+}
+.page-header-container h3 {
+    font-size: 1.75rem;
+    font-weight: bold;
+    color: #212529;
+    margin-bottom: 0;
+}
+
+.table-container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    border: 1px solid rgba(0,0,0,.125);
+    border-radius: 0.25rem;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075) !important;
+    overflow: hidden;
+    background-color: white;
+}
+.table {
+    margin-bottom: 0;
+    text-align: center;
+}
+.table-custom-header {
+    background-color: #e9ecef !important;
+    color: #495057 !important;
+    border-color: #dee2e6 !important;
+    font-weight: bold;
+}
+.table-hover tbody tr:hover {
+    background-color: #f1f3f5;
+}
+.table th, .table td {
+    vertical-align: middle;
+    color: #212529;
+}
+
+.btn-primary-custom {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+    border-radius: 0.25rem;
+    padding: 0.5rem 1rem;
+    font-weight: normal;
+    color: white;
+    text-decoration: none;
+    transition: all 0.2s ease-in-out;
+}
+.btn-primary-custom:hover {
+    background-color: #0b5ed7;
+    border-color: #0a58ca;
+    color: white;
+}
+
+/* ✅ 링크 색상 및 폰트 스타일 조정 */
+.table a {
+    color: #212529; /* 기본 텍스트 색상과 동일한 검은색으로 변경 */
+    text-decoration: none; /* 밑줄 제거 */
+    font-weight: normal; /* 굵기 제거 */
+    transition: color 0.2s ease-in-out, text-decoration 0.2s ease-in-out;
+}
+.table a:hover {
+    color: #495057; /* 호버 시 약간 어두워지는 효과 */
+    text-decoration: underline; /* 호버 시 밑줄 추가 */
+}

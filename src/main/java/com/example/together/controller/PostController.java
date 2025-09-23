@@ -4,13 +4,20 @@ import com.example.together.domain.PostType;
 import com.example.together.dto.comment.CommentCreateRequestDTO;
 import com.example.together.dto.comment.CommentResponseDTO;
 import com.example.together.dto.comment.CommentUpdateRequestDTO;
+import com.example.together.dto.demandSurvey.DemandSurveyCreateRequestDTO;
 import com.example.together.dto.post.PostCreateRequestDTO;
 import com.example.together.dto.post.PostResponseDTO;
 import com.example.together.service.UserService;
 import com.example.together.service.cafe.CafeService;
 import com.example.together.service.comment.CommentService;
 import com.example.together.service.post.PostService;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -41,16 +48,30 @@ public class PostController {
     }
 
     @GetMapping("/posts")
-    public String getPostsByCafe(@PathVariable Long cafeId, Model model, Principal principal) {
+    public String getPostsByCafe(@PathVariable Long cafeId,
+                                 @RequestParam(defaultValue = "0") int page, // 페이지 번호 추가
+                                 @RequestParam(defaultValue = "10") int size, // 페이지 크기 추가
+                                 Model model,
+                                 Principal principal) {
+
+        // Pageable 객체 생성 (페이지 번호와 크기 설정)
+        Pageable pageable = PageRequest.of(page, size);
 
         Long userId = getUserIdFromPrincipal(principal);
-        List<PostResponseDTO> posts = postService.getPostsByCafe(cafeId, userId);
+
+        // 서비스 메서드 호출: Pageable 객체를 전달하고 Page 객체를 반환받음
+        Page<PostResponseDTO> postsPage = postService.getPostsByCafe(cafeId, userId, pageable);
+
+        String cafeName = cafeService.getCafeNameById(cafeId);
+
         model.addAttribute("cafeId", cafeId);
-        model.addAttribute("posts", posts);
+        model.addAttribute("posts", postsPage); // Page 객체를 모델에 추가
+        model.addAttribute("cafeName", cafeName);
+
         return "post/list";
     }
 
-    @GetMapping("/posts/create")
+    @GetMapping("/posts/register")
     public String showCreateForm(@PathVariable Long cafeId, Model model, Principal principal) {
         Long userId = getUserIdFromPrincipal(principal);
 
@@ -60,10 +81,10 @@ public class PostController {
         model.addAttribute("postCreateRequestDTO", new PostCreateRequestDTO());
         model.addAttribute("isOwner", isOwner);
 
-        return "post/create";
+        return "post/register";
     }
 
-    @PostMapping("/posts/create")
+    @PostMapping("/posts/register")
     public String createPost(@PathVariable Long cafeId,
                              @ModelAttribute PostCreateRequestDTO requestDTO,
                              @RequestParam("imageFile") MultipartFile imageFile,
@@ -88,15 +109,30 @@ public class PostController {
     }
 
     @GetMapping("/posts/{postId}")
-    public String getPostDetail(@PathVariable Long cafeId, @PathVariable Long postId, Model model, Principal principal) {
-        Long userId = getUserIdFromPrincipal(principal);
+    public String getPostDetail(@PathVariable Long cafeId, @PathVariable Long postId,
+                                Model model, Principal principal,
+                                HttpServletRequest request, HttpServletResponse response) {
         try {
+            boolean isLoggedIn = (principal != null);
+
+            Long userId = null;
+            if (isLoggedIn) {
+                userId = getUserIdFromPrincipal(principal);
+            }
+
+            handleViewCount(postId, request, response);
+
+
             PostResponseDTO post = postService.getPostById(postId, userId);
             List<CommentResponseDTO> comments = commentService.getCommentsByPost(postId, userId);
+
             model.addAttribute("post", post);
             model.addAttribute("comments", comments);
             model.addAttribute("commentCreateRequestDTO", new CommentCreateRequestDTO());
             model.addAttribute("cafeId", cafeId);
+            model.addAttribute("isLoggedIn", isLoggedIn);
+            model.addAttribute("loggedInUserId", userId);
+
             return "post/detail";
         } catch (IllegalArgumentException e) {
             model.addAttribute("error", e.getMessage());
@@ -104,17 +140,76 @@ public class PostController {
         }
     }
 
+    private void handleViewCount(Long postId, HttpServletRequest request, HttpServletResponse response) {
+        String postIdString = String.valueOf(postId);
+        Cookie[] cookies = request.getCookies();
+        Cookie postViewCookie = null;
+
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if ("postView".equals(cookie.getName())) {
+                    postViewCookie = cookie;
+                    break;
+                }
+            }
+        }
+
+        if (postViewCookie != null) {
+            if (!postViewCookie.getValue().contains("[" + postIdString + "]")) {
+                postService.increaseViewCount(postId);
+                postViewCookie.setValue(postViewCookie.getValue() + "[" + postIdString + "]");
+                postViewCookie.setPath("/");
+                postViewCookie.setMaxAge(60 * 60 * 24); // 24시간
+                response.addCookie(postViewCookie);
+            }
+        } else {
+            postService.increaseViewCount(postId);
+            Cookie newCookie = new Cookie("postView", "[" + postIdString + "]");
+            newCookie.setPath("/");
+            newCookie.setMaxAge(60 * 60 * 24); // 24시간
+            response.addCookie(newCookie);
+        }
+    }
+
+
     @GetMapping("/posts/{postId}/edit")
     public String showEditForm(@PathVariable Long cafeId, @PathVariable Long postId, Model model, Principal principal) {
         Long userId = getUserIdFromPrincipal(principal);
         try {
             PostResponseDTO post = postService.getPostById(postId, userId);
+
             if (!post.isOwner()) {
                 model.addAttribute("error", "수정 권한이 없습니다.");
                 return "error/accessDenied";
             }
-            model.addAttribute("post", post);
-            model.addAttribute("postCreateRequestDTO", new PostCreateRequestDTO());
+
+
+            PostCreateRequestDTO requestDTO = new PostCreateRequestDTO();
+            requestDTO.setId(post.getId());
+            requestDTO.setTitle(post.getTitle());
+            requestDTO.setContent(post.getContent());
+            requestDTO.setPostType(post.getPostType());
+            requestDTO.setPinned(post.isPinned());
+            requestDTO.setCafeId(post.getCafeId());
+
+
+            if (post.getDemandSurvey() != null) {
+                DemandSurveyCreateRequestDTO demandSurveyDTO = new DemandSurveyCreateRequestDTO();
+                demandSurveyDTO.setId(post.getDemandSurvey().getId());
+                demandSurveyDTO.setTitle(post.getDemandSurvey().getTitle());
+                demandSurveyDTO.setContent(post.getDemandSurvey().getContent());
+                demandSurveyDTO.setDeadline(post.getDemandSurvey().getDeadline());
+                demandSurveyDTO.setVoteType(post.getDemandSurvey().getVoteType());
+                requestDTO.setDemandSurvey(demandSurveyDTO);
+            }
+
+            model.addAttribute("post", post); // 기존 이미지를 표시하기 위해 필요
+            model.addAttribute("postCreateRequestDTO", requestDTO);
+
+            // isOwner 정보도 전달
+            boolean isOwner = cafeService.isCafeOwner(cafeId, userId);
+            model.addAttribute("isOwner", isOwner);
+
             return "post/edit";
         } catch (IllegalArgumentException e) {
             model.addAttribute("error", e.getMessage());
@@ -154,6 +249,11 @@ public class PostController {
     public String createComment(@PathVariable Long cafeId, @PathVariable Long postId,
                                 @ModelAttribute CommentCreateRequestDTO requestDTO,
                                 Principal principal, RedirectAttributes redirectAttributes) {
+        if (principal == null) {
+            redirectAttributes.addFlashAttribute("error", "로그인 후 댓글을 작성할 수 있습니다.");
+            return "redirect:/cafe/" + cafeId + "/posts/" + postId;
+        }
+
         Long userId = getUserIdFromPrincipal(principal);
         requestDTO.setPostId(postId);
         try {

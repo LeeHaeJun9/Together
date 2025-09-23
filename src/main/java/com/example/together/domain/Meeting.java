@@ -25,7 +25,8 @@ public class Meeting extends BaseEntity {
     @Column(nullable = false)
     private LocalDateTime meetingDate;
 
-    private boolean recruiting;
+    @Enumerated(EnumType.STRING)
+    private RecruitingStatus recruiting;
 
     @Enumerated(EnumType.STRING)
     private Visibility visibility;
@@ -36,15 +37,18 @@ public class Meeting extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     private Cafe cafe;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    private Address addressId;
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    private Address addressId;
+    private String address;
+    private String location;
 
-    public void change(String title, String content, LocalDateTime meetingDate, boolean recruiting, Visibility visibility, Address addressId) {
+    public void change(String title, String content, LocalDateTime meetingDate, RecruitingStatus recruiting, Visibility visibility, String address, String location) {
         this.title = title;
         this.content = content;
         this.meetingDate = meetingDate;
         this.recruiting = recruiting;
         this.visibility = visibility;
-        this.addressId = addressId;
+        this.address = address;
+        this.location = location;
     }
 }

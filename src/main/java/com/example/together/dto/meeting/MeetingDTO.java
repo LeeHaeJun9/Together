@@ -1,15 +1,14 @@
 package com.example.together.dto.meeting;
 
-import com.example.together.domain.Address;
-import com.example.together.domain.Cafe;
-import com.example.together.domain.User;
-import com.example.together.domain.Visibility;
+import com.example.together.domain.*;
+import com.example.together.dto.cafe.CafeResponseDTO;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDateTime;
 
@@ -28,19 +27,25 @@ public class MeetingDTO {
     private String content;
 
     @NotNull
+    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     private LocalDateTime meetingDate;
 
-    private boolean recruiting;
+    private RecruitingStatus recruiting;
 
-    private Visibility visibility;
+    private Visibility visibility = Visibility.PUBLIC;
 
-    private User organizer;
+    private Long organizerId;
+    private String organizerName;
+    private String userId;
 
-    private Cafe cafe;
-
-    private Address addressId;
+    private CafeResponseDTO cafe;
 
     private LocalDateTime regDate;
 
     private LocalDateTime modDate;
+
+    private String address;
+    private String location;
+
+
 }

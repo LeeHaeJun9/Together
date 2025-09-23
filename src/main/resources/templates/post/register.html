@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>게시글 작성</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <link rel="stylesheet" th:href="@{/css/header.css}">
+  <link rel="stylesheet" th:href="@{/css/footer.css}">
+
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      background-color: #f8f9fa; /* Consistent background color */
+    }
+    main {
+      flex-grow: 1;
+      padding-top: 2rem;
+      padding-bottom: 2rem;
+    }
+
+    .page-header-container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding-left: 1rem;
+      padding-right: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1.5rem;
+    }
+    .page-header-container h3 {
+      font-size: 1.75rem;
+      font-weight: bold;
+      color: #212529;
+      margin-bottom: 0;
+    }
+
+    .card-custom {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2rem;
+      border-radius: 0.25rem;
+      box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075) !important;
+      border: 1px solid rgba(0,0,0,.125);
+      background-color: white;
+    }
+
+    /* Form elements */
+    .form-label-custom {
+      font-weight: 600;
+      color: #343a40;
+    }
+    .form-control {
+      border-radius: 0.25rem;
+      border: 1px solid #ced4da;
+      padding: 0.5rem 0.75rem;
+    }
+    .form-control:focus {
+      border-color: #80bdff;
+      box-shadow: 0 0 0 0.25rem rgba(0, 123, 255, 0.25);
+    }
+
+    /* Buttons */
+    .btn-primary-custom {
+      background-color: #0d6efd;
+      border-color: #0d6efd;
+      border-radius: 0.25rem;
+      padding: 0.5rem 1rem;
+      font-weight: normal;
+      color: white;
+      text-decoration: none;
+      transition: all 0.2s ease-in-out;
+    }
+    .btn-primary-custom:hover {
+      background-color: #0b5ed7;
+      border-color: #0a58ca;
+      color: white;
+    }
+    .btn-secondary-custom {
+      background-color: #6c757d;
+      border-color: #6c757d;
+      border-radius: 0.25rem;
+      padding: 0.5rem 1rem;
+      font-weight: normal;
+      color: white;
+      text-decoration: none;
+      transition: all 0.2s ease-in-out;
+    }
+    .btn-secondary-custom:hover {
+      background-color: #5c636a;
+      border-color: #565e64;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+
+<div th:replace="~{/layout/header :: header}"></div>
+
+<main>
+  <div class="page-header-container">
+    <h3>게시글 작성</h3>
+  </div>
+
+  <div class="container">
+    <div class="card card-custom">
+      <form th:action="@{/cafe/{cafeId}/posts/register(cafeId=${cafeId})}"
+            th:object="${postCreateRequestDTO}" method="post" enctype="multipart/form-data">
+
+        <div th:if="${message}" class="alert alert-success" th:text="${message}"></div>
+        <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+        <div class="mb-3">
+          <label for="title" class="form-label-custom">제목:</label>
+          <input type="text" class="form-control" id="title" th:field="*{title}" required>
+        </div>
+
+        <div class="mb-3">
+          <label for="content" class="form-label-custom">내용:</label>
+          <textarea class="form-control" id="content" th:field="*{content}" rows="10" required></textarea>
+        </div>
+
+        <div class="mb-3">
+          <label for="imageFile" class="form-label-custom">이미지:</label>
+          <input type="file" class="form-control" id="imageFile" name="imageFile">
+        </div>
+
+        <div class="mb-3" th:if="${isOwner}">
+          <label class="form-label-custom">게시글 고정:</label>
+          <div class="form-check">
+            <input type="checkbox" class="form-check-input" id="pinned" th:field="*{pinned}" disabled>
+            <label class="form-check-label" for="pinned">게시글 상단에 고정하기</label>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label-custom">게시글 유형:</label>
+          <div class="form-check form-check-inline">
+            <input type="radio" class="form-check-input" id="general" name="postType" value="GENERAL" th:field="*{postType}">
+            <label class="form-check-label" for="general">일반 게시글</label>
+          </div>
+          <div class="form-check form-check-inline" th:if="${isOwner}">
+            <input type="radio" class="form-check-input" id="notice" name="postType" value="NOTICE" th:field="*{postType}">
+            <label class="form-check-label" for="notice">공지사항</label>
+          </div>
+          <div class="form-check form-check-inline">
+            <input type="radio" class="form-check-input" id="demand" name="postType" value="DEMAND" th:field="*{postType}">
+            <label class="form-check-label" for="demand">수요조사 게시글</label>
+          </div>
+        </div>
+
+        <div id="demandSurveyFields" style="display: none;">
+          <h3 class="mt-4 mb-3">수요조사 정보</h3>
+          <div class="mb-3">
+            <label for="surveyTitle" class="form-label-custom">수요조사 제목:</label>
+            <input type="text" class="form-control" id="surveyTitle" name="demandSurvey.title">
+          </div>
+          <div class="mb-3">
+            <label for="surveyContent" class="form-label-custom">수요조사 내용:</label>
+            <textarea class="form-control" id="surveyContent" name="demandSurvey.content" rows="3"></textarea>
+          </div>
+          <div class="mb-3">
+            <label for="deadline" class="form-label-custom">마감일:</label>
+            <input type="datetime-local" class="form-control" id="deadline" name="demandSurvey.deadline">
+          </div>
+          <div class="mb-3">
+            <label class="form-label-custom">투표 타입:</label>
+            <div class="form-check form-check-inline">
+              <input type="radio" class="form-check-input" id="voteTypeAnonymous" name="demandSurvey.voteType" value="ANONYMOUS" checked>
+              <label class="form-check-label" for="voteTypeAnonymous">익명 투표</label>
+            </div>
+            <div class="form-check form-check-inline">
+              <input type="radio" class="form-check-input" id="voteTypePublic" name="demandSurvey.voteType" value="PUBLIC">
+              <label class="form-check-label" for="voteTypePublic">공개 투표</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+          <button type="submit" class="btn btn-primary-custom me-md-2">작성하기</button>
+          <a th:href="@{/cafe/{cafeId}/posts(cafeId=${cafeId})}" class="btn btn-secondary-custom">취소</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</main>
+
+<div th:replace="~{/layout/footer :: footer}"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  const postTypeRadios = document.querySelectorAll('input[name="postType"]');
+  const demandSurveyFields = document.getElementById('demandSurveyFields');
+  const deadlineInput = document.getElementById('deadline');
+  const surveyTitleInput = document.getElementById('surveyTitle');
+  const surveyContentTextarea = document.getElementById('surveyContent');
+  const voteTypeAnonymousInput = document.getElementById('voteTypeAnonymous');
+  const voteTypePublicInput = document.getElementById('voteTypePublic');
+
+  function toggleDemandSurveyFields() {
+    const selectedRadio = document.querySelector('input[name="postType"]:checked');
+    const isDemandSurveySelected = selectedRadio && selectedRadio.id === 'demand';
+
+    if (isDemandSurveySelected) {
+      demandSurveyFields.style.display = 'block';
+      surveyTitleInput.setAttribute('required', 'required');
+      deadlineInput.setAttribute('required', 'required');
+      voteTypeAnonymousInput.setAttribute('required', 'required');
+    } else {
+      demandSurveyFields.style.display = 'none';
+      surveyTitleInput.removeAttribute('required');
+      deadlineInput.removeAttribute('required');
+      voteTypeAnonymousInput.removeAttribute('required');
+    }
+  }
+
+  function togglePinnedCheckbox() {
+    const pinnedCheckbox = document.getElementById('pinned');
+    const noticeRadio = document.getElementById('notice');
+
+    if (noticeRadio && noticeRadio.checked) {
+      pinnedCheckbox.disabled = false;
+    } else {
+      pinnedCheckbox.checked = false; // 공지사항이 아니면 체크 해제
+      pinnedCheckbox.disabled = true; // 비활성화
+    }
+  }
+
+
+  // 페이지 로드 시 초기 상태 설정
+  document.addEventListener('DOMContentLoaded', () => {
+    // 일반 게시글이 기본으로 선택되어 있도록 함
+    const generalRadio = document.getElementById('general');
+    if (generalRadio) {
+      generalRadio.checked = true;
+      toggleDemandSurveyFields(); // 초기 상태에 맞춰 필드 숨김
+    }
+    togglePinnedCheckbox();
+  });
+
+  // 라디오 버튼 변경 시 함수 호출
+  postTypeRadios.forEach(radio => {
+    radio.addEventListener('change', () => {
+      toggleDemandSurveyFields();
+      togglePinnedCheckbox();
+    });
+  });
+</script>
+
+</body>
+</html>

@@ -4,11 +4,15 @@ package com.example.together.service;
 import com.example.together.domain.User;
 import com.example.together.dto.member.memberRegisterDTO;
 import com.example.together.dto.member.RegisterDTO;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.web.multipart.MultipartFile;
 
 
 public interface UserService {
     // 로그인 관련
     User authenticate(String userId, String password);
+    UserDetails loadUserByUsername(String username) throws UsernameNotFoundException;
 
     // 회원가입 관련
     User register(memberRegisterDTO registerDTO);
@@ -23,15 +27,19 @@ public interface UserService {
     User updateProfile(Long id, memberRegisterDTO registerDTO);
     void deleteUser(Long id);
 
+    // =============== 새로 추가되는 메소드들 ===============
     boolean updateUserField(String userId, String field, String value);
     boolean changePassword(String userId, String currentPassword, String newPassword);
+    // ===============================================
+
     boolean isEmailExistsExcludeUser(String email, String excludeUserId);
-
     String findUserIdByNameAndEmail(String name, String email);
-
-
     boolean isAdmin(Long adminId);
-
     String getUserNicknameById(Long userId);
+    boolean updateTempPassword(String userId, String tempPassword);
+    void updateUserPassword(String userId, String newPassword);
+
+    String uploadProfilePhoto(String userId, MultipartFile photo);
+
 }
 

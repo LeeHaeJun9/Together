@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>관리자 등록 - Together</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" th:href="@{/assets/favicon.ico}" />
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .register-container {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .register-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .register-header h1 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .register-header p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .form-section {
+            border: 1px solid #eee;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 25px;
+            background: #fafafa;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-label {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .required {
+            color: #dc3545;
+        }
+
+        .form-control, .form-select {
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            padding: 12px;
+            transition: all 0.3s;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+
+        .form-control.is-invalid, .form-select.is-invalid {
+            border-color: #dc3545;
+        }
+
+        .form-control.is-valid, .form-select.is-valid {
+            border-color: #28a745;
+        }
+
+        .form-check-input:checked {
+            background-color: #667eea;
+            border-color: #667eea;
+        }
+        .btn-group-custom {
+            display: flex !important;
+            gap: 15px;
+            margin: 50px 0 !important;
+            padding: 20px 0 !important;
+            border-top: 2px solid #eee !important;
+            position: relative !important;
+            z-index: 9999 !important;
+            width: 100% !important;
+        }
+
+        .btn-submit, .btn-cancel {
+            flex: 1 !important;
+            padding: 15px !important;
+            font-size: 16px !important;
+            font-weight: bold !important;
+            border-radius: 8px !important;
+            min-height: 50px !important;
+        }
+
+
+        .btn-submit {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            padding: 15px 30px;
+            font-weight: bold;
+            border-radius: 8px;
+            transition: transform 0.2s;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            color: white;
+        }
+
+        .btn-cancel {
+            background: #6c757d;
+            border: none;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 8px;
+        }
+
+        .btn-cancel:hover {
+            background: #5a6268;
+            color: white;
+        }
+
+        .invalid-feedback {
+            display: block;
+            font-size: 0.875em;
+            margin-top: 0.25rem;
+        }
+
+        .valid-feedback {
+            display: block;
+            font-size: 0.875em;
+            margin-top: 0.25rem;
+            color: #28a745;
+        }
+
+        .password-strength {
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        .strength-weak { color: #dc3545; }
+        .strength-medium { color: #ffc107; }
+        .strength-strong { color: #28a745; }
+
+        .form-text {
+            font-size: 0.875em;
+            color: #6c757d;
+        }
+
+        .role-description {
+            font-size: 0.875em;
+            color: #6c757d;
+            margin-top: 0.25rem;
+        }
+    </style>
+</head>
+
+
+<body>
+<div class="register-container">
+    <div class="register-header">
+        <h1>➕ 새 관리자 등록</h1>
+        <p>Together 시스템에 새 관리자를 추가합니다</p>
+    </div>
+
+    <!-- 성공/에러 메시지 -->
+    <div th:if="${message}" class="alert alert-success alert-dismissible fade show">
+        <span th:text="${message}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show">
+        <span th:text="${error}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- Thymeleaf 폼 with 객체 바인딩 -->
+    <form th:action="@{/admin/manager/register}"
+          th:object="${managerDTO}"
+          method="post"
+          novalidate>
+
+        <!-- 기본 정보 섹션 -->
+        <div class="form-section">
+            <div class="section-title">
+                👤 기본 정보
+            </div>
+
+            <div class="mb-3">
+                <label for="managerName" class="form-label">
+                    관리자 이름 <span class="required">*</span>
+                </label>
+                <input type="text"
+                       class="form-control"
+                       id="managerName"
+                       th:field="*{managerName}"
+                       th:classappend="${#fields.hasErrors('managerName')} ? 'is-invalid' : ''"
+                       placeholder="예: 김철수">
+                <div th:if="${#fields.hasErrors('managerName')}"
+                     class="invalid-feedback"
+                     th:errors="*{managerName}">
+                    이름을 입력해주세요.
+                </div>
+                <div th:unless="${#fields.hasErrors('managerName')}"
+                     th:if="*{managerName != null and !managerName.isEmpty()}"
+                     class="valid-feedback">
+                    ✓ 올바른 이름입니다.
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label for="email" class="form-label">
+                    이메일 <span class="required">*</span>
+                </label>
+                <input type="email"
+                       class="form-control"
+                       id="email"
+                       th:field="*{email}"
+                       th:classappend="${#fields.hasErrors('email')} ? 'is-invalid' : ''"
+                       placeholder="admin@example.com"
+                       onchange="checkEmailAvailability()">
+                <div th:if="${#fields.hasErrors('email')}"
+                     class="invalid-feedback"
+                     th:errors="*{email}">
+                    올바른 이메일을 입력해주세요.
+                </div>
+                <div id="emailAvailability" class="form-text"></div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="password" class="form-label">
+                        비밀번호 <span class="required">*</span>
+                    </label>
+                    <input type="password"
+                           class="form-control"
+                           id="password"
+                           th:field="*{password}"
+                           th:classappend="${#fields.hasErrors('password')} ? 'is-invalid' : ''"
+                           placeholder="8자 이상 입력"
+                           onkeyup="checkPasswordStrength()">
+                    <div id="passwordStrength" class="password-strength"></div>
+                    <div th:if="${#fields.hasErrors('password')}"
+                         class="invalid-feedback"
+                         th:errors="*{password}">
+                        비밀번호는 8자 이상이어야 합니다.
+                    </div>
+                    <div class="form-text">영문, 숫자, 특수문자를 포함하여 8자 이상</div>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label for="confirmPassword" class="form-label">
+                        비밀번호 확인 <span class="required">*</span>
+                    </label>
+                    <input type="password"
+                           class="form-control"
+                           id="confirmPassword"
+                           name="confirmPassword"
+                           placeholder="비밀번호 재입력"
+                           onkeyup="checkPasswordMatch()">
+                    <div id="passwordMatch" class="password-strength"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 권한 설정 섹션 -->
+        <div class="form-section">
+            <div class="section-title">
+                🔐 권한 설정
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">
+                        관리자 권한 <span class="required">*</span>
+                    </label>
+                    <div class="mt-2">
+                        <div class="form-check mb-3">
+                            <input class="form-check-input"
+                                   type="radio"
+                                   id="roleSuperAdmin"
+                                   th:field="*{role}"
+                                   value="SUPER_ADMIN"
+                                   onchange="updateRoleDescription()">
+                            <label class="form-check-label" for="roleSuperAdmin">
+                                <strong>최고관리자</strong>
+                                <div class="role-description">모든 시스템 권한 보유</div>
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input"
+                                   type="radio"
+                                   id="roleAdmin"
+                                   th:field="*{role}"
+                                   value="ADMIN"
+                                   onchange="updateRoleDescription()">
+                            <label class="form-check-label" for="roleAdmin">
+                                <strong>일반관리자</strong>
+                                <div class="role-description">제한된 관리 권한</div>
+                            </label>
+                        </div>
+                    </div>
+                    <div th:if="${#fields.hasErrors('role')}"
+                         class="invalid-feedback d-block"
+                         th:errors="*{role}">
+                        권한을 선택해주세요.
+                    </div>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label for="status" class="form-label">
+                        초기 상태 <span class="required">*</span>
+                    </label>
+                    <select class="form-select"
+                            id="status"
+                            th:field="*{status}"
+                            th:classappend="${#fields.hasErrors('status')} ? 'is-invalid' : ''">
+                        <option value="">상태를 선택하세요</option>
+                        <option value="ACTIVE">활성 - 즉시 로그인 가능</option>
+                        <option value="INACTIVE">비활성 - 승인 후 활성화</option>
+                    </select>
+                    <div th:if="${#fields.hasErrors('status')}"
+                         class="invalid-feedback"
+                         th:errors="*{status}">
+                        상태를 선택해주세요.
+                    </div>
+                </div>
+            </div>
+
+            <!-- 임시 버튼 테스트 -->
+            <div style="background: red; padding: 20px; margin: 20px 0; text-align: center;">
+                <button type="button" onclick="goBack()" style="background: #6c757d; color: white; padding: 15px 30px; margin-right: 10px; border: none; border-radius: 5px; font-size: 16px;">
+                    취소
+                </button>
+                <button type="submit" style="background: #667eea; color: white; padding: 15px 30px; border: none; border-radius: 5px; font-size: 16px;">
+                    등록하기
+                </button>
+            </div>
+
+            <!-- 권한 설명 박스 -->
+            <div id="rolePermissions" class="alert alert-info" style="display: none;">
+                <h6>권한 상세:</h6>
+                <ul id="permissionList" class="mb-0"></ul>
+            </div>
+        </div>
+
+        <!-- CSRF 토큰 -->
+        <input type="hidden" th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+        <!-- 버튼 그룹 -->
+        <div class="btn-group-custom" style="display: flex !important; gap: 15px; margin: 50px 0; padding: 20px 0; border-top: 2px solid #eee;">
+            <button type="button" class="btn btn-cancel" onclick="goBack()" style="flex: 1; padding: 15px; font-size: 16px; font-weight: bold;">
+                취소
+            </button>
+            <button type="submit" class="btn btn-submit" id="submitBtn" style="flex: 1; padding: 15px; font-size: 16px; font-weight: bold;">
+                등록하기
+            </button>
+        </div>
+
+    </form>
+
+
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    // 비밀번호 강도 체크
+    function checkPasswordStrength() {
+        const password = document.getElementById('password').value;
+        const strengthDiv = document.getElementById('passwordStrength');
+
+        if (password.length === 0) {
+            strengthDiv.innerHTML = '';
+            return;
+        }
+
+        let strength = 0;
+        let feedback = [];
+
+        if (password.length >= 8) strength++; else feedback.push('8자 이상');
+        if (/[a-z]/.test(password)) strength++; else feedback.push('소문자');
+        if (/[A-Z]/.test(password)) strength++; else feedback.push('대문자');
+        if (/[0-9]/.test(password)) strength++; else feedback.push('숫자');
+        if (/[^A-Za-z0-9]/.test(password)) strength++; else feedback.push('특수문자');
+
+        if (strength < 3) {
+            strengthDiv.innerHTML = `<span class="strength-weak">약함 - 필요: ${feedback.join(', ')}</span>`;
+        } else if (strength < 4) {
+            strengthDiv.innerHTML = '<span class="strength-medium">보통 - 사용 가능</span>';
+        } else {
+            strengthDiv.innerHTML = '<span class="strength-strong">강함 - 매우 안전</span>';
+        }
+    }
+
+    // 비밀번호 일치 확인
+    function checkPasswordMatch() {
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+        const matchDiv = document.getElementById('passwordMatch');
+
+        if (confirmPassword.length === 0) {
+            matchDiv.innerHTML = '';
+            return;
+        }
+
+        if (password === confirmPassword) {
+            matchDiv.innerHTML = '<span class="strength-strong">✓ 비밀번호가 일치합니다</span>';
+            document.getElementById('confirmPassword').classList.remove('is-invalid');
+            document.getElementById('confirmPassword').classList.add('is-valid');
+        } else {
+            matchDiv.innerHTML = '<span class="strength-weak">✗ 비밀번호가 일치하지 않습니다</span>';
+            document.getElementById('confirmPassword').classList.remove('is-valid');
+            document.getElementById('confirmPassword').classList.add('is-invalid');
+        }
+    }
+
+    // 이메일 중복 확인 (가짜 API 호출)
+    function checkEmailAvailability() {
+        const email = document.getElementById('email').value;
+        const availabilityDiv = document.getElementById('emailAvailability');
+
+        if (!email || !email.includes('@')) {
+            availabilityDiv.innerHTML = '';
+            return;
+        }
+
+        // 실제로는 서버 API 호출
+        setTimeout(() => {
+            if (email === 'admin@test.com') {
+                availabilityDiv.innerHTML = '<span class="text-danger">✗ 이미 사용 중인 이메일입니다</span>';
+                document.getElementById('email').classList.add('is-invalid');
+            } else {
+                availabilityDiv.innerHTML = '<span class="text-success">✓ 사용 가능한 이메일입니다</span>';
+                document.getElementById('email').classList.remove('is-invalid');
+                document.getElementById('email').classList.add('is-valid');
+            }
+        }, 500);
+    }
+
+    // 권한 설명 업데이트
+    function updateRoleDescription() {
+        const rolePermissions = document.getElementById('rolePermissions');
+        const permissionList = document.getElementById('permissionList');
+        const superAdmin = document.getElementById('roleSuperAdmin').checked;
+        const admin = document.getElementById('roleAdmin').checked;
+
+        if (superAdmin) {
+            permissionList.innerHTML = `
+                    <li>✅ 모든 관리자 계정 관리</li>
+                    <li>✅ 카페 승인/거부/삭제</li>
+                    <li>✅ 사용자 계정 관리</li>
+                    <li>✅ 시스템 설정 변경</li>
+                    <li>✅ 모든 데이터 접근</li>
+                `;
+            rolePermissions.style.display = 'block';
+        } else if (admin) {
+            permissionList.innerHTML = `
+                    <li>✅ 카페 정보 조회/수정</li>
+                    <li>✅ 사용자 계정 조회</li>
+                    <li>✅ 기본적인 관리 기능</li>
+                    <li>❌ 관리자 계정 관리 불가</li>
+                    <li>❌ 시스템 설정 변경 불가</li>
+                `;
+            rolePermissions.style.display = 'block';
+        } else {
+            rolePermissions.style.display = 'none';
+        }
+    }
+
+    // 취소 버튼
+    function goBack() {
+        if (confirm('작성 중인 내용이 사라집니다. 정말 취소하시겠습니까?')) {
+            window.location.href = '/admin/manager/list';
+        }
+    }
+
+    // 폼 제출 전 유효성 검사
+    document.querySelector('form').addEventListener('submit', function(e) {
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+
+        if (password !== confirmPassword) {
+            e.preventDefault();
+            alert('비밀번호가 일치하지 않습니다.');
+            document.getElementById('confirmPassword').focus();
+            return false;
+        }
+
+        // 제출 버튼 비활성화 (중복 제출 방지)
+        const submitBtn = document.getElementById('submitBtn');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '등록 중... <span class="spinner-border spinner-border-sm ms-2"></span>';
+    });
+
+    // 페이지 로드 시 초기화
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('관리자 등록 페이지가 로드되었습니다.');
+    });
+</script>
+</body>
+</html>

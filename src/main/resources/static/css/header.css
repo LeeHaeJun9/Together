@@ -1,0 +1,49 @@
+:root {
+    --primary-color: #4CAF50;
+    --secondary-color: #6c757d;
+    --background-color: #f8f9fa;
+    --card-background: #ffffff;
+    --text-color: #212529;
+    --hover-color: #388E3C;
+    --border-color: #e0e0e0;
+}
+
+.header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 0;
+}
+.logo-section {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: var(--text-color);
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+.logo-section img {
+    height: 40px;
+    margin-right: 0.5rem;
+}
+.nav-links {
+    list-style: none;
+    display: flex;
+    gap: 1rem;
+    margin: 0;
+    padding: 0;
+}
+.nav-links a {
+    background: none;
+    border: none;
+    font-size: 1rem;
+    cursor: pointer;
+    color: var(--text-color);
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+/* 호버 시 색상 변경 */
+.nav-links a:hover {
+    color: var(--primary-color);
+}

@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>카페 상세 정보</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .back-btn {
+            background: #6c757d;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .back-btn:hover {
+            background: #5a6268;
+            transform: translateY(-1px);
+        }
+
+        .content {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+        }
+
+        .cafe-info {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .info-section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #eee;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .info-label {
+            font-weight: bold;
+            color: #555;
+            font-size: 14px;
+        }
+
+        .info-value {
+            font-size: 16px;
+            color: #333;
+        }
+
+        .status {
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            width: fit-content;
+        }
+
+        .status.open {
+            background: #e8f5e8;
+            color: #4CAF50;
+        }
+
+        .status.closed {
+            background: #ffebee;
+            color: #f44336;
+        }
+
+        .status.pending {
+            background: #fff3e0;
+            color: #ff9800;
+        }
+
+        .actions-panel {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            height: fit-content;
+        }
+
+        .action-section {
+            margin-bottom: 25px;
+        }
+
+        .action-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .status-select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .status-select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .action-btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 10px;
+        }
+
+        .btn-update {
+            background: #2196f3;
+            color: white;
+        }
+
+        .btn-update:hover {
+            background: #1976d2;
+            transform: translateY(-1px);
+        }
+
+        .btn-delete {
+            background: #f44336;
+            color: white;
+        }
+
+        .btn-delete:hover {
+            background: #d32f2f;
+            transform: translateY(-1px);
+        }
+
+        .rating {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .stars {
+            color: #ffc107;
+            font-size: 18px;
+        }
+
+        .description {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 8px;
+            line-height: 1.6;
+            color: #666;
+        }
+
+        .tags {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .tag {
+            background: #e3f2fd;
+            color: #2196f3;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .image-preview {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 2px solid #eee;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="header">
+    <h1>☕ 카페 상세 정보</h1>
+    <button class="back-btn" onclick="goBack()">← 목록으로</button>
+</div>
+
+<div class="content">
+    <!-- 카페 정보 -->
+    <div class="cafe-info">
+        <!-- 기본 정보 -->
+        <div class="info-section">
+            <div class="section-title">
+                📍 기본 정보
+            </div>
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-label">카페명</div>
+                    <div class="info-value">스타벅스 강남점</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">운영 상태</div>
+                    <div class="info-value">
+                        <span class="status open">운영중</span>
+                    </div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">주소</div>
+                    <div class="info-value">서울시 강남구 테헤란로 123</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">전화번호</div>
+                    <div class="info-value">02-1234-5678</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">사업자 등록번호</div>
+                    <div class="info-value">123-45-67890</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">등록일</div>
+                    <div class="info-value">2024-01-15</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 운영 정보 -->
+        <div class="info-section">
+            <div class="section-title">
+                🕒 운영 정보
+            </div>
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-label">영업시간</div>
+                    <div class="info-value">07:00 - 22:00</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">휴무일</div>
+                    <div class="info-value">연중무휴</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">좌석 수</div>
+                    <div class="info-value">80석</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">주차</div>
+                    <div class="info-value">가능 (20대)</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 평가 정보 -->
+        <div class="info-section">
+            <div class="section-title">
+                ⭐ 평가 정보
+            </div>
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-label">평균 평점</div>
+                    <div class="info-value">
+                        <div class="rating">
+                            <span class="stars">★★★★☆</span>
+                            <span>4.2 / 5.0</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">리뷰 수</div>
+                    <div class="info-value">324개</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">즐겨찾기</div>
+                    <div class="info-value">1,256명</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">방문 횟수</div>
+                    <div class="info-value">15,432회</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 카페 설명 -->
+        <div class="info-section">
+            <div class="section-title">
+                📝 카페 설명
+            </div>
+            <div class="description">
+                강남 중심가에 위치한 스타벅스 강남점입니다. 넓은 공간과 편안한 좌석으로
+                비즈니스 미팅이나 개인 작업에 최적화되어 있습니다. WiFi와 콘센트가
+                모든 좌석에 완비되어 있으며, 다양한 음료와 디저트를 제공합니다.
+            </div>
+        </div>
+
+        <!-- 태그 -->
+        <div class="info-section">
+            <div class="section-title">
+                🏷️ 태그
+            </div>
+            <div class="tags">
+                <span class="tag">WiFi</span>
+                <span class="tag">콘센트</span>
+                <span class="tag">주차가능</span>
+                <span class="tag">24시간</span>
+                <span class="tag">스터디룸</span>
+                <span class="tag">테라스</span>
+            </div>
+        </div>
+
+        <!-- 대표 이미지 -->
+        <div class="info-section">
+            <div class="section-title">
+                🖼️ 대표 이미지
+            </div>
+            <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjZjVmNWY1Ii8+CjxwYXRoIGQ9Ik01MCA3NUMzNi4xOTI5IDc1IDI1IDYzLjgwNzEgMjUgNTBDMjUgMzYuMTkyOSAzNi4xOTI5IDI1IDUwIDI1QzYzLjgwNzEgMjUgNzUgMzYuMTkyOSA3NSA1MEM3NSA2My44MDcxIDYzLjgwNzEgNzUgNTAgNzVaIiBmaWxsPSIjZGRkIi8+CjxwYXRoIGQ9Ik01MCA2MEM0MS43MTU3IDYwIDM1IDUzLjI4NDMgMzUgNDVDMzUgMzYuNzE1NyA0MS43MTU3IDMwIDUwIDMwQzU4LjI4NDMgMzAgNjUgMzYuNzE1NyA2NSA0NUM2NSA1My4yODQzIDU4LjI4NDMgNjAgNTAgNjBaIiBmaWxsPSIjYmJiIi8+CjwvZz4KPC9zdmc+" alt="카페 이미지" class="image-preview">
+        </div>
+    </div>
+
+    <!-- 관리 작업 -->
+    <div class="actions-panel">
+        <div class="action-section">
+            <div class="action-title">🔄 상태 변경</div>
+            <select class="status-select" id="statusSelect">
+                <option value="open" selected>운영중</option>
+                <option value="closed">운영중지</option>
+                <option value="pending">승인대기</option>
+            </select>
+            <button class="action-btn btn-update" onclick="updateStatus()">상태 업데이트</button>
+        </div>
+
+        <div class="action-section">
+            <div class="action-title">📧 알림 발송</div>
+            <button class="action-btn btn-update" onclick="sendNotification()">사장님에게 알림</button>
+        </div>
+
+        <div class="action-section">
+            <div class="action-title">📊 통계 보기</div>
+            <button class="action-btn btn-update" onclick="viewStatistics()">상세 통계</button>
+        </div>
+
+        <div class="action-section">
+            <div class="action-title">⚠️ 위험 작업</div>
+            <button class="action-btn btn-delete" onclick="deleteCafe()">카페 삭제</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 상태 업데이트
+    function updateStatus() {
+        const select = document.getElementById('statusSelect');
+        const newStatus = select.value;
+        const statusText = select.options[select.selectedIndex].text;
+
+        if (confirm(`카페 상태를 '${statusText}'로 변경하시겠습니까?`)) {
+            // 실제로는 서버에 요청을 보내야 함
+            console.log('상태 변경:', newStatus);
+            alert(`카페 상태가 '${statusText}'로 변경되었습니다.`);
+
+            // 화면의 상태 표시 업데이트
+            updateStatusDisplay(newStatus);
+        }
+    }
+
+    // 화면의 상태 표시 업데이트
+    function updateStatusDisplay(status) {
+        const statusElement = document.querySelector('.status');
+
+        statusElement.className = `status ${status}`;
+
+        switch(status) {
+            case 'open':
+                statusElement.textContent = '운영중';
+                break;
+            case 'closed':
+                statusElement.textContent = '운영중지';
+                break;
+            case 'pending':
+                statusElement.textContent = '승인대기';
+                break;
+        }
+    }
+
+    // 알림 발송
+    function sendNotification() {
+        if (confirm('카페 사장님에게 알림을 발송하시겠습니까?')) {
+            alert('알림이 발송되었습니다.');
+        }
+    }
+
+    // 통계 보기
+    function viewStatistics() {
+        alert('통계 페이지로 이동합니다.');
+        // 실제로는 통계 페이지로 이동
+        // window.location.href = 'cafeStatistics.html?id=1';
+    }
+
+    // 카페 삭제
+    function deleteCafe() {
+        const confirmation = prompt('정말로 이 카페를 삭제하시겠습니까?\n삭제하려면 "삭제"라고 입력하세요:');
+
+        if (confirmation === '삭제') {
+            if (confirm('⚠️ 경고: 이 작업은 되돌릴 수 없습니다. 정말 삭제하시겠습니까?')) {
+                alert('카페가 삭제되었습니다.');
+                window.location.href = 'cafeList.html';
+            }
+        } else if (confirmation !== null) {
+            alert('잘못 입력되었습니다. 삭제가 취소되었습니다.');
+        }
+    }
+
+    // 뒤로 가기
+    function goBack() {
+        window.history.back();
+    }
+
+    // 페이지 로드 시 초기화
+    window.addEventListener('load', function() {
+        console.log('카페 상세 페이지가 로드되었습니다.');
+    });
+</script>
+</body>
+</html>

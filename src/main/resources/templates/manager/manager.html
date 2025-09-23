@@ -3,389 +3,347 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>관리자 페이지 - Together</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <title>관리자 페이지 - 모여라</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: #667eea;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
         .admin-header {
-            background: linear-gradient(135deg, #dc3545 0%, #6f42c1 100%);
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2.5rem;
+            margin-bottom: 3rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .admin-title {
+            font-size: 2.8rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.8rem;
+        }
+
+        .admin-subtitle {
+            color: #666;
+            font-size: 1.2rem;
+        }
+
+        /* 2x2 그리드 레이아웃 */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2.5rem;
+            margin-bottom: 3rem;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .dashboard-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2.5rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            text-align: center;
+            min-height: 280px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 16px 50px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem auto;
             color: white;
-            padding: 2rem 0;
-            margin-bottom: 2rem;
+            font-size: 2rem;
         }
-        .stat-card {
-            border-radius: 15px;
-            transition: transform 0.3s;
-            border: none;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-        .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-        }
-        .admin-card {
-            border-radius: 10px;
-            border-left: 4px solid #dc3545;
-            transition: all 0.3s;
-        }
-        .admin-card:hover {
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            cursor: pointer;
-        }
-        .quick-action-btn {
-            border-radius: 10px;
-            padding: 0.75rem 1.5rem;
-            margin: 0.5rem;
-            transition: all 0.3s;
-        }
-        .chart-container {
-            height: 300px;
-            position: relative;
-        }
-        .activity-item {
-            border-left: 3px solid #6c757d;
-            padding-left: 1rem;
+
+        .card-title {
+            font-size: 1.6rem;
+            font-weight: bold;
             margin-bottom: 1rem;
+            color: #333;
         }
-        .activity-item.recent {
-            border-left-color: #28a745;
+
+        .card-description {
+            color: #666;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+            font-size: 1rem;
+            flex-grow: 1;
         }
-        .activity-item.warning {
-            border-left-color: #ffc107;
+
+        .card-button {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+            font-size: 1rem;
         }
-        .activity-item.danger {
-            border-left-color: #dc3545;
+
+        .card-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
         }
-        .sidebar {
-            background-color: #f8f9fa;
-            min-height: calc(100vh - 200px);
-            border-radius: 10px;
+
+        .stats-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2.5rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
-        .nav-item {
+
+        .stats-title {
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin-bottom: 2rem;
+            color: #333;
+            text-align: center;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 2rem 1rem;
+            background: linear-gradient(135deg, #f8f9ff, #e8ebff);
+            border-radius: 15px;
+            border: 1px solid rgba(102, 126, 234, 0.1);
+        }
+
+        .stat-number {
+            font-size: 2.2rem;
+            font-weight: bold;
+            color: #667eea;
             margin-bottom: 0.5rem;
         }
-        .nav-link {
-            color: #495057;
-            border-radius: 8px;
-            transition: all 0.3s;
+
+        .stat-label {
+            color: #666;
+            font-size: 1rem;
+            font-weight: 500;
         }
-        .nav-link:hover {
-            background-color: #e9ecef;
-            color: #dc3545;
+
+        /* 반응형 디자인 */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+                max-width: 400px;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .container {
+                padding: 0 1rem;
+            }
+
+            .admin-title {
+                font-size: 2.2rem;
+            }
+
+            .dashboard-card {
+                min-height: 250px;
+                padding: 2rem;
+            }
+
+            .card-icon {
+                width: 70px;
+                height: 70px;
+                font-size: 1.8rem;
+            }
+
+            .card-title {
+                font-size: 1.4rem;
+            }
         }
-        .nav-link.active {
-            background-color: #dc3545;
-            color: white;
+
+        @media (max-width: 480px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stat-item {
+                padding: 1.5rem 1rem;
+            }
         }
     </style>
 </head>
 <body>
-<!-- Admin Header -->
-<div class="admin-header">
-    <div class="container">
-        <div class="row align-items-center">
-            <div class="col-md-8">
-                <h2><i class="fas fa-shield-alt me-2"></i>관리자 대시보드</h2>
-                <p class="mb-0">Together 플랫폼 전체 현황을 관리하세요</p>
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <img src="/images/moyeora-logo.png" alt="모여라 로고" style="height: 32px; margin-right: 8px;">
+            모여라
+        </div>
+        <ul class="nav-links">
+            <li><a href="/mainPage">홈</a></li>
+            <li><a href="/member/mypage">마이페이지</a></li>
+            <li><a href="/logout">로그아웃</a></li>
+        </ul>
+    </nav>
+</header>
+
+<div class="container">
+    <div class="admin-header">
+        <h1 class="admin-title">관리자 대시보드</h1>
+        <p class="admin-subtitle">모여라 플랫폼을 관리하고 모니터링하세요</p>
+    </div>
+
+    <div class="dashboard-grid">
+        <div class="dashboard-card">
+            <div>
+                <div class="card-icon">👥</div>
+                <h3 class="card-title">사용자 관리</h3>
+                <p class="card-description">회원 정보를 조회하고 관리할 수 있습니다. 계정 상태 변경 및 권한 설정이 가능합니다.</p>
             </div>
-            <div class="col-md-4 text-end">
-                <div class="dropdown">
-                    <button class="btn btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                        <i class="fas fa-user-shield"></i> 관리자님
-                    </button>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="/mypage">마이페이지</a></li>
-                        <li><a class="dropdown-item" href="/main">사용자 모드</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="/logout">로그아웃</a></li>
-                    </ul>
-                </div>
+            <a href="/admin/users" class="card-button">사용자 관리</a>
+        </div>
+
+        <div class="dashboard-card">
+            <div>
+                <div class="card-icon">☕</div>
+                <h3 class="card-title">카페 관리</h3>
+                <p class="card-description">등록된 카페 정보를 관리하고 새로운 카페를 추가할 수 있습니다.</p>
+            </div>
+            <a href="/admin/cafes" class="card-button">카페 관리</a>
+        </div>
+
+        <div class="dashboard-card">
+            <div>
+                <div class="card-icon">🛍️</div>
+                <h3 class="card-title">중고거래 관리</h3>
+                <p class="card-description">중고거래 게시글을 모니터링하고 부적절한 콘텐츠를 관리할 수 있습니다.</p>
+            </div>
+            <a href="/admin/trades" class="card-button">거래 관리</a>
+        </div>
+
+        <div class="dashboard-card">
+            <div>
+                <div class="card-icon">💬</div>
+                <h3 class="card-title">채팅 관리</h3>
+                <p class="card-description">채팅방을 모니터링하고 신고된 메시지를 처리할 수 있습니다. (준비 중)</p>
+            </div>
+            <a href="#" class="card-button" style="background: linear-gradient(135deg, #ccc, #999); cursor: not-allowed;">준비 중</a>
+        </div>
+    </div>
+
+    <div class="stats-section">
+        <h2 class="stats-title">실시간 통계</h2>
+        <div class="stats-grid">
+            <div class="stat-item">
+                <div class="stat-number" th:text="${totalUsers ?: '1,234'}">1,234</div>
+                <div class="stat-label">총 사용자</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" th:text="${totalCafes ?: '89'}">89</div>
+                <div class="stat-label">등록된 카페</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" th:text="${totalTrades ?: '567'}">567</div>
+                <div class="stat-label">중고거래 게시글</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" th:text="${activeChats ?: '23'}">23</div>
+                <div class="stat-label">활성 채팅방</div>
             </div>
         </div>
     </div>
 </div>
-
-<div class="container-fluid">
-    <div class="row">
-        <!-- Sidebar -->
-        <div class="col-md-2">
-            <div class="sidebar p-3">
-                <nav class="nav flex-column">
-                    <li class="nav-item">
-                        <a class="nav-link active" href="/manager/manager">
-                            <i class="fas fa-tachometer-alt me-2"></i>대시보드
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/manager/mUser">
-                            <i class="fas fa-users me-2"></i>회원 관리
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/manager/mCafe">
-                            <i class="fas fa-coffee me-2"></i>카페 관리
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/manager/mTrade">
-                            <i class="fas fa-shopping-cart me-2"></i>거래 관리
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/manager/mMeeting">
-                            <i class="fas fa-calendar-alt me-2"></i>모임 관리
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/manager/mReport">
-                            <i class="fas fa-exclamation-triangle me-2"></i>신고 관리
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/manager/mStats">
-                            <i class="fas fa-chart-bar me-2"></i>통계 관리
-                        </a>
-                    </li>
-                </nav>
-            </div>
-        </div>
-
-        <!-- Main Content -->
-        <div class="col-md-10">
-            <!-- Statistics Cards -->
-            <div class="row mb-4">
-                <div class="col-md-3">
-                    <div class="card stat-card bg-primary text-white">
-                        <div class="card-body text-center">
-                            <i class="fas fa-users fa-3x mb-3"></i>
-                            <h2 th:text="${totalUsers ?: 1245}">1,245</h2>
-                            <p class="mb-0">총 회원수</p>
-                            <small class="opacity-75">+12% 이번 달</small>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card stat-card bg-success text-white">
-                        <div class="card-body text-center">
-                            <i class="fas fa-coffee fa-3x mb-3"></i>
-                            <h2 th:text="${totalCafes ?: 89}">89</h2>
-                            <p class="mb-0">활성 카페</p>
-                            <small class="opacity-75">+5 새로운 카페</small>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card stat-card bg-info text-white">
-                        <div class="card-body text-center">
-                            <i class="fas fa-handshake fa-3x mb-3"></i>
-                            <h2 th:text="${totalTrades ?: 456}">456</h2>
-                            <p class="mb-0">총 거래</p>
-                            <small class="opacity-75">+23 오늘</small>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card stat-card bg-warning text-white">
-                        <div class="card-body text-center">
-                            <i class="fas fa-calendar-check fa-3x mb-3"></i>
-                            <h2 th:text="${totalMeetings ?: 178}">178</h2>
-                            <p class="mb-0">진행 모임</p>
-                            <small class="opacity-75">+8 이번 주</small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Quick Actions -->
-            <div class="row mb-4">
-                <div class="col-12">
-                    <div class="card admin-card">
-                        <div class="card-header">
-                            <h5><i class="fas fa-bolt me-2"></i>빠른 작업</h5>
-                        </div>
-                        <div class="card-body text-center">
-                            <a href="/manager/mUser" class="btn btn-outline-primary quick-action-btn">
-                                <i class="fas fa-user-plus"></i> 신규 회원 승인
-                            </a>
-                            <a href="/manager/mCafe" class="btn btn-outline-success quick-action-btn">
-                                <i class="fas fa-coffee"></i> 카페 신청 검토
-                            </a>
-                            <a href="/manager/mReport" class="btn btn-outline-warning quick-action-btn">
-                                <i class="fas fa-flag"></i> 신고 처리
-                            </a>
-                            <a href="/manager/mTrade" class="btn btn-outline-info quick-action-btn">
-                                <i class="fas fa-shopping-cart"></i> 거래 모니터링
-                            </a>
-                            <button class="btn btn-outline-danger quick-action-btn" onclick="sendNotification()">
-                                <i class="fas fa-bell"></i> 전체 공지
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Charts and Activity -->
-            <div class="row">
-                <!-- Chart Section -->
-                <div class="col-md-8">
-                    <div class="card admin-card">
-                        <div class="card-header">
-                            <h5><i class="fas fa-chart-line me-2"></i>플랫폼 활동 현황</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="chart-container">
-                                <canvas id="activityChart"></canvas>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Recent Activity -->
-                <div class="col-md-4">
-                    <div class="card admin-card">
-                        <div class="card-header">
-                            <h5><i class="fas fa-history me-2"></i>최근 활동</h5>
-                        </div>
-                        <div class="card-body" style="max-height: 350px; overflow-y: auto;">
-                            <div class="activity-item recent">
-                                <h6 class="mb-1">새로운 카페 신청</h6>
-                                <small class="text-muted">독서 모임 카페 - 5분 전</small>
-                            </div>
-                            <div class="activity-item recent">
-                                <h6 class="mb-1">신규 회원 가입</h6>
-                                <small class="text-muted">user1234 - 12분 전</small>
-                            </div>
-                            <div class="activity-item warning">
-                                <h6 class="mb-1">신고 접수</h6>
-                                <small class="text-muted">거래 관련 신고 - 1시간 전</small>
-                            </div>
-                            <div class="activity-item recent">
-                                <h6 class="mb-1">모임 개최</h6>
-                                <small class="text-muted">음악 감상 모임 - 2시간 전</small>
-                            </div>
-                            <div class="activity-item danger">
-                                <h6 class="mb-1">계정 정지</h6>
-                                <small class="text-muted">약관 위반 사용자 - 3시간 전</small>
-                            </div>
-                            <div class="activity-item recent">
-                                <h6 class="mb-1">거래 성사</h6>
-                                <small class="text-muted">전자기기 거래 완료 - 4시간 전</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Management Summary -->
-            <div class="row mt-4">
-                <div class="col-md-6">
-                    <div class="card admin-card">
-                        <div class="card-header">
-                            <h5><i class="fas fa-exclamation-circle me-2"></i>처리 대기 항목</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                <span>카페 신청 검토</span>
-                                <span class="badge bg-warning" th:text="${pendingCafes ?: 3}">3</span>
-                            </div>
-                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                <span>신고 처리</span>
-                                <span class="badge bg-danger" th:text="${pendingReports ?: 7}">7</span>
-                            </div>
-                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                <span>계정 복구 요청</span>
-                                <span class="badge bg-info" th:text="${pendingRecovery ?: 2}">2</span>
-                            </div>
-                            <div class="d-flex justify-content-between align-items-center">
-                                <span>문의사항</span>
-                                <span class="badge bg-secondary" th:text="${pendingInquiry ?: 5}">5</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-md-6">
-                    <div class="card admin-card">
-                        <div class="card-header">
-                            <h5><i class="fas fa-server me-2"></i>시스템 상태</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                <span>서버 상태</span>
-                                <span class="badge bg-success">정상</span>
-                            </div>
-                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                <span>데이터베이스</span>
-                                <span class="badge bg-success">연결됨</span>
-                            </div>
-                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                <span>CPU 사용률</span>
-                                <span class="badge bg-warning">67%</span>
-                            </div>
-                            <div class="d-flex justify-content-between align-items-center">
-                                <span>메모리 사용률</span>
-                                <span class="badge bg-info">45%</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Scripts -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-    // Activity Chart
-    const ctx = document.getElementById('activityChart').getContext('2d');
-    const activityChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: ['1월', '2월', '3월', '4월', '5월', '6월'],
-            datasets: [{
-                label: '신규 회원',
-                data: [65, 59, 80, 81, 56, 95],
-                borderColor: 'rgb(75, 192, 192)',
-                tension: 0.1
-            }, {
-                label: '신규 카페',
-                data: [28, 48, 40, 19, 86, 27],
-                borderColor: 'rgb(255, 99, 132)',
-                tension: 0.1
-            }, {
-                label: '거래량',
-                data: [35, 67, 58, 93, 44, 78],
-                borderColor: 'rgb(54, 162, 235)',
-                tension: 0.1
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
-            }
-        }
-    });
-
-    // Send Notification Function
-    function sendNotification() {
-        const message = prompt('전체 사용자에게 보낼 공지사항을 입력하세요:');
-        if (message) {
-            // API 호출 로직
-            alert('공지사항이 전송되었습니다: ' + message);
-        }
-    }
-
-    // Auto refresh data every 30 seconds
-    setInterval(function() {
-        // 실시간 데이터 갱신 로직
-        console.log('데이터 갱신 중...');
-    }, 30000);
-</script>
 </body>
 </html>

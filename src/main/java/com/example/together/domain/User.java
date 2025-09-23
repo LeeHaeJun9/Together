@@ -41,4 +41,19 @@ public class User extends BaseEntity {
     @Column(nullable = false, length = 20)
     private Status status = Status.ACTIVE;
 
+    @Override
+    public String toString() {
+        return this.userId;
+    }
+
+    @Column(name = "profile_photo")
+    private String profilePhoto;
+
+    public void setProfilePhoto(String profilePhoto) {
+        this.profilePhoto = profilePhoto;
+    }
+
+    public String getProfilePhoto() {
+        return profilePhoto;
+    }
 }

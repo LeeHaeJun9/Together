@@ -21,6 +21,7 @@ public class CafeApplication extends BaseEntity {
     private String description;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 300)
     private CafeCategory category;
 
     @Enumerated(EnumType.STRING)

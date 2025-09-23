@@ -3,9 +3,11 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-    <meta name="description" content="Together 프로필 관리" />
+    <meta name="description" content="모여라 프로필 관리" />
     <meta name="author" content="" />
-    <title>Together - 프로필 관리</title>
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <title>모여라 - 프로필 관리</title>
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" th:href="@{/assets/favicon.ico}" />
     <!-- Bootstrap CSS -->
@@ -226,15 +228,18 @@
         <div class="row align-items-center">
             <div class="col">
                 <div class="logo">
+                    <a href="/mainPage" onclick="window.location.href='/mainPage'; return false;"
+                       style="text-decoration: none; color: inherit; display: flex; align-items: center; cursor: pointer;">
                     <img src="/images/moyeora-logo.png" alt="모여라 로고" />
                     <span>모여라</span>
+                    </a>
                 </div>
             </div>
             <div class="col-auto">
                 <div class="nav-links">
-                    <a href="/login">로그인</a> /
-                    <a href="/member/register">회원가입</a> /
-                    <a href="/mypage">마이페이지</a>
+                    <a href="/mainPage">홈</a> /
+                    <span th:text="${userName} + '님'">사용자님</span> /
+                    <a href="/logout">로그아웃</a>
                 </div>
             </div>
         </div>
@@ -250,9 +255,18 @@
         <!-- 프로필 헤더 -->
         <div class="profile-header">
             <div class="row align-items-center">
+
                 <div class="col-auto">
-                    <div class="profile-photo">프로필<br>사진</div>
+                    <div class="profile-photo" onclick="document.getElementById('photoInput').click();" style="cursor: pointer;">
+                        <img th:if="${user.profilePhoto != null}"
+                             th:src="${user.profilePhoto}"
+                             alt="Profile Photo"
+                             style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover;">
+                        <span th:if="${user.profilePhoto == null}">프로필<br>사진</span>
+                    </div>
+                    <input type="file" id="photoInput" name="photo" accept="image/*" style="display: none;">
                 </div>
+
                 <div class="col">
                     <div class="profile-info">
                         <h5 th:text="${user != null ? user.nickname : '사용자'}">사용자</h5>
@@ -261,7 +275,7 @@
                 </div>
                 <div class="col-auto">
                     <div class="profile-buttons">
-                        <button class="btn btn-secondary btn-profile">이미지 변경</button>
+                        <button class="btn btn-secondary btn-profile" onclick="document.getElementById('photoInput').click();">이미지 변경</button>
                         <a href="/member/deleteUser" class="btn btn-danger btn-profile">회원 탈퇴</a>
                     </div>
                 </div>
@@ -367,6 +381,10 @@
 
 <!-- 프로필 관리 JavaScript -->
 <script>
+    // CSRF 토큰 변수 정의
+    const token = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+    const header = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+
     let originalValues = {}; // 원본 값 저장
 
     // 필드 수정 모드 활성화
@@ -417,6 +435,7 @@
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                [header]: token
             },
             body: JSON.stringify({
                 field: fieldId,
@@ -475,6 +494,7 @@
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                [header]: token
             },
             body: JSON.stringify({
                 currentPassword: currentPassword,
@@ -516,6 +536,48 @@
         // 페이지 최상단으로 스크롤
         window.scrollTo(0, 0);
     }
+    // Profile photo upload functionality
+    document.getElementById('photoInput').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const formData = new FormData();
+            formData.append('photo', file);
+
+            // Create headers object with CSRF token
+            const headers = {};
+            headers[header] = token;  // Add CSRF token here!
+            headers['X-Requested-With'] = 'XMLHttpRequest';
+
+            fetch('/member/profile/photo', {
+                method: 'POST',
+                body: formData,
+                headers: headers  // Use the headers object with CSRF token
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Update the profile photo immediately
+                        const img = document.querySelector('.profile-photo img');
+                        if (img) {
+                            img.src = data.photoUrl;
+                        } else {
+                            // If no img exists, create one and replace the span
+                            const profileDiv = document.querySelector('.profile-photo');
+                            profileDiv.innerHTML = `<img src="${data.photoUrl}" alt="Profile Photo" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover;">`;
+                        }
+                        alert('프로필 사진이 업데이트되었습니다.');
+                    } else {
+                        alert('업로드 실패: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('업로드 중 오류가 발생했습니다.');
+                });
+        }
+    });
+
+
 </script>
 </body>
 </html>
