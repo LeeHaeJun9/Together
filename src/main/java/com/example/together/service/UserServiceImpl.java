@@ -345,6 +345,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
                     break;
 
                 case "nickname":
+                case "name":
                     // 닉네임 유효성 검사 (2-10자)
                     if (value == null || value.trim().length() < 2 || value.trim().length() > 10) {
                         log.warn("유효하지 않은 닉네임: nickname = {}", value);
