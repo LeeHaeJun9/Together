@@ -279,6 +279,8 @@ public class MemberController {
     // 개별 필드 업데이트
     // MemberController.java의 updateProfile 메소드 개선
 
+    // MemberController.java의 updateProfile 메소드 개선
+
     @PostMapping("/member/profile/update")
     @ResponseBody
     public Map<String, Object> updateProfile(@RequestBody Map<String, String> request,
@@ -343,8 +345,9 @@ public class MemberController {
                 }
                 break;
             case "nickname":
+            case "name":  // "name" 필드도 처리
                 if (value.trim().length() < 2 || value.trim().length() > 10) {
-                    return "닉네임은 2-10자 사이여야 합니다.";
+                    return "이름은 2-10자 사이여야 합니다.";
                 }
                 break;
             case "phone":
@@ -363,6 +366,7 @@ public class MemberController {
         switch (field) {
             case "email": return "이메일이 성공적으로 변경되었습니다.";
             case "nickname": return "닉네임이 성공적으로 변경되었습니다.";
+            case "name": return "이름이 성공적으로 변경되었습니다.";
             case "phone": return "전화번호가 성공적으로 변경되었습니다.";
             default: return "정보가 성공적으로 수정되었습니다.";
         }
@@ -375,6 +379,7 @@ public class MemberController {
         switch (field) {
             case "email": return "이메일 변경에 실패했습니다. 이미 사용 중인 이메일일 수 있습니다.";
             case "nickname": return "닉네임 변경에 실패했습니다.";
+            case "name": return "이름 변경에 실패했습니다.";
             case "phone": return "전화번호 변경에 실패했습니다.";
             default: return "정보 수정에 실패했습니다.";
         }
