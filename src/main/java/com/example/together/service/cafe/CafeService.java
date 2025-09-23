@@ -3,6 +3,8 @@ package com.example.together.service.cafe;
 import com.example.together.domain.Cafe;
 import com.example.together.domain.CafeApplication;
 import com.example.together.domain.CafeCategory;
+import com.example.together.dto.PageRequestDTO;
+import com.example.together.dto.PageResponseDTO;
 import com.example.together.dto.cafe.*;
 import com.example.together.dto.calendar.CalendarEventDTO;
 import org.springframework.web.multipart.MultipartFile;
@@ -77,4 +79,10 @@ public interface CafeService {
     List<CafeResponseDTO> getRecommendedCafes(int limit);
 
     List<CafeResponseDTO> getCafesByCategory(CafeCategory cafeCategory);
+
+//    PageResponseDTO<CafeResponseDTO> getCafeList(PageRequestDTO pageRequestDTO);
+//
+//    PageResponseDTO<CafeResponseDTO> getCafeListByCategory(CafeCategory cafeCategory, PageRequestDTO pageRequestDTO);
+
+    PageResponseDTO<CafeResponseDTO> getCafeListWithFilters(PageRequestDTO pageRequestDTO, CafeCategory cafeCategory);
 }

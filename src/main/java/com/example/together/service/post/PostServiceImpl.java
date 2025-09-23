@@ -10,6 +10,7 @@ import com.example.together.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -92,30 +93,66 @@ public class PostServiceImpl implements PostService {
         return new PostResponseDTO(savedPost, userId);
     }
 
+//    @Override
+//    @Transactional(readOnly = true)
+//    public List<PostResponseDTO> getPostsByCafe(Long cafeId, Long userId) {
+//        Cafe cafe = cafeRepository.findById(cafeId)
+//                .orElseThrow(() -> new IllegalArgumentException("카페를 찾을 수 없습니다."));
+//
+//        List<Post> posts = postRepository.findByCafeOrderByPinnedDescRegDateDesc(cafe);
+//
+//        AtomicInteger originalIndex = new AtomicInteger(1);
+//
+//        return posts.stream()
+//                .map(post -> {
+//                    PostResponseDTO dto = new PostResponseDTO(post, userId);
+//                    boolean isPinned = post.isPinned(); // pinned 상태 변수에 저장
+//                    int currentOriginalIndex = 0; // 초기화
+//
+//                    if (!isPinned) {
+//                        currentOriginalIndex = originalIndex.getAndIncrement();
+//                        dto.setOriginalIndex(currentOriginalIndex);
+//                    }
+//
+//                    return dto;
+//                })
+//                .collect(Collectors.toList());
+//    }
+
     @Override
     @Transactional(readOnly = true)
-    public List<PostResponseDTO> getPostsByCafe(Long cafeId, Long userId) {
+    public Page<PostResponseDTO> getPostsByCafe(Long cafeId, Long userId, Pageable pageable) {
+
         Cafe cafe = cafeRepository.findById(cafeId)
                 .orElseThrow(() -> new IllegalArgumentException("카페를 찾을 수 없습니다."));
 
-        List<Post> posts = postRepository.findByCafeOrderByPinnedDescRegDateDesc(cafe);
+        // 페이징된 Post 목록을 가져옵니다.
+        Page<Post> postsPage = postRepository.findByCafeOrderByPinnedDescRegDateDesc(cafe, pageable);
 
-        AtomicInteger originalIndex = new AtomicInteger(1);
+        // 상단 고정된 게시글의 총 개수를 세어 옵니다.
+        long pinnedCount = postRepository.countByCafeAndPinnedIsTrue(cafe);
 
-        return posts.stream()
-                .map(post -> {
-                    PostResponseDTO dto = new PostResponseDTO(post, userId);
-                    boolean isPinned = post.isPinned(); // pinned 상태 변수에 저장
-                    int currentOriginalIndex = 0; // 초기화
+        // Page<Post> 객체를 Page<PostResponseDTO>로 변환합니다.
+        return postsPage.map(post -> {
+            PostResponseDTO dto = new PostResponseDTO(post, userId);
 
-                    if (!isPinned) {
-                        currentOriginalIndex = originalIndex.getAndIncrement();
-                        dto.setOriginalIndex(currentOriginalIndex);
-                    }
+            // 상단 고정 게시글이 아닌 경우에만 번호를 부여합니다.
+            if (!post.isPinned()) {
+                // 현재 페이지의 시작 인덱스를 계산합니다.
+                long startIndexForPage = (long) postsPage.getNumber() * postsPage.getSize();
+                // 현재 페이지 내에서 게시글의 인덱스를 가져옵니다.
+                long indexInPage = postsPage.getContent().indexOf(post);
 
-                    return dto;
-                })
-                .collect(Collectors.toList());
+                // 전체 게시글 순서에 맞게 번호를 계산합니다.
+                // (페이지 시작 인덱스 + 현재 페이지 내 인덱스 + 1)
+                long sequentialNumber = startIndexForPage + indexInPage + 1;
+
+                // 상단 고정 게시글의 개수만큼 번호에서 제외합니다.
+                // 예: 고정글이 2개면 1, 2번을 건너뛰고 3번부터 시작하도록
+                dto.setOriginalIndex((int) (sequentialNumber - pinnedCount));
+            }
+            return dto;
+        });
     }
 
     @Override

@@ -21,8 +21,13 @@ public class PageResponseDTO <E> {
 
     private List<E> dtoList;
 
+    private PageRequestDTO pageRequestDTO;
+
+
     @Builder(builderMethodName = "withAll")
     public PageResponseDTO(PageRequestDTO pageRequestDTO, List<E> dtoList, int total) {
+        this.pageRequestDTO = pageRequestDTO;
+
         if(total <= 0) {
             return;
         }

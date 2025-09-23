@@ -211,37 +211,48 @@ public class CafeController {
         }
     }
 
-//    @GetMapping("/list")
-//    public String listAllCafes(Model model, Principal principal) {
-//        // userId는 개인화된 정보가 필요할 때만 사용. 현재는 getAllCafes()가 userId를 받지 않으므로 제거.
-//        List<CafeResponseDTO> cafes = cafeService.getAllCafes();
-//        model.addAttribute("cafes", cafes);
-//        return "cafe/list";
-//    }
-
     @GetMapping("/list")
-    public String listAllCafes(@RequestParam(value = "category", required = false) String categoryName, Model model) {
+    public String listAllCafes(
+            @RequestParam(value = "category", required = false) String categoryName,
+            @RequestParam(value = "size", defaultValue = "6", required = false) int size,
+            @RequestParam(value = "type", required = false) String type,
+            @RequestParam(value = "keyword", required = false) String keyword,
+            Model model,
+            PageRequestDTO pageRequestDTO) {
+
         log.info("GET /cafe/list 요청. 카테고리: {}", categoryName);
 
-        List<CafeResponseDTO> cafes;
+        // 요청받은 size 값을 pageRequestDTO에 설정
+        pageRequestDTO.setSize(size);
 
-        if (categoryName == null || categoryName.equalsIgnoreCase("ALL")) {
-            // 'ALL' 카테고리 또는 매개변수가 없을 경우 모든 카페 조회
-            cafes = cafeService.getAllCafes();
-        } else {
-            // 특정 카테고리 이름으로 카페 조회
+        // type과 keyword를 PageRequestDTO에 직접 설정
+        pageRequestDTO.setType(type);
+        pageRequestDTO.setKeyword(keyword);
+
+        PageResponseDTO<CafeResponseDTO> responseDTO;
+        CafeCategory cafeCategory = null;
+
+        if (categoryName != null && !categoryName.equalsIgnoreCase("ALL")) {
             try {
-                // 문자열 카테고리 이름으로 Enum 변환
-                CafeCategory cafeCategory = CafeCategory.valueOf(categoryName.toUpperCase());
-                cafes = cafeService.getCafesByCategory(cafeCategory);
+                cafeCategory = CafeCategory.valueOf(categoryName.toUpperCase());
+                // 카테고리 필터링 시 type과 keyword는 사용하지 않으므로 null로 초기화
+                pageRequestDTO.setType(null);
+                pageRequestDTO.setKeyword(null);
             } catch (IllegalArgumentException e) {
-                // 유효하지 않은 카테고리 이름일 경우, 모든 카페 목록을 보여주거나 에러 페이지로 리다이렉트
                 log.error("잘못된 카테고리 이름: {}", categoryName);
-                cafes = cafeService.getAllCafes();
+                // 잘못된 카테고리일 경우 필터링 조건을 모두 제거
+                cafeCategory = null;
+                pageRequestDTO.setType(null);
+                pageRequestDTO.setKeyword(null);
             }
         }
 
-        model.addAttribute("cafes", cafes);
+        // 통합된 서비스 메서드 사용
+        responseDTO = cafeService.getCafeListWithFilters(pageRequestDTO, cafeCategory);
+
+        model.addAttribute("pageResponseDTO", responseDTO);
+        model.addAttribute("categories", CafeCategory.values());
+
         return "cafe/list";
     }
 
@@ -442,17 +453,4 @@ public class CafeController {
             return "redirect:/error"; // 예시: 에러 페이지로 리다이렉트
         }
     }
-
-//    @GetMapping("/{cafeId}/meetings")
-//    public String cafeMeetings(@PathVariable Long cafeId, PageRequestDTO pageRequestDTO, Model model) {
-//        log.info("Request for meetings of cafe: " + cafeId);
-//
-//        PageResponseDTO<MeetingDTO> responseDTO = meetingService.listByCafeId(cafeId, pageRequestDTO);
-//
-//        model.addAttribute("responseDTO", responseDTO);
-//        model.addAttribute("cafeId", cafeId);
-//
-//        return "meeting/list";
-//    }
-
 }

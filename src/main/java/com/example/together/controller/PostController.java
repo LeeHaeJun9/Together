@@ -15,6 +15,9 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -45,14 +48,26 @@ public class PostController {
     }
 
     @GetMapping("/posts")
-    public String getPostsByCafe(@PathVariable Long cafeId, Model model, Principal principal) {
+    public String getPostsByCafe(@PathVariable Long cafeId,
+                                 @RequestParam(defaultValue = "0") int page, // 페이지 번호 추가
+                                 @RequestParam(defaultValue = "10") int size, // 페이지 크기 추가
+                                 Model model,
+                                 Principal principal) {
+
+        // Pageable 객체 생성 (페이지 번호와 크기 설정)
+        Pageable pageable = PageRequest.of(page, size);
 
         Long userId = getUserIdFromPrincipal(principal);
-        List<PostResponseDTO> posts = postService.getPostsByCafe(cafeId, userId);
+
+        // 서비스 메서드 호출: Pageable 객체를 전달하고 Page 객체를 반환받음
+        Page<PostResponseDTO> postsPage = postService.getPostsByCafe(cafeId, userId, pageable);
+
         String cafeName = cafeService.getCafeNameById(cafeId);
+
         model.addAttribute("cafeId", cafeId);
-        model.addAttribute("posts", posts);
+        model.addAttribute("posts", postsPage); // Page 객체를 모델에 추가
         model.addAttribute("cafeName", cafeName);
+
         return "post/list";
     }
 
