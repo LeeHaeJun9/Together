@@ -472,15 +472,11 @@ public class MemberController {
     }
 
     // 계정 설정 페이지 표시
+    // 계정 설정 페이지 - 프로필로 리디렉션
     @GetMapping("/member/settings")
-    public String settingsPage(Model model, Principal principal) {
-        if (principal != null) {
-            String userId = principal.getName();
-            User user = userService.findByUserId(userId);
-            model.addAttribute("user", user);
-            log.info("계정 설정 페이지 요청: userId = {}", userId);
-        }
-        return "member/settings";
+    public String settingsPage() {
+        log.info("설정 페이지 요청 -> 프로필로 리디렉션");
+        return "redirect:/member/profile";
     }
 
     @GetMapping("/login")
