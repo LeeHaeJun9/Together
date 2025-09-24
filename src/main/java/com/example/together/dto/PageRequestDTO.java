@@ -25,6 +25,21 @@ public class PageRequestDTO {
     private String type;
     private String keyword;
 
+    public void setType(String type) {
+        if ("null".equals(type) || "".equals(type)) {
+            this.type = null;
+        } else {
+            this.type = type;
+        }
+    }
+
+    public void setKeyword(String keyword) {
+        if ("null".equals(keyword) || "".equals(keyword)) {
+            this.keyword = null;
+        } else {
+            this.keyword = keyword;
+        }
+    }
 
     public String[] getTypes() {
         if(type == null || type.isEmpty()) {

@@ -45,8 +45,9 @@ public class MeetingController {
     }
 
     @GetMapping("/meeting/list")
-    public void meetingListByRequestParam(@PathVariable("cafeId") Long cafeId, PageRequestDTO pageRequestDTO, Model model, Principal principal) {
+    public String meetingListByRequestParam(@PathVariable("cafeId") Long cafeId, PageRequestDTO pageRequestDTO, Model model, Principal principal) {
         processMeetingList(cafeId, pageRequestDTO, model, principal);
+        return "meeting/list";
     }
 
     // Case 2: 카페 상세 페이지의 "모임" 탭에서 클릭하여 /cafe/{cafeId}/meetings 형태로 요청할 때
@@ -72,10 +73,10 @@ public class MeetingController {
         if (principal != null) {
             // 로그인된 사용자
             User user = getUserFromPrincipal(principal);
-            cafeResponse = cafeService.getCafeById(cafeId, user.getId());
+            cafeResponse = cafeService.getCafeInfoWithMembership(cafeId, user.getId());
         } else {
             // 익명 사용자 (userId 없이 호출)
-            cafeResponse = cafeService.getCafeById(cafeId);
+            cafeResponse = cafeService.getBasicCafeInfo(cafeId);
         }
 
         model.addAttribute("cafeResponse", cafeResponse);
@@ -86,7 +87,7 @@ public class MeetingController {
         User user = getUserFromPrincipal(principal);
 
 
-        CafeResponseDTO cafeResponse = cafeService.getCafeById(cafeId, user.getId());
+        CafeResponseDTO cafeResponse = cafeService.getCafeInfoWithMembership(cafeId, user.getId());
 
         MeetingDTO meetingDTO = new MeetingDTO();
         meetingDTO.setOrganizerId(user.getId());
@@ -146,13 +147,22 @@ public class MeetingController {
 
         List<MeetingUserDTO> meetingUser = meetingUserService.getMeetingUsersByMeetingId(id);
         model.addAttribute("meetingUser", meetingUser);
+
+        Long userId = user != null ? user.getId() : null;
         model.addAttribute("loggedInUserId", user != null ? user.getId() : null);
+
+        // 로그인한 사용자가 모임에 참여했는지 확인
+        boolean isJoinedUser = false;
+        if (userId != null) {
+            isJoinedUser = meetingUserService.isUserJoined(id, userId);
+        }
+        model.addAttribute("isJoinedUser", isJoinedUser);
 
         CafeResponseDTO cafeResponse;
         if (user != null) {
-            cafeResponse = cafeService.getCafeById(cafeId, user.getId());
+            cafeResponse = cafeService.getCafeInfoWithMembership(cafeId, user.getId());
         } else {
-            cafeResponse = cafeService.getCafeById(cafeId);
+            cafeResponse = cafeService.getBasicCafeInfo(cafeId);
         }
         model.addAttribute("cafeResponse", cafeResponse);
 
@@ -174,9 +184,9 @@ public class MeetingController {
 
         CafeResponseDTO cafeResponse;
         if (user != null) {
-            cafeResponse = cafeService.getCafeById(cafeId, user.getId());
+            cafeResponse = cafeService.getCafeInfoWithMembership(cafeId, user.getId());
         } else {
-            cafeResponse = cafeService.getCafeById(cafeId);
+            cafeResponse = cafeService.getBasicCafeInfo(cafeId);
         }
         model.addAttribute("cafeResponse", cafeResponse);
 
@@ -223,7 +233,7 @@ public class MeetingController {
 
         meetingService.MeetingDelete(id);
         redirectAttributes.addFlashAttribute("result", "removed");
-        return "redirect:/meeting/list";
+        return "redirect:/cafe/" + cafeId + "/meetings";
     }
 
     @PostMapping("/meeting/apply")
@@ -238,6 +248,26 @@ public class MeetingController {
         try {
             meetingService.applyToMeeting(user, meetingId);
             redirectAttributes.addFlashAttribute("message", "모임 신청이 완료되었습니다.");
+        } catch (IllegalStateException e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+        }
+
+        redirectAttributes.addAttribute("id", meetingId);
+        return "redirect:/cafe/{cafeId}/meeting/read?id=" + meetingId;
+    }
+
+    @PostMapping("/meeting/cancel")
+    public String meetingCancel(@RequestParam Long meetingId,
+                                Principal principal,
+                                RedirectAttributes redirectAttributes) {
+        User user = getUserFromPrincipal(principal);
+        if (user == null) {
+            return "redirect:/login";
+        }
+
+        try {
+            meetingService.cancelMeeting(user, meetingId);
+            redirectAttributes.addFlashAttribute("message", "모임 신청이 취소되었습니다.");
         } catch (IllegalStateException e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
         }

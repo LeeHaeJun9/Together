@@ -10,6 +10,7 @@ import com.example.together.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -21,6 +22,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 @Service
@@ -68,14 +70,15 @@ public class PostServiceImpl implements PostService {
                 .image(imageUrl)
                 .viewCount(0)
                 .postType(requestDTO.getPostType())
-                .pinned(false)
+                .pinned(requestDTO.isPinned())
                 .author(author)
                 .cafe(cafe)
                 .build();
 
         Post savedPost = postRepository.save(post);
 
-        if (requestDTO.getPostType() == PostType.NOTICE && requestDTO.getDemandSurvey() != null) {
+        // ✅ 수정된 부분: 게시글 유형이 DEMAND일 때만 수요조사를 생성합니다.
+        if (requestDTO.getPostType() == PostType.DEMAND && requestDTO.getDemandSurvey() != null) {
             DemandSurvey demandSurvey = DemandSurvey.builder()
                     .title(requestDTO.getDemandSurvey().getTitle())
                     .content(requestDTO.getDemandSurvey().getContent())
@@ -90,15 +93,66 @@ public class PostServiceImpl implements PostService {
         return new PostResponseDTO(savedPost, userId);
     }
 
+//    @Override
+//    @Transactional(readOnly = true)
+//    public List<PostResponseDTO> getPostsByCafe(Long cafeId, Long userId) {
+//        Cafe cafe = cafeRepository.findById(cafeId)
+//                .orElseThrow(() -> new IllegalArgumentException("카페를 찾을 수 없습니다."));
+//
+//        List<Post> posts = postRepository.findByCafeOrderByPinnedDescRegDateDesc(cafe);
+//
+//        AtomicInteger originalIndex = new AtomicInteger(1);
+//
+//        return posts.stream()
+//                .map(post -> {
+//                    PostResponseDTO dto = new PostResponseDTO(post, userId);
+//                    boolean isPinned = post.isPinned(); // pinned 상태 변수에 저장
+//                    int currentOriginalIndex = 0; // 초기화
+//
+//                    if (!isPinned) {
+//                        currentOriginalIndex = originalIndex.getAndIncrement();
+//                        dto.setOriginalIndex(currentOriginalIndex);
+//                    }
+//
+//                    return dto;
+//                })
+//                .collect(Collectors.toList());
+//    }
+
     @Override
-    public List<PostResponseDTO> getPostsByCafe(Long cafeId, Long userId) {
+    @Transactional(readOnly = true)
+    public Page<PostResponseDTO> getPostsByCafe(Long cafeId, Long userId, Pageable pageable) {
+
         Cafe cafe = cafeRepository.findById(cafeId)
                 .orElseThrow(() -> new IllegalArgumentException("카페를 찾을 수 없습니다."));
-        List<Post> posts = postRepository.findByCafe(cafe);
-        return posts.stream()
 
-                .map(post -> new PostResponseDTO(post, userId))
-                .collect(Collectors.toList());
+        // 페이징된 Post 목록을 가져옵니다.
+        Page<Post> postsPage = postRepository.findByCafeOrderByPinnedDescRegDateDesc(cafe, pageable);
+
+        // 상단 고정된 게시글의 총 개수를 세어 옵니다.
+        long pinnedCount = postRepository.countByCafeAndPinnedIsTrue(cafe);
+
+        // Page<Post> 객체를 Page<PostResponseDTO>로 변환합니다.
+        return postsPage.map(post -> {
+            PostResponseDTO dto = new PostResponseDTO(post, userId);
+
+            // 상단 고정 게시글이 아닌 경우에만 번호를 부여합니다.
+            if (!post.isPinned()) {
+                // 현재 페이지의 시작 인덱스를 계산합니다.
+                long startIndexForPage = (long) postsPage.getNumber() * postsPage.getSize();
+                // 현재 페이지 내에서 게시글의 인덱스를 가져옵니다.
+                long indexInPage = postsPage.getContent().indexOf(post);
+
+                // 전체 게시글 순서에 맞게 번호를 계산합니다.
+                // (페이지 시작 인덱스 + 현재 페이지 내 인덱스 + 1)
+                long sequentialNumber = startIndexForPage + indexInPage + 1;
+
+                // 상단 고정 게시글의 개수만큼 번호에서 제외합니다.
+                // 예: 고정글이 2개면 1, 2번을 건너뛰고 3번부터 시작하도록
+                dto.setOriginalIndex((int) (sequentialNumber - pinnedCount));
+            }
+            return dto;
+        });
     }
 
     @Override
@@ -131,10 +185,9 @@ public class PostServiceImpl implements PostService {
             throw new IllegalStateException("게시글을 수정할 권한이 없습니다.");
         }
 
-        String newImageUrl = post.getImage(); // 기존 이미지 URL을 유지
+        String newImageUrl = post.getImage();
         if (newImage != null && !newImage.isEmpty()) {
             try {
-                // 기존 이미지 삭제 (선택 사항: 서버 공간 절약)
                 if (post.getImage() != null) {
                     String oldImageName = post.getImage().substring("/upload/".length());
                     File oldFile = new File(uploadPath, oldImageName);
@@ -143,7 +196,6 @@ public class PostServiceImpl implements PostService {
                     }
                 }
 
-                // 새 이미지 저장
                 String fileName = UUID.randomUUID().toString() + "_" + newImage.getOriginalFilename();
                 File destinationFile = new File(uploadPath, fileName);
                 newImage.transferTo(destinationFile);
@@ -155,40 +207,41 @@ public class PostServiceImpl implements PostService {
 
         post.setTitle(requestDTO.getTitle());
         post.setContent(requestDTO.getContent());
-        post.setImage(newImageUrl); // 이미지 URL 업데이트
+        post.setImage(newImageUrl);
         post.setPostType(requestDTO.getPostType());
+        post.setPinned(requestDTO.isPinned());
 
-        if (requestDTO.getPostType() == PostType.NOTICE) {
-            if (requestDTO.getDemandSurvey() != null) {
+        // --- 게시글 유형에 따른 수요조사 로직 분기 ---
+        if (requestDTO.getPostType() == PostType.DEMAND) {
+            // 유형이 DEMAND일 때: 수요조사 데이터 업데이트 또는 생성
+            if (requestDTO.getDemandSurvey() == null) {
+                throw new IllegalArgumentException("수요조사 게시글에는 수요조사 정보가 필수입니다.");
+            }
+
+            if (post.getDemandSurvey() != null) {
+                // 기존 수요조사가 있으면 업데이트
                 DemandSurvey existingSurvey = post.getDemandSurvey();
-                if (existingSurvey != null) {
-                    // 기존 수요조사가 있으면 업데이트
-                    existingSurvey.setTitle(requestDTO.getDemandSurvey().getTitle());
-                    existingSurvey.setContent(requestDTO.getDemandSurvey().getContent());
-                    existingSurvey.setDeadline(requestDTO.getDemandSurvey().getDeadline());
-                    existingSurvey.setVoteType(requestDTO.getDemandSurvey().getVoteType());
-                } else {
-                    // 기존 수요조사가 없으면 새로 생성
-                    DemandSurvey newSurvey = DemandSurvey.builder()
-                            .title(requestDTO.getDemandSurvey().getTitle())
-                            .content(requestDTO.getDemandSurvey().getContent())
-                            .deadline(requestDTO.getDemandSurvey().getDeadline())
-                            .voteType(requestDTO.getDemandSurvey().getVoteType())
-                            .post(post)
-                            .author(post.getAuthor())
-                            .build();
-                    demandSurveyRepository.save(newSurvey);
-                    post.setDemandSurvey(newSurvey);
-                }
+                existingSurvey.update(
+                        requestDTO.getDemandSurvey().getTitle(),
+                        requestDTO.getDemandSurvey().getContent(),
+                        requestDTO.getDemandSurvey().getDeadline(),
+                        requestDTO.getDemandSurvey().getVoteType()
+                );
             } else {
-                // 기존 수요조사 데이터 삭제
-                if (post.getDemandSurvey() != null) {
-                    demandSurveyRepository.delete(post.getDemandSurvey());
-                    post.setDemandSurvey(null);
-                }
+                // 기존 수요조사가 없으면 새로 생성
+                DemandSurvey newSurvey = DemandSurvey.builder()
+                        .title(requestDTO.getDemandSurvey().getTitle())
+                        .content(requestDTO.getDemandSurvey().getContent())
+                        .deadline(requestDTO.getDemandSurvey().getDeadline())
+                        .voteType(requestDTO.getDemandSurvey().getVoteType())
+                        .post(post)
+                        .author(post.getAuthor())
+                        .build();
+                demandSurveyRepository.save(newSurvey);
+                post.setDemandSurvey(newSurvey);
             }
         } else {
-            // 게시글 유형이 GENERAL로 변경되었을 경우, 기존 수요조사 삭제
+            // 유형이 DEMAND가 아닐 때: 기존 수요조사 데이터 삭제
             if (post.getDemandSurvey() != null) {
                 demandSurveyRepository.delete(post.getDemandSurvey());
                 post.setDemandSurvey(null);

@@ -9,15 +9,22 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class MeetingReviewImage extends BaseEntity {
+@ToString(exclude = "review")
+public class MeetingReviewImage extends BaseEntity implements Comparable<MeetingReviewImage> {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String uuid;
+    private String fileName;
+//    private String imageUrl;
+    private int sortOrder;
 
     @ManyToOne(fetch = FetchType.LAZY)
     private MeetingReview review;
 
-    private String imageUrl;
-
-    private int sortOrder;
+    @Override
+    public int compareTo(MeetingReviewImage other) {
+        return this.sortOrder - other.sortOrder;
+    }
+    public void changeReview(MeetingReview review) {
+        this.review = review;
+    }
 }

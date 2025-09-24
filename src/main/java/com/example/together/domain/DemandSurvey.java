@@ -40,4 +40,11 @@ public class DemandSurvey extends BaseEntity {
 
     @OneToMany(mappedBy = "survey", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Vote> votes = new ArrayList<>();
+
+    public void update(String title, String content, LocalDateTime deadline, VoteType voteType) {
+        this.title = title;
+        this.content = content;
+        this.deadline = deadline;
+        this.voteType = voteType;
+    }
 }

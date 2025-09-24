@@ -4,6 +4,7 @@ import com.example.together.domain.Post;
 import com.example.together.domain.PostType;
 import com.example.together.dto.demandSurvey.DemandSurveyResponseDTO;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 
@@ -20,6 +21,8 @@ public class PostResponseDTO {
     private final String authorName;
     private final Long cafeId;
     private final boolean isOwner;
+    @Setter
+    private int originalIndex;
 
     private DemandSurveyResponseDTO demandSurvey;
     private LocalDateTime regDate;
@@ -44,4 +47,5 @@ public class PostResponseDTO {
             this.demandSurvey = null;
         }
     }
+
 }

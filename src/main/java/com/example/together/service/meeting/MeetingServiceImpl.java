@@ -52,6 +52,7 @@ public class MeetingServiceImpl implements MeetingService {
                 .meetingDate(meetingDTO.getMeetingDate())
                 .recruiting(meetingDTO.getRecruiting())
                 .visibility(meetingDTO.getVisibility())
+                .location(meetingDTO.getLocation())
                 .address(meetingDTO.getAddress())
                 .organizer(organizer)
                 .cafe(cafe)
@@ -89,7 +90,8 @@ public class MeetingServiceImpl implements MeetingService {
                 meetingDTO.getMeetingDate(),
                 meetingDTO.getRecruiting(),
                 meetingDTO.getVisibility(),
-                meetingDTO.getAddress()
+                meetingDTO.getAddress(),
+                meetingDTO.getLocation()
         );
 
         meetingRepository.save(meeting);
@@ -97,6 +99,11 @@ public class MeetingServiceImpl implements MeetingService {
 
     @Override
     public void MeetingDelete(Long id) {
+        Optional<CafeCalendar> calendarEntry = cafeCalendarRepository.findByMeetingId(id);
+
+
+        calendarEntry.ifPresent(cafeCalendarRepository::delete);
+
         meetingRepository.deleteById(id);
     }
 
@@ -147,6 +154,16 @@ public class MeetingServiceImpl implements MeetingService {
         meetingUserRepository.save(meetingUser);
     }
 
+    public void cancelMeeting(User user, Long meetingId) {
+        MeetingUser meetingUser = meetingUserRepository
+                .findByMeetingIdAndUserId(meetingId, user.getId())
+                .orElseThrow(() -> new IllegalStateException("신청 정보가 없습니다."));
+
+        meetingUserRepository.delete(meetingUser);
+    }
+
+
+
     public List<MeetingUser> getApplicantsByMeeting(Long meetingId) {
         Meeting meeting = meetingRepository.findById(meetingId)
                 .orElseThrow(() -> new IllegalArgumentException("모임이 존재하지 않습니다."));
@@ -155,7 +172,9 @@ public class MeetingServiceImpl implements MeetingService {
 
     @Override
     public PageResponseDTO<MeetingDTO> listByCafeId(Long cafeId, PageRequestDTO pageRequestDTO) {
-        Pageable pageable = pageRequestDTO.getPageable("meetingDate");
+//        Pageable pageable = pageRequestDTO.getPageable("meetingDate"); // meetingDate 순으로 정렬
+        Pageable pageable = pageRequestDTO.getPageable("id"); // id 순으로 정렬
+
         Page<Meeting> result = meetingRepository.findByCafeId(cafeId, pageable);
 
         List<MeetingDTO> dtoList = result.getContent().stream()
@@ -199,6 +218,7 @@ public class MeetingServiceImpl implements MeetingService {
                 .meetingDate(meeting.getMeetingDate())
                 .recruiting(meeting.getRecruiting())
                 .visibility(meeting.getVisibility())
+                .location(meeting.getLocation())
                 .address(meeting.getAddress())
                 .organizerId(organizerId)
                 .organizerName(organizerName)

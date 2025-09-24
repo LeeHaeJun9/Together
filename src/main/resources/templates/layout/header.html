@@ -1,0 +1,25 @@
+<header th:fragment="header" class="container" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+    <link rel="stylesheet" th:href="@{/css/header.css}">
+    <div class="header-top">
+        <a th:href="@{/mainPage}" class="logo-section">
+            <img th:src="@{/images/moyeora-logo.png}" alt="Together 로고" />
+            <span>모여라</span>
+        </a>
+        <nav>
+            <ul class="nav-links" sec:authorize="!isAuthenticated()">
+                <li class="nav-link"><a th:href="@{/member/login}">로그인</a></li>
+                <li class="nav-link"><a th:href="@{/member/register}">회원가입</a></li>
+            </ul>
+            <ul class="nav-links" sec:authorize="isAuthenticated() and !hasRole('ADMIN')">
+                <li class="nav-link"><a th:href="@{/member/mypage}">마이페이지</a></li>
+                <li class="nav-link"><a th:href="@{/logout}">로그아웃</a></li>
+            </ul>
+            <ul class="nav-links" sec:authorize="hasRole('ADMIN')">
+                <li class="nav-link"><a th:href="@{/member/mypage}">마이페이지</a></li>
+                <li class="nav-link"><a th:href="@{/logout}">로그아웃</a></li>
+                <li class="nav-link"><a th:href="@{/manager}">관리자페이지</a></li>
+                <li class="nav-link"><a th:href="@{/cafe/admin/applications}">카페 가입 승인</a></li>
+            </ul>
+        </nav>
+    </div>
+</header>

@@ -40,13 +40,15 @@ public class Meeting extends BaseEntity {
 //    @ManyToOne(fetch = FetchType.LAZY)
 //    private Address addressId;
     private String address;
+    private String location;
 
-    public void change(String title, String content, LocalDateTime meetingDate, RecruitingStatus recruiting, Visibility visibility, String address) {
+    public void change(String title, String content, LocalDateTime meetingDate, RecruitingStatus recruiting, Visibility visibility, String address, String location) {
         this.title = title;
         this.content = content;
         this.meetingDate = meetingDate;
         this.recruiting = recruiting;
         this.visibility = visibility;
         this.address = address;
+        this.location = location;
     }
 }

@@ -1,152 +1,340 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layout/basic.html}">
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      layout:decorate="~{layout/basic}">
 <head>
-    <meta charset="UTF-8" />
-    <title>Trade Read</title>
+    <meta charset="UTF-8"/>
+    <title th:text="${dto != null ? dto.title : '게시물 보기'}">게시물 보기</title>
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-          rel="stylesheet"
-          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
-          crossorigin="anonymous" />
+    <style>
+        .main-wrap { display:flex; justify-content:center; }
+        .thumb { width:100%; max-width:640px; aspect-ratio:16/9; object-fit:cover; border-radius:12px; border:1px solid #eee; background:#fafafa; }
+        .gallery { display:flex; gap:8px; flex-wrap:wrap; justify-content:center; }
+        .gallery img { width:90px; height:90px; object-fit:cover; border-radius:8px; border:1px solid #eee; cursor:pointer; }
+        .gallery img.active{ outline:3px solid #0d6efd; }
+        .meta { font-size:1.05rem; line-height:1.4; }
+        .meta .line { display:block; margin-bottom:4px; }
+        .bottom-actions { display:flex; justify-content:flex-end; gap:8px; }
 
-    <link href="/static/css/style.css" rel="stylesheet">
+        /* 보기 프레임(비율 고정 + 레터박스) */
+        .viewer {
+            position: relative;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            width: 100%;
+            max-width: 640px;
+            aspect-ratio: 16 / 9;
+            margin: 0 auto;
+            background: #f5f5f5;
+            border: 1px solid #eee;
+            border-radius: 12px;
+        }
+        /* 프레임 안에서는 비율 유지(자르지 않음) */
+        .viewer > img.thumb{
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            border: none;
+            border-radius: 0;
+            background: transparent;
+            cursor: zoom-in;
+        }
 
+        .nav-btn{
+            position:absolute; top:50%; transform:translateY(-50%);
+            width:44px; height:44px; border:none; border-radius:50%;
+            background:#ffffffcc; box-shadow:0 2px 8px rgba(0,0,0,.2);
+            font-size:28px; line-height:44px; padding:0; cursor:pointer;
+            display:flex; align-items:center; justify-content:center; user-select:none;
+        }
+        .nav-btn.prev{ left:8px; }
+        .nav-btn.next{ right:8px; }
+
+        /* ===== 라이트박스(확대 모달) ===== */
+        .lightbox{ position:fixed; inset:0; background:rgba(0,0,0,.8); display:none; align-items:center; justify-content:center; z-index:1050; }
+        .lightbox.open{ display:flex; }
+        .lightbox-inner{
+            position:relative;          /* X 버튼을 이미지 위에 올리기 위해 relative */
+            max-width:min(92vw,1200px);
+            max-height:90vh;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+        }
+        .lightbox img{
+            max-width:100%;
+            max-height:90vh;
+            object-fit:contain;
+            box-shadow:0 8px 24px rgba(0,0,0,.35);
+            border-radius:8px;
+            background:#111;
+            display:block;
+        }
+        .lb-btn{
+            position:absolute; top:50%; transform:translateY(-50%);
+            width:48px; height:48px; border:0; border-radius:50%;
+            background:rgba(255,255,255,.9); font-size:28px; cursor:pointer;
+            display:flex; align-items:center; justify-content:center;
+        }
+        .lb-btn.prev{ left:-60px; }
+        .lb-btn.next{ right:-60px; }
+
+        /* ★ 닫기 버튼을 '이미지 안 우상단' 겹쳐 배치 */
+        .lb-close{
+            position:absolute;
+            top:12px;                   /* 이미지 컨테이너 내부 우상단 */
+            right:12px;
+            width:40px; height:40px;
+            border:0; border-radius:50%;
+            background:rgba(0,0,0,.55); /* 어두운 반투명으로 이미지 위에 잘 보이게 */
+            color:#fff;
+            font-size:22px; line-height:40px;
+            cursor:pointer;
+            display:flex; align-items:center; justify-content:center;
+        }
+        .lb-close:hover{ background:rgba(0,0,0,.7); }
+
+        @media (max-width:768px){
+            .lb-btn.prev{ left:8px; } .lb-btn.next{ right:8px; }
+        }
+    </style>
 </head>
 <body>
 
-<!-- 헤더 -->
-<header id="header">
-    <!-- 로고 -->
-    <div id="logo">
-        <img id="logo_img" src="#">
+<section layout:fragment="content" class="container py-4">
+
+    <!-- 상단: 제목 + 목록 버튼 -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="mb-0" th:text="${dto != null ? dto.title : '게시물 보기'}">게시물 보기</h2>
+        <a class="btn btn-secondary btn-sm" th:href="${backUrl}">목록</a>
     </div>
 
-    <!-- 검색 바 -->
-    <form class="search_bar" action="#" method="get">
-        <div class="input_box">
-            <i class="fa-solid i1 fa-magnifying-glass" aria-hidden="true"></i>
-            <input class="search_text" type="text" name="q" placeholder="검색어를 입력하세요" />
-        </div>
-    </form>
-
-    <!-- 로그인 -->
-    <div class="login">
-        <a href="#"><span>로그인</span></a>
+    <!-- 게시물 없음 -->
+    <div th:if="${dto == null}" class="alert alert-warning">
+        해당 게시물을 찾을 수 없습니다. <a th:href="@{/trade/list}" class="alert-link">목록으로</a>
     </div>
 
-    <!-- 상단 리스트 -->
-    <nav class="list_bar" aria-label="상단 메뉴">
-        <ul class="t_list">
-            <!-- 카페랑 모임부분 작성하기 -->
-            <li><a href="#"  class="menu-link" id="menu-cafe"><span>카페 목록</span></a></li>
-            <li><a href="#" class="menu-link" id="menu-group"><span>모임 목록</span></a></li>
-            <li><a href="/trade/list" class="menu-link" id="menu-trade"><span>중고거래</span></a></li>
-        </ul>
-    </nav>
-</header>
-
-<section layout:fragment="content">
-    <div id="carouselExampleIndicators" class="carousel slide">
-        <div class="carousel-indicators">
-            <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
-            <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="1" aria-label="Slide 2"></button>
-            <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="2" aria-label="Slide 3"></button>
-        </div>
-        <div class="carousel-inner">
-            <div class="carousel-item active">
-                <img src="..." class="d-block w-100" alt="...">
-            </div>
-            <div class="carousel-item">
-                <img src="..." class="d-block w-100" alt="...">
-            </div>
-            <div class="carousel-item">
-                <img src="..." class="d-block w-100" alt="...">
-            </div>
-        </div>
-        <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
-            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-            <span class="visually-hidden">Previous</span>
-        </button>
-        <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
-            <span class="carousel-control-next-icon" aria-hidden="true"></span>
-            <span class="visually-hidden">Next</span>
-        </button>
-    </div>
-
-        <div class="carousel-inner">
-            <!-- 이미지가 있을 때 -->
-            <div th:if="${item.images != null && !#lists.isEmpty(item.images)}"
-                 th:each="img, stat : ${item.images}"
-                 th:classappend="${stat.index == 0} ? ' active' : ''"
-                 class="carousel-item">
-                <img th:src="${img}" class="d-block w-100" alt="photo"/>
-            </div>
-
-            <!-- 이미지가 없을 때 플레이스홀더 -->
-            <div th:if="${item.images == null || #lists.isEmpty(item.images)}" class="carousel-item active">
-                <div class="ratio ratio-16x9 d-flex align-items-center justify-content-center placeholder-box">
-                    <div class="display-6 text-muted">사진</div>
-                </div>
-            </div>
+    <!-- 게시물 있음 -->
+    <div th:if="${dto != null}">
+        <!-- 대표 이미지 (가운데 정렬) + 좌/우 이동 버튼 -->
+        <div class="mb-3 main-wrap viewer" th:with="noImg=@{/images/no-image.png}">
+            <button type="button" class="nav-btn prev" aria-label="이전 보기">&lsaquo;</button>
+            <img id="mainImage"
+                 th:src="${images != null and !#lists.isEmpty(images)
+             ? images.get(0).imageUrl
+             : (!#strings.isEmpty(dto.thumbnail) ? dto.thumbnail : noImg)}"
+                 alt="thumbnail" class="thumb"
+                 onerror="this.onerror=null;this.src='/images/no-image.png'">
+            <button type="button" class="nav-btn next" aria-label="다음 보기">&rsaquo;</button>
         </div>
 
-        <button class="carousel-control-prev" type="button" data-bs-target="#tradeCarousel" data-bs-slide="prev">
-            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-            <span class="visually-hidden">Previous</span>
-        </button>
-        <button class="carousel-control-next" type="button" data-bs-target="#tradeCarousel" data-bs-slide="next">
-            <span class="carousel-control-next-icon" aria-hidden="true"></span>
-            <span class="visually-hidden">Next</span>
-        </button>
-    </div>
+        <!-- 갤러리 -->
+        <div class="gallery mb-3" th:if="${!#lists.isEmpty(images)}">
+            <img th:each="img, stat : ${images}"
+                 th:src="${img.imageUrl}"
+                 th:attr="data-src=${img.imageUrl}"
+                 th:alt="${'image-'+stat.index}"
+                 onerror="this.onerror=null;this.src='/images/no-image.png'">
+        </div>
 
-    <!-- ===== 작성자(닉네임/이름)만 표시 ===== -->
-    <div class="bg-light rounded-3 p-3 d-flex align-items-center mb-3">
-        <strong th:text="${
-              item.sellerName != null ? item.sellerName
-              : (item.sellerNickname != null ? item.sellerNickname : '닉네임')
-            }">닉네임</strong>
-    </div>
+        <!-- 메타(상태/가격/닉네임) -->
+        <div class="meta mb-3">
+            <span class="line"><strong>상태</strong> : <span th:text="${dto.status}">FOR_SALE</span></span>
+            <span class="line"><strong>가격</strong> :
+                <span th:text="${dto.price != null ? #numbers.formatInteger(dto.price, 0) : '0'}">0</span>원
+            </span>
+            <span class="line"><strong>닉네임</strong> :
+                <span th:text="${dto.sellerNickname != null ? dto.sellerNickname : '알수없음'}">닉네임</span>
+            </span>
+        </div>
 
-    <!-- ===== 제목 ===== -->
-    <div class="mb-2">
-        <div class="form-control py-3">
-            <strong th:text="${item.title != null ? item.title : '제목'}">제목</strong>
+        <!-- CSRF (레이아웃 메타가 없을 때 대비용) -->
+        <th:block th:if="${_csrf != null}">
+            <input type="hidden" id="csrfToken"  th:value="${_csrf.token}">
+            <input type="hidden" id="csrfHeader" th:value="${_csrf.headerName}">
+        </th:block>
+
+        <!-- 찜 버튼 -->
+        <div class="d-flex align-items-center gap-2 mb-2">
+            <button id="btnFav" class="btn btn-outline-danger btn-sm" type="button"
+                    th:attr="data-trade-id=${dto.id}">
+                <span class="me-1">♥</span>
+                <span id="favText" th:text="${liked != null and liked ? '찜 취소' : '찜하기'}">찜하기</span>
+            </button>
+            <span>찜 <strong id="favCount" th:text="${likeCount} ?: 0">0</strong></span>
+        </div>
+
+        <!-- 내용 -->
+        <h5 class="mb-2">내용</h5>
+        <pre class="p-3 bg-light rounded border" style="white-space:pre-wrap;" th:text="${dto.description}">내용이 없습니다.</pre>
+
+        <!-- 하단 우측: 작성자만 수정/삭제 -->
+        <div class="bottom-actions mt-3">
+            <a class="btn btn-primary" th:if="${isOwner}" th:href="@{'/trade/modify/' + ${dto.id}}">수정</a>
+            <form th:if="${isOwner}" th:action="@{'/trade/remove/' + ${dto.id}}" method="post"
+                  onsubmit="return confirm('삭제하시겠습니까?');">
+                <th:block th:if="${_csrf != null}">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                </th:block>
+                <button type="submit" class="btn btn-danger">삭제</button>
+            </form>
         </div>
     </div>
 
-    <!-- ===== 가격 ===== -->
-    <div class="mb-3">
-        <div class="form-control py-3">
-            <span th:text="${item.price != null ? #numbers.formatInteger(item.price,0,'COMMA') + '원' : '가격'}">가격</span>
+    <!-- ===== 라이트박스(확대 모달) ===== -->
+    <div id="lightbox" class="lightbox" role="dialog" aria-modal="true" aria-label="이미지 보기">
+        <div class="lightbox-inner" onclick="event.stopPropagation()">
+            <button class="lb-btn prev" type="button" aria-label="이전">&lsaquo;</button>
+            <img id="lightboxImg" alt="preview">
+            <!-- ★ 닫기 버튼을 이미지 우상단에 겹침 -->
+            <button class="lb-close" type="button" aria-label="닫기">&times;</button>
+            <button class="lb-btn next" type="button" aria-label="다음">&rsaquo;</button>
         </div>
     </div>
 
-    <!-- ===== 내용 ===== -->
-    <div class="mb-4">
-        <div class="form-control py-4" style="min-height:160px; white-space:pre-line;"
-             th:text="${item.content != null ? item.content : '내용'}">내용</div>
-    </div>
+    <!-- ★★★ 스크립트는 프래그먼트 안쪽에 둬야 레이아웃에서 살아남습니다 ★★★ -->
+    <script>
+        (function () {
+            // ---------- 이미지 슬라이더 ----------
+            const main    = document.getElementById('mainImage');
+            const thumbs  = Array.from(document.querySelectorAll('.gallery img'));
+            const prevBtn = document.querySelector('.nav-btn.prev');
+            const nextBtn = document.querySelector('.nav-btn.next');
 
-    <!-- ===== 채팅 입력창 (하단 고정) ===== -->
-    <div class="chat-dock">
-        <form class="container py-2" th:action="@{/trade/chat}" method="post">
-            <input type="hidden" name="tradeId" th:value="${item.id}" />
-            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-            <div class="input-group">
-                <span class="input-group-text">💬</span>
-                <input type="text" name="message" class="form-control" placeholder="채팅 입력창" required />
-                <button class="btn btn-primary" type="submit">보내기</button>
-            </div>
-        </form>
-    </div>
+            const urls = thumbs.length
+                ? thumbs.map(el => el.getAttribute('data-src') || el.getAttribute('src'))
+                : (main && main.src ? [main.src] : []);
+            let idx = 0;
+
+            function highlight() {
+                thumbs.forEach(t => t.classList.remove('active'));
+                if (thumbs[idx]) thumbs[idx].classList.add('active');
+            }
+            function show(i) {
+                if (!main || !urls.length) return;
+                idx = (i + urls.length) % urls.length;
+                main.src = urls[idx];
+                highlight();
+            }
+            thumbs.forEach((el, i) => el.addEventListener('click', () => { show(i); openLightbox(i); }));
+            prevBtn && prevBtn.addEventListener('click', () => show(idx - 1));
+            nextBtn && nextBtn.addEventListener('click', () => show(idx + 1));
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowLeft')  show(idx - 1);
+                if (e.key === 'ArrowRight') show(idx + 1);
+            });
+            highlight();
+
+            // ---------- 라이트박스(확대 보기) ----------
+            const lb      = document.getElementById('lightbox');
+            const lbImg   = document.getElementById('lightboxImg');
+            const lbPrev  = lb?.querySelector('.lb-btn.prev');
+            const lbNext  = lb?.querySelector('.lb-btn.next');
+            const lbClose = lb?.querySelector('.lb-close');
+
+            function isLightboxOpen(){ return lb?.classList.contains('open'); }
+            function openLightbox(i){
+                if (!lb || !lbImg || !urls.length) return;
+                idx = (i + urls.length) % urls.length;
+                lbImg.src = urls[idx];
+                lb.classList.add('open');
+                document.body.style.overflow = 'hidden';
+                highlight();
+            }
+            function closeLightbox(){
+                if (!lb) return;
+                lb.classList.remove('open');
+                document.body.style.overflow = '';
+            }
+            function lbShow(delta){
+                if (!urls.length) return;
+                idx = (idx + delta + urls.length) % urls.length;
+                lbImg.src = urls[idx];
+                if (main) main.src = urls[idx]; // 메인과 동기화
+                highlight();
+            }
+
+            if (main) main.addEventListener('click', () => openLightbox(idx));
+            lb && lb.addEventListener('click', closeLightbox);
+            lbPrev && lbPrev.addEventListener('click', (e) => { e.stopPropagation(); lbShow(-1); });
+            lbNext && lbNext.addEventListener('click', (e) => { e.stopPropagation(); lbShow(+1); });
+            lbClose && lbClose.addEventListener('click', (e) => { e.stopPropagation(); closeLightbox(); });
+            document.addEventListener('keydown', (e) => {
+                if (!isLightboxOpen()) return;
+                if (e.key === 'Escape')      closeLightbox();
+                if (e.key === 'ArrowLeft')  lbShow(-1);
+                if (e.key === 'ArrowRight') lbShow(+1);
+            });
+
+            // ---------- 찜 토글 ----------
+            const btn      = document.getElementById('btnFav');
+            const favText  = document.getElementById('favText');
+            const favCount = document.getElementById('favCount');
+            if (!btn || !favText || !favCount) return;
+
+            const tradeId = btn.getAttribute('data-trade-id');
+
+            // CSRF: meta → hidden → 없으면 생략
+            const metaToken   = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
+            const metaHeader  = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content');
+            const hiddenToken = document.getElementById('csrfToken')?.value;
+            const hiddenHead  = document.getElementById('csrfHeader')?.value;
+            const csrfHeaderName  = metaHeader || hiddenHead || null;
+            const csrfHeaderValue = metaToken  || hiddenToken || null;
+
+            async function toggleFavorite() {
+                try {
+                    btn.disabled = true;
+
+                    const headers = {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    };
+                    if (csrfHeaderName && csrfHeaderValue) headers[csrfHeaderName] = csrfHeaderValue;
+
+                    const body = new URLSearchParams({ tradeId: String(tradeId) }).toString();
+
+                    const res = await fetch('/favorite/toggle', {
+                        method: 'POST',
+                        headers,
+                        body,
+                        credentials: 'same-origin'
+                    });
+
+                    if (res.status === 401) { alert('로그인이 필요합니다.'); return; }
+                    if (res.status === 403) { alert('권한이 없습니다(CSRF 실패 가능).'); return; }
+
+                    const ct = res.headers.get('content-type') || '';
+                    if (!ct.includes('application/json')) {
+                        const txt = await res.text().catch(()=> '');
+                        if (res.redirected || (res.url && res.url.includes('/login'))) {
+                            alert('로그인이 필요합니다.');
+                        } else {
+                            alert('예상치 못한 응답을 받았습니다.\n' + txt.slice(0,200));
+                        }
+                        return;
+                    }
+
+                    const data = await res.json(); // { liked, count }
+                    if (typeof data.liked === 'boolean') favText.textContent = data.liked ? '찜 취소' : '찜하기';
+                    if (typeof data.count === 'number')  favCount.textContent = data.count;
+
+                    alert(data.liked ? '찜목록에 추가되었습니다.' : '찜이 취소되었습니다.');
+                } catch (e) {
+                    console.error(e);
+                    alert('찜 처리 중 오류가 발생했습니다.');
+                } finally {
+                    btn.disabled = false;
+                }
+            }
+            btn.addEventListener('click', toggleFavorite);
+        })();
+    </script>
+
 </section>
-
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
-        crossorigin="anonymous"></script>
 </body>
 </html>

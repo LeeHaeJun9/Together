@@ -5,265 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Together - 소모임 서비스</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
-    <style>
-        :root {
-            --primary-color: #4CAF50;
-            --secondary-color: #6c757d;
-            --background-color: #f8f9fa;
-            --card-background: #ffffff;
-            --text-color: #212529;
-            --hover-color: #388E3C;
-            --border-color: #e0e0e0;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            background-color: var(--background-color);
-            color: var(--text-color);
-            margin: 0;
-            padding: 0;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 1rem;
-        }
-
-        /* Header & Navigation */
-        .header-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem 0;
-        }
-        .logo-section {
-            display: flex;
-            align-items: center;
-            text-decoration: none;
-            color: var(--text-color);
-            font-size: 1.5rem;
-            font-weight: bold;
-        }
-        .logo-section img {
-            height: 40px;
-            margin-right: 0.5rem;
-        }
-        .nav-links {
-            list-style: none;
-            display: flex;
-            gap: 1rem;
-            margin: 0;
-            padding: 0;
-        }
-        .nav-link button {
-            background: none;
-            border: none;
-            font-size: 1rem;
-            cursor: pointer;
-            color: var(--text-color);
-            transition: color 0.3s;
-        }
-        .nav-link button:hover {
-            color: var(--primary-color);
-        }
-
-        /* Hero Section */
-        .hero-section {
-            background-color: #e9ecef;
-            padding: 3rem 1rem;
-            border-radius: 10px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-        .hero-section h1 {
-            font-size: 2.5rem;
-            font-weight: 700;
-            color: var(--primary-color);
-        }
-        .hero-section p {
-            font-size: 1.25rem;
-            max-width: 800px;
-            margin-bottom: 1.5rem;
-        }
-
-        /* Main Content Sections */
-        .section-title {
-            text-align: center;
-            font-size: 2rem;
-            font-weight: bold;
-            margin-bottom: 1.5rem;
-            color: var(--primary-color);
-        }
-
-        /* Category Grid */
-        .category-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-        @media (max-width: 768px) {
-            .category-grid {
-                /* 화면이 좁을 땐 2개의 열로 변경 */
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-        .category-item {
-            text-align: center;
-            text-decoration: none;
-            color: var(--text-color);
-            transition: transform 0.3s, box-shadow 0.3s;
-            border-radius: 10px;
-            overflow: hidden;
-            position: relative;
-        }
-        .category-item:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
-        }
-        .category-item img {
-            width: 100%;
-            height: 120px;
-            object-fit: cover;
-            border-radius: 10px;
-        }
-        .category-caption {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            padding: 0.5rem;
-            background-color: rgba(0, 0, 0, 0.6);
-            color: white;
-            font-weight: bold;
-            font-size: 1rem;
-        }
-
-        /* Recommended Groups Slider */
-        .slider-section {
-            margin-bottom: 7rem;
-        }
-        .slider-container {
-            position: relative;
-        }
-        .slider-wrapper {
-            display: flex;
-            overflow: hidden;
-            scroll-behavior: smooth;
-            gap: 1rem;
-        }
-        .slider-card {
-            min-width: 250px;
-            flex: 0 0 auto;
-            background-color: var(--card-background);
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
-            transition: transform 0.3s;
-        }
-        .slider-card:hover {
-            transform: scale(1.02);
-        }
-        .slider-card img {
-            width: 100%;
-            height: 150px;
-            object-fit: cover;
-            border-radius: 10px 10px 0 0;
-        }
-        .card-body {
-            padding: 1rem;
-        }
-        .card-body h5 {
-            font-size: 1.1rem;
-            font-weight: bold;
-            margin: 0 0 0.5rem;
-        }
-        .card-body p {
-            font-size: 0.9rem;
-            color: var(--secondary-color);
-            margin: 0;
-        }
-        .slider-button {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            background-color: rgba(255, 255, 255, 0.8);
-            border: 1px solid var(--border-color);
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            font-size: 1.5rem;
-            cursor: pointer;
-            z-index: 10;
-        }
-        .slider-button.prev { left: -20px; }
-        .slider-button.next { right: -20px; }
-        .slider-button:hover {
-            background-color: rgba(255, 255, 255, 1);
-        }
-
-        /* Footer */
-        .footer {
-            background-color: var(--text-color);
-            color: white;
-            padding: 2rem 0;
-            text-align: center;
-        }
-        .footer-links {
-            list-style: none;
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 1.5rem;
-            margin: 0 0 1rem 0;
-            padding: 0;
-        }
-        .footer-links a {
-            color: white;
-            text-decoration: none;
-            transition: color 0.3s;
-        }
-        .footer-links a:hover {
-            color: var(--primary-color);
-        }
-    </style>
+    <link rel="stylesheet" th:href="@{/css/mainPage.css}">
 </head>
 <body>
 
-<header class="container">
-    <div class="header-top">
-        <a th:href="@{/}" class="logo-section">
-            <img th:src="@{/images/moyeora-logo.png}" alt="Together 로고" />
-            <span>모여라</span>
-        </a>
-        <nav>
-            <ul class="nav-links" sec:authorize="!isAuthenticated()">
-                <li class="nav-link"><button><a th:href="@{/member/login}">로그인</a></button></li>
-                <li class="nav-link"><button><a th:href="@{/member/register}">회원가입</a></button></li>
-            </ul>
-            <ul class="nav-links" sec:authorize="isAuthenticated() and !hasRole('ADMIN')">
-                <li class="nav-link"><button><a th:href="@{/member/mypage}">마이페이지</a></button></li>
-                <li class="nav-link"><button><a th:href="@{/logout}">로그아웃</a></button></li>
-            </ul>
-            <ul class="nav-links" sec:authorize="hasRole('ADMIN')">
-                <li class="nav-link"><button><a th:href="@{/member/mypage}">마이페이지</a></button></li>
-                <li><button><a th:href="@{/logout}">로그아웃</a></button></li>
-                <li class="nav-link"><button><a th:href="@{/manager}">관리자페이지</a></button></li>
-                <li class="nav-link"><button><a th:href="@{/cafe/admin/applications}">카페 가입 승인</a></button></li>
-            </ul>
-        </nav>
-    </div>
-</header>
+<div th:replace="~{/layout/header :: header}"></div>
 
 <main>
     <section class="hero-section">
-        <h1>같이 놀 사람? 여기 모여라!</h1>
-        <p>
-            누구나 쉽게, 어디서든 가볍게. 같은 관심사만 있으면 지역은 상관없어요. 산책, 독서, 보드게임 등 마음 맞는 사람들과 자연스럽게 어울릴 수 있는 공간입니다.
-        </p>
+        <div class="container hero-content">
+            <div class="text-column">
+                <h1>같이 놀 사람? 여기 모여라!</h1>
+                <p>
+                    누구나 쉽게, 어디서든 가볍게. 같은 관심사만 있으면 지역은 상관없어요. 산책, 독서, 보드게임 등 마음 맞는 사람들과 자연스럽게 어울릴 수 있는 공간입니다.
+                </p>
+            </div>
+            <div class="image-column">
+                <img th:src="@{/images/banner.jpg}" alt="모임 일러스트" class="banner-image">
+            </div>
+        </div>
     </section>
 
     <section class="container slider-section">
@@ -281,7 +41,7 @@
                     </a>
                 </div>
                 <div th:if="${#lists.isEmpty(recomCafes)}" class="slider-card" style="min-width: 100%; text-align: center; display: flex; align-items: center; justify-content: center;">
-                    <p class="text-muted">추천 모임이 아직 없습니다.</p>
+                    <p class="text-muted">추천 카페가 아직 없습니다.</p>
                 </div>
             </div>
             <button class="slider-button next"><i class="fas fa-chevron-right"></i></button>
@@ -303,39 +63,9 @@
     </section>
 </main>
 
-<footer class="footer">
-    <div class="container">
-        <ul class="footer-links">
-            <li><a href="#">회사소개</a></li>
-            <li><a href="#">이용약관</a></li>
-            <li><a href="#">개인정보처리방침</a></li>
-            <li><a href="#">고객센터</a></li>
-        </ul>
-        <div class="footer-bottom">
-            <p>&copy; 2025 Together. All rights reserved.</p>
-        </div>
-    </div>
-</footer>
+<div th:replace="~{/layout/footer :: footer}"></div>
 
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        // 추천 모임 슬라이더 스크립트
-        const slider = document.getElementById('recom-slider');
-        const prevButton = document.querySelector('.slider-button.prev');
-        const nextButton = document.querySelector('.slider-button.next');
-
-        // 슬라이더 버튼 클릭 이벤트
-        nextButton.addEventListener('click', () => {
-            const cardWidth = slider.querySelector('.slider-card').offsetWidth;
-            slider.scrollBy({ left: cardWidth + 16, behavior: 'smooth' });
-        });
-
-        prevButton.addEventListener('click', () => {
-            const cardWidth = slider.querySelector('.slider-card').offsetWidth;
-            slider.scrollBy({ left: -(cardWidth + 16), behavior: 'smooth' });
-        });
-    });
-</script>
+<script th:src="@{/js/mainPage.js}"></script>
 
 </body>
 </html>

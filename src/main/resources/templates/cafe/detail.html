@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
@@ -13,100 +13,19 @@
     <script src='/lib/main.min.js'></script>
     <script src='/lib/locales-all.min.js'></script>
 
-    <style>
-        .page-header-bg {
-            background-size: cover;
-            background-position: center;
-            height: 300px;
-            position: relative;
-        }
-        .page-header-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-        }
-        .page-header-content {
-            position: relative;
-            z-index: 1;
-        }
-        .cafe-thumbnail {
-            width: 80px;
-            height: 80px;
-            object-fit: cover;
-            border-radius: 8px;
-            margin-right: 15px;
-        }
-
-        .col-3 {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-    </style>
+    <link rel="stylesheet" th:href="@{/css/cafeDetail.css}">
+    <link rel="stylesheet" th:href="@{/css/cafeHeader.css}">
+    <script th:inline="javascript">
+        // ✅ Thymeleaf 변수를 전역 변수로 할당하여 JS 파일에서 접근 가능하게 만듭니다.
+        var calendarEventsData = [[${calendarEvents}]];
+    </script>
 </head>
 <body>
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-    <div class="container px-5">
-        <a class="navbar-brand" href="/">Together</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-                <li class="nav-item"><a class="nav-link" href="/">홈</a></li>
-                <li class="nav-item"><a class="nav-link" href="/mypage" th:if="${userNickname}">마이페이지</a></li>
-                <li class="nav-item"><a class="nav-link" href="/logout" th:if="${userNickname}">로그아웃</a></li>
-            </ul>
-        </div>
-    </div>
-</nav>
+
+<div th:replace="~{/layout/header :: header}"></div>
 
 <div class="container px-4 px-lg-5">
-    <header class="py-5 bg-light border-bottom mb-4 page-header-bg" th:style="'background-image: url(' + ${cafe.cafeImage} + ');'">
-        <div class="page-header-overlay"></div>
-        <div class="container px-4 px-lg-5 my-5 page-header-content text-white">
-            <div class="text-center">
-                <h1 class="fw-bolder" th:text="${cafe.name}">카페 이름</h1>
-            </div>
-        </div>
-    </header>
-
-    <div class="row gx-4 gx-lg-5">
-        <div class="col-lg-12">
-            <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
-                <div class="container-fluid">
-                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                        <li class="nav-item">
-                            <a class="nav-link" th:href="@{/cafe/{cafeId}(cafeId=${cafe.id})}">카페 홈</a>
-                        </li>
-                        <li class="nav-item" th:if="${cafe.isMember}">
-                            <a class="nav-link" th:href="@{/cafe/{cafeId}/posts(cafeId=${cafe.id})}">게시글</a>
-                        </li>
-                        <li class="nav-item" th:if="${cafe.isMember}">
-                            <a class="nav-link" th:href="@{/cafe/{cafeId}/meetings(cafeId=${cafe.id})}">모임</a>
-                        </li>
-<!--                        <li class="nav-item" th:if="${cafe.isMember}">-->
-<!--                            <a class="nav-link" th:href="@{/meeting/register(cafeId=${cafe.id})}">모임 만들기</a>-->
-<!--                        </li>-->
-                        <li class="nav-item" th:if="${cafe.isOwner}">
-                            <a class="nav-link" th:href="@{/cafe/my/cafe/{cafeId}/joinRequests(cafeId=${cafe.id})}">가입 신청 목록</a>
-                        </li>
-                    </ul>
-                    <div th:if="${cafe.isMember and !cafe.isOwner}" class="ms-auto">
-                        <form th:action="@{/api/cafe/{cafeId}/leave(cafeId=${cafe.id})}" method="post" id="leaveForm">
-                            <button type="button" class="btn btn-outline-danger" onclick="confirmLeave()">카페 탈퇴</button>
-                        </form>
-                    </div>
-                    <div th:unless="${cafe.isMember}">
-                        <form th:action="@{/cafe/{cafeId}/join(cafeId=${cafe.id})}" method="post">
-                            <button type="submit" class="btn btn-outline-success">가입신청</button>
-                        </form>
-                    </div>
-                </div>
-            </nav>
-        </div>
-    </div>
+    <div th:replace="~{/layout/cafeHeader :: cafeHeader(cafe=${cafe})}"></div>
 
     <div class="row gx-4 gx-lg-5 mb-4">
         <div class="col-lg-12">
@@ -230,50 +149,10 @@
     </div>
 </div>
 
-<footer class="py-5 bg-dark mt-5">
-    <div class="container px-5"><p class="m-0 text-center text-white">Copyright &copy; Together 2025</p></div>
-</footer>
+<div th:replace="~{/layout/footer :: footer}"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-<script th:inline="javascript">
-    document.addEventListener('DOMContentLoaded', function() {
-        var calendarEl = document.getElementById('calendar');
+<script th:src="@{/js/cafeDetail.js}"></script>
 
-        // ✅ 백엔드에서 전달된 데이터를 직접 JavaScript 변수에 할당합니다.
-        // FullCalendar는 이 데이터를 사용하여 이벤트를 표시합니다.
-        var calendarEvents = [[${calendarEvents}]];
-
-        var calendar = new FullCalendar.Calendar(calendarEl, {
-            initialView: 'dayGridMonth', // 월 단위 뷰
-            locale: 'ko', // 한국어 설정
-            headerToolbar: {
-                left: 'prev,next today',
-                center: 'title',
-                right: 'dayGridMonth,timeGridWeek'
-            },
-            events: calendarEvents, // ✅ 여기에 당신의 데이터를 사용합니다.
-            eventClick: function(info) {
-                // 이벤트 클릭 시 해당 모임의 상세 페이지로 이동합니다.
-                if (info.event.url) {
-                    window.location.href = info.event.url;
-                }
-            }
-        });
-
-        calendar.render();
-    });
-
-    function confirmDelete() {
-        if (confirm("정말로 이 카페를 삭제하시겠습니까? 삭제 후에는 복구할 수 없습니다.")) {
-            document.getElementById("deleteForm").submit();
-        }
-    }
-
-    function confirmLeave() {
-        if (confirm("정말로 이 카페를 탈퇴하시겠습니까?")) {
-            document.getElementById("leaveForm").submit();
-        }
-    }
-</script>
 </body>
 </html>

@@ -4,6 +4,16 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/tab.html}">
 
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MeetingReview List</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+
+
 <div layout:fragment="content">
     <h1>MeetingReview List</h1>
 
@@ -30,23 +40,34 @@
                         <tr th:each="dto:${responseDTO.dtoList}">
                             <th scope="row">[[${dto.id}]]</th>
                             <td>
-                                <a th:href="|@{/meeting/review/read(id = ${dto.id})}&${link}|" class="text-decoration-none">[[${dto.title}]]</a>
+<!--                                <a th:href="|@{/cafe/{cafeId}/meeting/review/read((id = ${dto.id})}&${link}|" class="text-decoration-none">[[${dto.title}]]</a>-->
+                                <a th:href="@{/cafe/{cafeId}/meeting/review/read(cafeId=${cafeResponse.id}, id=${dto.id}, page=${pageRequestDTO.page}, size=${pageRequestDTO.size})}"
+                                   class="text-decoration-none">
+                                    [[${dto.title}]]
+                                </a>
                             </td>
                             <td>[[${dto.reviewerUserId}]]</td>
                             <td>[[${dto.reviewerNickname}]]</td>
                             <td th:text="${#temporals.format(dto.regDate, 'yyyy-MM-dd HH:mm')}"></td>
-                            <td></td>
+                            <td>
+                                <th:block th:if="${dto.imageList != null and not #lists.isEmpty(dto.imageList)}">
+                                    <img th:src="@{/upload/display(fileName='s_' + ${dto.imageList[0].uuid} + '_' + ${dto.imageList[0].fileName})}"
+                                         alt="Review Thumbnail"
+                                         style="width: 50px; height: 50px; object-fit: cover;">
+                                </th:block>
+                            </td>
                         </tr>
                         </tbody>
                     </table>
 
                     <!--                    페이지 목록 출력 p.482-->
-                    <form id="pageForm" action="/meeting/list" method="get">
+                    <form id="pageForm" th:action="@{/cafe/{cafeId}/meeting/review/list(cafeId=${cafeResponse.id})}" method="get">
                         <input type="hidden" name="page" value="1" />
                     </form>
 
                     <div>
-                        <button type="button" class="btn btn-primary registerBtn" >Register</button>
+<!--                        <button type="button" class="btn btn-primary registerBtn">Register</button>-->
+                        <button type="button" class="btn btn-primary registerBtn" th:data-cafe-id="${cafeResponse.id}">Register</button>
                         <div class="float-end">
                             <ul class="pagination flex-wrap">
                                 <li class="page-item" th:if="${responseDTO.prev}">
@@ -71,12 +92,23 @@
 
                     const result = [[${result}]]
                     if(result) {
-                        // alert(result + " 게시글이 등록되었습니다.")
-                        alert("게시글이 등록되었습니다.")
+                        if (result === 'removed') {
+                            alert("게시글이 성공적으로 삭제되었습니다.");
+                        } else if (result === 'modified') {
+                            alert("게시글이 성공적으로 수정되었습니다.");
+                        } else {
+                            // result가 숫자일 경우 (등록 성공 시)
+                            alert("게시글이 등록되었습니다.");
+                        }
                     }
 
                     document.querySelector(".registerBtn").addEventListener("click", function (e) {
-                        self.location = `/meeting/review/register`
+                        const cafeId = this.getAttribute("data-cafe-id");
+                        if (cafeId) {
+                            self.location = `/cafe/${cafeId}/meeting/review/register`;
+                        } else {
+                            alert("카페 정보를 찾을 수 없습니다.");
+                        }
                     }, false)
 
                     document.querySelector(".pagination").addEventListener("click", function (e) {

@@ -1,17 +1,23 @@
 package com.example.together.service.cafe;
 
 import com.example.together.domain.*;
+import com.example.together.dto.PageRequestDTO;
+import com.example.together.dto.PageResponseDTO;
 import com.example.together.dto.cafe.*;
 import com.example.together.dto.calendar.CalendarEventDTO;
 import com.example.together.repository.*;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -20,6 +26,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
+@Log4j2
 public class CafeServiceImpl implements CafeService {
 
     private final CafeRepository cafeRepository;
@@ -167,7 +174,7 @@ public class CafeServiceImpl implements CafeService {
     }
 
     @Override
-    public CafeResponseDTO getCafeById(Long cafeId, Long userId) {
+    public CafeResponseDTO getCafeInfoWithMembership(Long cafeId, Long userId) {
         // 1. Cafe 엔티티 조회
         Cafe cafe = cafeRepository.findById(cafeId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 카페입니다."));
@@ -196,7 +203,7 @@ public class CafeServiceImpl implements CafeService {
     }
 
     @Override
-    public CafeResponseDTO getCafeById(Long cafeId) {
+    public CafeResponseDTO getBasicCafeInfo(Long cafeId) {
         // userId가 없는 경우를 위한 메서드
         Cafe cafe = cafeRepository.findById(cafeId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 카페입니다."));
@@ -620,7 +627,10 @@ public class CafeServiceImpl implements CafeService {
         // Meeting 엔티티가 없는 경우를 고려하여 예외 처리
         String title = (calendar.getMeeting() != null) ? calendar.getMeeting().getTitle() : "제목 없음";
         String start = (calendar.getMeeting() != null) ? calendar.getMeeting().getMeetingDate().toString() : null;
-        String url = (calendar.getMeeting() != null) ? "/cafe/" + calendar.getCafe().getId() + "/meetings/" + calendar.getMeeting().getId() : null;
+        String url = null;
+        if (calendar.getMeeting() != null) {
+            url = "/cafe/" + calendar.getCafe().getId() + "/meeting/read?id=" + calendar.getMeeting().getId() + "&page=1&size=10";
+        }
 
         return CalendarEventDTO.builder()
                 .id(calendar.getId())
@@ -680,5 +690,112 @@ public class CafeServiceImpl implements CafeService {
                         false  // isMember
                 ))
                 .collect(Collectors.toList());
+    }
+
+//    @Override
+//    @Transactional(readOnly = true)
+//    public PageResponseDTO<CafeResponseDTO> getCafeList(PageRequestDTO pageRequestDTO) {
+//
+//        // 1. DTO에서 Pageable 객체 생성
+//        Pageable pageable = pageRequestDTO.getPageable("regDate");
+//
+//        // 2. Repository의 searchAll 메서드를 호출하여 키워드 검색 수행
+//        //    키워드는 DTO에서 가져오고, 카테고리 목록은 null로 전달합니다.
+//        Page<Cafe> result = cafeRepository.searchAll(
+//                pageRequestDTO.getKeyword(),
+//                null, // 카테고리 검색이 아니므로 null 전달
+//                pageable
+//        );
+//
+//        // 3. Page<Cafe>를 DTO 리스트로 변환
+//        List<CafeResponseDTO> dtoList = result.getContent().stream()
+//                .map(this::convertToCafeResponseDTO)
+//                .collect(Collectors.toList());
+//
+//        // 4. PageResponseDTO 생성 및 반환
+//        return PageResponseDTO.<CafeResponseDTO>withAll()
+//                .pageRequestDTO(pageRequestDTO)
+//                .dtoList(dtoList)
+//                .total((int) result.getTotalElements())
+//                .build();
+//    }
+//
+//    /**
+//     * 특정 카테고리로 필터링된 카페 목록을 페이징하여 반환합니다.
+//     */
+//    @Override
+//    @Transactional(readOnly = true)
+//    public PageResponseDTO<CafeResponseDTO> getCafeListByCategory(CafeCategory cafeCategory, PageRequestDTO pageRequestDTO) {
+//
+//        // 1. DTO에서 Pageable 객체 생성
+//        Pageable pageable = pageRequestDTO.getPageable("regDate");
+//
+//        // 2. Repository의 searchAll 메서드를 호출하여 카테고리 검색 수행
+//        //    키워드는 null로 전달하고, 카테고리 목록을 전달합니다.
+//        Page<Cafe> result = cafeRepository.searchAll(
+//                null, // 카테고리 검색이므로 키워드는 null
+//                Arrays.asList(cafeCategory), // 카테고리 목록 전달
+//                pageable
+//        );
+//
+//        // 3. Page<Cafe>를 DTO 리스트로 변환
+//        List<CafeResponseDTO> dtoList = result.getContent().stream()
+//                .map(this::convertToCafeResponseDTO)
+//                .collect(Collectors.toList());
+//
+//        // 4. PageResponseDTO 생성 및 반환
+//        return PageResponseDTO.<CafeResponseDTO>withAll()
+//                .pageRequestDTO(pageRequestDTO)
+//                .dtoList(dtoList)
+//                .total((int) result.getTotalElements())
+//                .build();
+//    }
+
+    @Override
+    public PageResponseDTO<CafeResponseDTO> getCafeListWithFilters(PageRequestDTO pageRequestDTO, CafeCategory category) {
+
+        String keyword = pageRequestDTO.getKeyword();
+        String[] typeArr = pageRequestDTO.getTypes();
+
+        Pageable pageable = pageRequestDTO.getPageable("regDate");
+        if (typeArr == null) {
+            keyword = null;
+        }
+        List<CafeCategory> categoryList = (category != null) ? List.of(category) : null;
+
+        // CafeRepository의 searchAll 메서드를 호출하여 검색
+        Page<Cafe> result = cafeRepository.searchAll(
+                pageRequestDTO.getKeyword(),
+                categoryList,
+                pageable
+        );
+
+        // DTO 변환 및 PageResponseDTO 반환 로직...
+        List<CafeResponseDTO> dtoList = result.getContent().stream()
+                .map(this::convertToCafeResponseDTO)
+                .collect(Collectors.toList());
+
+        return PageResponseDTO.<CafeResponseDTO>withAll()
+                .pageRequestDTO(pageRequestDTO)
+                .dtoList(dtoList)
+                .total((int) result.getTotalElements())
+                .build();
+    }
+
+    // DTO 변환을 위한 헬퍼 메서드 추가
+    private CafeResponseDTO convertToCafeResponseDTO(Cafe cafe) {
+        return new CafeResponseDTO(
+                cafe.getId(),
+                cafe.getName(),
+                cafe.getDescription(),
+                cafe.getCategory().name(),
+                cafe.getRegDate(),
+                cafe.getOwner().getId(),
+                cafe.getMemberCount(),
+                cafe.getCafeImage(),
+                cafe.getCafeThumbnail(),
+                false,
+                false
+        );
     }
 }

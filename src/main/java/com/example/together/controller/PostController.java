@@ -1,9 +1,12 @@
 package com.example.together.controller;
 
+import com.example.together.domain.Cafe;
 import com.example.together.domain.PostType;
+import com.example.together.dto.cafe.CafeResponseDTO;
 import com.example.together.dto.comment.CommentCreateRequestDTO;
 import com.example.together.dto.comment.CommentResponseDTO;
 import com.example.together.dto.comment.CommentUpdateRequestDTO;
+import com.example.together.dto.demandSurvey.DemandSurveyCreateRequestDTO;
 import com.example.together.dto.post.PostCreateRequestDTO;
 import com.example.together.dto.post.PostResponseDTO;
 import com.example.together.service.UserService;
@@ -14,6 +17,9 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -44,18 +50,34 @@ public class PostController {
     }
 
     @GetMapping("/posts")
-    public String getPostsByCafe(@PathVariable Long cafeId, Model model, Principal principal) {
+    public String getPostsByCafe(@PathVariable Long cafeId,
+                                 @RequestParam(defaultValue = "0") int page, // 페이지 번호 추가
+                                 @RequestParam(defaultValue = "10") int size, // 페이지 크기 추가
+                                 Model model,
+                                 Principal principal) {
 
         Long userId = getUserIdFromPrincipal(principal);
-        List<PostResponseDTO> posts = postService.getPostsByCafe(cafeId, userId);
+
+        CafeResponseDTO cafe = cafeService.getCafeInfoWithMembership(cafeId, userId);
+
+        // Pageable 객체 생성 (페이지 번호와 크기 설정)
+        Pageable pageable = PageRequest.of(page, size);
+
+
+        // 서비스 메서드 호출: Pageable 객체를 전달하고 Page 객체를 반환받음
+        Page<PostResponseDTO> postsPage = postService.getPostsByCafe(cafeId, userId, pageable);
+
         String cafeName = cafeService.getCafeNameById(cafeId);
+
+        model.addAttribute("cafe", cafe);
         model.addAttribute("cafeId", cafeId);
-        model.addAttribute("posts", posts);
+        model.addAttribute("posts", postsPage); // Page 객체를 모델에 추가
         model.addAttribute("cafeName", cafeName);
+
         return "post/list";
     }
 
-    @GetMapping("/posts/create")
+    @GetMapping("/posts/register")
     public String showCreateForm(@PathVariable Long cafeId, Model model, Principal principal) {
         Long userId = getUserIdFromPrincipal(principal);
 
@@ -65,10 +87,10 @@ public class PostController {
         model.addAttribute("postCreateRequestDTO", new PostCreateRequestDTO());
         model.addAttribute("isOwner", isOwner);
 
-        return "post/create";
+        return "post/register";
     }
 
-    @PostMapping("/posts/create")
+    @PostMapping("/posts/register")
     public String createPost(@PathVariable Long cafeId,
                              @ModelAttribute PostCreateRequestDTO requestDTO,
                              @RequestParam("imageFile") MultipartFile imageFile,
@@ -161,12 +183,39 @@ public class PostController {
         Long userId = getUserIdFromPrincipal(principal);
         try {
             PostResponseDTO post = postService.getPostById(postId, userId);
+
             if (!post.isOwner()) {
                 model.addAttribute("error", "수정 권한이 없습니다.");
                 return "error/accessDenied";
             }
-            model.addAttribute("post", post);
-            model.addAttribute("postCreateRequestDTO", new PostCreateRequestDTO());
+
+
+            PostCreateRequestDTO requestDTO = new PostCreateRequestDTO();
+            requestDTO.setId(post.getId());
+            requestDTO.setTitle(post.getTitle());
+            requestDTO.setContent(post.getContent());
+            requestDTO.setPostType(post.getPostType());
+            requestDTO.setPinned(post.isPinned());
+            requestDTO.setCafeId(post.getCafeId());
+
+
+            if (post.getDemandSurvey() != null) {
+                DemandSurveyCreateRequestDTO demandSurveyDTO = new DemandSurveyCreateRequestDTO();
+                demandSurveyDTO.setId(post.getDemandSurvey().getId());
+                demandSurveyDTO.setTitle(post.getDemandSurvey().getTitle());
+                demandSurveyDTO.setContent(post.getDemandSurvey().getContent());
+                demandSurveyDTO.setDeadline(post.getDemandSurvey().getDeadline());
+                demandSurveyDTO.setVoteType(post.getDemandSurvey().getVoteType());
+                requestDTO.setDemandSurvey(demandSurveyDTO);
+            }
+
+            model.addAttribute("post", post); // 기존 이미지를 표시하기 위해 필요
+            model.addAttribute("postCreateRequestDTO", requestDTO);
+
+            // isOwner 정보도 전달
+            boolean isOwner = cafeService.isCafeOwner(cafeId, userId);
+            model.addAttribute("isOwner", isOwner);
+
             return "post/edit";
         } catch (IllegalArgumentException e) {
             model.addAttribute("error", e.getMessage());

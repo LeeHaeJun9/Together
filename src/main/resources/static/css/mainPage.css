@@ -1,0 +1,193 @@
+
+:root {
+    --primary-color: #4CAF50;
+    --secondary-color: #6c757d;
+    --background-color: #f8f9fa;
+    --card-background: #ffffff;
+    --text-color: #212529;
+    --hover-color: #388E3C;
+    --border-color: #e0e0e0;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+
+/* Hero Section */
+.hero-section {
+    padding: 3rem 1rem;
+    border-radius: 10px;
+    margin-bottom: 2rem;
+}
+
+/* ✅ Flexbox를 사용하여 자식 요소를 좌우로 정렬 */
+.hero-content {
+    display: flex;
+    align-items: center; /* 세로 중앙 정렬 */
+    gap: 2rem; /* 텍스트와 이미지 사이 간격 */
+}
+
+.text-column {
+    flex: 1; /* 남은 공간을 채우도록 */
+    text-align: left; /* 텍스트 정렬 */
+}
+
+.text-column h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--primary-color);
+}
+.text-column p {
+    font-size: 1.25rem;
+    max-width: 800px;
+    margin-bottom: 1.5rem;
+    color: var(--text-color);
+}
+
+/* ✅ 이미지 칼럼 스타일 */
+.image-column {
+    flex: 1; /* 남은 공간을 채우도록 */
+    text-align: center;
+}
+
+.banner-image {
+    max-width: 100%;
+    height: auto;
+    border-radius: 10px;
+}
+
+/* ✅ 반응형 디자인 추가: 화면이 좁을 때 위아래로 정렬 */
+@media (max-width: 768px) {
+    .hero-content {
+        flex-direction: column;
+        text-align: center;
+    }
+}
+
+/* Main Content Sections */
+.section-title {
+    text-align: center;
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 1.5rem;
+    color: var(--primary-color);
+}
+
+/* Category Grid */
+.category-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+@media (max-width: 768px) {
+    .category-grid {
+        /* 화면이 좁을 땐 2개의 열로 변경 */
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+.category-item {
+    text-align: center;
+    text-decoration: none;
+    color: var(--text-color);
+    transition: transform 0.3s, box-shadow 0.3s;
+    border-radius: 10px;
+    overflow: hidden;
+    position: relative;
+}
+.category-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+}
+.category-item img {
+    width: 100%;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 10px;
+}
+.category-caption {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 0.5rem;
+    background-color: rgba(0, 0, 0, 0.6);
+    color: white;
+    font-weight: bold;
+    font-size: 1rem;
+}
+
+/* Recommended Groups Slider */
+.slider-section {
+    margin-bottom: 7rem;
+}
+.slider-container {
+    position: relative;
+}
+.slider-wrapper {
+    display: flex;
+    overflow: hidden;
+    scroll-behavior: smooth;
+    gap: 1rem;
+}
+.slider-card {
+    min-width: 250px;
+    flex: 0 0 auto;
+    background-color: var(--card-background);
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s;
+}
+.slider-card:hover {
+    transform: scale(1.02);
+}
+.slider-card img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 10px 10px 0 0;
+}
+.card-body {
+    padding: 1rem;
+}
+.card-body h5 {
+    font-size: 1.1rem;
+    font-weight: bold;
+    margin: 0 0 0.5rem;
+}
+.card-body p {
+    font-size: 0.9rem;
+    color: var(--secondary-color);
+    margin: 0;
+}
+.slider-button {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: rgba(255, 255, 255, 0.8);
+    border: 1px solid var(--border-color);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    font-size: 1.5rem;
+    cursor: pointer;
+    z-index: 10;
+}
+.slider-button.prev { left: -20px; }
+.slider-button.next { right: -20px; }
+.slider-button:hover {
+    background-color: rgba(255, 255, 255, 1);
+}
+
+

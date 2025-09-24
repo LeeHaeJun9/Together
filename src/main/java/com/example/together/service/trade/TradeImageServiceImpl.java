@@ -2,96 +2,103 @@ package com.example.together.service.trade;
 
 import com.example.together.domain.Trade;
 import com.example.together.domain.TradeImage;
-import com.example.together.repository.TradeImageRepository; // ← 경로 확인
-import com.example.together.repository.TradeRepository;     // ← 경로 확인
+import com.example.together.repository.TradeImageRepository;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.nio.file.*;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
-@Log4j2
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class TradeImageServiceImpl implements TradeImageService {
 
-  private final TradeRepository tradeRepository;
   private final TradeImageRepository tradeImageRepository;
 
-  private static final String UPLOAD_ROOT = "uploads";
-
-  @Override
-  @Transactional
-  public List<String> saveImages(Long tradeId, List<MultipartFile> files) {
-    List<String> urls = new ArrayList<>();
-    if (files == null || files.isEmpty()) return urls;
-
-    Trade trade = tradeRepository.findById(tradeId)
-        .orElseThrow(() -> new IllegalArgumentException("Trade not found: " + tradeId));
-
-    LocalDate today = LocalDate.now();
-    Path dir = tradeDir(tradeId, today);
-    try {
-      Files.createDirectories(dir);
-    } catch (IOException e) {
-      throw new RuntimeException("업로드 디렉토리 생성 실패: " + dir, e);
-    }
-
-    int sort = 0;
-    for (MultipartFile file : files) {
-      if (file.isEmpty()) continue;
-
-      String original = file.getOriginalFilename();
-      String ext = (original != null && original.lastIndexOf('.') != -1)
-          ? original.substring(original.lastIndexOf('.')) : "";
-      String filename = UUID.randomUUID() + ext;
-
-      Path savePath = dir.resolve(filename);
-      try {
-        file.transferTo(savePath.toFile());
-      } catch (IOException e) {
-        log.warn("파일 저장 실패: {}", savePath, e);
-        continue;
-      }
-
-      String url = toWebUrl(tradeId, today, filename);
-      urls.add(url);
-
-      TradeImage img = new TradeImage();
-      img.setTrade(trade);
-      img.setImageUrl(url);
-      img.setSortOrder(sort++);
-      tradeImageRepository.save(img);
-    }
-    return urls;
-  }
+  @Value("${org.zerock.upload.path}")
+  private String uploadRoot;
 
   @Override
   @Transactional(readOnly = true)
-  public String loadFirstImageUrl(Long tradeId) {
-    return tradeImageRepository
-        .findFirstByTrade_IdOrderBySortOrderAsc(tradeId)
-        .map(TradeImage::getImageUrl)
-        .orElse(null);
+  public List<TradeImage> listByTradeId(Long tradeId) {
+    return tradeImageRepository.findAllByTrade_IdOrderBySortOrderAsc(tradeId);
   }
 
-  private static Path tradeDir(Long tradeId, LocalDate date) {
-    String datePath = String.format("%04d/%02d/%02d",
-        date.getYear(), date.getMonthValue(), date.getDayOfMonth());
-    return Paths.get(UPLOAD_ROOT, "trade", String.valueOf(tradeId), datePath)
-        .toAbsolutePath().normalize();
+  @Override
+  public void deleteByIds(List<Long> imageIds) {
+    if (imageIds == null || imageIds.isEmpty()) return;
+
+    // 물리 파일 삭제 (루트 경로와 일치)
+    List<TradeImage> images = tradeImageRepository.findAllById(imageIds);
+    for (TradeImage img : images) {
+      String stored = img.getStoredName();
+      if (stored != null && !stored.isBlank()) {
+        Path p = Paths.get(uploadRoot, stored);
+        try { Files.deleteIfExists(p); } catch (IOException ignored) {}
+      }
+    }
+    tradeImageRepository.deleteAllByIdInBatch(imageIds);
   }
 
-  private static String toWebUrl(Long tradeId, LocalDate date, String filename) {
-    String datePath = String.format("%04d/%02d/%02d",
-        date.getYear(), date.getMonthValue(), date.getDayOfMonth());
-    return "/uploads/trade/" + tradeId + "/" + datePath + "/" + filename;
+  @Override
+  public void saveImages(Long tradeId, List<MultipartFile> files) {
+    if (files == null || files.isEmpty()) return;
+
+    Path dir = Paths.get(uploadRoot);
+    try { Files.createDirectories(dir); }
+    catch (IOException e) { throw new RuntimeException("업로드 디렉토리 생성 실패: " + dir, e); }
+
+    // 현재 마지막 sort_order 이후부터 붙이기
+    List<TradeImage> existing =
+        tradeImageRepository.findAllByTrade_IdOrderBySortOrderAsc(tradeId);
+    int order = existing.isEmpty() ? 0 : existing.get(existing.size() - 1).getSortOrder() + 1;
+
+    for (MultipartFile file : files) {
+      if (file == null || file.isEmpty()) continue;
+
+      String original = Optional.ofNullable(file.getOriginalFilename()).orElse("");
+      String ext = "";
+      int dot = original.lastIndexOf('.');
+      if (dot > -1) ext = original.substring(dot);
+
+      String stored = UUID.randomUUID().toString().replace("-", "") + ext;
+
+      Path target = dir.resolve(stored);
+      try { file.transferTo(target.toFile()); }
+      catch (IOException e) { throw new RuntimeException("이미지 업로드 실패: " + original, e); }
+
+      Trade tradeRef = new Trade();
+      tradeRef.setId(tradeId);
+
+      TradeImage entity = new TradeImage();
+      entity.setTrade(tradeRef);
+      entity.setOriginalName(original);
+      entity.setStoredName(stored);
+      entity.setImageUrl("/upload/" + stored); // 화면용 URL (WebMvcConfig와 1:1)
+      entity.setSortOrder(order++);
+
+      tradeImageRepository.save(entity);
+    }
   }
+
+  @Override
+  public void deleteByTradeId(Long tradeId) {
+    List<TradeImage> images =
+        tradeImageRepository.findAllByTrade_IdOrderBySortOrderAsc(tradeId);
+
+    for (TradeImage img : images) {
+      String stored = img.getStoredName();
+      if (stored != null && !stored.isBlank()) {
+        Path p = Paths.get(uploadRoot, stored); // 루트 경로
+        try { Files.deleteIfExists(p); } catch (IOException ignored) {}
+      }
+    }
+    tradeImageRepository.deleteByTrade_Id(tradeId);
+  }
+
 }

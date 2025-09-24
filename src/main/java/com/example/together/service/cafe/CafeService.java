@@ -3,6 +3,8 @@ package com.example.together.service.cafe;
 import com.example.together.domain.Cafe;
 import com.example.together.domain.CafeApplication;
 import com.example.together.domain.CafeCategory;
+import com.example.together.dto.PageRequestDTO;
+import com.example.together.dto.PageResponseDTO;
 import com.example.together.dto.cafe.*;
 import com.example.together.dto.calendar.CalendarEventDTO;
 import org.springframework.web.multipart.MultipartFile;
@@ -24,9 +26,9 @@ public interface CafeService {
 
     // 특정 ID의 카페 조회
 //    CafeResponseDTO getCafeById(Long cafeId);
-    CafeResponseDTO getCafeById(Long cafeId);
+    CafeResponseDTO getBasicCafeInfo(Long cafeId);
 
-    CafeResponseDTO getCafeById(Long cafeId, Long userId);
+    CafeResponseDTO getCafeInfoWithMembership(Long cafeId, Long userId);
 
     // 검토 대기 중인 모든 신청 목록 조회
     List<CafeApplication> getPendingApplications();
@@ -77,4 +79,10 @@ public interface CafeService {
     List<CafeResponseDTO> getRecommendedCafes(int limit);
 
     List<CafeResponseDTO> getCafesByCategory(CafeCategory cafeCategory);
+
+//    PageResponseDTO<CafeResponseDTO> getCafeList(PageRequestDTO pageRequestDTO);
+//
+//    PageResponseDTO<CafeResponseDTO> getCafeListByCategory(CafeCategory cafeCategory, PageRequestDTO pageRequestDTO);
+
+    PageResponseDTO<CafeResponseDTO> getCafeListWithFilters(PageRequestDTO pageRequestDTO, CafeCategory cafeCategory);
 }
