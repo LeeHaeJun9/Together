@@ -8,102 +8,64 @@
     <meta charset="UTF-8"/>
     <title th:text="${dto != null ? dto.title : '게시물 보기'}">게시물 보기</title>
 
-    <style>
-        .main-wrap { display:flex; justify-content:center; }
-        .thumb { width:100%; max-width:640px; aspect-ratio:16/9; object-fit:cover; border-radius:12px; border:1px solid #eee; background:#fafafa; }
-        .gallery { display:flex; gap:8px; flex-wrap:wrap; justify-content:center; }
-        .gallery img { width:90px; height:90px; object-fit:cover; border-radius:8px; border:1px solid #eee; cursor:pointer; }
-        .gallery img.active{ outline:3px solid #0d6efd; }
-        .meta { font-size:1.05rem; line-height:1.4; }
-        .meta .line { display:block; margin-bottom:4px; }
-        .bottom-actions { display:flex; justify-content:flex-end; gap:8px; }
+    <!-- ★ 레이아웃 basic.html 의 page-styles 프래그먼트로 주입 -->
+    <th:block layout:fragment="page-styles">
+        <style>
+            .main-wrap { display:flex; justify-content:center; }
 
-        /* 보기 프레임(비율 고정 + 레터박스) */
-        .viewer {
-            position: relative;
-            display:flex;
-            justify-content:center;
-            align-items:center;
-            width: 100%;
-            max-width: 640px;
-            aspect-ratio: 16 / 9;
-            margin: 0 auto;
-            background: #f5f5f5;
-            border: 1px solid #eee;
-            border-radius: 12px;
-        }
-        /* 프레임 안에서는 비율 유지(자르지 않음) */
-        .viewer > img.thumb{
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            border: none;
-            border-radius: 0;
-            background: transparent;
-            cursor: zoom-in;
-        }
+            /* 뷰어: 레터박스 + contain */
+            .viewer{
+                position:relative;
+                display:flex; justify-content:center; align-items:center;
+                width:100%; max-width:640px; aspect-ratio:16/9;
+                margin:0 auto; background:#f5f5f5; border:1px solid #eee; border-radius:12px;
+            }
+            .viewer > img.thumb{
+                width:100%; height:100%; object-fit:contain; /* 비율 유지, 크롭 X */
+                border:none; border-radius:0; background:transparent; cursor:zoom-in;
+            }
+            .nav-btn{
+                position:absolute; top:50%; transform:translateY(-50%);
+                width:44px; height:44px; border:none; border-radius:50%;
+                background:#ffffffcc; box-shadow:0 2px 8px rgba(0,0,0,.2);
+                font-size:28px; line-height:44px; padding:0; cursor:pointer;
+                display:flex; align-items:center; justify-content:center; user-select:none;
+            }
+            .nav-btn.prev{ left:8px; }
+            .nav-btn.next{ right:8px; }
 
-        .nav-btn{
-            position:absolute; top:50%; transform:translateY(-50%);
-            width:44px; height:44px; border:none; border-radius:50%;
-            background:#ffffffcc; box-shadow:0 2px 8px rgba(0,0,0,.2);
-            font-size:28px; line-height:44px; padding:0; cursor:pointer;
-            display:flex; align-items:center; justify-content:center; user-select:none;
-        }
-        .nav-btn.prev{ left:8px; }
-        .nav-btn.next{ right:8px; }
+            .gallery{ display:flex; gap:8px; flex-wrap:wrap; justify-content:center; }
+            .gallery img{ width:90px; height:90px; object-fit:cover; border-radius:8px; border:1px solid #eee; cursor:pointer; }
+            .gallery img.active{ outline:3px solid #0d6efd; }
 
-        /* ===== 라이트박스(확대 모달) ===== */
-        .lightbox{ position:fixed; inset:0; background:rgba(0,0,0,.8); display:none; align-items:center; justify-content:center; z-index:1050; }
-        .lightbox.open{ display:flex; }
-        .lightbox-inner{
-            position:relative;          /* X 버튼을 이미지 위에 올리기 위해 relative */
-            max-width:min(92vw,1200px);
-            max-height:90vh;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-        }
-        .lightbox img{
-            max-width:100%;
-            max-height:90vh;
-            object-fit:contain;
-            box-shadow:0 8px 24px rgba(0,0,0,.35);
-            border-radius:8px;
-            background:#111;
-            display:block;
-        }
-        .lb-btn{
-            position:absolute; top:50%; transform:translateY(-50%);
-            width:48px; height:48px; border:0; border-radius:50%;
-            background:rgba(255,255,255,.9); font-size:28px; cursor:pointer;
-            display:flex; align-items:center; justify-content:center;
-        }
-        .lb-btn.prev{ left:-60px; }
-        .lb-btn.next{ right:-60px; }
+            .meta{ font-size:1.05rem; line-height:1.5; }
+            .meta .line{ display:block; margin-bottom:4px; }
+            .bottom-actions{ display:flex; justify-content:flex-end; gap:8px; }
 
-        /* ★ 닫기 버튼을 '이미지 안 우상단' 겹쳐 배치 */
-        .lb-close{
-            position:absolute;
-            top:12px;                   /* 이미지 컨테이너 내부 우상단 */
-            right:12px;
-            width:40px; height:40px;
-            border:0; border-radius:50%;
-            background:rgba(0,0,0,.55); /* 어두운 반투명으로 이미지 위에 잘 보이게 */
-            color:#fff;
-            font-size:22px; line-height:40px;
-            cursor:pointer;
-            display:flex; align-items:center; justify-content:center;
-        }
-        .lb-close:hover{ background:rgba(0,0,0,.7); }
-
-        @media (max-width:768px){
-            .lb-btn.prev{ left:8px; } .lb-btn.next{ right:8px; }
-        }
-    </style>
+            /* 확대 모달 */
+            .img-modal{
+                position:fixed; inset:0; background:rgba(0,0,0,.7);
+                display:none; align-items:center; justify-content:center; z-index:1050;
+                padding:24px;
+            }
+            .img-modal.show{ display:flex; }
+            .img-modal .inner{
+                position:relative; max-width:90vw; max-height:90vh;
+                display:flex; align-items:center; justify-content:center;
+            }
+            .img-modal img{
+                max-width:90vw; max-height:90vh; object-fit:contain; background:#000;
+            }
+            .img-modal .close-btn{
+                position:absolute; top:8px; right:8px;
+                width:36px; height:36px; border:none; border-radius:50%;
+                background:#00000099; color:#fff; font-size:20px; cursor:pointer;
+                display:flex; align-items:center; justify-content:center;
+            }
+        </style>
+    </th:block>
 </head>
 <body>
-
 <section layout:fragment="content" class="container py-4">
 
     <!-- 상단: 제목 + 목록 버튼 -->
@@ -119,19 +81,19 @@
 
     <!-- 게시물 있음 -->
     <div th:if="${dto != null}">
-        <!-- 대표 이미지 (가운데 정렬) + 좌/우 이동 버튼 -->
+        <!-- 대표 이미지 + 좌/우 이동 -->
         <div class="mb-3 main-wrap viewer" th:with="noImg=@{/images/no-image.png}">
             <button type="button" class="nav-btn prev" aria-label="이전 보기">&lsaquo;</button>
             <img id="mainImage"
                  th:src="${images != null and !#lists.isEmpty(images)
-             ? images.get(0).imageUrl
-             : (!#strings.isEmpty(dto.thumbnail) ? dto.thumbnail : noImg)}"
+                     ? images.get(0).imageUrl
+                     : (!#strings.isEmpty(dto.thumbnail) ? dto.thumbnail : noImg)}"
                  alt="thumbnail" class="thumb"
                  onerror="this.onerror=null;this.src='/images/no-image.png'">
             <button type="button" class="nav-btn next" aria-label="다음 보기">&rsaquo;</button>
         </div>
 
-        <!-- 갤러리 -->
+        <!-- 썸네일 갤러리 -->
         <div class="gallery mb-3" th:if="${!#lists.isEmpty(images)}">
             <img th:each="img, stat : ${images}"
                  th:src="${img.imageUrl}"
@@ -140,24 +102,29 @@
                  onerror="this.onerror=null;this.src='/images/no-image.png'">
         </div>
 
-        <!-- 메타(상태/가격/닉네임) -->
+        <!-- 메타(카테고리/상태/가격/닉네임) -->
         <div class="meta mb-3">
-            <span class="line"><strong>상태</strong> : <span th:text="${dto.status}">FOR_SALE</span></span>
+            <span class="line"><strong>카테고리</strong> :
+                <span th:text="${dto.category != null ? dto.category : '미분류'}">미분류</span>
+            </span>
+            <span class="line"><strong>상태</strong> :
+                <span th:text="${dto.status}">FOR_SALE</span>
+            </span>
             <span class="line"><strong>가격</strong> :
-                <span th:text="${dto.price != null ? #numbers.formatInteger(dto.price, 0) : '0'}">0</span>원
+                <span th:text="${dto.price}">0</span>원
             </span>
             <span class="line"><strong>닉네임</strong> :
                 <span th:text="${dto.sellerNickname != null ? dto.sellerNickname : '알수없음'}">닉네임</span>
             </span>
         </div>
 
-        <!-- CSRF (레이아웃 메타가 없을 때 대비용) -->
+        <!-- CSRF (레이아웃 메타가 없을 때 대비) -->
         <th:block th:if="${_csrf != null}">
             <input type="hidden" id="csrfToken"  th:value="${_csrf.token}">
             <input type="hidden" id="csrfHeader" th:value="${_csrf.headerName}">
         </th:block>
 
-        <!-- 찜 버튼 -->
+        <!-- 찜 -->
         <div class="d-flex align-items-center gap-2 mb-2">
             <button id="btnFav" class="btn btn-outline-danger btn-sm" type="button"
                     th:attr="data-trade-id=${dto.id}">
@@ -184,157 +151,132 @@
         </div>
     </div>
 
-    <!-- ===== 라이트박스(확대 모달) ===== -->
-    <div id="lightbox" class="lightbox" role="dialog" aria-modal="true" aria-label="이미지 보기">
-        <div class="lightbox-inner" onclick="event.stopPropagation()">
-            <button class="lb-btn prev" type="button" aria-label="이전">&lsaquo;</button>
-            <img id="lightboxImg" alt="preview">
-            <!-- ★ 닫기 버튼을 이미지 우상단에 겹침 -->
-            <button class="lb-close" type="button" aria-label="닫기">&times;</button>
-            <button class="lb-btn next" type="button" aria-label="다음">&rsaquo;</button>
+    <!-- 확대 모달 -->
+    <div id="imgModal" class="img-modal" aria-hidden="true">
+        <div class="inner">
+            <img id="zoomImg" alt="zoom">
+            <button type="button" class="close-btn" aria-label="닫기">×</button>
         </div>
     </div>
 
-    <!-- ★★★ 스크립트는 프래그먼트 안쪽에 둬야 레이아웃에서 살아남습니다 ★★★ -->
-    <script>
-        (function () {
-            // ---------- 이미지 슬라이더 ----------
-            const main    = document.getElementById('mainImage');
-            const thumbs  = Array.from(document.querySelectorAll('.gallery img'));
-            const prevBtn = document.querySelector('.nav-btn.prev');
-            const nextBtn = document.querySelector('.nav-btn.next');
+    <!-- ★ 레이아웃 basic.html 의 script 프래그먼트로 주입 -->
+    <th:block layout:fragment="script">
+        <script>
+            (function () {
+                // ---------- 슬라이더 ----------
+                const main    = document.getElementById('mainImage');
+                const thumbs  = Array.from(document.querySelectorAll('.gallery img'));
+                const prevBtn = document.querySelector('.nav-btn.prev');
+                const nextBtn = document.querySelector('.nav-btn.next');
 
-            const urls = thumbs.length
-                ? thumbs.map(el => el.getAttribute('data-src') || el.getAttribute('src'))
-                : (main && main.src ? [main.src] : []);
-            let idx = 0;
+                const urls = thumbs.length
+                    ? thumbs.map(el => el.getAttribute('data-src') || el.getAttribute('src'))
+                    : (main && main.src ? [main.src] : []);
+                let idx = 0;
 
-            function highlight() {
-                thumbs.forEach(t => t.classList.remove('active'));
-                if (thumbs[idx]) thumbs[idx].classList.add('active');
-            }
-            function show(i) {
-                if (!main || !urls.length) return;
-                idx = (i + urls.length) % urls.length;
-                main.src = urls[idx];
-                highlight();
-            }
-            thumbs.forEach((el, i) => el.addEventListener('click', () => { show(i); openLightbox(i); }));
-            prevBtn && prevBtn.addEventListener('click', () => show(idx - 1));
-            nextBtn && nextBtn.addEventListener('click', () => show(idx + 1));
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'ArrowLeft')  show(idx - 1);
-                if (e.key === 'ArrowRight') show(idx + 1);
-            });
-            highlight();
-
-            // ---------- 라이트박스(확대 보기) ----------
-            const lb      = document.getElementById('lightbox');
-            const lbImg   = document.getElementById('lightboxImg');
-            const lbPrev  = lb?.querySelector('.lb-btn.prev');
-            const lbNext  = lb?.querySelector('.lb-btn.next');
-            const lbClose = lb?.querySelector('.lb-close');
-
-            function isLightboxOpen(){ return lb?.classList.contains('open'); }
-            function openLightbox(i){
-                if (!lb || !lbImg || !urls.length) return;
-                idx = (i + urls.length) % urls.length;
-                lbImg.src = urls[idx];
-                lb.classList.add('open');
-                document.body.style.overflow = 'hidden';
-                highlight();
-            }
-            function closeLightbox(){
-                if (!lb) return;
-                lb.classList.remove('open');
-                document.body.style.overflow = '';
-            }
-            function lbShow(delta){
-                if (!urls.length) return;
-                idx = (idx + delta + urls.length) % urls.length;
-                lbImg.src = urls[idx];
-                if (main) main.src = urls[idx]; // 메인과 동기화
-                highlight();
-            }
-
-            if (main) main.addEventListener('click', () => openLightbox(idx));
-            lb && lb.addEventListener('click', closeLightbox);
-            lbPrev && lbPrev.addEventListener('click', (e) => { e.stopPropagation(); lbShow(-1); });
-            lbNext && lbNext.addEventListener('click', (e) => { e.stopPropagation(); lbShow(+1); });
-            lbClose && lbClose.addEventListener('click', (e) => { e.stopPropagation(); closeLightbox(); });
-            document.addEventListener('keydown', (e) => {
-                if (!isLightboxOpen()) return;
-                if (e.key === 'Escape')      closeLightbox();
-                if (e.key === 'ArrowLeft')  lbShow(-1);
-                if (e.key === 'ArrowRight') lbShow(+1);
-            });
-
-            // ---------- 찜 토글 ----------
-            const btn      = document.getElementById('btnFav');
-            const favText  = document.getElementById('favText');
-            const favCount = document.getElementById('favCount');
-            if (!btn || !favText || !favCount) return;
-
-            const tradeId = btn.getAttribute('data-trade-id');
-
-            // CSRF: meta → hidden → 없으면 생략
-            const metaToken   = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
-            const metaHeader  = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content');
-            const hiddenToken = document.getElementById('csrfToken')?.value;
-            const hiddenHead  = document.getElementById('csrfHeader')?.value;
-            const csrfHeaderName  = metaHeader || hiddenHead || null;
-            const csrfHeaderValue = metaToken  || hiddenToken || null;
-
-            async function toggleFavorite() {
-                try {
-                    btn.disabled = true;
-
-                    const headers = {
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                        'X-Requested-With': 'XMLHttpRequest'
-                    };
-                    if (csrfHeaderName && csrfHeaderValue) headers[csrfHeaderName] = csrfHeaderValue;
-
-                    const body = new URLSearchParams({ tradeId: String(tradeId) }).toString();
-
-                    const res = await fetch('/favorite/toggle', {
-                        method: 'POST',
-                        headers,
-                        body,
-                        credentials: 'same-origin'
-                    });
-
-                    if (res.status === 401) { alert('로그인이 필요합니다.'); return; }
-                    if (res.status === 403) { alert('권한이 없습니다(CSRF 실패 가능).'); return; }
-
-                    const ct = res.headers.get('content-type') || '';
-                    if (!ct.includes('application/json')) {
-                        const txt = await res.text().catch(()=> '');
-                        if (res.redirected || (res.url && res.url.includes('/login'))) {
-                            alert('로그인이 필요합니다.');
-                        } else {
-                            alert('예상치 못한 응답을 받았습니다.\n' + txt.slice(0,200));
-                        }
-                        return;
-                    }
-
-                    const data = await res.json(); // { liked, count }
-                    if (typeof data.liked === 'boolean') favText.textContent = data.liked ? '찜 취소' : '찜하기';
-                    if (typeof data.count === 'number')  favCount.textContent = data.count;
-
-                    alert(data.liked ? '찜목록에 추가되었습니다.' : '찜이 취소되었습니다.');
-                } catch (e) {
-                    console.error(e);
-                    alert('찜 처리 중 오류가 발생했습니다.');
-                } finally {
-                    btn.disabled = false;
+                function highlight() {
+                    thumbs.forEach(t => t.classList.remove('active'));
+                    if (thumbs[idx]) thumbs[idx].classList.add('active');
                 }
-            }
-            btn.addEventListener('click', toggleFavorite);
-        })();
-    </script>
+                function show(i) {
+                    if (!main || !urls.length) return;
+                    idx = (i + urls.length) % urls.length;
+                    main.src = urls[idx];
+                    highlight();
+                }
+                thumbs.forEach((el, i) => el.addEventListener('click', () => show(i)));
+                prevBtn && prevBtn.addEventListener('click', () => show(idx - 1));
+                nextBtn && nextBtn.addEventListener('click', () => show(idx + 1));
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'ArrowLeft')  show(idx - 1);
+                    if (e.key === 'ArrowRight') show(idx + 1);
+                    if (e.key === 'Escape') closeModal();
+                });
+                highlight();
 
+                // ---------- 확대 모달 ----------
+                const modal   = document.getElementById('imgModal');
+                const zoomImg = document.getElementById('zoomImg');
+                const closeBtn= modal.querySelector('.close-btn');
+
+                function openModal(src){
+                    if (!src) return;
+                    zoomImg.src = src;
+                    modal.classList.add('show');
+                    modal.setAttribute('aria-hidden', 'false');
+                    closeBtn.focus();
+                }
+                function closeModal(){
+                    modal.classList.remove('show');
+                    modal.setAttribute('aria-hidden', 'true');
+                    zoomImg.src = '';
+                }
+                main && main.addEventListener('click', () => openModal(main.src));
+                thumbs.forEach(el => el.addEventListener('dblclick', () => openModal(el.getAttribute('data-src') || el.src)));
+                closeBtn.addEventListener('click', closeModal);
+                modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+
+                // ---------- 찜 토글 ----------
+                const btn      = document.getElementById('btnFav');
+                const favText  = document.getElementById('favText');
+                const favCount = document.getElementById('favCount');
+                if (!btn || !favText || !favCount) return;
+
+                const tradeId = btn.getAttribute('data-trade-id');
+
+                // CSRF: meta → hidden → 없으면 생략
+                const metaToken   = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
+                const metaHeader  = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content');
+                const hiddenToken = document.getElementById('csrfToken')?.value;
+                const hiddenHead  = document.getElementById('csrfHeader')?.value;
+                const csrfHeaderName  = metaHeader || hiddenHead || null;
+                const csrfHeaderValue = metaToken  || hiddenToken || null;
+
+                async function toggleFavorite() {
+                    try {
+                        btn.disabled = true;
+                        const headers = {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        };
+                        if (csrfHeaderName && csrfHeaderValue) headers[csrfHeaderName] = csrfHeaderValue;
+
+                        const body = new URLSearchParams({ tradeId: String(tradeId) }).toString();
+
+                        const res = await fetch('/favorite/toggle', {
+                            method: 'POST', headers, body, credentials: 'same-origin'
+                        });
+
+                        if (res.status === 401) { alert('로그인이 필요합니다.'); return; }
+                        if (res.status === 403) { alert('권한이 없습니다(CSRF 실패 가능).'); return; }
+
+                        const ct = res.headers.get('content-type') || '';
+                        if (!ct.includes('application/json')) {
+                            const txt = await res.text().catch(()=> '');
+                            if (res.redirected || (res.url && res.url.includes('/login'))) {
+                                alert('로그인이 필요합니다.');
+                            } else {
+                                alert('예상치 못한 응답을 받았습니다.\n' + txt.slice(0,200));
+                            }
+                            return;
+                        }
+
+                        const data = await res.json(); // { liked, count }
+                        if (typeof data.liked === 'boolean') favText.textContent = data.liked ? '찜 취소' : '찜하기';
+                        if (typeof data.count === 'number')  favCount.textContent = data.count;
+                        alert(data.liked ? '찜목록에 추가되었습니다.' : '찜이 취소되었습니다.');
+                    } catch (e) {
+                        console.error(e);
+                        alert('찜 처리 중 오류가 발생했습니다.');
+                    } finally {
+                        btn.disabled = false;
+                    }
+                }
+                btn.addEventListener('click', toggleFavorite);
+            })();
+        </script>
+    </th:block>
 </section>
 </body>
 </html>
