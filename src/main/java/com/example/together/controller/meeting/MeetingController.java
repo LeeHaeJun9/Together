@@ -79,6 +79,7 @@ public class MeetingController {
             cafeResponse = cafeService.getBasicCafeInfo(cafeId);
         }
 
+        model.addAttribute("cafe", cafeResponse);
         model.addAttribute("cafeResponse", cafeResponse);
     }
 
