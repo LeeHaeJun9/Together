@@ -10,4 +10,5 @@ public interface TradeService {
   Trade find(Long id);
   List<Trade> list();
   void remove(Long id);
+
 }
