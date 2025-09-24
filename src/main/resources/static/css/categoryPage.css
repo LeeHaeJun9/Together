@@ -50,6 +50,9 @@
 .card-text {
     font-size: 0.9rem;
     color: #555;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .card .btn {

@@ -25,6 +25,9 @@ public class PageRequestDTO {
     private String type;
     private String keyword;
 
+    private String sort;
+
+
     public void setType(String type) {
         if ("null".equals(type) || "".equals(type)) {
             this.type = null;

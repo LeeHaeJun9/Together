@@ -30,4 +30,15 @@ public interface CafeRepository extends JpaRepository<Cafe,Long> {
             @Param("keyword") String keyword,
             @Param("categoryEnumList") List<CafeCategory> categoryEnumList,
             Pageable pageable);
+
+    @Query("SELECT c FROM Cafe c " +
+            "WHERE c.category = :category AND " +
+            "(:keyword IS NULL OR c.name LIKE %:keyword% OR c.description LIKE %:keyword%)")
+    Page<Cafe> searchByCategoryAndKeyword(
+            @Param("category") CafeCategory cafeCategory,
+            @Param("keyword") String cafeKeyword,
+            Pageable pageable);
+
+
+    Page<Cafe> findPageByCategory(CafeCategory cafeCategory, Pageable pageable);
 }

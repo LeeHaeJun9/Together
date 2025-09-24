@@ -1,9 +1,15 @@
 package com.example.together.controller;
 
 import com.example.together.domain.*;
+import com.example.together.dto.PageRequestDTO;
+import com.example.together.dto.PageResponseDTO;
+import com.example.together.dto.cafe.CafeResponseDTO;
+import com.example.together.dto.meeting.MeetingDTO;
+import com.example.together.dto.trade.TradeDTO;
 import com.example.together.repository.CafeRepository;
 import com.example.together.repository.MeetingRepository;
 import com.example.together.repository.TradeRepository;
+import com.example.together.service.category.CategoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -15,34 +21,39 @@ import java.util.List;
 @Controller
 @RequiredArgsConstructor
 public class CategoryController {
-    private final MeetingRepository meetingRepository;
-    private final CafeRepository cafeRepository;
-    private final TradeRepository tradeRepository;
-
+    private final CategoryService categoryService;
 
     @GetMapping("/categories")
-    public String getCategoryPage(@RequestParam String category, Model model) {
-        List<Cafe> cafes;
-        List<Trade> trades;
-        List<Meeting> meetings;
+    public String getCategoryPage(
+            @RequestParam String category,
+            @RequestParam(defaultValue = "1", name = "m_page") int mPage,
+            @RequestParam(defaultValue = "10", name = "m_size") int mSize,
+            @RequestParam(defaultValue = "1", name = "c_page") int cPage,
+            @RequestParam(defaultValue = "4", name = "c_size") int cSize,
+            @RequestParam(defaultValue = "1", name = "t_page") int tPage,
+            @RequestParam(defaultValue = "10", name = "t_size") int tSize,
+            @RequestParam(required = false) String type,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(defaultValue = "regdate") String sort,
+            Model model
+    ) {
+        PageRequestDTO meetingPageRequestDTO = PageRequestDTO.builder()
+                .page(mPage).size(mSize).type(type).keyword(keyword).sort(sort).build();
+        PageRequestDTO cafePageRequestDTO = PageRequestDTO.builder()
+                .page(cPage).size(cSize).type(type).keyword(keyword).sort(sort).build();
+        PageRequestDTO tradePageRequestDTO = PageRequestDTO.builder()
+                .page(tPage).size(tSize).type(type).keyword(keyword).sort(sort).build();
 
-        if ("ALL".equalsIgnoreCase(category)) {
-            cafes = cafeRepository.findAll();
-            trades = tradeRepository.findAll();
-            meetings = meetingRepository.findByVisibility(Visibility.PUBLIC); // 전체 공개 모임
-        } else {
-            CafeCategory cafeCategory = CafeCategory.valueOf(category.toUpperCase());
-            TradeCategory tradeCategory = TradeCategory.valueOf(category.toUpperCase());
-
-            cafes = cafeRepository.findByCategory(cafeCategory);
-            trades = tradeRepository.findByCategory(tradeCategory);
-            meetings = meetingRepository.findByCafe_CategoryAndVisibility(cafeCategory, Visibility.PUBLIC);
-        }
-
-        model.addAttribute("cafes", cafes);
-        model.addAttribute("trades", trades);
-        model.addAttribute("meetings", meetings);
+        PageResponseDTO<MeetingDTO> meetings = categoryService.getMeetings(category, meetingPageRequestDTO);
+        PageResponseDTO<CafeResponseDTO> cafes = categoryService.getCafes(category, cafePageRequestDTO);
+        PageResponseDTO<TradeDTO> trades = categoryService.getTrades(category, tradePageRequestDTO);
         model.addAttribute("category", category);
+        model.addAttribute("meetings", meetings.getDtoList());
+        model.addAttribute("meetingsPage", meetings);
+        model.addAttribute("cafes", cafes.getDtoList());
+        model.addAttribute("cafesPage", cafes);
+        model.addAttribute("trades", trades.getDtoList());
+        model.addAttribute("tradesPage", trades);
 
         return "category/categoryPage";
     }

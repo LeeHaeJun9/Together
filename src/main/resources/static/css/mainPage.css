@@ -16,6 +16,10 @@ body {
     margin: 0;
     padding: 0;
 }
+a {
+    text-decoration: none; /* 밑줄 제거 */
+    color: inherit; /* 글자색 유지 */
+}
 
 .container {
     max-width: 1200px;
@@ -188,6 +192,63 @@ body {
 .slider-button.next { right: -20px; }
 .slider-button:hover {
     background-color: rgba(255, 255, 255, 1);
+}
+/* 슬라이더 카드 */
+.slider-wrapper {
+    display: flex;
+    gap: 1rem;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+}
+
+.slider-card {
+    flex: 0 0 25%; /* 한 줄에 4개 */
+    max-width: 25%;
+    box-sizing: border-box;
+}
+
+.slider-card .card {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.slider-card img.card-img-top {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 8px 8px 0 0;
+}
+
+.slider-card .card-body {
+    padding: 0.5rem 0.75rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.card-title {
+    font-family: 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+    font-weight: 700; /* 진하게 */
+    font-size: 1.1rem;
+    color: #333; /* 제목 색상 */
+    letter-spacing: -0.5px; /* 글자 간격 */
+}
+.slider-card .card-title {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.slider-card .card-text {
+    font-size: 0.85rem;
+    color: #6c757d;
+    white-space: nowrap; /* 한 줄로 줄임 */
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 

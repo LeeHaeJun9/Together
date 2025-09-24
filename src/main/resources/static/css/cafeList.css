@@ -83,3 +83,8 @@ main {
     color: #28a745;
 }
 
+.text-muted.small.mb-1 {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}

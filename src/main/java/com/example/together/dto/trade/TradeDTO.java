@@ -23,4 +23,16 @@ public class TradeDTO {
   private int favoriteCount;
   private String thumbnail;
 
+  public static TradeDTO fromEntity(Trade trade) {
+    return TradeDTO.builder()
+            .id(trade.getId())
+            .title(trade.getTitle())
+            .content(trade.getDescription())
+            .price(BigDecimal.valueOf(trade.getPrice()))
+            .sellerNickname(trade.getSellerNickname())
+            .regdate(trade.getRegdate())
+            .moddate(trade.getModdate())
+            .thumbnail(trade.getThumbnail() != null ? trade.getThumbnail() : "/images/default-trade.png")
+            .build();
+  }
 }
