@@ -1,6 +1,11 @@
 package com.example.together.repository;
 
 import com.example.together.domain.Trade;
+import com.example.together.domain.TradeCategory;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface TradeRepository extends JpaRepository<Trade, Long> { }
+import java.util.List;
+
+public interface TradeRepository extends JpaRepository<Trade, Long> {
+    List<Trade> findByCategory(TradeCategory category);
+}

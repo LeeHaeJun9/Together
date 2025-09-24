@@ -1,0 +1,95 @@
+/* categoryPage.css - 섹션별 카드 색상 테마 */
+
+/* 모임 카드 - 푸른 계열 */
+.meeting-card {
+    border-left: 4px solid #007bff;
+    background-color: #f0f8ff;
+}
+
+.meeting-card .card-title {
+    color: #007bff;
+}
+
+/* 카페 카드 - 초록 계열 */
+.cafe-card {
+    border-left: 4px solid #28a745;
+    background-color: #f0fff0;
+}
+
+.cafe-card .card-title {
+    color: #28a745;
+}
+
+/* 거래 카드 - 주황 계열 */
+.trade-card {
+    border-left: 4px solid #fd7e14;
+    background-color: #fffaf0;
+}
+
+.trade-card .card-title {
+    color: #fd7e14;
+}
+
+/* 공통 카드 스타일 */
+.card {
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.card-img-top {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    border-bottom: 1px solid #ddd;
+}
+
+.card-text {
+    font-size: 0.9rem;
+    color: #555;
+}
+
+.card .btn {
+    font-size: 0.85rem;
+    padding: 0.25rem 0.6rem;
+}
+
+/* 리스트그룹 모임 스타일 */
+.list-group-item-action {
+    transition: background-color 0.2s;
+}
+
+.list-group-item-action:hover {
+    background-color: #f8f9fa;
+}
+
+/* 작은 글씨 */
+small, .text-muted {
+    font-size: 0.8rem;
+}
+
+/* 반응형 그리드 간격 */
+.row.row-cols-1.row-cols-md-2.g-3 {
+    margin-left: 0;
+    margin-right: 0;
+}
+
+.row.row-cols-1.row-cols-md-2.g-3 > .col {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+@media (max-width: 768px) {
+    main {
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+    }
+
+    .card-img-top {
+        height: 150px;
+    }
+}
