@@ -20,7 +20,10 @@
                             <a class="nav-link" th:href="@{/cafe/{cafeId}/posts(cafeId=${cafe.id})}">게시글</a>
                         </li>
                         <li class="nav-item" th:if="${cafe.isMember}">
-                            <a class="nav-link" th:href="@{/cafe/{cafeId}/meetings(cafeId=${cafe.id})}">모임</a>
+                            <a class="nav-link" th:href="@{/cafe/{cafeId}/meetings(cafeId=${cafe.id})}">모임목록</a>
+                        </li>
+                        <li class="nav-item" th:if="${cafe.isMember}">
+                            <a class="nav-link" th:href="@{/cafe/{cafeId}/meeting/review/list(cafeId=${cafe.id})}">모임후기</a>
                         </li>
                         <li class="nav-item" th:if="${cafe.isOwner}">
                             <a class="nav-link" th:href="@{/cafe/my/cafe/{cafeId}/joinRequests(cafeId=${cafe.id})}">가입 신청 목록</a>
