@@ -1,7 +1,6 @@
 package com.example.together.controller;
 
 import com.example.together.domain.Favorite;
-import com.example.together.domain.TradeImage;
 import com.example.together.domain.User;
 import com.example.together.repository.UserRepository;
 import com.example.together.service.trade.FavoriteService;

@@ -1,6 +1,5 @@
 package com.example.together.service.trade;
 
-
 import com.example.together.domain.Trade;
 import com.example.together.domain.TradeImage;
 import com.example.together.repository.TradeImageRepository;
@@ -11,9 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.*;
 import java.util.*;
 
 @Service
@@ -23,29 +20,28 @@ public class TradeImageServiceImpl implements TradeImageService {
 
   private final TradeImageRepository tradeImageRepository;
 
-  /** WebMvcConfig의 /images/** 매핑과 동일한 루트 폴더 */
-  @Value("${app.upload-path:${TOGETHER_UPLOAD_PATH:${user.home}/together/uploads}}")
-  private String uploadRoot; // 예: C:/upload
+  @Value("${org.zerock.upload.path}")
+  private String uploadRoot;
 
   @Override
   @Transactional(readOnly = true)
   public List<TradeImage> listByTradeId(Long tradeId) {
-    return tradeImageRepository.findAllByTradeIdOrderBySortOrderAsc(tradeId);
+    return tradeImageRepository.findAllByTrade_IdOrderBySortOrderAsc(tradeId);
   }
 
   @Override
   public void deleteByIds(List<Long> imageIds) {
     if (imageIds == null || imageIds.isEmpty()) return;
 
-    // 물리 파일 삭제
+    // 물리 파일 삭제 (루트 경로와 일치)
     List<TradeImage> images = tradeImageRepository.findAllById(imageIds);
     for (TradeImage img : images) {
-      if (img.getStoredName() != null) {
-        Path p = Paths.get(uploadRoot, "trade", img.getStoredName());
+      String stored = img.getStoredName();
+      if (stored != null && !stored.isBlank()) {
+        Path p = Paths.get(uploadRoot, stored);
         try { Files.deleteIfExists(p); } catch (IOException ignored) {}
       }
     }
-    // DB 삭제
     tradeImageRepository.deleteAllByIdInBatch(imageIds);
   }
 
@@ -53,11 +49,13 @@ public class TradeImageServiceImpl implements TradeImageService {
   public void saveImages(Long tradeId, List<MultipartFile> files) {
     if (files == null || files.isEmpty()) return;
 
-    Path dir = Paths.get(uploadRoot, "trade");
-    try { Files.createDirectories(dir); } catch (IOException e) { throw new RuntimeException(e); }
+    Path dir = Paths.get(uploadRoot);
+    try { Files.createDirectories(dir); }
+    catch (IOException e) { throw new RuntimeException("업로드 디렉토리 생성 실패: " + dir, e); }
 
     // 현재 마지막 sort_order 이후부터 붙이기
-    List<TradeImage> existing = tradeImageRepository.findAllByTradeIdOrderBySortOrderAsc(tradeId);
+    List<TradeImage> existing =
+        tradeImageRepository.findAllByTrade_IdOrderBySortOrderAsc(tradeId);
     int order = existing.isEmpty() ? 0 : existing.get(existing.size() - 1).getSortOrder() + 1;
 
     for (MultipartFile file : files) {
@@ -69,37 +67,37 @@ public class TradeImageServiceImpl implements TradeImageService {
       if (dot > -1) ext = original.substring(dot);
 
       String stored = UUID.randomUUID().toString().replace("-", "") + ext;
-      Path target = dir.resolve(stored);
-      try {
-        file.transferTo(target.toFile());
-      } catch (IOException e) {
-        throw new RuntimeException("이미지 업로드 실패", e);
-      }
 
-      Trade tradeRef = new Trade(); // 프록시 레퍼런스
+      Path target = dir.resolve(stored);
+      try { file.transferTo(target.toFile()); }
+      catch (IOException e) { throw new RuntimeException("이미지 업로드 실패: " + original, e); }
+
+      Trade tradeRef = new Trade();
       tradeRef.setId(tradeId);
 
       TradeImage entity = new TradeImage();
       entity.setTrade(tradeRef);
       entity.setOriginalName(original);
       entity.setStoredName(stored);
-      entity.setImageUrl("/images/trade/" + stored); // ★ read/list에서 바로 사용
+      entity.setImageUrl("/upload/" + stored); // 화면용 URL (WebMvcConfig와 1:1)
       entity.setSortOrder(order++);
 
       tradeImageRepository.save(entity);
     }
   }
+
   @Override
   public void deleteByTradeId(Long tradeId) {
-    List<TradeImage> images = tradeImageRepository.findAllByTradeIdOrderBySortOrderAsc(tradeId);
-    // 파일 삭제
+    List<TradeImage> images =
+        tradeImageRepository.findAllByTrade_IdOrderBySortOrderAsc(tradeId);
+
     for (TradeImage img : images) {
-      if (img.getStoredName() != null) {
-        Path p = Paths.get(uploadRoot, "trade", img.getStoredName());
+      String stored = img.getStoredName();
+      if (stored != null && !stored.isBlank()) {
+        Path p = Paths.get(uploadRoot, stored); // 루트 경로
         try { Files.deleteIfExists(p); } catch (IOException ignored) {}
       }
     }
-    // DB 삭제
-    tradeImageRepository.deleteByTradeId(tradeId);
+    tradeImageRepository.deleteByTrade_Id(tradeId);
   }
 }

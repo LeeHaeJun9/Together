@@ -8,36 +8,77 @@
     <meta charset="UTF-8"/>
     <title>중고거래 목록</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .card-img-top{ object-fit:cover; }
+    </style>
 </head>
 <body>
 <section layout:fragment="content">
-    <!-- noImg URL은 미리 변수로 -->
     <div class="container py-3" th:with="noImg=@{/images/no-image.png}">
-        <!-- 글쓰기 버튼 -->
-        <div class="d-flex justify-content-end align-items-center mb-3">
-            <a sec:authorize="isAuthenticated()" class="btn btn-primary btn-sm" th:href="@{/trade/register}">글쓰기</a>
-            <a sec:authorize="isAnonymous()" class="btn btn-primary btn-sm ms-2" th:href="@{/member/login}">글쓰기</a>
+
+        <!-- 상단 액션: 글쓰기 / 찜목록 / 카테고리 드롭다운 -->
+        <div class="d-flex justify-content-between align-items-center mb-3">
+
+            <!-- 좌측: 선택된 카테고리 표시(쿼리 파라미터 기준) -->
+            <div>
+                <span class="badge text-bg-light" th:if="${param.category != null}">
+                    선택된 카테고리:
+                    <strong th:text="${param.category}">전체</strong>
+                </span>
+            </div>
+
+            <!-- 우측: 액션 버튼들 -->
+            <div class="d-flex align-items-center gap-2">
+                <!-- 글쓰기 -->
+                <a sec:authorize="isAuthenticated()" class="btn btn-primary btn-sm" th:href="@{/trade/register}">글쓰기</a>
+                <a sec:authorize="isAnonymous()" class="btn btn-primary btn-sm" th:href="@{/member/login}">글쓰기</a>
+
+                <!-- 찜목록 -->
+                <a class="btn btn-outline-danger btn-sm" th:href="@{/favorite/list}">찜목록</a>
+
+                <!-- 카테고리 드롭다운 -->
+                <div class="dropdown">
+                    <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        카테고리
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li>
+                            <a class="dropdown-item" th:href="@{/trade/list}">전체보기</a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" th:href="@{/trade/list(category='운동')}">운동</a></li>
+                        <li><a class="dropdown-item" th:href="@{/trade/list(category='예술')}">예술</a></li>
+                        <li><a class="dropdown-item" th:href="@{/trade/list(category='음악')}">음악</a></li>
+                        <li><a class="dropdown-item" th:href="@{/trade/list(category='반려동물')}">반려동물</a></li>
+                        <li><a class="dropdown-item" th:href="@{/trade/list(category='수집')}">수집</a></li>
+                        <li><a class="dropdown-item" th:href="@{/trade/list(category='언어')}">언어</a></li>
+                        <li><a class="dropdown-item" th:href="@{/trade/list(category='요리')}">요리</a></li>
+                    </ul>
+                </div>
+            </div>
         </div>
 
         <!-- 카드 그리드 -->
         <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-4">
             <div class="col" th:each="t : ${trades}">
                 <div class="card h-100 shadow-sm">
+                    <!-- 썸네일 -->
                     <div class="ratio ratio-4x3">
-                        <!-- 썸네일: thumbnails 우선, 없으면 t.thumbnail, 그것도 없으면 noImg -->
-                        <img class="card-img-top object-fit-cover" alt="thumbnail"
+                        <img class="card-img-top"
+                             alt="thumbnail"
                              th:src="${ (thumbnails != null and thumbnails.containsKey(t.id))
                                         ? thumbnails[t.id]
-                                        : (#strings.isEmpty(t.thumbnail) ? noImg : t.thumbnail) }">
+                                        : (#strings.isEmpty(t.thumbnail) ? noImg : t.thumbnail) }"
+                             onerror="this.onerror=null;this.src='/images/no-image.png'">
                     </div>
 
+                    <!-- 내용 -->
                     <div class="card-body">
                         <h6 class="card-title mb-1 text-truncate" th:text="${t.title}">제목</h6>
 
                         <div class="d-flex justify-content-between align-items-center">
-                           <span class="fw-semibold"
-                                 th:text="${priceTexts != null and priceTexts.containsKey(t.id) ? priceTexts[t.id] : '가격문의'}">0원</span>
-
+                            <span class="fw-semibold"
+                                  th:text="${priceTexts != null and priceTexts.containsKey(t.id) ? priceTexts[t.id] : '가격문의'}">0원</span>
                         </div>
 
                         <p class="card-text small text-muted mb-0">
@@ -46,10 +87,11 @@
                         </p>
                     </div>
 
+                    <!-- 푸터 -->
                     <div class="card-footer bg-white d-flex justify-content-between align-items-center">
                         <a class="btn btn-sm btn-outline-primary"
                            th:href="@{/trade/read/{id}(id=${t.id})}">자세히</a>
-                        <!-- 찜 수(컨트롤러에서 favoriteCounts 맵 내려줌; 없으면 0) -->
+
                         <span class="small">❤️
                           <span th:text="${favoriteCounts != null and favoriteCounts.containsKey(t.id) ? favoriteCounts[t.id] : 0}">0</span>
                         </span>
@@ -58,22 +100,25 @@
             </div>
         </div>
 
-        <!-- 페이지네이션: page 객체 있을 때만 표시 -->
+        <!-- 페이지네이션(선택적으로 page 객체가 있을 때만) -->
         <nav class="mt-4" th:if="${page != null and page.totalPages > 1}">
             <ul class="pagination justify-content-center">
                 <li class="page-item" th:classappend="${page.first} ? 'disabled'">
-                    <a class="page-link" th:href="@{/trade/list(page=${page.number - 1}, size=${page.size})}">이전</a>
+                    <a class="page-link"
+                       th:href="@{/trade/list(page=${page.number - 1}, size=${page.size}, category=${param.category})}">이전</a>
                 </li>
                 <li class="page-item" th:each="i : ${#numbers.sequence(0, page.totalPages - 1)}"
                     th:classappend="${i} == ${page.number} ? 'active'">
                     <a class="page-link" th:text="${i + 1}"
-                       th:href="@{/trade/list(page=${i}, size=${page.size})}">1</a>
+                       th:href="@{/trade/list(page=${i}, size=${page.size}, category=${param.category})}">1</a>
                 </li>
                 <li class="page-item" th:classappend="${page.last} ? 'disabled'">
-                    <a class="page-link" th:href="@{/trade/list(page=${page.number + 1}, size=${page.size})}">다음</a>
+                    <a class="page-link"
+                       th:href="@{/trade/list(page=${page.number + 1}, size=${page.size}, category=${param.category})}">다음</a>
                 </li>
             </ul>
         </nav>
+
     </div>
 </section>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
