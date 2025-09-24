@@ -38,7 +38,6 @@ public class MeetingReviewController {
     private final CafeService cafeService;
     private final UserRepository userRepository;
     private final MeetingUserService meetingUserService;
-    private final MeetingReviewReplyService meetingReviewReplyService;
 
     private User getUserFromPrincipal(Principal principal) {
         if (principal == null) return null;
@@ -58,10 +57,10 @@ public class MeetingReviewController {
         if (principal != null) {
             // 로그인된 사용자
             User user = getUserFromPrincipal(principal);
-            cafeResponse = cafeService.getCafeById(cafeId, user.getId());
+            cafeResponse = cafeService.getCafeInfoWithMembership(cafeId, user.getId());
         } else {
             // 익명 사용자 (userId 없이 호출)
-            cafeResponse = cafeService.getCafeById(cafeId);
+            cafeResponse = cafeService.getBasicCafeInfo(cafeId);
         }
 
         model.addAttribute("cafeResponse", cafeResponse);
@@ -77,7 +76,7 @@ public class MeetingReviewController {
                                        Model model, Principal principal, PageRequestDTO pageRequestDTO) {
 
         User user = getUserFromPrincipal(principal);
-        CafeResponseDTO cafeResponse = cafeService.getCafeById(cafeId, user.getId());
+        CafeResponseDTO cafeResponse = cafeService.getCafeInfoWithMembership(cafeId, user.getId());
         MeetingReviewDTO reviewDTO = new MeetingReviewDTO();
 
         if (meetingId != null && meetingId > 0) {
@@ -174,15 +173,15 @@ public class MeetingReviewController {
 
         CafeResponseDTO cafeResponse;
         if (user != null) {
-            cafeResponse = cafeService.getCafeById(cafeId, user.getId());
+            cafeResponse = cafeService.getCafeInfoWithMembership(cafeId, user.getId());
         } else {
-            cafeResponse = cafeService.getCafeById(cafeId);
+            cafeResponse = cafeService.getBasicCafeInfo(cafeId);
         }
         model.addAttribute("cafeResponse", cafeResponse);
 
         Long userId = (user != null) ? user.getId() : null;
-        List<MeetingReviewReplyDTO> replyList = meetingReviewReplyService.getList(id, userId);
-        model.addAttribute("replyList", replyList);
+//        List<MeetingReviewReplyDTO> replyList = meetingReviewReplyService.getList(id, userId);
+//        model.addAttribute("replyList", replyList);
 
         return "meeting/review/read";
     }
@@ -201,9 +200,9 @@ public class MeetingReviewController {
 
         CafeResponseDTO cafeResponse;
         if (user != null) {
-            cafeResponse = cafeService.getCafeById(cafeId, user.getId());
+            cafeResponse = cafeService.getCafeInfoWithMembership(cafeId, user.getId());
         } else {
-            cafeResponse = cafeService.getCafeById(cafeId);
+            cafeResponse = cafeService.getBasicCafeInfo(cafeId);
         }
         model.addAttribute("cafeResponse", cafeResponse);
 

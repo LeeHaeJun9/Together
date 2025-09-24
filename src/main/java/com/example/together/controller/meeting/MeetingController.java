@@ -73,10 +73,10 @@ public class MeetingController {
         if (principal != null) {
             // 로그인된 사용자
             User user = getUserFromPrincipal(principal);
-            cafeResponse = cafeService.getCafeById(cafeId, user.getId());
+            cafeResponse = cafeService.getCafeInfoWithMembership(cafeId, user.getId());
         } else {
             // 익명 사용자 (userId 없이 호출)
-            cafeResponse = cafeService.getCafeById(cafeId);
+            cafeResponse = cafeService.getBasicCafeInfo(cafeId);
         }
 
         model.addAttribute("cafeResponse", cafeResponse);
@@ -87,7 +87,7 @@ public class MeetingController {
         User user = getUserFromPrincipal(principal);
 
 
-        CafeResponseDTO cafeResponse = cafeService.getCafeById(cafeId, user.getId());
+        CafeResponseDTO cafeResponse = cafeService.getCafeInfoWithMembership(cafeId, user.getId());
 
         MeetingDTO meetingDTO = new MeetingDTO();
         meetingDTO.setOrganizerId(user.getId());
@@ -160,9 +160,9 @@ public class MeetingController {
 
         CafeResponseDTO cafeResponse;
         if (user != null) {
-            cafeResponse = cafeService.getCafeById(cafeId, user.getId());
+            cafeResponse = cafeService.getCafeInfoWithMembership(cafeId, user.getId());
         } else {
-            cafeResponse = cafeService.getCafeById(cafeId);
+            cafeResponse = cafeService.getBasicCafeInfo(cafeId);
         }
         model.addAttribute("cafeResponse", cafeResponse);
 
@@ -184,9 +184,9 @@ public class MeetingController {
 
         CafeResponseDTO cafeResponse;
         if (user != null) {
-            cafeResponse = cafeService.getCafeById(cafeId, user.getId());
+            cafeResponse = cafeService.getCafeInfoWithMembership(cafeId, user.getId());
         } else {
-            cafeResponse = cafeService.getCafeById(cafeId);
+            cafeResponse = cafeService.getBasicCafeInfo(cafeId);
         }
         model.addAttribute("cafeResponse", cafeResponse);
 
