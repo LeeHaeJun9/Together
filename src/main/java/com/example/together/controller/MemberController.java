@@ -29,9 +29,7 @@ public class MemberController {
 
     private final UserService userService;
 
-    @Autowired
-    private UserService memberService;  // UserService를 memberService로도 사용
-
+    // ==================== 회원가입 관련 ====================
 
     // 회원가입 페이지
     @GetMapping("/member/register")
@@ -54,10 +52,12 @@ public class MemberController {
         if (!registerDTO.getPassword().equals(registerDTO.getConfirmPassword())) {
             bindingResult.rejectValue("confirmPassword", "password.mismatch", "비밀번호가 일치하지 않습니다.");
         }
+
         // 아이디 중복 확인
         if (userService.isUserIdExists(registerDTO.getUserId())) {
             bindingResult.rejectValue("userId", "userId.duplicate", "이미 사용 중인 아이디입니다.");
         }
+
         // 이메일 중복 확인
         if (userService.isEmailExists(registerDTO.getEmail())) {
             bindingResult.rejectValue("email", "email.duplicate", "이미 사용 중인 이메일입니다.");
@@ -81,13 +81,146 @@ public class MemberController {
         }
     }
 
+    // ==================== 중복 확인 AJAX API ====================
+
     // 사용자 ID 중복 확인 AJAX
-    @PostMapping("/member/register/check-userid")
+    @GetMapping("/api/member/check-id")
     @ResponseBody
-    public String checkUserId(@RequestParam("userId") String userId) {
-        log.info("아이디 중복 확인: userId = {}", userId);
-        boolean exists = userService.isUserIdExists(userId);
-        return exists ? "{\"available\": false}" : "{\"available\": true}";
+    public ResponseEntity<Map<String, Object>> checkIdDuplicate(@RequestParam String userId) {
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            boolean isDuplicate = userService.isUserIdExists(userId);
+
+            response.put("success", true);
+            response.put("isDuplicate", isDuplicate);
+
+            if (isDuplicate) {
+                response.put("message", "이미 사용중인 ID입니다.");
+            } else {
+                response.put("message", "사용 가능한 ID입니다.");
+            }
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            log.error("ID 중복 체크 중 오류 발생: {}", e.getMessage());
+            response.put("success", false);
+            response.put("message", "ID 체크 중 오류가 발생했습니다.");
+            return ResponseEntity.status(500).body(response);
+        }
+    }
+
+    // 이메일 중복 확인 AJAX
+    @GetMapping("/api/member/check-email")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> checkEmailDuplicate(@RequestParam String email) {
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            boolean isDuplicate = userService.isEmailExists(email);
+
+            response.put("success", true);
+            response.put("isDuplicate", isDuplicate);
+
+            if (isDuplicate) {
+                response.put("message", "이미 사용중인 이메일입니다.");
+            } else {
+                response.put("message", "사용 가능한 이메일입니다.");
+            }
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            log.error("이메일 중복 체크 중 오류 발생: {}", e.getMessage());
+            response.put("success", false);
+            response.put("message", "이메일 체크 중 오류가 발생했습니다.");
+            return ResponseEntity.status(500).body(response);
+        }
+    }
+
+    // 이름 중복 확인 AJAX
+    @GetMapping("/api/member/check-name")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> checkNameDuplicate(@RequestParam String name) {
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            boolean isDuplicate = userService.isNameExists(name);
+
+            response.put("success", true);
+            response.put("isDuplicate", isDuplicate);
+
+            if (isDuplicate) {
+                response.put("message", "이미 사용중인 이름입니다.");
+            } else {
+                response.put("message", "사용 가능한 이름입니다.");
+            }
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            log.error("이름 중복 체크 중 오류 발생: {}", e.getMessage());
+            response.put("success", false);
+            response.put("message", "이름 체크 중 오류가 발생했습니다.");
+            return ResponseEntity.status(500).body(response);
+        }
+    }
+
+    // 닉네임 중복 확인 AJAX
+    @GetMapping("/api/member/check-nickname")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> checkNicknameDuplicate(@RequestParam String nickname) {
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            boolean isDuplicate = userService.isNicknameExists(nickname);
+
+            response.put("success", true);
+            response.put("isDuplicate", isDuplicate);
+
+            if (isDuplicate) {
+                response.put("message", "이미 사용중인 닉네임입니다.");
+            } else {
+                response.put("message", "사용 가능한 닉네임입니다.");
+            }
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            log.error("닉네임 중복 체크 중 오류 발생: {}", e.getMessage());
+            response.put("success", false);
+            response.put("message", "닉네임 체크 중 오류가 발생했습니다.");
+            return ResponseEntity.status(500).body(response);
+        }
+    }
+
+    // 전화번호 중복 확인 AJAX
+    @GetMapping("/api/member/check-phone")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> checkPhoneDuplicate(@RequestParam String phone) {
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            boolean isDuplicate = userService.isPhoneExists(phone);
+
+            response.put("success", true);
+            response.put("isDuplicate", isDuplicate);
+
+            if (isDuplicate) {
+                response.put("message", "이미 사용중인 전화번호입니다.");
+            } else {
+                response.put("message", "사용 가능한 전화번호입니다.");
+            }
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            log.error("전화번호 중복 체크 중 오류 발생: {}", e.getMessage());
+            response.put("success", false);
+            response.put("message", "전화번호 체크 중 오류가 발생했습니다.");
+            return ResponseEntity.status(500).body(response);
+        }
     }
 
     // 이메일 중복 확인 AJAX
@@ -99,18 +232,39 @@ public class MemberController {
         return exists ? "{\"available\": false}" : "{\"available\": true}";
     }
 
-    @GetMapping("/member/myCafes")
-    public String myCafes(Model model, Principal principal) {
-        if (principal != null) {
-            String userId = principal.getName();
-            // 사용자가 참여한 카페 목록 조회
-            // List<Cafe> myCafes = cafeService.findByUserId(userId);
-            // model.addAttribute("cafes", myCafes);
+    // 이름 중복 확인 AJAX
+    @PostMapping("/member/register/check-name")
+    @ResponseBody
+    public String checkName(@RequestParam("name") String name) {
+        log.info("이름 중복 확인: name = {}", name);
+        boolean exists = userService.isNameExists(name);
+        return exists ? "{\"available\": false}" : "{\"available\": true}";
+    }
 
-            // 임시로 빈 목록 전달
-            model.addAttribute("cafes", new ArrayList<>());
-        }
-        return "member/myCafes";
+    // 닉네임 중복 확인 AJAX
+    @PostMapping("/member/register/check-nickname")
+    @ResponseBody
+    public String checkNickname(@RequestParam("nickname") String nickname) {
+        log.info("닉네임 중복 확인: nickname = {}", nickname);
+        boolean exists = userService.isNicknameExists(nickname);
+        return exists ? "{\"available\": false}" : "{\"available\": true}";
+    }
+
+    // 전화번호 중복 확인 AJAX
+    @PostMapping("/member/register/check-phone")
+    @ResponseBody
+    public String checkPhone(@RequestParam("phone") String phone) {
+        log.info("전화번호 중복 확인: phone = {}", phone);
+        boolean exists = userService.isPhoneExists(phone);
+        return exists ? "{\"available\": false}" : "{\"available\": true}";
+    }
+
+    // ==================== 로그인/아이디·비밀번호 찾기 ====================
+
+    @GetMapping("/login")
+    public String loginPage() {
+        log.info("GET /login - 로그인 페이지 요청");
+        return "member/login";
     }
 
     // 아이디 찾기 페이지 표시
@@ -129,7 +283,6 @@ public class MemberController {
         try {
             log.info("아이디 찾기 요청: name = {}, email = {}", name, email);
 
-            // 데이터베이스에서 사용자 찾기
             String userId = userService.findUserIdByNameAndEmail(name, email);
 
             if (userId != null) {
@@ -167,14 +320,10 @@ public class MemberController {
         Map<String, Object> response = new HashMap<>();
 
         try {
-            // 사용자 정보 확인 (임시로 간단하게 구현)
-            boolean userExists = userService.isUserIdExists(userId) &&
-                    userService.isEmailExists(email);
+            boolean userExists = userService.isUserIdExists(userId) && userService.isEmailExists(email);
 
             if (userExists) {
-                // 임시 비밀번호 생성 (간단한 랜덤 문자열)
                 String tempPassword = "temp" + System.currentTimeMillis() % 10000;
-
                 userService.updateUserPassword(userId, tempPassword);
 
                 response.put("success", true);
@@ -182,7 +331,6 @@ public class MemberController {
                 response.put("message", "임시 비밀번호가 발급되었습니다.");
 
                 log.info("임시 비밀번호 발급 성공: userId = {}", userId);
-
             } else {
                 response.put("success", false);
                 response.put("message", "입력하신 정보와 일치하는 회원을 찾을 수 없습니다.");
@@ -198,6 +346,8 @@ public class MemberController {
         return response;
     }
 
+    // ==================== 프로필 관리 ====================
+
     // 프로필 페이지 표시
     @GetMapping("/member/profile")
     public String profilePage(Model model, Principal principal) {
@@ -207,7 +357,6 @@ public class MemberController {
 
             if (user != null) {
                 model.addAttribute("user", user);
-                // 사용자 이름을 명시적으로 추가 (null 방지)
                 String userName = user.getName() != null ? user.getName() : user.getUserId();
                 model.addAttribute("userName", userName);
                 log.info("프로필 페이지 요청: userId = {}, userName = {}", userId, userName);
@@ -242,14 +391,12 @@ public class MemberController {
                 return response;
             }
 
-            // 파일 크기 제한 (5MB)
             if (photo.getSize() > 5 * 1024 * 1024) {
                 response.put("success", false);
                 response.put("message", "파일 크기는 5MB 이하여야 합니다.");
                 return response;
             }
 
-            // 이미지 파일 형식 확인
             String contentType = photo.getContentType();
             if (contentType == null || !contentType.startsWith("image/")) {
                 response.put("success", false);
@@ -258,8 +405,6 @@ public class MemberController {
             }
 
             String userId = principal.getName();
-
-            // UserService에서 사진 업로드 처리
             String photoUrl = userService.uploadProfilePhoto(userId, photo);
 
             if (photoUrl != null) {
@@ -282,10 +427,6 @@ public class MemberController {
     }
 
     // 개별 필드 업데이트
-    // MemberController.java의 updateProfile 메소드 개선
-
-    // MemberController.java의 updateProfile 메소드 개선
-
     @PostMapping("/member/profile/update")
     @ResponseBody
     public Map<String, Object> updateProfile(@RequestBody Map<String, String> request,
@@ -303,14 +444,12 @@ public class MemberController {
             String field = request.get("field");
             String value = request.get("value");
 
-            // 입력값 유효성 검사
             if (field == null || value == null) {
                 response.put("success", false);
                 response.put("message", "필수 정보가 누락되었습니다.");
                 return response;
             }
 
-            // 필드별 추가 유효성 검사
             String validationError = validateField(field, value);
             if (validationError != null) {
                 response.put("success", false);
@@ -318,7 +457,6 @@ public class MemberController {
                 return response;
             }
 
-            // 필드 업데이트 처리
             boolean success = userService.updateUserField(userId, field, value);
 
             if (success) {
@@ -339,6 +477,191 @@ public class MemberController {
         return response;
     }
 
+    // 닉네임 중복 확인 (프로필 수정용)
+    @PostMapping("/member/profile/checkNickname")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> checkNickname(@RequestBody Map<String, String> request,
+                                                             Principal principal) {
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            String nickname = request.get("nickname");
+            String currentUserId = principal.getName();
+
+            if (nickname == null || nickname.trim().isEmpty()) {
+                response.put("available", false);
+                response.put("message", "닉네임을 입력해주세요.");
+                return ResponseEntity.badRequest().body(response);
+            }
+
+            if (nickname.length() < 2 || nickname.length() > 20) {
+                response.put("available", false);
+                response.put("message", "닉네임은 2-20자 사이여야 합니다.");
+                return ResponseEntity.badRequest().body(response);
+            }
+
+            if (!nickname.matches("^[가-힣a-zA-Z0-9]+$")) {
+                response.put("available", false);
+                response.put("message", "닉네임은 한글, 영문, 숫자만 사용 가능합니다.");
+                return ResponseEntity.badRequest().body(response);
+            }
+
+            boolean isAvailable = userService.isNicknameAvailable(nickname, currentUserId);
+
+            response.put("available", isAvailable);
+            response.put("message", isAvailable ? "사용 가능한 닉네임입니다." : "이미 사용중인 닉네임입니다.");
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            response.put("available", false);
+            response.put("message", "중복확인 중 오류가 발생했습니다.");
+            return ResponseEntity.internalServerError().body(response);
+        }
+    }
+
+    // 비밀번호 변경
+    @PostMapping("/member/profile/password")
+    @ResponseBody
+    public Map<String, Object> changePassword(@RequestBody Map<String, String> request,
+                                              Principal principal) {
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            if (principal == null) {
+                response.put("success", false);
+                response.put("message", "로그인이 필요합니다.");
+                return response;
+            }
+
+            String userId = principal.getName();
+            String currentPassword = request.get("currentPassword");
+            String newPassword = request.get("newPassword");
+
+            boolean success = userService.changePassword(userId, currentPassword, newPassword);
+
+            if (success) {
+                response.put("success", true);
+                response.put("message", "비밀번호가 성공적으로 변경되었습니다.");
+                log.info("비밀번호 변경 성공: userId = {}", userId);
+            } else {
+                response.put("success", false);
+                response.put("message", "현재 비밀번호가 일치하지 않습니다.");
+            }
+
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", "서버 오류가 발생했습니다.");
+            log.error("비밀번호 변경 오류: {}", e.getMessage());
+        }
+
+        return response;
+    }
+
+    // ==================== 마이페이지 관련 ====================
+
+    // 마이페이지 메인
+    @GetMapping("/mypage")
+    public String myPage(Model model, Principal principal) {
+        if (principal != null) {
+            String userId = principal.getName();
+            User user = userService.findByUserId(userId);
+            model.addAttribute("user", user);
+
+            model.addAttribute("favoriteCount", 0);
+            model.addAttribute("tradeCount", 0);
+            model.addAttribute("cafeCount", 0);
+            model.addAttribute("meetingCount", 0);
+
+            log.info("마이페이지 요청: userId = {}", userId);
+        }
+        return "member/mypage";
+    }
+
+    @GetMapping("/member/myCafes")
+    public String myCafes(Model model, Principal principal) {
+        if (principal != null) {
+            model.addAttribute("cafes", new ArrayList<>());
+        }
+        return "member/myCafes";
+    }
+
+    @GetMapping("/member/myTrade")
+    public String myTradePage(Model model, Principal principal) {
+        if (principal != null) {
+            String userId = principal.getName();
+            model.addAttribute("sellCount", 0);
+            model.addAttribute("soldCount", 0);
+            model.addAttribute("favoriteCount", 0);
+            model.addAttribute("chatCount", 0);
+            log.info("거래 내역 페이지 요청: userId = {}", userId);
+        }
+        return "member/myTrade";
+    }
+
+    @GetMapping("/member/myMeetings")
+    public String myMeetingsPage(Model model, Principal principal) {
+        if (principal != null) {
+            String userId = principal.getName();
+            model.addAttribute("upcomingMeetings", 0);
+            model.addAttribute("completedMeetings", 0);
+            model.addAttribute("hostedMeetings", 0);
+            model.addAttribute("reviewCount", 0);
+            log.info("나의 모임 페이지 요청: userId = {}", userId);
+        }
+        return "member/myMeetings";
+    }
+
+    @GetMapping("/member/favorites")
+    public String favoritesPage(Model model, Principal principal) {
+        if (principal != null) {
+            String userId = principal.getName();
+            model.addAttribute("totalFavorites", 0);
+            model.addAttribute("availableCount", 0);
+            model.addAttribute("soldOutCount", 0);
+            model.addAttribute("recentCount", 0);
+            model.addAttribute("favorites", new ArrayList<>());
+            log.info("찜한 상품 페이지 요청: userId = {}", userId);
+        }
+        return "member/favorites";
+    }
+
+    @GetMapping("/member/settings")
+    public String settingsPage() {
+        log.info("설정 페이지 요청 -> 프로필로 리디렉션");
+        return "redirect:/member/profile";
+    }
+
+    // ==================== 회원탈퇴 ====================
+
+    @GetMapping("/member/deleteUser")
+    public String deleteUserPage(Model model, Principal principal) {
+        if (principal != null) {
+            String userId = principal.getName();
+            User user = userService.findByUserId(userId);
+            model.addAttribute("user", user);
+            log.info("회원탈퇴 페이지 요청: userId = {}", userId);
+        }
+        return "member/deleteUser";
+    }
+
+    @PostMapping("/member/deleteUser")
+    public String deleteUser(Principal principal, RedirectAttributes redirectAttributes) {
+        if (principal != null) {
+            String userId = principal.getName();
+            User user = userService.findByUserId(userId);
+            if (user != null) {
+                userService.deleteUser(user.getId());
+                redirectAttributes.addFlashAttribute("message", "회원탈퇴가 완료되었습니다.");
+                return "redirect:/login";
+            }
+        }
+        redirectAttributes.addFlashAttribute("error", "회원탈퇴 처리 중 오류가 발생했습니다.");
+        return "redirect:/member/profile";
+    }
+
+    // ==================== 유틸리티 메서드 ====================
+
     /**
      * 필드별 유효성 검사
      */
@@ -350,7 +673,7 @@ public class MemberController {
                 }
                 break;
             case "nickname":
-            case "name":  // "name" 필드도 처리
+            case "name":
                 if (value.trim().length() < 2 || value.trim().length() > 10) {
                     return "이름은 2-10자 사이여야 합니다.";
                 }
@@ -397,217 +720,6 @@ public class MemberController {
                 return "전화번호 변경에 실패했습니다.";
             default:
                 return "정보 수정에 실패했습니다.";
-        }
-    }
-
-    // 비밀번호 변경
-    @PostMapping("/member/profile/password")
-    @ResponseBody
-    public Map<String, Object> changePassword(@RequestBody Map<String, String> request,
-                                              Principal principal) {
-        Map<String, Object> response = new HashMap<>();
-
-        try {
-            if (principal == null) {
-                response.put("success", false);
-                response.put("message", "로그인이 필요합니다.");
-                return response;
-            }
-
-            String userId = principal.getName();
-            String currentPassword = request.get("currentPassword");
-            String newPassword = request.get("newPassword");
-
-            // 현재 비밀번호 확인 및 새 비밀번호로 변경
-            boolean success = userService.changePassword(userId, currentPassword, newPassword);
-
-            if (success) {
-                // 특정 조건에서 임시 비밀번호 발급 (예: 관리자가 사용자 비밀번호 재설정 시)
-                boolean needTempPassword = false; // 실제 조건에 맞게 수정
-
-                if (needTempPassword) {
-                    // 임시 비밀번호 생성
-                    String tempPassword = "temp" + System.currentTimeMillis() % 10000;
-                    response.put("success", true);
-                    response.put("tempPassword", tempPassword); // 이 부분이 모달 트리거
-                    response.put("message", "임시 비밀번호가 발급되었습니다.");
-                } else {
-                    response.put("success", true);
-                    response.put("message", "비밀번호가 성공적으로 변경되었습니다.");
-                }
-                log.info("비밀번호 변경 성공: userId = {}", userId);
-            } else {
-                response.put("success", false);
-                response.put("message", "현재 비밀번호가 일치하지 않습니다.");
-            }
-
-        } catch (Exception e) {
-            response.put("success", false);
-            response.put("message", "서버 오류가 발생했습니다.");
-            log.error("비밀번호 변경 오류: {}", e.getMessage());
-        }
-
-        return response;
-    }
-
-    // 거래 내역 페이지 표시
-    @GetMapping("/member/myTrade")
-    public String myTradePage(Model model, Principal principal) {
-        if (principal != null) {
-            String userId = principal.getName();
-
-            // 임시로 빈 리스트 전달 (실제 구현 전)
-            model.addAttribute("sellCount", 0);
-            model.addAttribute("soldCount", 0);
-            model.addAttribute("favoriteCount", 0);
-            model.addAttribute("chatCount", 0);
-
-            log.info("거래 내역 페이지 요청: userId = {}", userId);
-        }
-        return "member/myTrade";
-    }
-
-    // 나의 모임 페이지 표시
-    @GetMapping("/member/myMeetings")
-    public String myMeetingsPage(Model model, Principal principal) {
-        if (principal != null) {
-            String userId = principal.getName();
-
-            // 임시로 빈 리스트 전달 (실제 구현 전)
-            model.addAttribute("upcomingMeetings", 0);
-            model.addAttribute("completedMeetings", 0);
-            model.addAttribute("hostedMeetings", 0);
-            model.addAttribute("reviewCount", 0);
-
-            log.info("나의 모임 페이지 요청: userId = {}", userId);
-        }
-        return "member/myMeetings";
-    }
-
-    // 찜한 상품 페이지 표시
-    @GetMapping("/member/favorites")
-    public String favoritesPage(Model model, Principal principal) {
-        if (principal != null) {
-            String userId = principal.getName();
-
-            // 임시로 빈 리스트 전달 (실제 구현 전)
-            model.addAttribute("totalFavorites", 0);
-            model.addAttribute("availableCount", 0);
-            model.addAttribute("soldOutCount", 0);
-            model.addAttribute("recentCount", 0);
-            model.addAttribute("favorites", new ArrayList<>());
-
-            log.info("찜한 상품 페이지 요청: userId = {}", userId);
-        }
-        return "member/favorites";
-    }
-
-    // 계정 설정 페이지 표시
-    // 계정 설정 페이지 - 프로필로 리디렉션
-    @GetMapping("/member/settings")
-    public String settingsPage() {
-        log.info("설정 페이지 요청 -> 프로필로 리디렉션");
-        return "redirect:/member/profile";
-    }
-
-    @GetMapping("/login")
-    public String loginPage() {
-        log.info("GET /login - 로그인 페이지 요청");
-        return "member/login";
-    }
-
-    @PostMapping("/member/deleteUser")
-    public String deleteUser(Principal principal, RedirectAttributes redirectAttributes) {
-        if (principal != null) {
-            String userId = principal.getName();
-            User user = userService.findByUserId(userId);  // 먼저 User 엔티티 조회
-            if (user != null) {
-                userService.deleteUser(user.getId());  // Long 타입 ID 사용
-                redirectAttributes.addFlashAttribute("message", "회원탈퇴가 완료되었습니다.");
-                return "redirect:/login";
-            }
-        }
-        redirectAttributes.addFlashAttribute("error", "회원탈퇴 처리 중 오류가 발생했습니다.");
-        return "redirect:/member/profile";
-    }
-
-    // 회원탈퇴 페이지 표시
-    @GetMapping("/member/deleteUser")
-    public String deleteUserPage(Model model, Principal principal) {
-        if (principal != null) {
-            String userId = principal.getName();
-            User user = userService.findByUserId(userId);
-            model.addAttribute("user", user);
-            log.info("회원탈퇴 페이지 요청: userId = {}", userId);
-        }
-        return "member/deleteUser";
-    }
-
-    // 마이페이지 메인
-    @GetMapping("/mypage")
-    public String myPage(Model model, Principal principal) {
-        if (principal != null) {
-            String userId = principal.getName();
-            User user = userService.findByUserId(userId);
-            model.addAttribute("user", user);
-
-            // 임시 데이터 (실제 구현 전)
-            model.addAttribute("favoriteCount", 0);
-            model.addAttribute("tradeCount", 0);
-            model.addAttribute("cafeCount", 0);
-            model.addAttribute("meetingCount", 0);
-
-            log.info("마이페이지 요청: userId = {}", userId);
-        }
-        return "member/mypage";  // mypage.html 템플릿으로 이동
-    }
-    // MemberController.java에 추가할 메소드
-
-    @PostMapping("/member/profile/checkNickname")
-    @ResponseBody
-    public ResponseEntity<Map<String, Object>> checkNickname(
-            @RequestBody Map<String, String> request,
-            Principal principal) {
-
-        Map<String, Object> response = new HashMap<>();
-
-        try {
-            String nickname = request.get("nickname");
-            String currentUserId = principal.getName();
-
-            // 입력값 검증
-            if (nickname == null || nickname.trim().isEmpty()) {
-                response.put("available", false);
-                response.put("message", "닉네임을 입력해주세요.");
-                return ResponseEntity.badRequest().body(response);
-            }
-
-            // 닉네임 길이 검증 (2-20자)
-            if (nickname.length() < 2 || nickname.length() > 20) {
-                response.put("available", false);
-                response.put("message", "닉네임은 2-20자 사이여야 합니다.");
-                return ResponseEntity.badRequest().body(response);
-            }
-
-            // 특수문자 검증 (한글, 영문, 숫자만 허용)
-            if (!nickname.matches("^[가-힣a-zA-Z0-9]+$")) {
-                response.put("available", false);
-                response.put("message", "닉네임은 한글, 영문, 숫자만 사용 가능합니다.");
-                return ResponseEntity.badRequest().body(response);
-            }
-
-            // 데이터베이스에서 중복 확인
-            boolean isAvailable = userService.isNicknameAvailable(nickname, currentUserId);
-
-            response.put("available", isAvailable);
-            response.put("message", isAvailable ? "사용 가능한 닉네임입니다." : "이미 사용중인 닉네임입니다.");
-
-            return ResponseEntity.ok(response);
-
-        } catch (Exception e) {
-            response.put("available", false);
-            response.put("message", "중복확인 중 오류가 발생했습니다.");
-            return ResponseEntity.internalServerError().body(response);
         }
     }
 }
