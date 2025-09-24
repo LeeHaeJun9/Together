@@ -25,7 +25,7 @@
     </div>
     <div class="list-group" th:unless="${#lists.isEmpty(meetings)}">
       <a th:each="meeting : ${meetings}"
-         th:href="@{/meeting/{id}(id=${meeting.id})}"
+         th:href="@{/cafe/{cafeId}/meeting/read(id=${meeting.id}, cafeId=${meeting.cafe.id}, page=1, size=10)}"
          class="list-group-item list-group-item-action meeting-card">
         <strong th:text="${meeting.title}">모임 제목</strong>
         <span class="text-muted small" th:text="${#temporals.format(meeting.meetingDate, 'yyyy-MM-dd HH:mm')}">날짜</span>
