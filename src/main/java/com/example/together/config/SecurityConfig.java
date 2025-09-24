@@ -1,5 +1,8 @@
 package com.example.together.config;
 
+import com.example.together.service.CustomOAuth2UserService;
+import org.springframework.beans.factory.annotation.Autowired;
+
 import com.example.together.domain.User;
 import com.example.together.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +16,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
@@ -33,6 +37,9 @@ import java.util.Collections;
 public class SecurityConfig {
 
     private final UserRepository userRepository;
+
+    @Autowired
+    private CustomOAuth2UserService customOAuth2UserService;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -59,6 +66,14 @@ public class SecurityConfig {
                         .successHandler(customSuccessHandler())
                         .failureUrl("/login?error=true")
                 )
+                // OAuth2 로그인 설정 수정
+                .oauth2Login(oauth2 -> oauth2
+                        .loginPage("/login")
+                        .successHandler(oAuth2SuccessHandler()) // OAuth2 전용 성공 핸들러 추가
+                        .userInfoEndpoint(userInfo -> userInfo
+                                .userService(customOAuth2UserService)
+                        )
+                )
                 // 로그아웃 설정
                 .logout(logout -> logout
                         .logoutUrl("/logout")
@@ -71,7 +86,7 @@ public class SecurityConfig {
         return http.build();
     }
 
-    // 로그인 성공 후 역할을 확인하여 리디렉션하는 핸들러
+    // 일반 로그인 성공 핸들러
     @Bean
     public AuthenticationSuccessHandler customSuccessHandler() {
         return (request, response, authentication) -> {
@@ -83,12 +98,26 @@ public class SecurityConfig {
             session.setAttribute("loginUser", user);
             session.setAttribute("userId", user.getUserId());
 
-            // 사용자의 권한을 확인하고 리디렉션
-            if (authentication.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
-                response.sendRedirect("/manager");
-            } else {
-                response.sendRedirect("/mainPage");
-            }
+            response.sendRedirect("/mainPage");
+        };
+    }
+
+    // OAuth2 로그인 성공 핸들러 (새로 추가)
+    @Bean
+    public AuthenticationSuccessHandler oAuth2SuccessHandler() {
+        return (request, response, authentication) -> {
+            OAuth2User oauth2User = (OAuth2User) authentication.getPrincipal();
+            String socialId = (String) oauth2User.getAttributes().get("id");
+
+            // 소셜 로그인 사용자 정보를 DB에서 조회
+            User user = userRepository.findByUserId(socialId)
+                    .orElseThrow(() -> new UsernameNotFoundException("OAuth2 사용자를 찾을 수 없습니다: " + socialId));
+
+            HttpSession session = request.getSession();
+            session.setAttribute("loginUser", user);
+            session.setAttribute("userId", user.getUserId());
+
+            response.sendRedirect("/mainPage");
         };
     }
 }

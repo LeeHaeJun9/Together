@@ -392,4 +392,38 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         User existingUser = existingUserOptional.get();
         return !existingUser.getId().equals(currentUserId);
     }
+    @Override
+    public boolean isNicknameAvailable(String nickname, String currentUserId) {
+        try {
+            // 현재 사용자 조회
+            Optional<User> currentUserOpt = userRepository.findByUserId(currentUserId);
+            if (!currentUserOpt.isPresent()) {
+                return false;
+            }
+            User currentUser = currentUserOpt.get();
+
+            // 같은 닉네임을 가진 다른 사용자가 있는지 확인
+            Optional<User> existingUserOpt = userRepository.findByNickname(nickname);
+
+            // 닉네임을 사용하는 사용자가 없는 경우 사용 가능
+            if (!existingUserOpt.isPresent()) {
+                return true;
+            }
+
+            User existingUser = existingUserOpt.get();
+
+            // 현재 사용자 본인인 경우 사용 가능
+            return existingUser.getId().equals(currentUser.getId());
+
+        } catch (Exception e) {
+            log.error("닉네임 중복 확인 중 오류: {}", e.getMessage());
+            return false; // 오류 발생시 사용 불가로 처리
+        }
+    }
+    @Override
+    public User findUserForPasswordReset(String userId, String email, String name) {
+        // 이 메서드는 UserRepository에 정의된 새로운 메서드를 호출해야 합니다.
+        return userRepository.findByUserIdAndEmailAndName(userId, email, name).orElse(null);
+    }
+
 }

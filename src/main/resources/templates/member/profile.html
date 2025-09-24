@@ -219,6 +219,82 @@
         .hidden {
             display: none;
         }
+
+        /* 임시 비밀번호 모달 스타일 */
+        .temp-password-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .temp-password-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .temp-password-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #28a745;
+            margin-bottom: 20px;
+        }
+
+        .temp-password-display {
+            background-color: #f8f9fa;
+            border: 2px solid #28a745;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            margin: 20px 0;
+            letter-spacing: 2px;
+        }
+
+        .temp-password-info {
+            color: #6c757d;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        .btn-copy {
+            background-color: #17a2b8;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+
+        .btn-copy:hover {
+            background-color: #138496;
+        }
+
+        .btn-close-modal {
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .btn-close-modal:hover {
+            background-color: #5a6268;
+        }
     </style>
 </head>
 <body>
@@ -230,8 +306,8 @@
                 <div class="logo">
                     <a href="/mainPage" onclick="window.location.href='/mainPage'; return false;"
                        style="text-decoration: none; color: inherit; display: flex; align-items: center; cursor: pointer;">
-                    <img src="/images/moyeora-logo.png" alt="모여라 로고" />
-                    <span>모여라</span>
+                        <img src="/images/moyeora-logo.png" alt="모여라 로고" />
+                        <span>모여라</span>
                     </a>
                 </div>
             </div>
@@ -288,15 +364,19 @@
 
             <form id="profileForm">
                 <!-- 닉네임 -->
+
                 <div class="form-group">
                     <label class="form-label">닉네임</label>
                     <div class="input-group">
                         <input type="text" id="nickname" class="form-control"
                                th:value="${user != null ? user.nickname : ''}" disabled>
                         <button type="button" class="btn-change" onclick="enableEdit('nickname')">변경하기</button>
-                        <button type="button" class="btn-save hidden" onclick="saveField('nickname')">저장</button>
+                        <button type="button" class="btn btn-info btn-sm hidden" id="checkNicknameBtn" onclick="checkNicknameDuplicate()">중복확인</button>
+                        <button type="button" class="btn-save hidden" onclick="saveField('nickname')" id="saveNicknameBtn" disabled>저장</button>
                         <button type="button" class="btn-cancel hidden" onclick="cancelEdit('nickname')">취소</button>
                     </div>
+                    <!-- 중복확인 결과 메시지 -->
+                    <div id="nicknameCheckResult" class="mt-2" style="font-size: 14px;"></div>
                 </div>
 
                 <!-- 이름 -->
@@ -369,6 +449,22 @@
     </div>
 </div>
 
+<!-- 임시 비밀번호 모달창 -->
+<div id="tempPasswordModal" class="temp-password-modal">
+    <div class="temp-password-content">
+        <div class="temp-password-title">✅ 임시 비밀번호 발급 완료</div>
+        <div class="temp-password-display" id="tempPasswordDisplay">temp1234</div>
+        <div class="temp-password-info">
+            위 임시 비밀번호를 복사하여 로그인하세요.<br>
+            로그인 후 새로운 비밀번호로 변경해주세요.
+        </div>
+        <div>
+            <button class="btn-copy" onclick="copyTempPassword()">비밀번호 복사</button>
+            <button class="btn-close-modal" onclick="closeTempPasswordModal()">확인</button>
+        </div>
+    </div>
+</div>
+
 <!-- 푸터 -->
 <div class="footer">
     <div class="container">
@@ -382,10 +478,42 @@
 <!-- 프로필 관리 JavaScript -->
 <script>
     // CSRF 토큰 변수 정의
+    // CSRF 토큰 변수 정의
     const token = document.querySelector('meta[name="_csrf"]').getAttribute('content');
     const header = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
 
     let originalValues = {}; // 원본 값 저장
+
+    // 닉네임 중복확인 상태 변수
+    let isNicknameChecked = false;
+    let isNicknameAvailable = false;
+
+    // 임시 비밀번호 모달 관련 함수들
+    function showTempPasswordModal(tempPassword) {
+        document.getElementById('tempPasswordDisplay').textContent = tempPassword;
+        document.getElementById('tempPasswordModal').style.display = 'flex';
+    }
+
+    function closeTempPasswordModal() {
+        document.getElementById('tempPasswordModal').style.display = 'none';
+    }
+
+    function copyTempPassword() {
+        const tempPassword = document.getElementById('tempPasswordDisplay').textContent;
+        navigator.clipboard.writeText(tempPassword).then(function() {
+            // 복사 성공 시 버튼 텍스트 변경
+            const copyBtn = document.querySelector('.btn-copy');
+            copyBtn.textContent = '복사됨!';
+            copyBtn.style.backgroundColor = '#28a745';
+
+            setTimeout(() => {
+                copyBtn.textContent = '비밀번호 복사';
+                copyBtn.style.backgroundColor = '#17a2b8';
+            }, 2000);
+        }).catch(function() {
+            alert('복사에 실패했습니다. 수동으로 복사해주세요.');
+        });
+    }
 
     // 필드 수정 모드 활성화
     function enableEdit(fieldId) {
@@ -399,10 +527,24 @@
         field.disabled = false;
         field.focus();
 
-        // 버튼 전환
+        // 기본 버튼 전환
         container.querySelector('.btn-change').classList.add('hidden');
         container.querySelector('.btn-save').classList.remove('hidden');
         container.querySelector('.btn-cancel').classList.remove('hidden');
+
+        // 닉네임인 경우 특별 처리
+        if (fieldId === 'nickname') {
+            // 중복확인 버튼 표시
+            document.getElementById('checkNicknameBtn').classList.remove('hidden');
+
+            // 저장 버튼 비활성화 (중복확인 후 활성화)
+            document.getElementById('saveNicknameBtn').disabled = true;
+
+            // 중복확인 상태 초기화
+            isNicknameChecked = false;
+            isNicknameAvailable = false;
+            document.getElementById('nicknameCheckResult').innerHTML = '';
+        }
     }
 
     // 수정 취소
@@ -414,10 +556,23 @@
         field.value = originalValues[fieldId];
         field.disabled = true;
 
-        // 버튼 전환
+        // 기본 버튼 전환
         container.querySelector('.btn-change').classList.remove('hidden');
         container.querySelector('.btn-save').classList.add('hidden');
         container.querySelector('.btn-cancel').classList.add('hidden');
+
+        // 닉네임인 경우 특별 처리
+        if (fieldId === 'nickname') {
+            // 중복확인 버튼 숨기기
+            document.getElementById('checkNicknameBtn').classList.add('hidden');
+
+            // 중복확인 결과 메시지 지우기
+            document.getElementById('nicknameCheckResult').innerHTML = '';
+
+            // 중복확인 상태 초기화
+            isNicknameChecked = false;
+            isNicknameAvailable = false;
+        }
     }
 
     // 필드 저장
@@ -428,6 +583,18 @@
         if (!value) {
             showAlert('필드를 비워둘 수 없습니다.', 'danger');
             return;
+        }
+
+        // 닉네임인 경우 중복확인 검증
+        if (fieldId === 'nickname') {
+            if (!isNicknameChecked) {
+                showAlert('닉네임 중복확인을 먼저 해주세요.', 'danger');
+                return;
+            }
+            if (!isNicknameAvailable) {
+                showAlert('사용할 수 없는 닉네임입니다.', 'danger');
+                return;
+            }
         }
 
         // AJAX 요청으로 서버에 업데이트
@@ -456,9 +623,17 @@
                     container.querySelector('.btn-save').classList.add('hidden');
                     container.querySelector('.btn-cancel').classList.add('hidden');
 
-                    // 닉네임이 변경된 경우 헤더도 업데이트
+                    // 닉네임인 경우 특별 처리
                     if (fieldId === 'nickname') {
+                        // 중복확인 버튼 숨기기
+                        document.getElementById('checkNicknameBtn').classList.add('hidden');
+                        // 결과 메시지 지우기
+                        document.getElementById('nicknameCheckResult').innerHTML = '';
+                        // 헤더 닉네임 업데이트
                         document.querySelector('.profile-info h5').textContent = value;
+                        // 상태 초기화
+                        isNicknameChecked = false;
+                        isNicknameAvailable = false;
                     }
 
                 } else {
@@ -577,7 +752,77 @@
         }
     });
 
+    // 닉네임 중복확인 상태 변수
 
+
+    // 닉네임 중복확인 함수
+    function checkNicknameDuplicate() {
+        const nickname = document.getElementById('nickname').value.trim();
+        const currentNickname = originalValues['nickname']; // 현재 사용자의 원래 닉네임
+
+        // 입력값 검증
+        if (!nickname) {
+            showNicknameResult('닉네임을 입력해주세요.', 'danger');
+            return;
+        }
+
+        if (nickname.length < 2) {
+            showNicknameResult('닉네임은 2자 이상이어야 합니다.', 'danger');
+            return;
+        }
+
+        // 현재 닉네임과 같으면 중복확인 생략
+        if (nickname === currentNickname) {
+            showNicknameResult('현재 사용중인 닉네임입니다.', 'info');
+            isNicknameChecked = true;
+            isNicknameAvailable = true;
+            document.getElementById('saveNicknameBtn').disabled = false;
+            return;
+        }
+
+        // 중복확인 버튼 비활성화
+        document.getElementById('checkNicknameBtn').disabled = true;
+        document.getElementById('checkNicknameBtn').textContent = '확인중...';
+
+        // 서버에 중복확인 요청
+        fetch('/member/profile/checkNickname', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                [header]: token
+            },
+            body: JSON.stringify({
+                nickname: nickname
+            })
+        })
+            .then(response => response.json())
+            .then(data => {
+                isNicknameChecked = true;
+                if (data.isAvailable) {
+                    isNicknameAvailable = true;
+                    showNicknameResult('✅ 사용 가능한 닉네임입니다.', 'success');
+                    document.getElementById('saveNicknameBtn').disabled = false;
+                } else {
+                    isNicknameAvailable = false;
+                    showNicknameResult('❌ 이미 사용 중인 닉네임입니다.', 'danger');
+                    document.getElementById('saveNicknameBtn').disabled = true;
+                }
+                document.getElementById('checkNicknameBtn').disabled = false;
+                document.getElementById('checkNicknameBtn').textContent = '중복확인';
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNicknameResult('서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.', 'danger');
+                isNicknameChecked = false;
+                isNicknameAvailable = false;
+                document.getElementById('checkNicknameBtn').disabled = false;
+                document.getElementById('checkNicknameBtn').textContent = '중복확인';
+            });
+    }
+
+    // 닉네임 중복확인 메시지 표시 함수
+    function showNicknameResult(message, type) {
+        const resultDiv = document.getElementById('nicknameCheckResult');
+        resultDiv.innerHTML = `<span class="text-${type}">${message}</span>`;
+    }
 </script>
-</body>
-</html>
