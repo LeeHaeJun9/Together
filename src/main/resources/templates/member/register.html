@@ -315,8 +315,10 @@
             <label for="userId">사용자 ID <span class="required">*</span></label>
             <input type="text" id="userId" th:field="*{userId}" placeholder="영문자와 숫자 4~20자" required>
             <button type="button" class="check-btn" id="checkUserIdBtn">중복확인</button>
-            <div class="field-message error-message" id="userIdError"
-                 th:if="${#fields.hasErrors('userId')}" th:errors="*{userId}"></div>
+            <!-- 서버 오류 표시 (Thymeleaf) -->
+            <div th:if="${#fields.hasErrors('userId')}" class="field-message error-message show" th:errors="*{userId}"></div>
+            <!-- JavaScript 오류/성공 메시지 표시 (항상 존재) -->
+            <div class="field-message error-message" id="userIdError"></div>
             <div class="field-message success-message" id="userIdSuccess"></div>
         </div>
 
@@ -325,8 +327,10 @@
             <label for="email">이메일 <span class="required">*</span></label>
             <input type="email" id="email" th:field="*{email}" placeholder="example@email.com" required>
             <button type="button" class="check-btn" id="checkEmailBtn">중복확인</button>
-            <div class="field-message error-message" id="emailError"
-                 th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
+            <!-- 서버 오류 표시 (Thymeleaf) -->
+            <div th:if="${#fields.hasErrors('email')}" class="field-message error-message show" th:errors="*{email}"></div>
+            <!-- JavaScript 오류/성공 메시지 표시 (항상 존재) -->
+            <div class="field-message error-message" id="emailError"></div>
             <div class="field-message success-message" id="emailSuccess"></div>
         </div>
 
@@ -336,8 +340,10 @@
             <input type="password" id="password" th:field="*{password}" placeholder="6~20자" required>
             <div class="password-strength" id="passwordStrength"></div>
             <div class="password-hint">영문자, 숫자, 특수문자를 조합하여 6자 이상 입력해주세요</div>
-            <div class="field-message error-message" id="passwordError"
-                 th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
+            <!-- 서버 오류 표시 (Thymeleaf) -->
+            <div th:if="${#fields.hasErrors('userId')}" class="field-message error-message show" th:errors="*{userId}"></div>
+            <!-- JavaScript 오류/성공 메시지 표시 (항상 존재) -->
+            <div class="field-message error-message" id="userIdError"></div>
         </div>
 
         <!-- 비밀번호 확인 -->
