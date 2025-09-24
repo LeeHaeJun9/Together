@@ -85,7 +85,6 @@ public class TradeController {
     });
   }
 
-  /** 목록 화면용: 한글 라벨 → Enum 매핑 */
   private TradeCategory mapLabelToEnum(String t) {
     if (t == null) return null;
     t = t.trim();
@@ -112,12 +111,10 @@ public class TradeController {
     }
   }
 
-  /** 현재 로그인한 계정의 로그인 ID(userId, 문자열) */
   private String currentLoginId(Principal principal) {
     return principal == null ? null : principal.getName();
   }
 
-  /** 현재 로그인한 사용자 PK(Long) */
   private Long currentUserPk(Principal principal) {
     if (principal == null) return null;
     return userRepository.findByUserId(principal.getName())
@@ -125,7 +122,6 @@ public class TradeController {
         .orElse(null);
   }
 
-  /** 목록 (카테고리 필터 지원) */
   @GetMapping("/list")
   public String list(@RequestParam(value = "category", required = false) String categoryLabel,
                      Model model, Principal principal) {
@@ -188,7 +184,6 @@ public class TradeController {
     return "trade/list";
   }
 
-  /** 등록 폼 */
   @GetMapping("/register")
   public String registerForm(Model model, Principal principal) {
     model.addAttribute("categories", CATEGORIES);
@@ -205,7 +200,6 @@ public class TradeController {
     return "trade/register";
   }
 
-  /** 등록 처리 */
   @PostMapping("/register")
   public String register(@ModelAttribute Trade trade,
                          @RequestParam(value = "images", required = false) List<MultipartFile> images,
@@ -256,7 +250,6 @@ public class TradeController {
     return "redirect:/trade/read/" + saved.getId();
   }
 
-  /** 읽기 */
   @GetMapping("/read/{id}")
   public String read(@PathVariable Long id,
                      @RequestParam(value = "from", required = false) String from,
@@ -297,7 +290,6 @@ public class TradeController {
     return "trade/read";
   }
 
-  /** 수정 폼 */
   @GetMapping("/modify/{id}")
   public String modifyForm(@PathVariable Long id, Model model, Principal principal) {
     Trade trade = tradeService.find(id);
@@ -321,7 +313,6 @@ public class TradeController {
     return "trade/modify";
   }
 
-  /** 수정 처리 */
   @PostMapping("/modify/{id}")
   public String modify(@PathVariable Long id,
                        @ModelAttribute Trade trade,
@@ -364,7 +355,6 @@ public class TradeController {
     return "redirect:/trade/read/" + saved.getId();
   }
 
-  /** 삭제 */
   @PostMapping("/remove/{id}")
   public String remove(@PathVariable Long id) {
     tradeImageService.deleteByTradeId(id);

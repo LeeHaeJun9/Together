@@ -14,4 +14,5 @@ public interface FavoriteService {
 
   // 레거시 로그인ID 기반(기존에 찜해둔 데이터 복구용)
   List<Favorite> listMineByLoginId(String loginId);
+
 }

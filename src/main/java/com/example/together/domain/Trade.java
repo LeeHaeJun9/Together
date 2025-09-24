@@ -35,7 +35,7 @@ public class Trade {
   private String thumbnail;
 
   @Enumerated(EnumType.STRING)
-//  @Column(name = "trade_category",  nullable = false)
+  @Column(name = "trade_category",  nullable = false)
   private TradeCategory category;
 
   @CreationTimestamp

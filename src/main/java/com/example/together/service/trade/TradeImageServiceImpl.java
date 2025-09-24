@@ -100,4 +100,5 @@ public class TradeImageServiceImpl implements TradeImageService {
     }
     tradeImageRepository.deleteByTrade_Id(tradeId);
   }
+
 }

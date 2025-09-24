@@ -208,7 +208,6 @@
                 });
             }
 
-            // ★ 핵심: submit 직전에 강제 동기화
             form.addEventListener('submit', function() {
                 if (window.DataTransfer) {
                     syncToInput(); // 제출 직전 최종 반영
