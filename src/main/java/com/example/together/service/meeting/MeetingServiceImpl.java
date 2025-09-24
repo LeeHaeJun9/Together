@@ -14,6 +14,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -193,6 +194,30 @@ public class MeetingServiceImpl implements MeetingService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
         return user.getNickname();
+    }
+
+    @Override
+    public PageResponseDTO<MeetingDTO> listByCategory(String category, PageRequestDTO pageRequestDTO) {
+
+        PageRequest pageable = PageRequest.of(pageRequestDTO.getPage(), pageRequestDTO.getSize());
+        Page<Meeting> meetingPage;
+
+        if ("ALL".equalsIgnoreCase(category)) {
+            meetingPage = (Page<Meeting>) meetingRepository.findByVisibility(Visibility.PUBLIC, pageable);
+        } else {
+            CafeCategory cafeCategory = CafeCategory.valueOf(category.toUpperCase());
+            meetingPage = (Page<Meeting>) meetingRepository.findByCafe_CategoryAndVisibility(cafeCategory, Visibility.PUBLIC, pageable);
+        }
+
+        List<MeetingDTO> dtoList = meetingPage.stream()
+                .map(MeetingDTO::fromEntity) // fromEntity 메서드 만들어서 Meeting → MeetingDTO 변환
+                .collect(Collectors.toList());
+
+        return PageResponseDTO.<MeetingDTO>withAll()
+                .pageRequestDTO(pageRequestDTO)
+                .dtoList(dtoList)
+                .total((int) meetingPage.getTotalElements())
+                .build();
     }
 
     // 엔티티를 DTO로 변환하는 헬퍼 메서드

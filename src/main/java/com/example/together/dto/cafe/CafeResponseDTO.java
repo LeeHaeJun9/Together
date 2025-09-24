@@ -1,5 +1,6 @@
 package com.example.together.dto.cafe;
 
+import com.example.together.domain.Cafe;
 import com.example.together.domain.CafeCategory;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -31,4 +32,14 @@ public class CafeResponseDTO {
     private String cafeThumbnail;
     private boolean isOwner;
     private boolean isMember;
+
+    public static CafeResponseDTO fromEntity(Cafe cafe) {
+        return CafeResponseDTO.builder()
+                .id(cafe.getId())
+                .name(cafe.getName())
+                .description(cafe.getDescription())
+                .cafeThumbnail(cafe.getCafeThumbnail())
+                .memberCount(cafe.getMemberCount())
+                .build();
+    }
 }

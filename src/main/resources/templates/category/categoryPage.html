@@ -10,14 +10,12 @@
 </head>
 <body>
 
-<!-- 헤더 -->
 <div th:replace="~{/layout/header :: header}"></div>
 
 <main class="container my-4">
 
   <h2 class="mb-4" th:text="${category} + ' 카테고리 전체 보기'">카테고리 전체 보기</h2>
 
-  <!-- 모임 섹션 -->
   <section class="mb-5">
     <h3>모임 (공개)</h3>
     <div th:if="${#lists.isEmpty(meetings)}" class="text-muted">
@@ -25,16 +23,25 @@
     </div>
     <div class="list-group" th:unless="${#lists.isEmpty(meetings)}">
       <a th:each="meeting : ${meetings}"
-         th:href="@{/cafe/{cafeId}/meeting/read(id=${meeting.id}, cafeId=${meeting.cafe.id}, page=1, size=10)}"
+         th:href="@{/cafe/{cafeId}/meeting/read(id=${meeting.id}, cafeId=${meeting.cafe.id})}"
          class="list-group-item list-group-item-action meeting-card">
         <strong th:text="${meeting.title}">모임 제목</strong>
         <span class="text-muted small" th:text="${#temporals.format(meeting.meetingDate, 'yyyy-MM-dd HH:mm')}">날짜</span>
         <p class="mb-0" th:text="${meeting.content}">모임 내용</p>
       </a>
     </div>
+    <nav th:if="${meetingsPage.total > 0}" aria-label="Meeting Pagination">
+      <ul class="pagination justify-content-center">
+        <li class="page-item" th:each="pageNum : ${#numbers.sequence(meetingsPage.start, meetingsPage.end)}"
+            th:classappend="${pageNum == meetingsPage.pageRequestDTO.page} ? 'active'">
+          <a class="page-link"
+             th:href="@{/categories(category=${category}, m_page=${pageNum}, m_size=${meetingsPage.size}, c_page=${cafesPage.pageRequestDTO.page}, c_size=${cafesPage.pageRequestDTO.size}, t_page=${tradesPage.pageRequestDTO.page}, t_size=${tradesPage.pageRequestDTO.size}, type=${meetingsPage.pageRequestDTO.type}, keyword=${meetingsPage.pageRequestDTO.keyword}, sort=${meetingsPage.pageRequestDTO.sort})}"
+             th:text="${pageNum}"></a>
+        </li>
+      </ul>
+    </nav>
   </section>
 
-  <!-- 카페 섹션 -->
   <section class="mb-5">
     <h3>카페</h3>
     <div th:if="${#lists.isEmpty(cafes)}" class="text-muted">
@@ -53,9 +60,18 @@
         </div>
       </div>
     </div>
+    <nav th:if="${cafesPage.total > 0}" aria-label="Cafe Pagination">
+      <ul class="pagination justify-content-center">
+        <li class="page-item" th:each="pageNum : ${#numbers.sequence(cafesPage.start, cafesPage.end)}"
+            th:classappend="${pageNum == cafesPage.pageRequestDTO.page} ? 'active'">
+          <a class="page-link"
+             th:href="@{/categories(category=${category}, m_page=${meetingsPage.pageRequestDTO.page}, m_size=${meetingsPage.pageRequestDTO.size}, c_page=${pageNum}, c_size=${cafesPage.size}, t_page=${tradesPage.pageRequestDTO.page}, t_size=${tradesPage.pageRequestDTO.size}, type=${cafesPage.pageRequestDTO.type}, keyword=${cafesPage.pageRequestDTO.keyword}, sort=${cafesPage.pageRequestDTO.sort})}"
+             th:text="${pageNum}"></a>
+        </li>
+      </ul>
+    </nav>
   </section>
 
-  <!-- 중고거래 섹션 -->
   <section class="mb-5">
     <h3>중고거래</h3>
     <div th:if="${#lists.isEmpty(trades)}" class="text-muted">
@@ -75,11 +91,20 @@
         </div>
       </div>
     </div>
+    <nav th:if="${tradesPage.total > 0}" aria-label="Trade Pagination">
+      <ul class="pagination justify-content-center">
+        <li class="page-item" th:each="pageNum : ${#numbers.sequence(tradesPage.start, tradesPage.end)}"
+            th:classappend="${pageNum == tradesPage.pageRequestDTO.page} ? 'active'">
+          <a class="page-link"
+             th:href="@{/categories(category=${category}, m_page=${meetingsPage.pageRequestDTO.page}, m_size=${meetingsPage.pageRequestDTO.size}, c_page=${cafesPage.pageRequestDTO.page}, c_size=${cafesPage.pageRequestDTO.size}, t_page=${pageNum}, t_size=${tradesPage.size}, type=${tradesPage.pageRequestDTO.type}, keyword=${tradesPage.pageRequestDTO.keyword}, sort=${tradesPage.pageRequestDTO.sort})}"
+             th:text="${pageNum}"></a>
+        </li>
+      </ul>
+    </nav>
   </section>
 
 </main>
 
-<!-- 푸터 -->
 <div th:replace="~{/layout/footer :: footer}"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
