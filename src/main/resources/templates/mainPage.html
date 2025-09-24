@@ -51,11 +51,13 @@
     <section class="container">
         <h2 class="section-title">카테고리별 탐색</h2>
         <div class="category-grid">
-            <a th:href="@{/cafe/list(category='ALL')}" class="category-item">
+            <a th:href="@{/categories(category='ALL')}" class="category-item">
                 <img th:src="@{/images/category-all.png}" alt="전체" />
                 <div class="category-caption">전체</div>
             </a>
-            <a th:each="category : ${categories}" th:href="@{/cafe/list(category=${category.name()})}" class="category-item">
+            <a th:each="category : ${categories}"
+               th:href="@{/categories(category=${category.name()})}"
+               class="category-item">
                 <img th:src="@{${category.imageUrl}}" th:alt="${category.koreanName} + ' 카테고리 이미지'" />
                 <div class="category-caption" th:text="${category.koreanName}">카테고리명</div>
             </a>
