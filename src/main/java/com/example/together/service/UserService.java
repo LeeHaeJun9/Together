@@ -1,4 +1,5 @@
-// src/main/java/com/example/together/service/UserService.java
+// UserService.java - 올바른 인터페이스 형식
+
 package com.example.together.service;
 
 import com.example.together.domain.User;
@@ -7,7 +8,6 @@ import com.example.together.dto.member.RegisterDTO;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.multipart.MultipartFile;
-
 
 public interface UserService {
     // 로그인 관련
@@ -30,6 +30,8 @@ public interface UserService {
     // =============== 새로 추가되는 메소드들 ===============
     boolean updateUserField(String userId, String field, String value);
     boolean changePassword(String userId, String currentPassword, String newPassword);
+
+    User findUserForPasswordReset(String userId, String email, String name);
     // ===============================================
 
     boolean isEmailExistsExcludeUser(String email, String excludeUserId);
@@ -41,5 +43,6 @@ public interface UserService {
 
     String uploadProfilePhoto(String userId, MultipartFile photo);
 
+    // 닉네임 중복 확인 메소드 선언 추가
+    boolean isNicknameAvailable(String nickname, String currentUserId);
 }
-

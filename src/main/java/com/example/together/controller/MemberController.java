@@ -5,6 +5,7 @@ import com.example.together.dto.member.memberRegisterDTO;
 import com.example.together.service.UserService;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -27,6 +28,10 @@ import java.util.Map;
 public class MemberController {
 
     private final UserService userService;
+
+    @Autowired
+    private UserService memberService;  // UserService를 memberService로도 사용
+
 
     // 회원가입 페이지
     @GetMapping("/member/register")
@@ -364,11 +369,16 @@ public class MemberController {
      */
     private String getSuccessMessage(String field) {
         switch (field) {
-            case "email": return "이메일이 성공적으로 변경되었습니다.";
-            case "nickname": return "닉네임이 성공적으로 변경되었습니다.";
-            case "name": return "이름이 성공적으로 변경되었습니다.";
-            case "phone": return "전화번호가 성공적으로 변경되었습니다.";
-            default: return "정보가 성공적으로 수정되었습니다.";
+            case "email":
+                return "이메일이 성공적으로 변경되었습니다.";
+            case "nickname":
+                return "닉네임이 성공적으로 변경되었습니다.";
+            case "name":
+                return "이름이 성공적으로 변경되었습니다.";
+            case "phone":
+                return "전화번호가 성공적으로 변경되었습니다.";
+            default:
+                return "정보가 성공적으로 수정되었습니다.";
         }
     }
 
@@ -377,11 +387,16 @@ public class MemberController {
      */
     private String getErrorMessage(String field) {
         switch (field) {
-            case "email": return "이메일 변경에 실패했습니다. 이미 사용 중인 이메일일 수 있습니다.";
-            case "nickname": return "닉네임 변경에 실패했습니다.";
-            case "name": return "이름 변경에 실패했습니다.";
-            case "phone": return "전화번호 변경에 실패했습니다.";
-            default: return "정보 수정에 실패했습니다.";
+            case "email":
+                return "이메일 변경에 실패했습니다. 이미 사용 중인 이메일일 수 있습니다.";
+            case "nickname":
+                return "닉네임 변경에 실패했습니다.";
+            case "name":
+                return "이름 변경에 실패했습니다.";
+            case "phone":
+                return "전화번호 변경에 실패했습니다.";
+            default:
+                return "정보 수정에 실패했습니다.";
         }
     }
 
@@ -407,8 +422,19 @@ public class MemberController {
             boolean success = userService.changePassword(userId, currentPassword, newPassword);
 
             if (success) {
-                response.put("success", true);
-                response.put("message", "비밀번호가 성공적으로 변경되었습니다.");
+                // 특정 조건에서 임시 비밀번호 발급 (예: 관리자가 사용자 비밀번호 재설정 시)
+                boolean needTempPassword = false; // 실제 조건에 맞게 수정
+
+                if (needTempPassword) {
+                    // 임시 비밀번호 생성
+                    String tempPassword = "temp" + System.currentTimeMillis() % 10000;
+                    response.put("success", true);
+                    response.put("tempPassword", tempPassword); // 이 부분이 모달 트리거
+                    response.put("message", "임시 비밀번호가 발급되었습니다.");
+                } else {
+                    response.put("success", true);
+                    response.put("message", "비밀번호가 성공적으로 변경되었습니다.");
+                }
                 log.info("비밀번호 변경 성공: userId = {}", userId);
             } else {
                 response.put("success", false);
@@ -534,5 +560,54 @@ public class MemberController {
             log.info("마이페이지 요청: userId = {}", userId);
         }
         return "member/mypage";  // mypage.html 템플릿으로 이동
+    }
+    // MemberController.java에 추가할 메소드
+
+    @PostMapping("/member/profile/checkNickname")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> checkNickname(
+            @RequestBody Map<String, String> request,
+            Principal principal) {
+
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            String nickname = request.get("nickname");
+            String currentUserId = principal.getName();
+
+            // 입력값 검증
+            if (nickname == null || nickname.trim().isEmpty()) {
+                response.put("available", false);
+                response.put("message", "닉네임을 입력해주세요.");
+                return ResponseEntity.badRequest().body(response);
+            }
+
+            // 닉네임 길이 검증 (2-20자)
+            if (nickname.length() < 2 || nickname.length() > 20) {
+                response.put("available", false);
+                response.put("message", "닉네임은 2-20자 사이여야 합니다.");
+                return ResponseEntity.badRequest().body(response);
+            }
+
+            // 특수문자 검증 (한글, 영문, 숫자만 허용)
+            if (!nickname.matches("^[가-힣a-zA-Z0-9]+$")) {
+                response.put("available", false);
+                response.put("message", "닉네임은 한글, 영문, 숫자만 사용 가능합니다.");
+                return ResponseEntity.badRequest().body(response);
+            }
+
+            // 데이터베이스에서 중복 확인
+            boolean isAvailable = userService.isNicknameAvailable(nickname, currentUserId);
+
+            response.put("available", isAvailable);
+            response.put("message", isAvailable ? "사용 가능한 닉네임입니다." : "이미 사용중인 닉네임입니다.");
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            response.put("available", false);
+            response.put("message", "중복확인 중 오류가 발생했습니다.");
+            return ResponseEntity.internalServerError().body(response);
+        }
     }
 }
