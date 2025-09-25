@@ -40,8 +40,8 @@ public class TradeController {
       TradeCategory.COOK,    "요리",
       TradeCategory.MUSIC,   "음악",
       TradeCategory.PET,     "반려동물",
-      TradeCategory.SPORTS,  "운동",
-      TradeCategory.STUDY,   "학습",
+      TradeCategory.SPORTS,  "스포츠",
+      TradeCategory.STUDY,   "스터디",
       TradeCategory.TRAVEL,  "여행"
   );
   private static final Map<String, TradeCategory> KO_TO_ENUM;
@@ -52,7 +52,7 @@ public class TradeController {
   }
   // 뷰 선택용(라벨)
   private static final List<String> CATEGORIES = List.of(
-      "예술", "요리", "음악", "반려동물", "운동", "학습", "여행"
+      "예술", "요리", "음악", "반려동물", "스포츠", "스터디", "여행"
   );
 
   @InitBinder
