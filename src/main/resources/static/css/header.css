@@ -42,8 +42,40 @@
     text-decoration: none;
     transition: color 0.3s;
 }
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 
-/* 호버 시 색상 변경 */
-.nav-links a:hover {
-    color: var(--primary-color);
+    color: var(--text-color);
+    margin: 0;
+    padding: 0;
+}
+a {
+    text-decoration: none; /* 밑줄 제거 */
+    color: inherit; /* 글자색 유지 */
+}
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    /* px-4 px-lg-5 클래스가 남아있더라도 기본 padding을 0으로 덮어씁니다. */
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+
+/* 뷰포트가 클 때만 적용되는 규칙이 있다면 이대로 유지 */
+@media (min-width: 1200px) {
+    .container {
+        max-width: 1200px;
+    }
+}
+
+header .logo-section {
+    color: var(--text-color) !important;
+}
+
+
+/* 2. LI 간격 넓어지는 문제 해결 (Bootstrap/header.css 충돌 해결) */
+header .nav-links li {
+    margin: 0 !important;
+    padding: 0 !important;
+    /* li 안의 a 태그 패딩만 header.css의 gap: 1rem과 결합되어 간격을 만듭니다. */
 }

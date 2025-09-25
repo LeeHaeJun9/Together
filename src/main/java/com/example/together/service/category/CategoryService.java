@@ -15,7 +15,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 
 @Service
 @RequiredArgsConstructor
@@ -79,7 +81,18 @@ public class CategoryService {
         if ("ALL".equalsIgnoreCase(category)) {
             tradePage = tradeRepository.findAll(pageable);
         } else {
-            TradeCategory tradeCategory = TradeCategory.valueOf(category.toUpperCase());
+            TradeCategory tradeCategory = mapLabelToEnum(category);
+
+            if (tradeCategory == null) {
+                // 유효하지 않은 카테고리가 들어왔거나 매핑에 실패한 경우
+                // 빈 페이지 목록을 반환하여 서버 에러(IllegalArgumentException)를 방지합니다.
+                return PageResponseDTO.<TradeDTO>withAll()
+                        .pageRequestDTO(pageRequestDTO)
+                        .dtoList(Collections.emptyList())
+                        .total(0)
+                        .build();
+            }
+
             tradePage = tradeRepository.findByCategory(tradeCategory, pageable);
         }
 
@@ -92,5 +105,33 @@ public class CategoryService {
                 .dtoList(dtoList)
                 .total((int) tradePage.getTotalElements())
                 .build();
+    }
+    private TradeCategory mapLabelToEnum(String t) {
+        if (t == null) return null;
+        t = t.trim();
+        if (t.isEmpty()) return null;
+
+        // enum 이름 그대로 들어온 경우
+        try {
+            // TradeCategory.valueOf("SPORTS") 등
+            return TradeCategory.valueOf(t.toUpperCase(Locale.ROOT));
+        } catch (Exception ignore) {}
+
+        // 한글 라벨 매핑
+        try {
+            return switch (t) {
+                // TradeController의 mapLabelToEnum 로직을 그대로 사용
+                case "운동"     -> TradeCategory.valueOf("SPORTS");
+                case "예술"     -> TradeCategory.valueOf("ART");
+                case "음악"     -> TradeCategory.valueOf("MUSIC");
+                case "반려동물" -> TradeCategory.valueOf("PETS"); // 팀원 코드를 따라 PETS 사용
+                case "수집"     -> TradeCategory.valueOf("COLLECTION");
+                case "언어"     -> TradeCategory.valueOf("LANGUAGE");
+                case "요리"     -> TradeCategory.valueOf("COOKING");
+                default -> null;
+            };
+        } catch (Exception e) {
+            return null;
+        }
     }
 }
