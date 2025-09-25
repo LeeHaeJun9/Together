@@ -300,12 +300,24 @@ public class UserServiceImpl implements UserService, UserDetailsService {
                     break;
 
                 case "nickname":
-                case "name":
                     if (value == null || value.trim().length() < 2 || value.trim().length() > 10) {
                         log.warn("유효하지 않은 닉네임: nickname = {}", value);
                         return false;
                     }
-                    user.setName(value.trim());
+                    // 닉네임 중복 확인 추가
+                    if (!isNicknameAvailable(value.trim(), userId)) {
+                        log.warn("이미 사용 중인 닉네임: nickname = {}", value);
+                        return false;
+                    }
+                    user.setNickname(value.trim()); // 수정: setName → setNickname
+                    break;
+
+                case "name":
+                    if (value == null || value.trim().length() < 2 || value.trim().length() > 10) {
+                        log.warn("유효하지 않은 이름: name = {}", value);
+                        return false;
+                    }
+                    user.setName(value.trim()); // 이름은 setName 사용
                     break;
 
                 case "phone":
