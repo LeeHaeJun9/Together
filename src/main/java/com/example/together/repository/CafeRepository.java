@@ -2,8 +2,8 @@ package com.example.together.repository;
 
 import com.example.together.domain.Cafe;
 import com.example.together.domain.CafeCategory;
+import com.example.together.repository.search.CafeSearch;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -12,7 +12,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 import java.util.Optional;
 
-public interface CafeRepository extends JpaRepository<Cafe,Long> {
+public interface CafeRepository extends JpaRepository<Cafe,Long>, CafeSearch {
     Optional<Object> findByName(String name);
 
     List<Cafe> findByCategoryAndIdNot(CafeCategory category, Long id, Pageable pageable);
