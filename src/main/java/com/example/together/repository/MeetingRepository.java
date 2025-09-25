@@ -26,4 +26,7 @@ public interface MeetingRepository extends JpaRepository<Meeting,Long>, MeetingS
 
     List<Meeting> findByVisibility(Visibility visibility, PageRequest pageable);
 
+    // 주최한 모임 리스트
+    @Query("SELECT m FROM Meeting m WHERE m.organizer.id = :userId")
+    List<Meeting> findMeetingsHostedByUserId(Long userId);
 }

@@ -47,7 +47,6 @@ public class MeetingDTO {
     private String address;
     private String location;
 
-
     public static MeetingDTO fromEntity(Meeting meeting) {
         return MeetingDTO.builder()
                 .id(meeting.getId())

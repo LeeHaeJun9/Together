@@ -4,7 +4,9 @@ import com.example.together.domain.Meeting;
 import com.example.together.domain.MeetingJoinStatus;
 import com.example.together.domain.MeetingUser;
 import com.example.together.domain.User;
+import com.example.together.dto.meeting.MeetingDTO;
 import com.example.together.dto.meeting.MeetingUserDTO;
+import com.example.together.dto.meeting.MyJoinedMeetingsDTO;
 import com.example.together.repository.MeetingRepository;
 import com.example.together.repository.MeetingUserRepository;
 import jakarta.transaction.Transactional;
@@ -12,6 +14,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -52,5 +56,4 @@ public class MeetingUserServiceImpl implements MeetingUserService{
     public boolean isUserJoined(Long meetingId, Long userId) {
         return meetingUserRepository.existsByMeetingIdAndUserIdAndJoinStatus(meetingId, userId, MeetingJoinStatus.ACCEPTED);
     }
-
 }

@@ -1,6 +1,7 @@
 package com.example.together.service.meeting;
 
 import com.example.together.dto.meeting.MeetingUserDTO;
+import com.example.together.dto.meeting.MyJoinedMeetingsDTO;
 
 import java.util.List;
 
