@@ -37,8 +37,8 @@ public class MeetingReview extends BaseEntity {
     private String meetingLocation;
     private String meetingAddress;
 
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    private Cafe cafe;
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Cafe cafe;
 
     @OneToMany(mappedBy = "review", cascade = {CascadeType.ALL}, fetch = FetchType.LAZY, orphanRemoval = true)
     @Builder.Default

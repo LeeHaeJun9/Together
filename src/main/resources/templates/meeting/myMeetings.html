@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>나의 모임 - Together</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .meeting-card {
+            transition: transform 0.2s;
+            border-left: 4px solid #6f42c1;
+        }
+        .meeting-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .meeting-status {
+            font-size: 0.8rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 15px;
+        }
+        .meeting-thumbnail {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+        .page-header {
+            background: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%);
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+        }
+        .participant-count {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+        .meeting-date {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+        .nav-tabs .nav-link.active {
+            background-color: #6f42c1;
+            border-color: #6f42c1;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+<!-- Header -->
+<div class="page-header">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h2><i class="fas fa-users me-2"></i>나의 모임</h2>
+                <p class="mb-0">참여한 모임과 주최한 모임을 확인하세요</p>
+            </div>
+            <div class="col-md-4 text-end">
+                <a href="/meeting/create" class="btn btn-light">
+                    <i class="fas fa-plus"></i> 모임 만들기
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Meeting Statistics -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-calendar-check fa-2x mb-2"></i>
+                    <h4 th:text="${myJoinedMeetings.countUpcoming}">0</h4>
+                    <small>예정된 모임</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-check-circle fa-2x mb-2"></i>
+                    <h4 th:text="${myJoinedMeetings.countComplete}">0</h4>
+                    <small>완료된 모임</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-crown fa-2x mb-2"></i>
+                    <h4 th:text="${myJoinedMeetings.countHosted}">0</h4>
+                    <small>주최한 모임</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-star fa-2x mb-2"></i>
+                    <h4 th:text="${myJoinedMeetings.countMyReviews}">0</h4>
+                    <small>작성한 후기</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <ul class="nav nav-tabs mb-4" id="meetingTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="upcoming-tab" data-bs-toggle="tab" data-bs-target="#upcoming" type="button" role="tab">
+                <i class="fas fa-calendar-alt me-2"></i>예정된 모임
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="completed-tab" data-bs-toggle="tab" data-bs-target="#completed" type="button" role="tab">
+                <i class="fas fa-history me-2"></i>완료된 모임
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="hosted-tab" data-bs-toggle="tab" data-bs-target="#hosted" type="button" role="tab">
+                <i class="fas fa-crown me-2"></i>주최한 모임
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="myreviews-tab" data-bs-toggle="tab" data-bs-target="#myreviews" type="button" role="tab">
+                <i class="fas fa-star me-2"></i>작성한 후기
+            </button>
+        </li>
+    </ul>
+
+    <!-- Tab Content -->
+    <div class="tab-content" id="meetingTabContent">
+        <!-- 예정된 모임 -->
+        <div class="tab-pane fade show active" id="upcoming" role="tabpanel">
+            <div class="row" th:if="${myJoinedMeetings.upcomingMeetings != null and !myJoinedMeetings.upcomingMeetings.isEmpty()}">
+                <div class="col-md-6 mb-3" th:each="meeting : ${myJoinedMeetings.upcomingMeetings}">
+                    <div class="card meeting-card">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-3">
+                                    <th:block th:if="${meeting.cafe != null and meeting.cafe.cafeThumbnail != null}">
+                                        <img th:src="@{${meeting.cafe.cafeThumbnail}}" alt="Cafe Thumbnail" />
+                                    </th:block>
+                                </div>
+                                <div class="col-9">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <h6 class="card-title mb-0" th:text="${meeting.title}">모임명</h6>
+                                        <span class="badge meeting-status bg-primary">예정</span>
+                                    </div>
+                                    <p class="text-muted small mb-1" th:text="${meeting.location}">모임 장소</p>
+                                    <div class="meeting-date mb-2">
+                                        <i class="fas fa-calendar"></i>
+                                        <span th:text="${#temporals.format(meeting.meetingDate, 'yyyy-MM-dd HH:mm')}">모임 일시</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+<!--                                        <span class="participant-count">-->
+<!--                                            <i class="fas fa-users"></i>-->
+<!--                                            <span th:text="|${meetingUser.meeting.currentParticipants}/${meetingUser.meeting.maxParticipants}명|">0/0명</span>-->
+<!--                                        </span>-->
+                                        <small class="text-muted" th:text="${meeting.cafe.name}">카페명</small>
+                                    </div>
+                                    <div class="mt-2">
+                                        <a th:href="@{/cafe/{cafeId}/meeting/read(cafeId=${meeting.cafe.id}, id=${meeting.id})}"
+                                           class="btn btn-sm btn-primary">상세보기</a>
+
+                                        <button type="button" class="btn btn-sm btn-outline-danger cancel-btn"
+                                                data-meeting-id="24" data-cafe-id="1"
+                                                data-bs-toggle="modal" data-bs-target="#cancelModal">참여 취소</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal fade" id="cancelModal" tabindex="-1" aria-labelledby="cancelModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <form th:action="@{/cafe/{cafeId}/meeting/cancel(cafeId=${meeting.cafe.id})}" method="post">
+                                    <input type="hidden" name="meetingId" th:value="${meeting.id}" />
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="cancelModalLabel">신청 취소</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="닫기"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        정말로 이 모임 신청을 취소하시겠습니까?
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">돌아가기</button>
+                                        <button type="submit" class="btn btn-danger">모임 신청 취소</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <div th:if="${upcomingMeetingList == null or upcomingMeetingList.isEmpty()}" class="text-center py-5">
+                <i class="fas fa-calendar-alt fa-3x text-muted mb-3"></i>
+                <h5 class="text-muted">예정된 모임이 없습니다</h5>
+                <a href="/meeting/search" class="btn btn-primary mt-2">모임 찾기</a>
+            </div>
+        </div>
+
+        <!-- 완료된 모임 -->
+        <div class="tab-pane fade" id="completed" role="tabpanel">
+            <div class="row" th:if="${myJoinedMeetings.completedMeetings != null and !myJoinedMeetings.completedMeetings.isEmpty()}">
+                <div class="col-md-6 mb-3" th:each="meeting : ${myJoinedMeetings.completedMeetings}">
+                    <div class="card meeting-card">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-3">
+                                    <th:block th:if="${meeting.cafe != null and meeting.cafe.cafeThumbnail != null}">
+                                        <img th:src="@{${meeting.cafe.cafeThumbnail}}" alt="Cafe Thumbnail" />
+                                    </th:block>
+                                </div>
+                                <div class="col-9">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <h6 class="card-title mb-0" th:text="${meeting.title}">완료된 모임명</h6>
+                                        <span class="badge meeting-status bg-success">완료</span>
+                                    </div>
+                                    <p class="text-muted small mb-1" th:text="${meeting.location}">모임 장소</p>
+                                    <div class="meeting-date mb-2">
+                                        <i class="fas fa-calendar-check"></i>
+                                        <span th:text="${#temporals.format(meeting.meetingDate, 'yyyy-MM-dd HH:mm')}">완료 일시</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+<!--                                        <span class="participant-count">-->
+<!--                                            <i class="fas fa-users"></i>-->
+<!--                                            <span th:text="|참여자 ${meeting.currentParticipants}명|">참여자 0명</span>-->
+<!--                                        </span>-->
+                                        <small class="text-muted" th:text="${meeting.cafe.name}">카페명</small>
+                                    </div>
+                                    <div class="mt-2">
+                                        <a th:href="@{/cafe/{cafeId}/meeting/read(cafeId=${meeting.cafe.id}, id=${meeting.id})}"
+                                           class="btn btn-sm btn-primary">상세보기</a>
+
+                                        <a th:href="@{/cafe/{cafeId}/meeting/review/register(cafeId=${meeting.cafe.id}, meetingId=${meeting.id})}">
+                                            <button class="btn btn-sm btn-warning">후기작성</button>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div th:if="${completedMeetingList == null or completedMeetingList.isEmpty()}" class="text-center py-5">
+                <i class="fas fa-history fa-3x text-muted mb-3"></i>
+                <h5 class="text-muted">완료된 모임이 없습니다</h5>
+            </div>
+        </div>
+
+        <!-- 주최한 모임 -->
+        <div class="tab-pane fade" id="hosted" role="tabpanel">
+            <div class="row" th:if="${myJoinedMeetings.hostedMeetings != null and !myJoinedMeetings.hostedMeetings.isEmpty()}">
+                <div class="col-md-6 mb-3" th:each="meeting : ${myJoinedMeetings.hostedMeetings}">
+                    <div class="card meeting-card">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-3">
+                                    <img th:if="${meeting.cafe != null and meeting.cafe.cafeThumbnail != null}"
+                                         th:src="@{${meeting.cafe.cafeThumbnail}}"
+                                         alt="모임 이미지" class="meeting-thumbnail">
+                                </div>
+                                <div class="col-9">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <h6 class="card-title mb-0" th:text="${meeting.title}">주최한 모임명</h6>
+                                        <span class="badge meeting-status bg-info">주최</span>
+                                    </div>
+                                    <p class="text-muted small mb-1" th:text="${meeting.location}">모임 장소</p>
+                                    <div class="meeting-date mb-2">
+                                        <i class="fas fa-calendar"></i>
+                                        <span th:text="${#temporals.format(meeting.meetingDate, 'yyyy-MM-dd HH:mm')}">모임 일시</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+<!--                                        <span class="participant-count">-->
+<!--                                            <i class="fas fa-users"></i>-->
+<!--                                            <span th:text="|${meeting.currentParticipants}/${meeting.maxParticipants}명|">0/0명</span>-->
+<!--                                        </span>-->
+                                        <small class="text-muted" th:text="${meeting.cafe.name}">카페명</small>
+                                    </div>
+                                    <div class="mt-2">
+                                        <a th:href="@{/cafe/{cafeId}/meeting/read(cafeId=${meeting.cafe.id}, id=${meeting.id})}"
+                                           class="btn btn-sm btn-primary">상세보기</a>
+                                        <a th:href="@{/cafe/{cafeId}/meeting/modify(cafeId=${meeting.cafe.id}, id=${meeting.id})}"
+                                           class="btn btn-sm btn-outline-secondary">수정</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div th:if="${hostedMeetingList == null or hostedMeetingList.isEmpty()}" class="text-center py-5">
+                <i class="fas fa-crown fa-3x text-muted mb-3"></i>
+                <h5 class="text-muted">주최한 모임이 없습니다</h5>
+                <a href="/meeting/create" class="btn btn-info mt-2">모임 만들기</a>
+            </div>
+        </div>
+
+        <!-- 내가 쓴 리뷰 -->
+        <div class="tab-pane fade" id="myreviews" role="tabpanel">
+            <div class="row" th:if="${myJoinedMeetings.myReviews != null and !myJoinedMeetings.myReviews.isEmpty()}">
+                <div class="col-md-12 mb-3" th:each="review : ${myJoinedMeetings.myReviews}">
+                    <div class="card meeting-card">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-3">
+                                    <!--                                <img th:if="${meeting.cafe != null and meeting.cafe.cafeThumbnail != null}"-->
+                                    <!--                                     th:src="@{${meeting.cafe.cafeThumbnail}}"-->
+                                    <!--                                     alt="모임 이미지" class="meeting-thumbnail">-->
+                                </div>
+                                <div class="col-9">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <h6 class="card-title mb-0" th:text="${review.title}">리뷰 제목</h6>
+                                        <span class="badge meeting-status bg-info">리뷰</span>
+                                    </div>
+                                    <p class="text-muted small mb-1" th:text="${review.meetingLocation}">모임 장소</p>
+                                    <div class="meeting-date mb-2">
+                                        <i class="fas fa-calendar"></i>
+                                        <span th:text="${#temporals.format(review.meetingDate, 'yyyy-MM-dd HH:mm')}">모임 일시</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <!--                                        <span class="participant-count">-->
+                                        <!--                                            <i class="fas fa-users"></i>-->
+                                        <!--                                            <span th:text="|${meeting.currentParticipants}/${meeting.maxParticipants}명|">0/0명</span>-->
+                                        <!--                                        </span>-->
+                                        <small class="text-muted" th:text="${review.cafeName}">카페명</small>
+                                    </div>
+                                    <div class="mt-2">
+<!--                                        <a th:href="@{/cafe/{cafeId}/meeting/review/read(cafeId=${meeting.cafe.id}, id=${meeting.id})}"-->
+                                        <a class="btn btn-sm btn-primary">관리하기</a>
+                                        <a class="btn btn-sm btn-outline-secondary">수정</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div th:if="${myReviewsList == null or myReviewsList.isEmpty()}" class="text-center py-5">
+                <i class="fas fa-crown fa-3x text-muted mb-3"></i>
+                <h5 class="text-muted">리뷰한 모임이 없습니다</h5>
+                <a href="/meeting/create" class="btn btn-info mt-2">참여한 모임 보기</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Back to MyPage -->
+    <div class="text-center mt-4">
+        <a href="/member/mypage" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> 마이페이지로 돌아가기
+        </a>
+    </div>
+</div>
+
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // function leaveMeeting(meetingId) {
+    //     if (confirm('정말로 이 모임 참여를 취소하시겠습니까?')) {
+    //         fetch(`/api/meeting/${meetingId}/leave`, {
+    //             method: 'POST',
+    //             headers: {
+    //                 'Content-Type': 'application/json',
+    //             }
+    //         })
+    //             .then(response => {
+    //                 if (response.ok) {
+    //                     alert('모임 참여가 취소되었습니다.');
+    //                     location.reload();
+    //                 } else {
+    //                     alert('취소 처리 중 오류가 발생했습니다.');
+    //                 }
+    //             })
+    //             .catch(error => {
+    //                 console.error('Error:', error);
+    //                 alert('오류가 발생했습니다.');
+    //             });
+    //     }
+    // }
+
+    // function writeReview(meetingId) {
+    //     // 후기 작성 페이지로 이동 또는 모달 표시
+    //     window.location.href = `/meeting/${meetingId}/review`;
+    // }
+
+    //     document.addEventListener('DOMContentLoaded', function () {
+    //     document.querySelectorAll('.cancel-btn').forEach(button => {
+    //         button.addEventListener('click', () => {
+    //             const meetingId = button.getAttribute('data-meeting-id');
+    //             const cafeId = button.getAttribute('data-cafe-id');
+    //             const form = document.getElementById('cancelForm');
+    //             const modalMeetingId = document.getElementById('modalMeetingId');
+    //
+    //             if (!meetingId || !cafeId) {
+    //                 console.error('meetingId 또는 cafeId가 비어 있음!');
+    //                 return;
+    //             }
+    //
+    //             form.action = `/cafe/${cafeId}/meeting/cancel`;
+    //             modalMeetingId.value = meetingId;
+    //         });
+    //     });
+    // });
+
+
+</script>
+</body>
+</html>

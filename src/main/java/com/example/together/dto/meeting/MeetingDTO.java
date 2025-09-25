@@ -46,6 +46,4 @@ public class MeetingDTO {
 
     private String address;
     private String location;
-
-
 }

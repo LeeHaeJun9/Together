@@ -259,6 +259,7 @@ public class MeetingController {
 
     @PostMapping("/meeting/cancel")
     public String meetingCancel(@RequestParam Long meetingId,
+                                @PathVariable Long cafeId,
                                 Principal principal,
                                 RedirectAttributes redirectAttributes) {
         User user = getUserFromPrincipal(principal);
