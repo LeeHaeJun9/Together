@@ -6,30 +6,79 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         .main-wrap{display:flex;justify-content:center;}
-        .viewer{position:relative;display:flex;justify-content:center;align-items:center;width:100%;max-width:640px;aspect-ratio:16/9;margin:0 auto;background:#f5f5f5;border:1px solid #eee;border-radius:12px;}
-        .viewer>img.thumb{width:100%;height:100%;object-fit:contain;border:none;border-radius:0;background:transparent;cursor:zoom-in;}
-        .nav-btn{position:absolute;top:50%;transform:translateY(-50%);width:44px;height:44px;border:none;border-radius:50%;background:#ffffffcc;box-shadow:0 2px 8px rgba(0,0,0,.2);font-size:28px;line-height:44px;padding:0;cursor:pointer;display:flex;align-items:center;justify-content:center;user-select:none;}
-        .nav-btn.prev{left:8px}.nav-btn.next{right:8px}
+
+        .viewer{
+            position:relative;display:flex;justify-content:center;align-items:center;
+            width:100%;max-width:640px;aspect-ratio:16/9;margin:0 auto;
+            background:#fff;border:none;border-radius:12px;overflow:hidden;
+        }
+        .viewer>img.thumb{
+            width:100%;height:100%;object-fit:contain;background:#fff;cursor:zoom-in;
+        }
+
+        .nav-btn{
+            position:absolute;top:50%;transform:translateY(-50%);
+            width:44px;height:44px;border:none;border-radius:12px;
+            background:rgba(241,243,245,.92);
+            color:#333;box-shadow:0 2px 8px rgba(0,0,0,.12);
+            font-size:24px;line-height:44px;padding:0;cursor:pointer;
+            display:flex;align-items:center;justify-content:center;user-select:none;
+        }
+        .nav-btn:hover{background:#f8f9fa;}
+        .nav-btn.prev{left:0}
+        .nav-btn.next{right:0}
+
         .gallery{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
-        .gallery img{width:90px;height:90px;object-fit:cover;border-radius:8px;border:1px solid #eee;cursor:pointer}
+        .gallery img{width:90px;height:90px;object-fit:cover;border-radius:8px;border:1px solid #eee;cursor:pointer;background:#fff}
         .gallery img.active{outline:3px solid #0d6efd}
+
         .meta{font-size:1.05rem;line-height:1.5}.meta .line{display:block;margin-bottom:4px}
         .bottom-actions{display:flex;justify-content:flex-end;gap:8px}
+
         .img-modal{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:1050;padding:24px}
         .img-modal.show{display:flex}
         .img-modal .inner{position:relative;max-width:90vw;max-height:90vh;display:flex;align-items:center;justify-content:center}
         .img-modal img{max-width:90vw;max-height:90vh;object-fit:contain;background:#000}
-        .img-modal .close-btn{position:absolute;top:8px;right:8px;width:36px;height:36px;border:none;border-radius:50%;background:#00000099;color:#fff;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+        .img-modal .close-btn{position:absolute;top:8px;right:8px;width:36px;height:36px;border:none;border-radius:10px;background:#00000099;color:#fff;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+
+        /* 아이콘 전용 목록 버튼 (보더 제거) */
+        .icon-btn{
+            display:inline-flex; align-items:center; justify-content:center;
+            width:44px; height:44px; border-radius:10px;
+            border:none; background:transparent; color:#6c757d; text-decoration:none;
+            transition:.15s;
+        }
+        .icon-btn:hover{ color:#0d6efd; background:#f5f9ff; }
+        .icon-btn:focus{ outline:none; box-shadow:0 0 0 .2rem rgba(13,110,253,.15); }
+        .icon-btn svg{ width:27px; height:27px; }
     </style>
 </head>
 <body>
-<!-- 공통 헤더 -->
 <div th:replace="~{/layout/header :: header}"></div>
 
 <main class="container py-4">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h2 class="mb-0" th:text="${dto != null ? dto.title : '게시물 보기'}">게시물 보기</h2>
-        <a class="btn btn-secondary btn-sm" th:href="${backUrl}">목록</a>
+
+        <!-- 목록 아이콘 버튼 (툴팁: 목록). backUrl 우선, 없으면 /trade/list -->
+        <a class="icon-btn"
+           th:if="${backUrl != null}"
+           th:href="${backUrl}"
+           title="목록" aria-label="목록"
+           data-bs-toggle="tooltip" data-bs-placement="bottom">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bi bi-filter-right" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+                <path d="M14 10.5a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0 0 1h3a.5.5 0 0 0 .5-.5m0-3a.5.5 0 0 0-.5-.5h-7a.5.5 0 0 0 0 1h7a.5.5 0 0 0 .5-.5m0-3a.5.5 0 0 0-.5-.5h-11a.5.5 0 0 0 0 1h11a.5.5 0 0 0 .5-.5"/>
+            </svg>
+        </a>
+        <a class="icon-btn"
+           th:if="${backUrl == null}"
+           th:href="@{/trade/list}"
+           title="목록" aria-label="목록"
+           data-bs-toggle="tooltip" data-bs-placement="bottom">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bi bi-filter-right" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+                <path d="M14 10.5a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0 0 1h3a.5.5 0 0 0 .5-.5m0-3a.5.5 0 0 0-.5-.5h-7a.5.5 0 0 0 0 1h7a.5.5 0 0 0 .5-.5m0-3a.5.5 0 0 0-.5-.5h-11a.5.5 0 0 0 0 1h11a.5.5 0 0 0 .5-.5"/>
+            </svg>
+        </a>
     </div>
 
     <div th:if="${dto == null}" class="alert alert-warning">
@@ -39,12 +88,12 @@
     <div th:if="${dto != null}">
         <!-- 대표 이미지 -->
         <div class="mb-3 main-wrap viewer" th:with="noImg=@{/images/no-image.png}">
-            <button type="button" class="nav-btn prev" aria-label="이전 보기">&lsaquo;</button>
+            <button type="button" class="nav-btn prev" aria-label="이전 보기">‹</button>
             <img id="mainImage"
                  th:src="${images != null and !#lists.isEmpty(images) ? images.get(0).imageUrl : (!#strings.isEmpty(dto.thumbnail) ? dto.thumbnail : noImg)}"
                  alt="thumbnail" class="thumb"
                  onerror="this.onerror=null;this.src='/images/no-image.png'">
-            <button type="button" class="nav-btn next" aria-label="다음 보기">&rsaquo;</button>
+            <button type="button" class="nav-btn next" aria-label="다음 보기">›</button>
         </div>
 
         <!-- 썸네일 -->
@@ -58,18 +107,18 @@
 
         <!-- 메타 -->
         <div class="meta mb-3">
-        <span class="line"><strong>카테고리</strong> :
-          <span th:text="${dto.category != null ? dto.category : '미분류'}">미분류</span>
-        </span>
+            <span class="line"><strong>카테고리</strong> :
+                <span th:text="${dto.category != null ? dto.category : '미분류'}">미분류</span>
+            </span>
             <span class="line"><strong>상태</strong> :
-          <span th:text="${dto.status}">FOR_SALE</span>
-        </span>
+                <span th:text="${dto.status}">FOR_SALE</span>
+            </span>
             <span class="line"><strong>가격</strong> :
-          <span th:text="${#numbers.formatInteger(dto.price, 0, 'COMMA')}">0</span>원
-        </span>
+                <span th:text="${#numbers.formatInteger(dto.price, 0, 'COMMA')}">0</span>원
+            </span>
             <span class="line"><strong>닉네임</strong> :
-          <span th:text="${dto.sellerNickname != null ? dto.sellerNickname : '알수없음'}">닉네임</span>
-        </span>
+                <span th:text="${dto.sellerNickname != null ? dto.sellerNickname : '알수없음'}">닉네임</span>
+            </span>
         </div>
 
         <!-- CSRF 백업 -->
@@ -124,13 +173,18 @@
     </div>
 </main>
 
-<!-- 공통 푸터 -->
 <div th:replace="~{/layout/footer :: footer}"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     (function () {
-        // 슬라이더
+        // Tooltip init
+        if (window.bootstrap) {
+            document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function(el){
+                try{ new bootstrap.Tooltip(el); }catch(e){}
+            });
+        }
+
         const main    = document.getElementById('mainImage');
         const thumbs  = Array.from(document.querySelectorAll('.gallery img'));
         const prevBtn = document.querySelector('.nav-btn.prev');
@@ -145,7 +199,6 @@
         nextBtn && nextBtn.addEventListener('click', ()=>show(idx+1));
         highlight();
 
-        // 이미지 확대
         const modal=document.getElementById('imgModal'), zoomImg=document.getElementById('zoomImg'), closeBtn=modal.querySelector('.close-btn');
         function openModal(src){ if(!src) return; zoomImg.src=src; modal.classList.add('show'); modal.setAttribute('aria-hidden','false'); closeBtn.focus(); }
         function closeModal(){ modal.classList.remove('show'); modal.setAttribute('aria-hidden','true'); zoomImg.src=''; }
@@ -154,7 +207,6 @@
         closeBtn.addEventListener('click', closeModal);
         modal.addEventListener('click', e=>{ if(e.target===modal) closeModal(); });
 
-        // 찜 토글
         const btn=document.getElementById('btnFav'), favText=document.getElementById('favText'), favCount=document.getElementById('favCount');
         if(!btn||!favText||!favCount) return;
         const tradeId = btn.getAttribute('data-trade-id');
@@ -175,7 +227,10 @@
                 if (res.status===401){ alert('로그인이 필요합니다.'); return; }
                 if (res.status===403){ alert('권한이 없습니다.'); return; }
                 const data = await res.json();
-                if (typeof data.liked==='boolean') favText.textContent = data.liked ? '찜 취소' : '찜하기';
+                if (typeof data.liked==='boolean') {
+                    favText.textContent = data.liked ? '찜 취소' : '찜하기';
+                    alert(data.liked ? '찜 목록에 등록되었습니다.' : '찜이 해제되었습니다.');
+                }
                 if (typeof data.count==='number')  favCount.textContent = data.count;
             }catch(e){ console.error(e); alert('찜 처리 중 오류가 발생했습니다.'); }
             finally{ btn.disabled=false; }

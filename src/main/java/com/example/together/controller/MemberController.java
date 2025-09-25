@@ -4,6 +4,7 @@ import com.example.together.domain.User;
 import com.example.together.dto.member.memberRegisterDTO;
 import com.example.together.service.UserService;
 
+import com.example.together.service.chat.ChatService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -29,7 +30,8 @@ public class MemberController {
 
     private final UserService userService;
 
-    // ==================== 회원가입 관련 ====================
+
+  // ==================== 회원가입 관련 ====================
 
     // 회원가입 페이지
     @GetMapping("/member/register")
@@ -612,19 +614,19 @@ public class MemberController {
         return "member/myMeetings";
     }
 
-    @GetMapping("/member/favorites")
-    public String favoritesPage(Model model, Principal principal) {
-        if (principal != null) {
-            String userId = principal.getName();
-            model.addAttribute("totalFavorites", 0);
-            model.addAttribute("availableCount", 0);
-            model.addAttribute("soldOutCount", 0);
-            model.addAttribute("recentCount", 0);
-            model.addAttribute("favorites", new ArrayList<>());
-            log.info("찜한 상품 페이지 요청: userId = {}", userId);
-        }
-        return "member/favorites";
-    }
+//    @GetMapping("/member/favorites")
+//    public String favoritesPage(Model model, Principal principal) {
+//        if (principal != null) {
+//            String userId = principal.getName();
+//            model.addAttribute("totalFavorites", 0);
+//            model.addAttribute("availableCount", 0);
+//            model.addAttribute("soldOutCount", 0);
+//            model.addAttribute("recentCount", 0);
+//            model.addAttribute("favorites", new ArrayList<>());
+//            log.info("찜한 상품 페이지 요청: userId = {}", userId);
+//        }
+//        return "member/favorites";
+//    }
 
     @GetMapping("/member/settings")
     public String settingsPage() {

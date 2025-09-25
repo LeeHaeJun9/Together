@@ -3,6 +3,7 @@ package com.example.together.controller;
 import com.example.together.domain.Favorite;
 import com.example.together.domain.User;
 import com.example.together.repository.UserRepository;
+import com.example.together.service.chat.ChatService;
 import com.example.together.service.trade.FavoriteService;
 import com.example.together.service.trade.TradeImageService;
 import lombok.RequiredArgsConstructor;
@@ -19,13 +20,14 @@ import java.util.*;
 
 @Slf4j
 @Controller
-@RequestMapping("/favorite")
 @RequiredArgsConstructor
 public class FavoriteController {
 
   private final FavoriteService favoriteService;
   private final TradeImageService tradeImageService;
   private final UserRepository userRepository;
+  private final ChatService chatService;
+
 
   /** Principal(userId 문자열) → User PK(Long) */
   private Long currentUserPk(Principal principal) {
@@ -35,8 +37,8 @@ public class FavoriteController {
         .orElse(null);
   }
 
-  /** 찜 토글(AJAX) */
-  @PostMapping("/toggle")
+  /** 찜 토글(AJAX) - 경로 유지 (/favorite/toggle) */
+  @PostMapping("/favorite/toggle")
   @ResponseBody
   public Map<String, Object> toggle(@RequestParam Long tradeId, Principal principal) {
     Long me = currentUserPk(principal);
@@ -49,11 +51,11 @@ public class FavoriteController {
     return Map.of("liked", liked, "count", count);
   }
 
-  /** 내 찜 목록 */
-  @GetMapping("/list")
+  /** 내 찜 목록 - 최종 경로: /member/favorites */
+  @GetMapping("/member/favorites")
   public String favorites(Model model, Principal principal) {
     Long mePk = currentUserPk(principal);
-    if (mePk == null) return "redirect:/member/login?redirect=/favorite/list";
+    if (mePk == null) return "redirect:/member/login?redirect=/member/favorites";
 
     // 1) PK 기반
     List<Favorite> byPk = Optional.ofNullable(favoriteService.listMine(mePk)).orElseGet(List::of);
@@ -89,15 +91,19 @@ public class FavoriteController {
     });
 
     boolean hasFavorites = !favorites.isEmpty();
-    log.info("[favorite/list] size={} hasFavorites={} thumbs={} prices={}",
+    log.info("[member/favorites] size={} hasFavorites={} thumbs={} prices={}",
         favorites.size(), hasFavorites, thumbnails.size(), priceTexts.size());
 
     model.addAttribute("favorites", favorites);
-    model.addAttribute("hasFavorites", hasFavorites); // 템플릿에서 빈 목록 처리 플래그
+    model.addAttribute("hasFavorites", hasFavorites);
     model.addAttribute("thumbnails", thumbnails);
     model.addAttribute("favoriteCounts", favoriteCounts);
     model.addAttribute("priceTexts", priceTexts);
+    model.addAttribute("totalFavorites", favorites.size()); // 상단 카드에서 사용
 
-    return "favorite/list";
+    int chatCount = chatService.countRooms(mePk);
+    model.addAttribute("chatCount", chatCount);
+
+    return "member/favorites";
   }
 }

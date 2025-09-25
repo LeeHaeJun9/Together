@@ -7,111 +7,46 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <style>
-        :root{
-            --bg:#f6f7fb; --line:#e9edf3; --text-muted:#6c757d;
-            --bubble-me:#d7ecff; --bubble-you:#ffffff;
-        }
+        :root{ --bg:#f6f7fb; --line:#e9edf3; --text-muted:#6c757d; --bubble-me:#d7ecff; --bubble-you:#ffffff; }
         body{background:#fff;}
-        .chat-wrap{max-width: 960px; margin: 0 auto;}
-
-        .trade-head{
-            position: sticky; top: 0; z-index: 100;
-            background: linear-gradient(180deg,#fff 0%, #fff 70%, rgba(255,255,255,.9) 100%);
-            border-bottom: 1px solid var(--line);
-            padding: 14px 12px; border-radius: 0 0 16px 16px;
-            backdrop-filter: saturate(160%) blur(8px);
-        }
-        .prod-thumb{
-            width: clamp(120px, 18vw, 180px);
-            height: clamp(120px, 18vw, 180px);
-            border-radius: 14px; object-fit: cover;
-            border: 1px solid var(--line); background:#f1f3f5;
-            flex: 0 0 auto;
-        }
-        .title-ellipsis{
-            max-width: clamp(220px, 52vw, 560px);
-            overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
-        }
-
-        .chat-box{
-            height: 66vh; overflow-y: auto; background: var(--bg);
-            border: 1px solid var(--line); border-radius: 16px;
-            padding: 14px; scroll-behavior: smooth;
-        }
-        .day-sep{
-            display:flex; align-items:center; gap:10px; margin: 12px 0;
-            color: var(--text-muted); font-size: .85rem;
-        }
-        .day-sep::before, .day-sep::after{
-            content:""; flex:1 1 0; height:1px; background:var(--line);
-        }
-
-        .msg-row{display:flex; gap:10px; margin: 8px 0;}
+        .chat-wrap{max-width:960px;margin:0 auto;}
+        .trade-head{position:sticky;top:0;z-index:100;background:linear-gradient(180deg,#fff 0%, #fff 70%, rgba(255,255,255,.9) 100%);border-bottom:1px solid var(--line);padding:14px 12px;border-radius:0 0 16px 16px;backdrop-filter:saturate(160%) blur(8px);}
+        .prod-thumb{width:clamp(120px,18vw,180px);height:clamp(120px,18vw,180px);border-radius:14px;object-fit:cover;border:1px solid var(--line);background:#f1f3f5;flex:0 0 auto;}
+        .title-ellipsis{max-width:clamp(220px,52vw,560px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+        .chat-box{height:66vh;overflow-y:auto;background:var(--bg);border:1px solid var(--line);border-radius:16px;padding:14px;scroll-behavior:smooth;}
+        .day-sep{display:flex;align-items:center;gap:10px;margin:12px 0;color:var(--text-muted);font-size:.85rem;}
+        .day-sep::before,.day-sep::after{content:"";flex:1 1 0;height:1px;background:var(--line);}
+        .msg-row{display:flex;align-items:flex-end;gap:10px;margin:12px 0;}
         .msg-row.me{justify-content:flex-end;}
         .msg-row.you{justify-content:flex-start;}
-
-        .avatar{
-            width: 36px; height:36px; border-radius:50%;
-            background:#e9f2ff; color:#1b66d2; font-weight:700;
-            display:flex; align-items:center; justify-content:center;
-            border:1px solid var(--line);
-            user-select:none;
-        }
+        .avatar{width:36px;height:36px;border-radius:50%;background:#e9f2ff;color:#1b66d2;font-weight:700;display:flex;align-items:center;justify-content:center;border:1px solid var(--line);user-select:none;}
         .msg-row.me .avatar{display:none;}
-
-        .bubble{
-            max-width: 70%; border-radius: 16px; padding: 10px 12px;
-            box-shadow: 0 1px 3px rgba(0,0,0,.06);
-            background: var(--bubble-you); border: 1px solid var(--line);
-        }
-        .msg-row.me .bubble{ background: var(--bubble-me); border-color: #cfe5fb; }
-        .name{font-size:.82rem; color: var(--text-muted); margin-bottom:4px;}
-        .text{white-space:pre-wrap; word-break:break-word;}
-        .meta{font-size:.75rem; color: var(--text-muted); margin-top:4px; text-align:right;}
-
-        .sendbar{
-            position: sticky; bottom: 0; z-index: 101;
-            background:#fff; padding: 10px 0 4px;
-        }
-        .sendbar .field{
-            display:flex; gap:10px; align-items:center;
-            border:1px solid var(--line);
-            border-radius:12px;             /* 사각형+살짝 둥글게 */
-            padding:8px 10px; background:#fff;
-        }
-
-        /* 입력창 높이 살짝 축소해서 버튼과 높이 맞춤 */
-        #msgInput{
-            border:none; outline:none; box-shadow:none;
-            flex:1 1 auto; padding:6px 10px;
-            height:38px;                    /* 버튼과 동일 높이 */
-        }
-
-        /* 버튼: 한 줄 고정 + 세로 중앙 정렬 */
-        .sendbar .btn-primary{
-            display:inline-flex;            /* 콘텐츠 크기만큼 */
-            align-items:center;
-            justify-content:center;
-            white-space:nowrap;             /* 줄바꿈 금지 */
-            word-break:keep-all;            /* 한국어 단어 분리 금지 */
-            border-radius:10px;             /* 사각형 느낌 */
-            padding:6px 14px;               /* 적당한 여백 */
-            font-size:.875rem;              /* 글자 살짝 작게 */
-            line-height:1;                  /* 정확히 한 줄 */
-            min-height:38px;                /* 입력창과 동일 높이 */
-        }
-        @media (max-width: 576px){
-            .prod-thumb{width: 120px; height: 120px;}
-            .bubble{max-width: 80%;}
-        }
+        .msg-col{display:flex;flex-direction:column;max-width:70%;}
+        .msg-row.me  .msg-col{align-items:flex-end;}
+        .msg-row.you .msg-col{align-items:flex-start;}
+        .name{font-size:.82rem;color:var(--text-muted);margin-bottom:4px;}
+        .msg-row.me .name{text-align:right;}
+        .bubbleline{display:flex;align-items:flex-end;gap:6px;}
+        .msg-row.me  .bubbleline{justify-content:flex-end;}
+        .msg-row.you .bubbleline{justify-content:flex-start;}
+        .bubble{border-radius:16px;padding:10px 12px;box-shadow:0 1px 3px rgba(0,0,0,.06);background:var(--bubble-you);border:1px solid var(--line);max-width:100%;}
+        .msg-row.me .bubble{background:var(--bubble-me);border-color:#cfe5fb;}
+        .text{white-space:pre-wrap;word-break:break-word;}
+        .time-out{font-size:.75rem;color:var(--text-muted);white-space:nowrap;min-width:42px;line-height:1;text-align:center;}
+        .msg-row.me  .time-out{margin-right:6px;}
+        .msg-row.you .time-out{margin-left:6px;}
+        .sendbar{position:sticky;bottom:0;z-index:101;background:#fff;padding:10px 0 4px;}
+        .sendbar .field{display:flex;gap:10px;align-items:center;border:1px solid var(--line);border-radius:12px;padding:8px 10px;background:#fff;}
+        #msgInput{border:none;outline:none;box-shadow:none;flex:1 1 auto;padding:6px 10px;height:38px;}
+        .sendbar .btn-primary{display:inline-flex;align-items:center;justify-content:center;white-space:nowrap;word-break:keep-all;border-radius:10px;padding:6px 14px;font-size:.875rem;line-height:1;min-height:38px;}
+        @media (max-width:576px){ .prod-thumb{width:120px;height:120px;} .msg-col{max-width:80%;} }
     </style>
 </head>
 <body>
 <div th:replace="~{/layout/header :: header}"></div>
 
 <div class="container py-3 chat-wrap">
-
-    <!-- 상단: 상품 + 참여자 -->
+    <!-- 상단(상품 표시 카드) -->
     <div class="trade-head d-flex align-items-center justify-content-between">
         <div class="d-flex align-items-center gap-3">
             <img class="prod-thumb"
@@ -119,12 +54,11 @@
                  th:src="${trade != null and !#strings.isEmpty(trade.thumbnail) ? trade.thumbnail : noImg}"
                  alt="상품 썸네일"
                  onerror="this.onerror=null;this.src='/images/no-image.png'">
-
             <div>
                 <div class="d-flex align-items-center gap-2 flex-wrap">
                     <h5 class="mb-0 title-ellipsis" th:text="${trade != null ? trade.title : '채팅'}">채팅</h5>
                     <span class="badge text-bg-secondary" th:text="${categoryLabel}">카테고리</span>
-                    <span class="badge" th:classappend="${statusClass}" th:text="${statusLabel}">상태</span>
+                    <span id="statusBadge" class="badge" th:classappend="${statusClass}" th:text="${statusLabel}">상태</span>
                     <span class="fw-semibold" th:text="${priceText}">0원</span>
                 </div>
                 <div class="text-muted small mt-1">
@@ -133,10 +67,22 @@
             </div>
         </div>
 
-        <div class="d-flex align-items-center gap-2">
-            <a class="btn btn-sm btn-outline-secondary" th:href="@{'/trade/read/' + ${room.tradeId}}">상품보기</a>
-            <a class="btn btn-sm btn-outline-primary" th:href="@{/chat/list}">내 채팅</a>
+        <!-- 판매자 전용 상태 변경 컨트롤 (상단 카드 내부 유지) -->
+        <div class="d-flex align-items-center gap-2" th:if="${me == room.sellerId}">
+            <select id="statusSelect" class="form-select form-select-sm" style="width:auto;"
+                    th:disabled="${statusLabel} == '판매완료'">
+                <option value="FOR_SALE" th:selected="${statusLabel} == '판매중'">판매중</option>
+                <option value="RESERVED" th:selected="${statusLabel} == '예약중'">예약중</option>
+                <option value="SOLD_OUT" th:selected="${statusLabel} == '판매완료'">판매완료</option>
+            </select>
+            <button id="btnStatusSave" class="btn btn-sm btn-outline-primary"
+                    th:disabled="${statusLabel} == '판매완료'">상태 저장</button>
         </div>
+    </div>
+
+    <!-- ▶ 카드 아래: 채팅방 목록 버튼 (메시지 영역 위) -->
+    <div class="d-flex justify-content-end mt-2">
+        <a class="btn btn-sm btn-outline-dark" th:href="@{/chat/list}">채팅방 목록</a>
     </div>
 
     <!-- 메시지 -->
@@ -146,12 +92,15 @@
                   day=${#temporals.format(m.regDate, 'yyyy-MM-dd')},
                   time=${#temporals.format(m.regDate, 'HH:mm')}"
              th:class="'msg-row ' + (${m.senderId} == ${me} ? 'me' : 'you')"
-             th:attr="data-ts=${ts}, data-day=${day}">
-            <div class="avatar" th:text="${#strings.substring(names[m.senderId],0,1)}">닉</div>
-            <div class="bubble">
+             th:attr="data-id=${m.id}, data-ts=${ts}, data-day=${day}">
+            <div class="avatar" th:if="${m.senderId} != ${me}" th:text="${#strings.substring(names[m.senderId],0,1)}">닉</div>
+            <div class="msg-col">
                 <div class="name" th:text="${names[m.senderId]}">닉네임</div>
-                <div class="text" th:text="${m.content}">내용</div>
-                <div class="meta" th:text="${time}">12:00</div>
+                <div class="bubbleline">
+                    <div class="time-out" th:if="${m.senderId} == ${me}" th:text="${time}">12:00</div>
+                    <div class="bubble"><div class="text" th:text="${m.content}">내용</div></div>
+                    <div class="time-out" th:if="${m.senderId} != ${me}" th:text="${time}">12:00</div>
+                </div>
             </div>
         </div>
     </div>
@@ -164,7 +113,7 @@
         </form>
     </div>
 
-    <!-- CSRF (레이아웃 메타 없을 때 대비) -->
+    <!-- CSRF -->
     <th:block th:if="${_csrf != null}">
         <input type="hidden" id="csrfName"  th:value="${_csrf.headerName}">
         <input type="hidden" id="csrfToken" th:value="${_csrf.token}">
@@ -172,8 +121,8 @@
 
     <input type="hidden" id="roomId" th:value="${room.id}">
     <input type="hidden" id="meId"   th:value="${me}">
-    <input type="hidden" id="initLastTs"
-           th:value="${#lists.isEmpty(messages) ? '' : #temporals.format(messages.get(messages.size()-1).regDate, 'yyyy-MM-dd''T''HH:mm:ss')}">
+    <input type="hidden" id="initLastId"
+           th:value="${#lists.isEmpty(messages) ? '' : messages.get(messages.size()-1).id}">
 </div>
 
 <div th:replace="~{/layout/footer :: footer}"></div>
@@ -181,123 +130,139 @@
 
 <script>
     (function(){
-        const roomId = document.getElementById('roomId').value;
-        const me     = document.getElementById('meId').value;
-        const box    = document.getElementById('chatBox');
-        const form   = document.getElementById('sendForm');
-        const input  = document.getElementById('msgInput');
-        const hName  = document.getElementById('csrfName')?.value;
-        const hToken = document.getElementById('csrfToken')?.value;
+        const roomId=document.getElementById('roomId').value;
+        const me=document.getElementById('meId').value;
+        const box=document.getElementById('chatBox');
+        const form=document.getElementById('sendForm');
+        const input=document.getElementById('msgInput');
+        const hName=document.getElementById('csrfName')?.value;
+        const hToken=document.getElementById('csrfToken')?.value;
 
-        let lastTs = document.getElementById('initLastTs')?.value || null;
-        let lastDayOnDom = null;
+        // ====== 상태 변경 UI ======
+        const sel = document.getElementById('statusSelect');
+        const btn = document.getElementById('btnStatusSave');
+        const badge = document.getElementById('statusBadge');
 
-        function scrollBottom(){ box.scrollTop = box.scrollHeight; }
-        function formatTime(ts){
-            if (!ts) return '';
-            const d = new Date(ts);
-            const hh = String(d.getHours()).padStart(2,'0');
-            const mm = String(d.getMinutes()).padStart(2,'0');
-            return `${hh}:${mm}`;
-        }
-        function dayStr(ts){ return ts ? ts.slice(0,10) : null; }
-        function addDaySeparator(day){
-            if (!day || lastDayOnDom === day) return;
-            const sep = document.createElement('div');
-            sep.className = 'day-sep';
-            sep.innerHTML = `<span>${day}</span>`;
-            box.appendChild(sep);
-            lastDayOnDom = day;
-        }
-        (function insertInitialDaySeps(){
-            const rows = Array.from(box.querySelectorAll('.msg-row'));
-            let prev = null;
-            rows.forEach(r=>{
-                const d = r.getAttribute('data-day');
-                if (d && d !== prev){
-                    const sep = document.createElement('div');
-                    sep.className = 'day-sep';
-                    sep.innerHTML = `<span>${d}</span>`;
-                    box.insertBefore(sep, r);
-                    prev = d; lastDayOnDom = d;
+        async function saveStatus(){
+            if (!sel || !btn) return;
+            btn.disabled = true;
+            try{
+                const headers={'Content-Type':'application/x-www-form-urlencoded'};
+                if (hName && hToken) headers[hName]=hToken;
+                const body=new URLSearchParams({roomId, status: sel.value}).toString();
+                const res=await fetch('/chat/trade/status',{method:'POST',headers,body,credentials:'same-origin'});
+                if (res.status===401){ alert('로그인이 필요합니다.'); return; }
+                if (res.status===403){ alert('변경 권한이 없습니다. (판매자만 가능)'); return; }
+                if (res.status===409){ alert('이미 거래 완료된 글은 상태를 바꿀 수 없습니다.'); return; }
+                if (!res.ok){ alert('상태 변경 중 오류가 발생했습니다.'); return; }
+
+                const data = await res.json();
+                if (data && data.ok){
+                    badge.textContent = data.statusLabel || '상태';
+                    badge.className = 'badge ' + (data.statusClass || 'text-bg-secondary');
+
+                    if (data.status === 'SOLD_OUT'){
+                        sel.value = 'SOLD_OUT';
+                        sel.disabled = true;
+                        btn.disabled = true;
+                        alert('거래가 완료되었습니다.');
+                    }
                 }
-            });
-        })();
-        function avatarInitial(name){ return (name && name.trim()) ? name.trim().charAt(0) : '알'; }
-        function append(msg){
-            const ts = msg.regDate;
-            const day = dayStr(ts);
-            addDaySeparator(day);
-
-            const row  = document.createElement('div');
-            row.className = 'msg-row ' + (String(msg.senderId) === String(me) ? 'me' : 'you');
-            row.setAttribute('data-ts', ts || '');
-            row.setAttribute('data-day', day || '');
-
-            const av = document.createElement('div');
-            av.className = 'avatar';
-            av.textContent = avatarInitial(msg.senderName);
-
-            const bub = document.createElement('div');
-            bub.className = 'bubble';
-
-            const name = document.createElement('div');
-            name.className = 'name';
-            name.textContent = msg.senderName || '알수없음';
-
-            const text = document.createElement('div');
-            text.className = 'text';
-            text.textContent = msg.content || '';
-
-            const meta = document.createElement('div');
-            meta.className = 'meta';
-            meta.textContent = formatTime(ts);
-
-            bub.appendChild(name); bub.appendChild(text); bub.appendChild(meta);
-            if (row.classList.contains('you')) row.appendChild(av);
-            row.appendChild(bub);
-            box.appendChild(row);
+            }catch(e){ console.error(e); alert('상태 변경 중 오류가 발생했습니다.'); }
+            finally{ if (sel && sel.value !== 'SOLD_OUT') btn.disabled=false; }
         }
+        btn?.addEventListener('click', saveStatus);
+
+        // ====== 채팅 로직 ======
+        let lastId=Number(document.getElementById('initLastId')?.value||'')||null;
+        const seenIds=new Set();
+        Array.from(box.querySelectorAll('.msg-row')).forEach(r=>{ const id=Number(r.dataset.id); if(!isNaN(id)) seenIds.add(id); });
+
+        let lastDayOnDom=null;
+        function scrollBottom(){ box.scrollTop=box.scrollHeight; }
+        function formatTime(ts){ if(!ts) return ''; const d=new Date(ts); return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`; }
+        function dayStr(ts){ return ts?ts.slice(0,10):null; }
+        function addDaySeparator(day){ if(!day||lastDayOnDom===day) return; const sep=document.createElement('div'); sep.className='day-sep'; sep.innerHTML=`<span>${day}</span>`; box.appendChild(sep); lastDayOnDom=day; }
+        (function initDaySeps(){ const rows=Array.from(box.querySelectorAll('.msg-row')); let prev=null; rows.forEach(r=>{ const d=r.getAttribute('data-day'); if(d&&d!==prev){ const sep=document.createElement('div'); sep.className='day-sep'; sep.innerHTML=`<span>${d}</span>`; box.insertBefore(sep,r); prev=d; lastDayOnDom=d; } }); })();
+        function avatarInitial(name){ return (name&&name.trim())?name.trim().charAt(0):'알'; }
+
+        function append(msg){
+            if(!msg||msg.id==null) return;
+            const mid=Number(msg.id);
+            if(seenIds.has(mid)) return;
+            seenIds.add(mid);
+            if(lastId==null||mid>lastId) lastId=mid;
+
+            const ts=msg.regDate; const day=dayStr(ts); addDaySeparator(day);
+            const mine=String(msg.senderId)===String(me);
+
+            const row=document.createElement('div');
+            row.className='msg-row '+(mine?'me':'you');
+            row.dataset.id=String(mid);
+            row.dataset.ts=ts||'';
+            row.dataset.day=day||'';
+
+            if(!mine){
+                const av=document.createElement('div');
+                av.className='avatar';
+                av.textContent=avatarInitial(msg.senderName);
+                row.appendChild(av);
+            }
+
+            const col=document.createElement('div'); col.className='msg-col';
+            const name=document.createElement('div'); name.className='name'; name.textContent=msg.senderName||'알수없음';
+            col.appendChild(name);
+
+            const line=document.createElement('div'); line.className='bubbleline';
+            if(mine){ const t=document.createElement('div'); t.className='time-out'; t.textContent=formatTime(ts); line.appendChild(t); }
+            const bubble=document.createElement('div'); bubble.className='bubble';
+            const text=document.createElement('div'); text.className='text'; text.textContent=msg.content||'';
+            bubble.appendChild(text); line.appendChild(bubble);
+            if(!mine){ const t=document.createElement('div'); t.className='time-out'; t.textContent=formatTime(ts); line.appendChild(t); }
+
+            col.appendChild(line); row.appendChild(col); box.appendChild(row);
+        }
+
         async function poll(){
             try{
-                const url = new URL('/chat/messages', location.origin);
-                url.searchParams.set('roomId', roomId);
-                if (lastTs) url.searchParams.set('after', lastTs);
-                const res = await fetch(url, {credentials:'same-origin'});
-                if (!res.ok) return;
-                const list = await res.json();
-                if (Array.isArray(list) && list.length){
-                    list.forEach(m => append(m));
-                    lastTs = list[list.length - 1].regDate;
+                const url=new URL('/chat/messages',location.origin);
+                url.searchParams.set('roomId',roomId);
+                if(lastId!=null) url.searchParams.set('afterId',String(lastId));
+                const res=await fetch(url,{credentials:'same-origin'});
+                if(!res.ok) return;
+                const list=await res.json();
+                if(Array.isArray(list)&&list.length){
+                    list.forEach(m=>append(m));
                     scrollBottom();
                 }
             }catch(e){ console.error(e); }
         }
+
         async function send(e){
             e.preventDefault();
-            const content = input.value.trim();
-            if (!content) return;
+            const content=input.value.trim();
+            if(!content) return;
 
-            const headers = {'Content-Type':'application/x-www-form-urlencoded'};
-            if (hName && hToken) headers[hName] = hToken;
+            const headers={'Content-Type':'application/x-www-form-urlencoded'};
+            if(hName&&hToken) headers[hName]=hToken;
 
-            const body = new URLSearchParams({roomId, content}).toString();
-            const res = await fetch('/chat/send', {method:'POST', headers, body, credentials:'same-origin'});
-            if (res.ok){
-                const m = await res.json();
+            const body=new URLSearchParams({roomId,content}).toString();
+            const res=await fetch('/chat/send',{method:'POST',headers,body,credentials:'same-origin'});
+            if(res.ok){
+                const m=await res.json();
                 append(m);
-                lastTs = m.regDate;
-                input.value = '';
+                input.value='';
                 scrollBottom();
-            }else if (res.status === 401){
+            }else if(res.status===401){
                 alert('로그인이 필요합니다.');
-            }else if (res.status === 403){
+            }else if(res.status===403){
                 alert('접근 권한이 없습니다.');
             }
         }
-        form.addEventListener('submit', send);
+
+        form.addEventListener('submit',send);
         scrollBottom();
-        setInterval(poll, 2000); // 2초 폴링
+        setInterval(poll,2000);
     })();
 </script>
 </body>
