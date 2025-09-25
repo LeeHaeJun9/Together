@@ -17,10 +17,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.time.LocalDateTime;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -545,28 +543,51 @@ public class CafeServiceImpl implements CafeService {
 
     @Transactional(readOnly = true)
     public MyJoinedCafesDTO getMyJoinedCafes(Long userId) {
-        // 1. 해당 사용자의 모든 Membership 정보를 조회합니다.
         List<Membership> memberships = membershipRepository.findByUserId(userId);
 
-        // 2. 가입한 카페들의 카테고리별 통계를 계산합니다.
-        long totalCafes = memberships.size();
-        long musicCafes = memberships.stream()
-                .filter(m -> m.getCafe().getCategory() == CafeCategory.MUSIC)
-                .count();
-        long sportsCafes = memberships.stream()
-                .filter(m -> m.getCafe().getCategory() == CafeCategory.SPORTS)
-                .count();
-        long studyCafes = memberships.stream()
-                .filter(m -> m.getCafe().getCategory() == CafeCategory.STUDY)
+        long totalJoinedCafes = memberships.size();
+        long totalOwnedCafes = memberships.stream()
+                .filter(m -> m.getRole() == CafeRole.CAFE_ADMIN)
                 .count();
 
-        // 3. 통계와 가입 목록을 DTO에 담아 반환합니다.
+        // 💡 최근 7일 내 가입한 카페 수 계산 (regDate 기준)
+        LocalDateTime oneWeekAgo = LocalDateTime.now().minusDays(7);
+        long recentlyJoinedCount = memberships.stream()
+                .filter(m -> m.getRegDate().isAfter(oneWeekAgo))
+                .count();
+
+        // 💡 1. 모든 카테고리별 개수 맵 계산
+        Map<String, Long> categoryCounts = memberships.stream()
+                .collect(
+                        Collectors.groupingBy(
+                                m -> m.getCafe().getCategory().getKoreanName(),
+                                Collectors.counting()
+                        )
+                );
+
+        // 💡 2. 개수를 기준으로 내림차순 정렬하여 상위 1개만 추출
+        List<Map.Entry<String, Long>> sortedCategories = categoryCounts.entrySet().stream()
+                .sorted(Map.Entry.<String, Long>comparingByValue().reversed())
+                .limit(1) // 상위 1개만 선택
+                .collect(Collectors.toList());
+
+        String cat1Name = "가입 카테고리"; // 기본값
+        long cat1Count = 0;
+
+        if (sortedCategories.size() > 0) {
+            cat1Name = sortedCategories.get(0).getKey();
+            cat1Count = sortedCategories.get(0).getValue();
+        }
+
+
+        // 3. DTO에 담아 반환
         return MyJoinedCafesDTO.builder()
                 .memberships(memberships)
-                .totalCafes(totalCafes)
-                .musicCafes(musicCafes)
-                .sportsCafes(sportsCafes)
-                .studyCafes(studyCafes)
+                .totalJoinedCafes(totalJoinedCafes)
+                .totalOwnedCafes(totalOwnedCafes)
+                .selectedCategory1Name(cat1Name)
+                .selectedCategory1Count(cat1Count)
+                .recentlyJoinedCount(recentlyJoinedCount) // 💡 새 필드 추가
                 .build();
     }
 

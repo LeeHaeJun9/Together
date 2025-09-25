@@ -83,35 +83,37 @@
                 <div class="card-body text-center">
                     <i class="fas fa-users fa-2x mb-2"></i>
                     <h4 th:text="${totalCafes ?: 0}">0</h4>
-                    <small>참여 카페</small>
+                    <small>총 참여 카페</small>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card bg-info text-white">
-                <div class="card-body text-center">
-                    <i class="fas fa-music fa-2x mb-2"></i>
-                    <h4 th:text="${musicCafes ?: 0}">0</h4>
-                    <small>음악 카페</small>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card bg-warning text-white">
-                <div class="card-body text-center">
-                    <i class="fas fa-dumbbell fa-2x mb-2"></i>
-                    <h4 th:text="${sportsCafes ?: 0}">0</h4>
-                    <small>스포츠 카페</small>
-                </div>
-            </div>
-        </div>
+
         <div class="col-md-3">
             <div class="card bg-primary text-white">
                 <div class="card-body text-center">
-                    <i class="fas fa-book fa-2x mb-2"></i>
-                    <h4 th:text="${studyCafes ?: 0}">0</h4>
-                    <small>스터디 카페</small>
+                    <i class="fas fa-crown fa-2x mb-2"></i>
+                    <h4 th:text="${ownedCafes ?: 0}">0</h4>
+                    <small>내가 운영</small>
                 </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-chart-bar fa-2x mb-2"></i>
+                    <h4 th:text="${cat1Count ?: 0}">0</h4>
+                    <small th:text="${cat1Name}">주요 카테고리</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card bg-warning text-dark"> <div class="card-body text-center">
+                <i class="fas fa-calendar-plus fa-2x mb-2"></i>
+                <h4 th:text="${recentlyJoinedCount ?: 0}">0</h4>
+                <small>최근 7일 가입</small>
+            </div>
             </div>
         </div>
     </div>

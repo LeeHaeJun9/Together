@@ -6,6 +6,7 @@ import com.example.together.domain.User;
 import com.example.together.repository.*;
 
 import com.example.together.service.cafe.CafeService;
+import com.example.together.service.trade.TradeService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -42,6 +43,8 @@ public class MainController {
 
     private final CafeService cafeService;
 
+    private final TradeService tradeService;
+
     // 메인페이지
     @GetMapping("/mainPage")
     public String mainPage(Model model, Principal principal) {
@@ -53,6 +56,8 @@ public class MainController {
         // 2. 카테고리 목록을 가져와서 모델에 추가
         model.addAttribute("categories", cafeService.getAllCategories());
 
+
+        model.addAttribute("recomTrades", tradeService.getPopularTradesByFavoriteCount(8));
         // 로그인 여부에 따른 메시지 처리 (선택 사항)
         String message = (principal != null) ?
                 "환영합니다, " + principal.getName() + "님!" : "모여라에 오신 것을 환영합니다!";

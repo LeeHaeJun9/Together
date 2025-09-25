@@ -26,6 +26,22 @@
         </div>
     </section>
 
+    <section class="container">
+        <h2 class="section-title">카테고리별 탐색</h2>
+        <div class="category-grid">
+            <a th:href="@{/categories(category='ALL')}" class="category-item">
+                <img th:src="@{/images/category-all.png}" alt="전체" />
+                <div class="category-caption">전체</div>
+            </a>
+            <a th:each="category : ${categories}"
+               th:href="@{/categories(category=${category.name()})}"
+               class="category-item">
+                <img th:src="@{${category.imageUrl}}" th:alt="${category.koreanName} + ' 카테고리 이미지'" />
+                <div class="category-caption" th:text="${category.koreanName}">카테고리명</div>
+            </a>
+        </div>
+    </section>
+
     <section class="container slider-section">
         <h2 class="section-title">추천 카페</h2>
         <div class="slider-container">
@@ -51,19 +67,30 @@
         </div>
     </section>
 
-    <section class="container">
-        <h2 class="section-title">카테고리별 탐색</h2>
-        <div class="category-grid">
-            <a th:href="@{/categories(category='ALL')}" class="category-item">
-                <img th:src="@{/images/category-all.png}" alt="전체" />
-                <div class="category-caption">전체</div>
-            </a>
-            <a th:each="category : ${categories}"
-               th:href="@{/categories(category=${category.name()})}"
-               class="category-item">
-                <img th:src="@{${category.imageUrl}}" th:alt="${category.koreanName} + ' 카테고리 이미지'" />
-                <div class="category-caption" th:text="${category.koreanName}">카테고리명</div>
-            </a>
+    <section class="container slider-section">
+        <h2 class="section-title">인기 중고거래</h2>
+        <div class="slider-container">
+            <button class="slider-button prev trade-prev"><i class="fas fa-chevron-left"></i></button>
+            <div class="slider-wrapper" id="trade-slider">
+                <div class="slider-card" th:each="trade : ${recomTrades}">
+                    <a th:href="@{/trade/read/{id}(id=${trade.id})}" class="card-link">
+                        <div class="card h-100">
+                            <img th:src="@{${trade.thumbnail ?: '/images/default-trade.png'}}"
+                                 th:alt="${trade.title} + ' 상품 이미지'" class="card-img-top">
+                            <div class="card-body">
+                                <h5 class="card-title" th:text="${trade.title}">거래 제목</h5>
+                                <p class="card-text text-success small mb-0 fw-bold">
+                                    <span th:text="${#numbers.formatDecimal(trade.price, 0, 'COMMA', 0, 'POINT')}">0</span>원
+                                </p>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                <div th:if="${#lists.isEmpty(recomTrades)}" class="slider-card empty-card">
+                    <p class="text-center text-muted" style="min-width: 100%;">인기 중고거래 상품이 아직 없습니다.</p>
+                </div>
+            </div>
+            <button class="slider-button next trade-next"><i class="fas fa-chevron-right"></i></button>
         </div>
     </section>
 </main>
