@@ -41,4 +41,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
     long countByStatus(Status status);
 
     Optional<User> findByUserIdAndEmailAndName(String userId, String email, String name);
+
+    // 이름으로 사용자 찾기
+    Optional<User> findByName(String name);
+
+
 }

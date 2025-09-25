@@ -83,3 +83,20 @@ main {
     color: #28a745;
 }
 
+.text-muted.small.mb-1 {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+header .logo-section {
+    color: var(--text-color) !important;
+}
+
+
+/* 2. LI 간격 넓어지는 문제 해결 (Bootstrap/header.css 충돌 해결) */
+header .nav-links li {
+    margin: 0 !important;
+    padding: 0 !important;
+    /* li 안의 a 태그 패딩만 header.css의 gap: 1rem과 결합되어 간격을 만듭니다. */
+}

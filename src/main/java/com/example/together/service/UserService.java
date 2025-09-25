@@ -45,4 +45,8 @@ public interface UserService {
 
     // 닉네임 중복 확인 메소드 선언 추가
     boolean isNicknameAvailable(String nickname, String currentUserId);
+    // 추가 중복 확인 메소드들
+    boolean isNameExists(String name);
+    boolean isNicknameExists(String nickname);
+    boolean isPhoneExists(String phone);
 }

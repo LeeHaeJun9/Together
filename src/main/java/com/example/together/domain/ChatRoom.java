@@ -2,24 +2,35 @@ package com.example.together.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
-@Entity
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
+import java.time.LocalDateTime;
+
+@Getter @Setter
+@NoArgsConstructor @AllArgsConstructor
 @Builder
-public class ChatRoom extends BaseEntity {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+@Entity
+@Table(name = "chat_room")
+public class ChatRoom {
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    private User buyer;
+  @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    private User seller;
+  @Column(name = "buyer_id")
+  private Long buyerId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    private Trade trade;
+  @Column(name = "seller_id")
+  private Long sellerId;
+
+  @Column(name = "trade_id")
+  private Long tradeId;
+
+  @CreationTimestamp
+  @Column(name = "regdate")
+  private LocalDateTime regDate;
+
+  @UpdateTimestamp
+  @Column(name = "moddate")
+  private LocalDateTime modDate;
 }

@@ -46,4 +46,23 @@ public class MeetingDTO {
 
     private String address;
     private String location;
+
+    public static MeetingDTO fromEntity(Meeting meeting) {
+        return MeetingDTO.builder()
+                .id(meeting.getId())
+                .title(meeting.getTitle())
+                .content(meeting.getContent())
+                .meetingDate(meeting.getMeetingDate())
+                .recruiting(meeting.getRecruiting())
+                .visibility(meeting.getVisibility())
+                .organizerId(meeting.getOrganizer() != null ? meeting.getOrganizer().getId() : null)
+                .organizerName(meeting.getOrganizer() != null ? meeting.getOrganizer().getNickname() : null)
+                .userId(meeting.getOrganizer() != null ? meeting.getOrganizer().getName() : null)
+                .cafe(meeting.getCafe() != null ? CafeResponseDTO.fromEntity(meeting.getCafe()) : null)
+                .regDate(meeting.getRegDate())
+                .modDate(meeting.getModDate())
+                .address(meeting.getAddress())
+                .location(meeting.getLocation())
+                .build();
+    }
 }

@@ -12,45 +12,45 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
     <!-- Custom CSS -->
     <style>
-        body {
-            background-color: #f8f9fa;
-            font-family: 'Arial', sans-serif;
-        }
+        /*body {*/
 
-        .header {
-            background-color: white;
-            padding: 15px 0;
-            border-bottom: 1px solid #dee2e6;
-        }
+        /*    font-family: 'Arial', sans-serif;*/
+        /*}*/
 
-        .logo {
-            display: flex;
-            align-items: center;
-            font-size: 18px;
-            font-weight: bold;
-            color: #333;
-        }
+        /*.header {*/
+        /*    background-color: white;*/
+        /*    padding: 15px 0;*/
+        /*    border-bottom: 1px solid #dee2e6;*/
+        /*}*/
 
-        .logo img {
-            height: 45px;
-            width: auto;
-            margin-right: 10px;
-        }
+        /*.logo {*/
+        /*    display: flex;*/
+        /*    align-items: center;*/
+        /*    font-size: 18px;*/
+        /*    font-weight: bold;*/
+        /*    color: #333;*/
+        /*}*/
 
-        .nav-links {
-            font-size: 14px;
-            color: #6c757d;
-        }
+        /*.logo img {*/
+        /*    height: 45px;*/
+        /*    width: auto;*/
+        /*    margin-right: 10px;*/
+        /*}*/
 
-        .nav-links a {
-            color: #6c757d;
-            text-decoration: none;
-            margin: 0 5px;
-        }
+        /*.nav-links {*/
+        /*    font-size: 14px;*/
+        /*    color: #6c757d;*/
+        /*}*/
 
-        .nav-links a:hover {
-            color: #495057;
-        }
+        /*.nav-links a {*/
+        /*    color: #6c757d;*/
+        /*    text-decoration: none;*/
+        /*    margin: 0 5px;*/
+        /*}*/
+
+        /*.nav-links a:hover {*/
+        /*    color: #495057;*/
+        /*}*/
 
         .mypage-container {
             max-width: 800px;
@@ -132,144 +132,50 @@
             color: #6c757d;
         }
 
-        .footer {
-            background-color: #6c757d;
-            color: white;
-            text-align: center;
-            padding: 30px 0;
-            margin-top: 50px;
-        }
-
-        .calendar-section {
-            background-color: #f8f9fa;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 30px;
-        }
-
+        /*.footer {*/
+        /*    background-color: #6c757d;*/
+        /*    color: white;*/
+        /*    text-align: center;*/
+        /*    padding: 30px 0;*/
+        /*    margin-top: 50px;*/
+        /*}*/
         .calendar-container table {
             background-color: white;
         }
 
-        .schedule-item {
-            background-color: #e3f2fd !important;
-            vertical-align: top;
-        }
 
         .schedule-item small {
             color: #1976d2;
             font-weight: 500;
         }
 
-        .section-title {
-            font-size: 18px;
-            font-weight: bold;
-            color: #333;
-            margin-bottom: 15px;
-            padding-bottom: 8px;
-            border-bottom: 2px solid #dee2e6;
-        }
-
-        .cafe-list {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .cafe-item {
-            display: flex;
-            align-items: center;
-            padding: 15px;
-            background-color: #f8f9fa;
-            border-radius: 8px;
-            border: 1px solid #dee2e6;
-        }
-
-        .cafe-thumbnail {
-            width: 60px;
-            height: 60px;
-            border-radius: 8px;
-            object-fit: cover;
-            margin-right: 15px;
-        }
-
-        .cafe-name {
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 5px;
-        }
-
-        .cafe-details {
-            font-size: 14px;
-            color: #6c757d;
-        }
-
-        .purchase-history {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .purchase-item {
-            display: flex;
-            align-items: center;
-            padding: 15px;
-            background-color: #f8f9fa;
-            border-radius: 8px;
-            border: 1px solid #dee2e6;
-        }
-
-        .product-thumbnail {
-            width: 60px;
-            height: 60px;
-            border-radius: 8px;
-            object-fit: cover;
-            margin-right: 15px;
-        }
-
-        .product-title {
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 5px;
-        }
-
-        .purchase-status {
-            font-size: 14px;
-            color: #28a745;
-            margin-bottom: 3px;
-        }
-
-        .purchase-date {
-            font-size: 12px;
-            color: #6c757d;
-        }
     </style>
 </head>
 <body>
 <!-- 헤더 -->
-<!-- 헤더 -->
-<div class="header">
-    <div class="container">
-        <div class="row align-items-center">
-            <div class="col">
-                <!-- Add link to main page on logo -->
-                <a th:href="@{/mainPage}" class="logo" style="text-decoration: none; color: inherit;">
-                    <img th:src="@{/images/moyeora-logo.png}" alt="모여라 로고" />
-                    <span>모여라</span>
-                </a>
-            </div>
-            <div class="col-auto">
-                <div class="nav-links">
-                    <!-- Add main page link -->
-                    <a th:href="@{/mainPage}">메인</a> /
-                    <span th:text="${userName} + '님'">사용자님</span> /
-                    <a href="/logout">로그아웃</a>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
+<!--&lt;!&ndash; 헤더 &ndash;&gt;-->
+<!--<div class="header">-->
+<!--    <div class="container">-->
+<!--        <div class="row align-items-center">-->
+<!--            <div class="col">-->
+<!--                &lt;!&ndash; Add link to main page on logo &ndash;&gt;-->
+<!--                <a th:href="@{/mainPage}" class="logo" style="text-decoration: none; color: inherit;">-->
+<!--                    <img th:src="@{/images/moyeora-logo.png}" alt="모여라 로고" />-->
+<!--                    <span>모여라</span>-->
+<!--                </a>-->
+<!--            </div>-->
+<!--            <div class="col-auto">-->
+<!--                <div class="nav-links">-->
+<!--                    &lt;!&ndash; Add main page link &ndash;&gt;-->
+<!--                    <a th:href="@{/mainPage}">메인</a> /-->
+<!--                    <span th:text="${userName} + '님'">사용자님</span> /-->
+<!--                    <a href="/logout">로그아웃</a>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </div>-->
+<!--</div>-->
+<div th:replace="~{/layout/header :: header}"></div>
 <!-- 마이페이지 메인 -->
 <div class="container">
     <div class="mypage-container">
@@ -290,6 +196,12 @@
                 <div class="menu-desc">개인정보 수정 및 관리</div>
             </a>
 
+            <a href="/member/favorites" class="menu-card">
+                <div class="menu-icon">❤️</div>
+                <div class="menu-title">찜한 상품</div>
+                <div class="menu-desc">관심 상품 목록</div>
+            </a>
+
             <!-- 참여 카페 -->
             <a th:href="@{/cafe/my/joined-cafes}" class="menu-card">
                 <div class="menu-icon">☕</div>
@@ -297,19 +209,12 @@
                 <div class="menu-desc">가입한 카페 목록</div>
             </a>
 
-            <!-- 나의 거래 -->
-            <a href="/member/myTrade" class="menu-card">
-                <div class="menu-icon">🛒</div>
-                <div class="menu-title">나의 거래</div>
-                <div class="menu-desc">판매/구매 내역</div>
-            </a>
-
-            <!-- 찜한 상품 -->
-            <a href="/member/favorites" class="menu-card">
-                <div class="menu-icon">❤️</div>
-                <div class="menu-title">찜한 상품</div>
-                <div class="menu-desc">관심 상품 목록</div>
-            </a>
+<!--            &lt;!&ndash; 나의 거래 &ndash;&gt;-->
+<!--            <a href="/member/myTrade" class="menu-card">-->
+<!--                <div class="menu-icon">🛒</div>-->
+<!--                <div class="menu-title">나의 거래</div>-->
+<!--                <div class="menu-desc">판매/구매 내역</div>-->
+<!--            </a>-->
 
             <!-- 나의 모임 -->
             <a th:href="@{/meeting/my/joined-meetings}" class="menu-card">
@@ -318,22 +223,26 @@
                 <div class="menu-desc">참여한 모임 목록</div>
             </a>
 
-            <!-- 계정 설정 -->
-            <a href="/member/settings" class="menu-card">
-                <div class="menu-icon">⚙️</div>
-                <div class="menu-title">계정 설정</div>
-                <div class="menu-desc">비밀번호 변경, 탈퇴</div>
-            </a>
+
+
+            <!--            &lt;!&ndash; 계정 설정 &ndash;&gt;-->
+<!--            <a href="/member/settings" class="menu-card">-->
+<!--                <div class="menu-icon">⚙️</div>-->
+<!--                <div class="menu-title">계정 설정</div>-->
+<!--                <div class="menu-desc">비밀번호 변경, 탈퇴</div>-->
+<!--            </a>-->
         </div>
     </div>
 </div>
 
-<!-- 푸터 -->
-<div class="footer">
-    <div class="container">
-        <p class="mb-0">푸터</p>
-    </div>
-</div>
+<!--&lt;!&ndash; 푸터 &ndash;&gt;-->
+<!--<div class="footer">-->
+<!--    <div class="container">-->
+<!--        <p class="mb-0">푸터</p>-->
+<!--    </div>-->
+<!--</div>-->
+<div th:replace="~{/layout/footer :: footer}"></div>
+
 
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

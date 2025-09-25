@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.security.Principal;
+import java.text.NumberFormat;
 import java.util.*;
 
 @Slf4j
@@ -34,6 +35,7 @@ public class FavoriteController {
         .orElse(null);
   }
 
+  /** 찜 토글(AJAX) */
   @PostMapping("/toggle")
   @ResponseBody
   public Map<String, Object> toggle(@RequestParam Long tradeId, Principal principal) {
@@ -43,10 +45,11 @@ public class FavoriteController {
     boolean liked = favoriteService.toggle(tradeId, me);
     long count = favoriteService.count(tradeId);
 
-    log.info("favorite/toggle userPk={} tradeId={} -> liked={}, count={}", me, tradeId, liked, count);
+    log.info("[favorite/toggle] userPk={} tradeId={} -> liked={}, count={}", me, tradeId, liked, count);
     return Map.of("liked", liked, "count", count);
   }
 
+  /** 내 찜 목록 */
   @GetMapping("/list")
   public String favorites(Model model, Principal principal) {
     Long mePk = currentUserPk(principal);
@@ -54,47 +57,46 @@ public class FavoriteController {
 
     // 1) PK 기반
     List<Favorite> byPk = Optional.ofNullable(favoriteService.listMine(mePk)).orElseGet(List::of);
-    // 2) 로그인ID 기반(레거시)
+    // 2) 로그인ID 기반(레거시 겸용)
     String loginId = principal.getName();
     List<Favorite> byLogin = Optional.ofNullable(favoriteService.listMineByLoginId(loginId)).orElseGet(List::of);
 
-    // trade 널 제외 + 같은 trade 중복 제거
+    // trade 널 제외 + 같은 trade 중복 제거(보존 순서: PK → 로그인ID)
     Map<Long, Favorite> merged = new LinkedHashMap<>();
     for (Favorite f : byPk)    if (f != null && f.getTrade() != null) merged.putIfAbsent(f.getTrade().getId(), f);
     for (Favorite f : byLogin) if (f != null && f.getTrade() != null) merged.putIfAbsent(f.getTrade().getId(), f);
     List<Favorite> favorites = new ArrayList<>(merged.values());
 
-    // 썸네일/하트/가격 보강
+    // 썸네일/찜수/가격 텍스트
     Map<Long, String> thumbnails = new HashMap<>();
     Map<Long, Long>   favoriteCounts = new HashMap<>();
     Map<Long, String> priceTexts = new HashMap<>();
-    var nf = java.text.NumberFormat.getIntegerInstance(java.util.Locale.KOREA);
+    NumberFormat nf = NumberFormat.getIntegerInstance(Locale.KOREA);
 
     favorites.forEach(f -> {
       var t = f.getTrade();
+      if (t == null) return;
+
       String thumb = t.getThumbnail();
       if (thumb == null || thumb.isBlank()) {
         var imgs = tradeImageService.listByTradeId(t.getId());
         if (!imgs.isEmpty()) thumb = imgs.get(0).getImageUrl();
       }
-      if (thumb != null) thumbnails.put(t.getId(), thumb);
+      if (thumb != null && !thumb.isBlank()) thumbnails.put(t.getId(), thumb);
 
       favoriteCounts.put(t.getId(), favoriteService.count(t.getId()));
       if (t.getPrice() != null) priceTexts.put(t.getId(), nf.format(t.getPrice()) + "원");
     });
 
     boolean hasFavorites = !favorites.isEmpty();
-    log.info("favorite/list size={} hasFavorites={} thumbs={} prices={}",
+    log.info("[favorite/list] size={} hasFavorites={} thumbs={} prices={}",
         favorites.size(), hasFavorites, thumbnails.size(), priceTexts.size());
 
     model.addAttribute("favorites", favorites);
-    model.addAttribute("hasFavorites", hasFavorites); // ← 템플릿은 이것만 본다
+    model.addAttribute("hasFavorites", hasFavorites); // 템플릿에서 빈 목록 처리 플래그
     model.addAttribute("thumbnails", thumbnails);
     model.addAttribute("favoriteCounts", favoriteCounts);
     model.addAttribute("priceTexts", priceTexts);
-
-    // 디버그용 숫자(보이진 않지만 혹시 필요하면 템플릿에서 찍어 볼 수 있음)
-    model.addAttribute("favoritesSize", favorites.size());
 
     return "favorite/list";
   }

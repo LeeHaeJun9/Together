@@ -77,18 +77,13 @@
                       <span th:text="${cafe.name}"></span>
                     </a>
                   </h6>
-                  <span class="badge cafe-category text-dark"
-                        th:text="${cafe.category.toString() == 'MUSIC' ? '음악' :
-                                                       (cafe.category.toString() == 'SPORTS' ? '스포츠' : '스터디')}">
-                                      카테고리
-                                    </span>
                 </div>
                 <p class="text-muted small mb-1" th:text="${cafe.description}">카페 설명</p>
                 <div class="d-flex justify-content-between align-items-center mb-2">
-                                    <span class="member-count">
-                                      <i class="fas fa-users"></i>
-                                      <span th:text="|멤버 ${cafe.memberCount ?: 0}명|">멤버 0명</span>
-                                    </span>
+                  <span class="member-count">
+                    <i class="fas fa-users"></i>
+                    <span th:text="|멤버 ${cafe.memberCount ?: 0}명|">멤버 0명</span>
+                  </span>
                   <small class="text-muted" th:text="${#temporals.format(cafe.regDate, 'yyyy-MM-dd 등록')}">등록일</small>
                 </div>
                 <div class="mt-2">
