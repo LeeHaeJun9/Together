@@ -420,24 +420,25 @@ public class CafeController {
 
     @GetMapping("/my/joined-cafes")
     public String showMyJoinedCafes(Model model, Principal principal) {
-        if (principal == null) {
-            return "redirect:/login";
-        }
+        // ... (로그인 및 ID 가져오기 로직 유지) ...
 
         Long userId = getLoggedInUserId(principal);
-
-        System.out.println("로그인된 사용자 ID: " + userId);
-
         MyJoinedCafesDTO myCafesData = cafeService.getMyJoinedCafes(userId);
 
-        // ✅ HTML 템플릿에서 사용할 수 있도록 모델에 데이터를 추가합니다.
-        model.addAttribute("cafes", myCafesData.getMemberships());
-        model.addAttribute("totalCafes", myCafesData.getTotalCafes());
-        model.addAttribute("musicCafes", myCafesData.getMusicCafes());
-        model.addAttribute("sportsCafes", myCafesData.getSportsCafes());
-        model.addAttribute("studyCafes", myCafesData.getStudyCafes());
+        // 1. 필수 통계
+        model.addAttribute("totalCafes", myCafesData.getTotalJoinedCafes());
+        model.addAttribute("ownedCafes", myCafesData.getTotalOwnedCafes());
 
-        return "cafe/myCafes"; // Thymeleaf 템플릿 파일 이름
+        // 2. 상위 1개 카테고리 통계
+        model.addAttribute("cat1Name", myCafesData.getSelectedCategory1Name());
+        model.addAttribute("cat1Count", myCafesData.getSelectedCategory1Count());
+
+        // 💡 3. 최근 가입 카페 수
+        model.addAttribute("recentlyJoinedCount", myCafesData.getRecentlyJoinedCount());
+
+        model.addAttribute("cafes", myCafesData.getMemberships());
+
+        return "cafe/myCafes";
     }
 
     @PostMapping("/{cafeId}/leave")

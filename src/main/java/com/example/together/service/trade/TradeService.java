@@ -12,4 +12,6 @@ public interface TradeService {
 
   List<Trade> list();                               // 최신순
   List<Trade> listByCategory(TradeCategory category);
+
+  List<Trade> getPopularTradesByFavoriteCount(int count);
 }
