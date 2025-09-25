@@ -45,12 +45,21 @@
             overflow: hidden;
             text-overflow: ellipsis;
         }
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        main {
+            flex-grow: 1;
+        }
     </style>
 </head>
 <body>
 <div th:replace="~{/layout/header :: header}"></div>
 <!-- Header -->
-<div class="page-header">
+<main>
+<<div class="page-header">
     <div class="container">
         <div class="row align-items-center">
             <div class="col-md-8">
@@ -157,6 +166,7 @@
         </a>
     </div>
 </div>
+</main>
 <div th:replace="~{/layout/footer :: footer}"></div>
 
 <!-- Scripts -->
