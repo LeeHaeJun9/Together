@@ -52,7 +52,7 @@ public class SecurityConfig {
                                 "/css/**", "/js/**", "/images/**", "/assets/**", "/lib/**", "/resources/**",
                                 "/join", "/member/register/check-userid", "/member/register/check-email",
                                 "/member/register/check-name", "/member/register/check-nickname", "/member/register/check-phone",
-                                "/api/member/**"  // API 경로 추가
+                                "/api/member/**", "/upload/**" // API 경로 추가
                         ).permitAll()
                         // 특정 역할(Role)이 필요한 경로 설정
                         .requestMatchers("/admin/**", "/manager/**").hasRole("ADMIN")
