@@ -1,60 +1,28 @@
 package com.example.together.config;
 
-
-import com.example.together.controller.meeting.StringToUserConverter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.format.FormatterRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+import java.nio.file.Paths;
 
 @Configuration
 public class WebMvcConfig implements WebMvcConfigurer {
 
-  @Value("${app.upload-path:file:./uploads}")
+  @Value("${org.zerock.upload.path:C:/upload}")
   private String uploadPath;
 
 
-   @Override
-     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-       String root = "file:///C:/upload/";
-       registry.addResourceHandler("/upload/**")
-           .addResourceLocations(root);
+  @Value("${app.upload.url-prefix:/upload}")
+  private String urlPrefix;
 
-//  @Override
-//    public void addResourceHandlers(ResourceHandlerRegistry registry) {
-//      String root = "file:///C:/upload/";
-//      registry.addResourceHandler("/upload/**")
-//          .addResourceLocations(root);
-//
-//    registry.addResourceHandler("/files/**")
-//        .addResourceLocations(uploadPath.endsWith("/")? uploadPath : uploadPath + "/");
-
-//    @Override
-//    public void addResourceHandlers(ResourceHandlerRegistry registry) {
-//        registry.addResourceHandler("/upload/**")
-//                .addResourceLocations("file:///" + uploadPath + "/");
-//        registry.addResourceHandler("/css/**")
-//                .addResourceLocations("classpath:/static/css/");
-//        registry.addResourceHandler("/js/**")
-//                .addResourceLocations("classpath:/static/js/");
-//        registry.addResourceHandler("/images/**")
-//                .addResourceLocations("classpath:/static/images/");
-//        registry.addResourceHandler("/assets/**")
-//                .addResourceLocations("classpath:/static/assets/");
-//        registry.addResourceHandler("/lib/**")
-//                .addResourceLocations("classpath:/static/lib/");
-//        registry.addResourceHandler("/uploads/**")
-//                .addResourceLocations("file:" + System.getProperty("user.dir") + "/uploads/");
-//    }
-
-//    private final StringToUserConverter stringToUserConverter;
-//
-//    public WebMvcConfig(StringToUserConverter stringToUserConverter) {
-//        this.stringToUserConverter = stringToUserConverter;
-
+  @Override
+  public void addResourceHandlers(ResourceHandlerRegistry registry) {
+    // OS 독립적으로 file:/// 형태로 변환
+    String fileLocation = Paths.get(uploadPath).toAbsolutePath().normalize().toUri().toString();
+    // 예) "/upload/**" URL로 들어오면 C:/upload/ 실제 파일을 서빙
+    registry.addResourceHandler(urlPrefix.endsWith("/**") ? urlPrefix : (urlPrefix + "/**"))
+        .addResourceLocations(fileLocation);
   }
 }
-
-
-

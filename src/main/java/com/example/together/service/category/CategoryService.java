@@ -73,24 +73,27 @@ public class CategoryService {
 
     // -------------------- Trade --------------------
     public PageResponseDTO<TradeDTO> getTrades(String category, PageRequestDTO pageRequestDTO) {
-        Pageable pageable = pageRequestDTO.getPageable("regdate");
+      // ✨ 엔티티 필드명이 regDate 라면 아래처럼 CamelCase 사용
+      Pageable pageable = pageRequestDTO.getPageable("regDate");
 
-        Page<Trade> tradePage;
-        if ("ALL".equalsIgnoreCase(category)) {
-            tradePage = tradeRepository.findAll(pageable);
-        } else {
-            TradeCategory tradeCategory = TradeCategory.valueOf(category.toUpperCase());
-            tradePage = tradeRepository.findByCategory(tradeCategory, pageable);
-        }
+      Page<Trade> tradePage;
+      if ("ALL".equalsIgnoreCase(category)) {
+        tradePage = tradeRepository.findAll(pageable);
+      } else {
+        TradeCategory tradeCategory = TradeCategory.valueOf(category.toUpperCase());
+        tradePage = tradeRepository.findByCategory(tradeCategory, pageable);
+        // (선택) 위에 주석 처리한 메서드를 쓴다면:
+        // tradePage = tradeRepository.findByCategoryOrderByRegDateDesc(tradeCategory, pageable);
+      }
 
-        List<TradeDTO> dtoList = tradePage.stream()
-                .map(TradeDTO::fromEntity)
-                .toList();
+      List<TradeDTO> dtoList = tradePage.stream()
+          .map(TradeDTO::fromEntity)
+          .toList();
 
-        return PageResponseDTO.<TradeDTO>withAll()
-                .pageRequestDTO(pageRequestDTO)
-                .dtoList(dtoList)
-                .total((int) tradePage.getTotalElements())
-                .build();
+      return PageResponseDTO.<TradeDTO>withAll()
+          .pageRequestDTO(pageRequestDTO)
+          .dtoList(dtoList)
+          .total((int) tradePage.getTotalElements())
+          .build();
     }
 }

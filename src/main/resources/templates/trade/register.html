@@ -1,227 +1,153 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layout/basic.html}">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8" />
     <title>상품 등록</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- 분리된 CSS (캐시 버스터 포함) -->
-    <link rel="stylesheet" th:href="@{/css/trade-register.css(v=${#dates.createNow().time})}">
     <style>
-        /* 혹시 외부 CSS 없을 때를 대비한 최소 스타일 */
-        .uploader{border:1px dashed #c9c9c9; border-radius:10px; padding:16px; background:#fafafa;}
-        .uploader.dragover{border-color:#0d6efd; background:#eef5ff;}
-        .upload-tile{display:flex; align-items:center; justify-content:center; width:100%; height:140px; cursor:pointer;}
-        .thumb-grid{display:flex; flex-wrap:wrap; gap:8px;}
-        .thumb{position:relative; width:90px; height:90px; border:1px solid #eee; border-radius:8px; overflow:hidden; background:#fff;}
-        .thumb img{width:100%; height:100%; object-fit:cover;}
-        .thumb .remove{position:absolute; right:4px; top:4px; width:22px; height:22px; border:none; border-radius:50%; background:#00000080; color:#fff; line-height:22px; text-align:center;}
-        .badge-top{position:absolute; left:6px; top:6px;}
+        .uploader{border:1px dashed #c9c9c9;border-radius:10px;padding:16px;background:#fafafa;}
+        .uploader.dragover{border-color:#0d6efd;background:#eef5ff;}
+        .upload-tile{display:flex;align-items:center;justify-content:center;width:100%;height:140px;cursor:pointer;}
+        .thumb-grid{display:flex;flex-wrap:wrap;gap:8px;}
+        .thumb{position:relative;width:90px;height:90px;border:1px solid #eee;border-radius:8px;overflow:hidden;background:#fff;}
+        .thumb img{width:100%;height:100%;object-fit:cover;}
+        .thumb .remove{position:absolute;right:4px;top:4px;width:22px;height:22px;border:none;border-radius:50%;background:#00000080;color:#fff;line-height:22px;text-align:center;}
+        .badge-top{position:absolute;left:6px;top:6px;}
     </style>
 </head>
 <body>
-<section layout:fragment="content">
-    <div class="container py-4" style="max-width:1100px;">
-        <div class="d-flex align-items-center justify-content-between mb-3">
-            <h3 class="mb-0">상품 등록</h3>
-            <a th:href="@{/trade/list}" class="btn btn-outline-secondary btn-sm">목록으로</a>
-        </div>
+<!-- 공통 헤더 -->
+<div th:replace="~{/layout/header :: header}"></div>
 
-        <form id="registerForm"
-              th:action="@{/trade/register}"
-              method="post"
-              enctype="multipart/form-data"
-              class="needs-validation" novalidate>
-
-            <!-- CSRF -->
-            <th:block th:if="${_csrf != null}">
-                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-            </th:block>
-
-            <div class="row g-4">
-                <!-- 좌측 폼 -->
-                <div class="col-12 col-lg-6">
-                    <div class="card shadow-sm"><div class="card-body">
-
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">제목</label>
-                            <input name="title" class="form-control" required>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">가격</label>
-                            <div class="input-group">
-                                <input name="price" type="number" min="0" class="form-control" required>
-                                <span class="input-group-text">원</span>
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">카테고리</label>
-                            <select name="category" id="category" class="form-select" required>
-                                <option value="" selected hidden>카테고리 선택</option>
-                                <option th:each="cat : ${categories}" th:value="${cat}" th:text="${cat}"></option>
-                            </select>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">상태</label>
-                            <select name="status" class="form-select" required>
-                                <option value="FOR_SALE" selected>판매중</option>
-                                <option value="RESERVED">예약중</option>
-                                <option value="SOLD">판매완료</option>
-                            </select>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">작성자(닉네임)</label>
-                            <input name="sellerNickname" class="form-control" th:value="${nickname}">
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">내용</label>
-                            <textarea name="description" rows="7" class="form-control" required></textarea>
-                        </div>
-
-                    </div></div>
-                </div>
-
-                <!-- 우측 이미지 업로더 -->
-                <div class="col-12 col-lg-6">
-                    <div class="card shadow-sm"><div class="card-body">
-
-                        <div class="d-flex align-items-center justify-content-between mb-2">
-                            <div class="fw-semibold">상품 이미지</div>
-                            <div class="counter"><span id="count">0</span> / 10</div>
-                        </div>
-
-                        <div id="dropzone" class="uploader mb-3">
-                            <label for="fileInput" id="uploadTile" class="upload-tile" aria-label="이미지 업로드">
-                                <div class="text-center">
-                                    <div class="mb-1">📷 사진 업로드</div>
-                                    <small class="text-muted">클릭 또는 드래그하여 선택 (최대 10장)</small>
-                                </div>
-                            </label>
-                            <!-- ★ 컨트롤러와 일치: name="images" -->
-                            <input id="fileInput" name="images" type="file" accept="image/*" multiple class="visually-hidden">
-                        </div>
-
-                        <div id="thumbs" class="thumb-grid"></div>
-
-                    </div></div>
-                </div>
-            </div>
-
-            <div class="d-flex gap-2 mt-4">
-                <button type="submit" class="btn btn-primary">등록하기</button>
-                <a th:href="@{/trade/list}" class="btn btn-secondary">취소</a>
-            </div>
-        </form>
+<main class="container py-4" style="max-width:1100px;">
+    <div class="d-flex align-items-center justify-content-between mb-3">
+        <h3 class="mb-0">상품 등록</h3>
+        <a th:href="@{/trade/list}" class="btn btn-outline-secondary btn-sm">목록으로</a>
     </div>
 
-    <!-- 업로더 스크립트 (옵션 B: submit 직전 강제 동기화) -->
-    <script>
-        (function(){
-            if (window.__tradeRegisterInited) return;
-            window.__tradeRegisterInited = true;
+    <form id="registerForm" th:action="@{/trade/register}" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+        <th:block th:if="${_csrf != null}">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+        </th:block>
 
-            const form     = document.getElementById('registerForm');
-            const fileInput= document.getElementById('fileInput');
-            const dropzone = document.getElementById('dropzone');
-            const thumbs   = document.getElementById('thumbs');
-            const counter  = document.getElementById('count');
-            if (!form || !fileInput || !dropzone || !thumbs) return;
+        <div class="row g-4">
+            <!-- 좌측 -->
+            <div class="col-12 col-lg-6">
+                <div class="card shadow-sm"><div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">제목</label>
+                        <input name="title" class="form-control" required>
+                    </div>
 
-            let filesBuffer = [];
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">가격</label>
+                        <div class="input-group">
+                            <input name="price" type="number" min="0" class="form-control" required>
+                            <span class="input-group-text">원</span>
+                        </div>
+                    </div>
 
-            // 업로드 타일 클릭 → 파일 선택
-            document.addEventListener('click', (e) => {
-                if (e.target.closest('#uploadTile')) { e.preventDefault(); fileInput.click(); }
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">카테고리</label>
+                        <select name="category" class="form-select" required>
+                            <option value="" selected hidden>카테고리 선택</option>
+                            <option th:each="cat : ${categories}" th:value="${cat}" th:text="${cat}"></option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">상태</label>
+                        <select name="status" class="form-select" required>
+                            <option value="FOR_SALE" selected>판매중</option>
+                            <option value="RESERVED">예약중</option>
+                            <option value="SOLD_OUT">판매완료</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">작성자(닉네임)</label>
+                        <input name="sellerNickname" class="form-control" th:value="${nickname}">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">내용</label>
+                        <textarea name="description" rows="7" class="form-control" required></textarea>
+                    </div>
+                </div></div>
+            </div>
+
+            <!-- 우측 업로더 -->
+            <div class="col-12 col-lg-6">
+                <div class="card shadow-sm"><div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <div class="fw-semibold">상품 이미지</div>
+                        <div class="counter"><span id="count">0</span> / 10</div>
+                    </div>
+
+                    <div id="dropzone" class="uploader mb-3">
+                        <label for="fileInput" id="uploadTile" class="upload-tile" aria-label="이미지 업로드">
+                            <div class="text-center">
+                                <div class="mb-1">📷 사진 업로드</div>
+                                <small class="text-muted">클릭 또는 드래그하여 선택 (최대 10장)</small>
+                            </div>
+                        </label>
+                        <input id="fileInput" name="images" type="file" accept="image/*" multiple class="visually-hidden">
+                    </div>
+
+                    <div id="thumbs" class="thumb-grid"></div>
+                </div></div>
+            </div>
+        </div>
+
+        <div class="d-flex gap-2 mt-4">
+            <button type="submit" class="btn btn-primary">등록하기</button>
+            <a th:href="@{/trade/list}" class="btn btn-secondary">취소</a>
+        </div>
+    </form>
+</main>
+
+<!-- 공통 푸터 -->
+<div th:replace="~{/layout/footer :: footer}"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    (function(){
+        if (window.__tradeRegisterInited) return; window.__tradeRegisterInited = true;
+        const form=document.getElementById('registerForm'), fileInput=document.getElementById('fileInput'),
+            dropzone=document.getElementById('dropzone'), thumbs=document.getElementById('thumbs'),
+            counter=document.getElementById('count');
+        if(!form||!fileInput||!dropzone||!thumbs) return;
+
+        let filesBuffer=[];
+        document.addEventListener('click', e=>{ if(e.target.closest('#uploadTile')){ e.preventDefault(); fileInput.click(); }});
+        ['dragenter','dragover'].forEach(evt=> dropzone.addEventListener(evt, e=>{e.preventDefault();e.stopPropagation();dropzone.classList.add('dragover');}));
+        ['dragleave','drop'].forEach(evt=> dropzone.addEventListener(evt, e=>{e.preventDefault();e.stopPropagation();dropzone.classList.remove('dragover');}));
+        dropzone.addEventListener('drop', e=> addFiles(Array.from(e.dataTransfer?.files||[])));
+        fileInput.addEventListener('change', e=>{ addFiles(Array.from(e.target.files||[])); if(window.DataTransfer) fileInput.value=''; });
+
+        function addFiles(incoming){
+            if(!incoming.length) return;
+            const images=incoming.filter(f=>f.type.startsWith('image/'));
+            const room=Math.max(0,10-filesBuffer.length);
+            const toAdd=images.slice(0,room);
+            if(images.length>room) alert('최대 10장까지만 등록 가능합니다.');
+            filesBuffer.push(...toAdd); renderThumbs(); if(window.DataTransfer) syncToInput();
+        }
+        function removeAt(i){ filesBuffer.splice(i,1); renderThumbs(); if(window.DataTransfer) syncToInput(); }
+        function renderThumbs(){
+            thumbs.innerHTML=''; if(counter) counter.textContent=String(filesBuffer.length);
+            filesBuffer.forEach((file,i)=>{
+                const url=URL.createObjectURL(file);
+                const wrap=document.createElement('div'); wrap.className='thumb';
+                const img=document.createElement('img'); img.src=url; img.alt='preview';
+                if(i===0){ const badge=document.createElement('span'); badge.className='badge text-bg-primary badge-top'; badge.textContent='대표'; wrap.appendChild(badge); }
+                const btn=document.createElement('button'); btn.type='button'; btn.className='remove'; btn.innerHTML='&times;'; btn.addEventListener('click',()=>removeAt(i));
+                wrap.appendChild(img); wrap.appendChild(btn); thumbs.appendChild(wrap);
             });
-
-            // 드래그&드롭
-            ['dragenter','dragover'].forEach(evt => {
-                dropzone.addEventListener(evt, (e) => { e.preventDefault(); e.stopPropagation(); dropzone.classList.add('dragover'); });
-            });
-            ['dragleave','drop'].forEach(evt => {
-                dropzone.addEventListener(evt, (e) => { e.preventDefault(); e.stopPropagation(); dropzone.classList.remove('dragover'); });
-            });
-            dropzone.addEventListener('drop', (e) => {
-                const dropped = Array.from(e.dataTransfer?.files || []);
-                addFiles(dropped);
-            });
-
-            // 파일 선택
-            fileInput.addEventListener('change', (e) => {
-                addFiles(Array.from(e.target.files || []));
-                // ❗ DataTransfer 지원일 때만 비움 (미지원 환경에서는 남겨둬서 제출되게)
-                if (window.DataTransfer) fileInput.value = '';
-            });
-
-            function addFiles(incoming) {
-                if (!incoming.length) return;
-                const images = incoming.filter(f => f.type.startsWith('image/'));
-                const room = Math.max(0, 10 - filesBuffer.length);
-                const toAdd = images.slice(0, room);
-                if (images.length > room) alert('최대 10장까지만 등록 가능합니다.');
-                filesBuffer.push(...toAdd);
-                renderThumbs();
-                // DataTransfer 지원 환경이면 즉시 동기화
-                if (window.DataTransfer) syncToInput();
-            }
-
-            function removeAt(idx) {
-                filesBuffer.splice(idx, 1);
-                renderThumbs();
-                if (window.DataTransfer) syncToInput();
-            }
-
-            function renderThumbs() {
-                thumbs.innerHTML = '';
-                if (counter) counter.textContent = String(filesBuffer.length);
-                filesBuffer.forEach((file, i) => {
-                    const url = URL.createObjectURL(file);
-                    const wrap = document.createElement('div');
-                    wrap.className = 'thumb';
-
-                    const img = document.createElement('img');
-                    img.src = url;
-                    img.alt = 'preview';
-
-                    if (i === 0) {
-                        const badge = document.createElement('span');
-                        badge.className = 'badge text-bg-primary badge-top';
-                        badge.textContent = '대표';
-                        wrap.appendChild(badge);
-                    }
-
-                    const btn = document.createElement('button');
-                    btn.type = 'button';
-                    btn.className = 'remove';
-                    btn.innerHTML = '&times;';
-                    btn.addEventListener('click', () => removeAt(i));
-
-                    wrap.appendChild(img);
-                    wrap.appendChild(btn);
-                    thumbs.appendChild(wrap);
-                });
-            }
-
-            form.addEventListener('submit', function() {
-                if (window.DataTransfer) {
-                    syncToInput(); // 제출 직전 최종 반영
-                }
-            });
-
-            function syncToInput() {
-                if (typeof DataTransfer === 'undefined') return;
-                const dt = new DataTransfer();
-                filesBuffer.forEach(f => dt.items.add(f));
-                fileInput.files = dt.files;
-            }
-        })();
-    </script>
-</section>
+        }
+        form.addEventListener('submit', ()=>{ if(window.DataTransfer) syncToInput(); });
+        function syncToInput(){ if(typeof DataTransfer==='undefined') return; const dt=new DataTransfer(); filesBuffer.forEach(f=>dt.items.add(f)); fileInput.files=dt.files; }
+    })();
+</script>
 </body>
 </html>
