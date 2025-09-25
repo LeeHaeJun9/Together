@@ -20,4 +20,7 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
   @Modifying
   @Query("update ChatRoom r set r.modDate = CURRENT_TIMESTAMP where r.id = :roomId")
   int touchModDate(Long roomId);
+
+  long countBySellerIdOrBuyerId(Long sellerId, Long buyerId);
+
 }

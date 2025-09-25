@@ -13,4 +13,8 @@ public interface ChatService {
   List<ChatMessage> latest(Long roomId);
   List<ChatMessage> after(Long roomId, LocalDateTime after);
   ChatMessage send(Long roomId, Long senderId, String content);
+  int countRooms(Long userId);
+  void deleteRoom(Long roomId, Long requesterId);
+
+
 }
