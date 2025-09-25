@@ -2,17 +2,25 @@ body {
     display: flex;
     flex-direction: column;
     min-height: 100vh;
-    background-color: #f8f9fa; /* 상품 등록 페이지와 동일한 배경색 */
 }
+
 main {
     flex-grow: 1;
     padding-top: 2rem;
     padding-bottom: 2rem;
 }
 
-/* 상품 등록 페이지의 제목 영역 스타일을 적용 */
+/* main 페이지 전용 컨테이너 */
+main .page-container {
+    max-width: 600px;        /* 폼 너비 조절 */
+    margin: 0 auto;           /* 가운데 정렬 */
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+}
+
+/* 페이지 제목 */
 .page-header-container {
-    max-width: 1100px;
+    max-width: 600px;         /* 폼과 동일 너비 */
     padding-left: 1rem;
     padding-right: 1rem;
     display: flex;
@@ -20,6 +28,7 @@ main {
     justify-content: center;
     margin: 0 auto 1.5rem;
 }
+
 .page-header-container h3 {
     font-size: 1.75rem;
     font-weight: bold;
@@ -27,15 +36,7 @@ main {
     margin-bottom: 0;
 }
 
-/* 폼 컨테이너 스타일 */
-.form-container-custom {
-    max-width: 600px; /* 폼이 너무 넓지 않게 조정 */
-    margin: 0 auto;
-    padding-left: 1rem;
-    padding-right: 1rem;
-}
-
-/* 카드 스타일을 상품 등록 페이지와 통일 */
+/* 카드 스타일 */
 .card.shadow-sm {
     border-radius: 0.25rem;
     box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075) !important;
@@ -47,17 +48,19 @@ main {
     font-weight: 600;
     color: #343a40;
 }
+
 .form-control, .form-select {
     border-radius: 0.25rem;
     border: 1px solid #ced4da;
     padding: 0.5rem 0.75rem;
 }
+
 .form-control:focus, .form-select:focus {
     border-color: #80bdff;
     box-shadow: 0 0 0 0.25rem rgba(0, 123, 255, 0.25);
 }
 
-/* 버튼 스타일 통일 */
+/* 버튼 스타일 */
 .btn-primary {
     background-color: #0d6efd;
     border-color: #0d6efd;
@@ -65,6 +68,7 @@ main {
     padding: 0.5rem 1rem;
     font-weight: normal;
 }
+
 .btn-primary:hover {
     background-color: #0b5ed7;
     border-color: #0a58ca;

@@ -55,26 +55,26 @@
 
   <nav aria-label="게시글 페이지네이션" class="mt-4">
     <ul class="pagination justify-content-center">
-      <li class="page-item" th:classappend="${posts.hasPrevious()} ? '' : 'disabled'">
-        <a class="page-link"
-           th:href="@{|/cafe/${cafeId}/posts?page=${posts.number - 1}&size=${posts.size}|}"
-           aria-label="Previous">
-          <span aria-hidden="true">&laquo;</span>
-        </a>
-      </li>
+<!--      <li class="page-item" th:classappend="${posts.hasPrevious()} ? '' : 'disabled'">-->
+<!--        <a class="page-link"-->
+<!--           th:href="@{|/cafe/${cafeId}/posts?page=${posts.number - 1}&size=${posts.size}|}"-->
+<!--           aria-label="Previous">-->
+<!--          <span aria-hidden="true">&laquo;</span>-->
+<!--        </a>-->
+<!--      </li>-->
 
       <li class="page-item" th:each="i : ${#numbers.sequence(0, posts.totalPages - 1)}"
           th:classappend="${i == posts.number} ? 'active'">
         <a class="page-link" th:href="@{|/cafe/${cafeId}/posts?page=${i}&size=${posts.size}|}">[[${i + 1}]]</a>
       </li>
 
-      <li class="page-item" th:classappend="${posts.hasNext()} ? '' : 'disabled'">
-        <a class="page-link"
-           th:href="@{|/cafe/${cafeId}/posts?page=${posts.number + 1}&size=${posts.size}|}"
-           aria-label="Next">
-          <span aria-hidden="true">&raquo;</span>
-        </a>
-      </li>
+<!--      <li class="page-item" th:classappend="${posts.hasNext()} ? '' : 'disabled'">-->
+<!--        <a class="page-link"-->
+<!--           th:href="@{|/cafe/${cafeId}/posts?page=${posts.number + 1}&size=${posts.size}|}"-->
+<!--           aria-label="Next">-->
+<!--          <span aria-hidden="true">&raquo;</span>-->
+<!--        </a>-->
+<!--      </li>-->
     </ul>
   </nav>
 </main>
