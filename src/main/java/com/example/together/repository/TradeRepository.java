@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 
@@ -17,4 +18,9 @@ public interface TradeRepository extends JpaRepository<Trade, Long>, TradeSearch
 
   // 카테고리별 목록 조회 + 정렬 (TradeServiceImpl에서 사용)
   List<Trade> findByCategory(TradeCategory category, Sort sort);
+
+  @Query("SELECT t FROM Trade t LEFT JOIN Favorite f ON t.id = f.trade.id " +
+          "GROUP BY t " +
+          "ORDER BY COUNT(f) DESC, t.regdate DESC")
+  List<Trade> findPopularTradesByFavoriteCount(Pageable pageable);
 }

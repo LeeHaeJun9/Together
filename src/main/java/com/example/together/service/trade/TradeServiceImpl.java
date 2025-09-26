@@ -7,7 +7,12 @@ import com.example.together.domain.TradeImage;
 import com.example.together.repository.TradeImageRepository;
 import com.example.together.repository.TradeRepository;
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.beans.factory.annotation.Value;
+
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -85,5 +90,12 @@ public class TradeServiceImpl implements TradeService {
   @Override
   public List<Trade> listByCategory(TradeCategory category) {
     return tradeRepository.findByCategory(category, Sort.by(Sort.Direction.DESC, "id"));
+  }
+
+  @Override
+  public List<Trade> getPopularTradesByFavoriteCount(int count) {
+    Pageable pageable = PageRequest.of(0, count);
+
+    return tradeRepository.findPopularTradesByFavoriteCount(pageable);
   }
 }

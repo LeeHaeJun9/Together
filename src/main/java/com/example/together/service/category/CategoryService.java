@@ -148,13 +148,13 @@ public class CategoryService {
         try {
             return switch (t) {
                 // TradeController의 mapLabelToEnum 로직을 그대로 사용
-                case "운동"     -> TradeCategory.valueOf("SPORTS");
+                case "스포츠"     -> TradeCategory.valueOf("SPORTS");
                 case "예술"     -> TradeCategory.valueOf("ART");
                 case "음악"     -> TradeCategory.valueOf("MUSIC");
-                case "반려동물" -> TradeCategory.valueOf("PETS"); // 팀원 코드를 따라 PETS 사용
-                case "수집"     -> TradeCategory.valueOf("COLLECTION");
-                case "언어"     -> TradeCategory.valueOf("LANGUAGE");
-                case "요리"     -> TradeCategory.valueOf("COOKING");
+                case "반려동물" -> TradeCategory.valueOf("PET");
+                case "요리"     -> TradeCategory.valueOf("COOK");
+                case "스터디"     -> TradeCategory.valueOf("STUDY");
+                case "여행"     -> TradeCategory.valueOf("TRAVEL");
                 default -> null;
             };
         } catch (Exception e) {

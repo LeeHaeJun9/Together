@@ -169,31 +169,47 @@ public class MemberController {
         }
     }
 
-    // 닉네임 중복 확인 AJAX
-    @GetMapping("/api/member/check-nickname")
+    // 닉네임 중복 확인 (프로필 수정용) - 수정된 버전
+    @PostMapping("/member/profile/checkNickname")
     @ResponseBody
-    public ResponseEntity<Map<String, Object>> checkNicknameDuplicate(@RequestParam String nickname) {
+    public ResponseEntity<Map<String, Object>> checkNickname(@RequestBody Map<String, String> request,
+                                                             Principal principal) {
         Map<String, Object> response = new HashMap<>();
 
         try {
-            boolean isDuplicate = userService.isNicknameExists(nickname);
+            String nickname = request.get("nickname");
+            String currentUserId = principal.getName();
 
-            response.put("success", true);
-            response.put("isDuplicate", isDuplicate);
-
-            if (isDuplicate) {
-                response.put("message", "이미 사용중인 닉네임입니다.");
-            } else {
-                response.put("message", "사용 가능한 닉네임입니다.");
+            if (nickname == null || nickname.trim().isEmpty()) {
+                response.put("isAvailable", false);  // available → isAvailable 수정
+                response.put("message", "닉네임을 입력해주세요.");
+                return ResponseEntity.badRequest().body(response);
             }
+
+            if (nickname.length() < 2 || nickname.length() > 20) {
+                response.put("isAvailable", false);  // available → isAvailable 수정
+                response.put("message", "닉네임은 2-20자 사이여야 합니다.");
+                return ResponseEntity.badRequest().body(response);
+            }
+
+            if (!nickname.matches("^[가-힣a-zA-Z0-9]+$")) {
+                response.put("isAvailable", false);  // available → isAvailable 수정
+                response.put("message", "닉네임은 한글, 영문, 숫자만 사용 가능합니다.");
+                return ResponseEntity.badRequest().body(response);
+            }
+
+            boolean isAvailable = userService.isNicknameAvailable(nickname, currentUserId);
+
+            response.put("isAvailable", isAvailable);  // available → isAvailable 수정
+            response.put("message", isAvailable ? "사용 가능한 닉네임입니다." : "이미 사용중인 닉네임입니다.");
 
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
-            log.error("닉네임 중복 체크 중 오류 발생: {}", e.getMessage());
-            response.put("success", false);
-            response.put("message", "닉네임 체크 중 오류가 발생했습니다.");
-            return ResponseEntity.status(500).body(response);
+            log.error("닉네임 중복확인 중 오류 발생: {}", e.getMessage());
+            response.put("isAvailable", false);  // available → isAvailable 수정
+            response.put("message", "중복확인 중 오류가 발생했습니다.");
+            return ResponseEntity.internalServerError().body(response);
         }
     }
 
@@ -246,7 +262,7 @@ public class MemberController {
     // 닉네임 중복 확인 AJAX
     @PostMapping("/member/register/check-nickname")
     @ResponseBody
-    public String checkNickname(@RequestParam("nickname") String nickname) {
+    public String checkNicknameForRegister(@RequestParam("nickname") String nickname) {
         log.info("닉네임 중복 확인: nickname = {}", nickname);
         boolean exists = userService.isNicknameExists(nickname);
         return exists ? "{\"available\": false}" : "{\"available\": true}";
@@ -479,48 +495,7 @@ public class MemberController {
         return response;
     }
 
-    // 닉네임 중복 확인 (프로필 수정용)
-    @PostMapping("/member/profile/checkNickname")
-    @ResponseBody
-    public ResponseEntity<Map<String, Object>> checkNickname(@RequestBody Map<String, String> request,
-                                                             Principal principal) {
-        Map<String, Object> response = new HashMap<>();
 
-        try {
-            String nickname = request.get("nickname");
-            String currentUserId = principal.getName();
-
-            if (nickname == null || nickname.trim().isEmpty()) {
-                response.put("available", false);
-                response.put("message", "닉네임을 입력해주세요.");
-                return ResponseEntity.badRequest().body(response);
-            }
-
-            if (nickname.length() < 2 || nickname.length() > 20) {
-                response.put("available", false);
-                response.put("message", "닉네임은 2-20자 사이여야 합니다.");
-                return ResponseEntity.badRequest().body(response);
-            }
-
-            if (!nickname.matches("^[가-힣a-zA-Z0-9]+$")) {
-                response.put("available", false);
-                response.put("message", "닉네임은 한글, 영문, 숫자만 사용 가능합니다.");
-                return ResponseEntity.badRequest().body(response);
-            }
-
-            boolean isAvailable = userService.isNicknameAvailable(nickname, currentUserId);
-
-            response.put("available", isAvailable);
-            response.put("message", isAvailable ? "사용 가능한 닉네임입니다." : "이미 사용중인 닉네임입니다.");
-
-            return ResponseEntity.ok(response);
-
-        } catch (Exception e) {
-            response.put("available", false);
-            response.put("message", "중복확인 중 오류가 발생했습니다.");
-            return ResponseEntity.internalServerError().body(response);
-        }
-    }
 
     // 비밀번호 변경
     @PostMapping("/member/profile/password")
