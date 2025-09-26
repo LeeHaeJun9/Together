@@ -280,6 +280,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     @Override
+    @Transactional
     public boolean updateUserField(String userId, String field, String value) {
         try {
             Optional<User> userOptional = userRepository.findByUserId(userId);
