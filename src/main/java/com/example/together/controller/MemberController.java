@@ -45,6 +45,7 @@ public class MemberController {
     @PostMapping("/member/register")
     public String processRegistration(@Valid @ModelAttribute("memberRegisterDTO") memberRegisterDTO registerDTO,
                                       BindingResult bindingResult,
+                                      @RequestParam(value = "profilePhoto", required = false) MultipartFile profilePhoto,
                                       Model model,
                                       RedirectAttributes redirectAttributes) {
 
@@ -73,7 +74,7 @@ public class MemberController {
 
         // 모든 검증 통과 후 회원가입 진행
         try {
-            userService.register(registerDTO);
+            userService.register(registerDTO,profilePhoto);
             redirectAttributes.addFlashAttribute("message", "회원가입에 성공했습니다. 로그인해주세요.");
             return "redirect:/mainPage";
         } catch (IllegalArgumentException e) {
@@ -140,6 +141,34 @@ public class MemberController {
             return ResponseEntity.status(500).body(response);
         }
     }
+    // 닉네임 중복 확인 AJAX (회원가입용)
+    @GetMapping("/api/member/check-nickname")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> checkNicknameDuplicate(@RequestParam String nickname) {
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            boolean isDuplicate = userService.isNicknameExists(nickname);
+
+            response.put("success", true);
+            response.put("isDuplicate", isDuplicate);
+
+            if (isDuplicate) {
+                response.put("message", "이미 사용중인 닉네임입니다.");
+            } else {
+                response.put("message", "사용 가능한 닉네임입니다.");
+            }
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            log.error("닉네임 중복 체크 중 오류 발생: {}", e.getMessage());
+            response.put("success", false);
+            response.put("message", "닉네임 체크 중 오류가 발생했습니다.");
+            return ResponseEntity.status(500).body(response);
+        }
+    }
+
 
     // 이름 중복 확인 AJAX
     @GetMapping("/api/member/check-name")
