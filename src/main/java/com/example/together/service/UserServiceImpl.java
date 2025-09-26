@@ -245,6 +245,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     @Override
+    @Transactional
     public String uploadProfilePhoto(String userId, MultipartFile photo) {
         try {
             String currentDir = System.getProperty("user.dir");
@@ -269,9 +270,18 @@ public class UserServiceImpl implements UserService, UserDetailsService {
             File targetFile = new File(uploadDir, newFilename);
             photo.transferTo(targetFile);
 
-            log.info("프로필 사진 업로드 성공: {}", targetFile.getAbsolutePath());
+            String photoUrl = "/uploads/profile/" + newFilename;
 
-            return "/uploads/profile/" + newFilename;
+            // ⭐ 핵심 수정: 데이터베이스에 프로필 사진 URL 저장
+            User user = userRepository.findByUserId(userId)
+                    .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다: " + userId));
+
+            user.setProfilePhoto(photoUrl);
+            userRepository.save(user);
+
+            log.info("프로필 사진 업로드 및 DB 저장 성공: userId = {}, photoUrl = {}", userId, photoUrl);
+
+            return photoUrl;
 
         } catch (IOException e) {
             log.error("프로필 사진 업로드 중 파일 저장 실패: " + e.getMessage(), e);
@@ -383,5 +393,9 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Override
     public User findUserForPasswordReset(String userId, String email, String name) {
         return userRepository.findByUserIdAndEmailAndName(userId, email, name).orElse(null);
+    }
+    @Override
+    public void register(memberRegisterDTO registerDTO, MultipartFile profilePhoto) {
+        // 기존 로직 + 프로필 사진 저장 로직
     }
 }

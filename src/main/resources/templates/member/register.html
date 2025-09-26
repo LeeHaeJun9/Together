@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>회원가입 - 모여라</title>
     <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" th:href="@{/assets/favicon.ico}" />
+    <link rel="icon" type="image/x-icon" href="/assets/favicon.ico" />
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
     <style>
@@ -86,6 +86,69 @@
             border-radius: 5px;
             font-size: 14px;
             box-sizing: border-box;
+        }
+
+        /* 프로필 사진 업로드 스타일 */
+        .profile-photo-section {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .profile-preview {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 3px solid rgba(255, 255, 255, 0.5);
+            margin: 0 auto 15px;
+            background: rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .profile-preview:hover {
+            border-color: rgba(255, 255, 255, 0.8);
+            transform: scale(1.05);
+        }
+
+        .profile-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .profile-preview-placeholder {
+            font-size: 48px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .profile-upload-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            padding: 8px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .profile-upload-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.8);
+        }
+
+        .file-input-hidden {
+            display: none;
+        }
+
+        .photo-info {
+            font-size: 12px;
+            color: #e9ecef;
+            margin-top: 10px;
         }
 
         .check-button {
@@ -224,7 +287,25 @@
         <h1>모여라</h1>
         <p>함께하는 카페 모임의 시작</p>
 
-        <form id="registerForm" th:action="@{/member/register}" method="post">
+        <form id="registerForm" action="/member/register" method="post" enctype="multipart/form-data">
+            <input type="hidden" name="_csrf" th:value="${_csrf.token}" />
+
+            <!-- 프로필 사진 업로드 -->
+            <div class="profile-photo-section">
+                <div class="profile-preview" onclick="document.getElementById('profilePhoto').click()">
+                    <div class="profile-preview-placeholder" id="photoPlaceholder">📷</div>
+                    <img id="photoPreview" style="display: none;" alt="프로필 미리보기">
+                </div>
+                <label class="profile-upload-btn" for="profilePhoto">
+                    사진 선택
+                </label>
+                <input type="file" id="profilePhoto" name="profilePhoto" class="file-input-hidden"
+                       accept="image/*" onchange="previewPhoto(this)">
+                <div class="photo-info">
+                    JPG, PNG 파일만 가능 (최대 5MB)
+                </div>
+            </div>
+
             <!-- 사용자 ID -->
             <div class="form-group">
                 <label>사용자 ID <span style="color: #ff6b6b;">*</span></label>
@@ -329,6 +410,41 @@
     let isNicknameValid = false;
     let isPhoneValid = false;
     let isPasswordValid = false;
+
+    // 프로필 사진 미리보기 함수
+    function previewPhoto(input) {
+        const file = input.files[0];
+        const preview = document.getElementById('photoPreview');
+        const placeholder = document.getElementById('photoPlaceholder');
+
+        if (file) {
+            // 파일 크기 체크 (5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                alert('파일 크기는 5MB 이하만 가능합니다.');
+                input.value = '';
+                return;
+            }
+
+            // 파일 형식 체크
+            const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+            if (!allowedTypes.includes(file.type)) {
+                alert('JPG, PNG 파일만 업로드 가능합니다.');
+                input.value = '';
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+                placeholder.style.display = 'none';
+            };
+            reader.readAsDataURL(file);
+        } else {
+            preview.style.display = 'none';
+            placeholder.style.display = 'block';
+        }
+    }
 
     // 비밀번호 강도 체크 함수
     function checkPasswordStrength(password) {
@@ -687,26 +803,65 @@
 
     // 폼 제출 시 모든 필드 검증 확인
     document.getElementById('registerForm').addEventListener('submit', function(e) {
+        e.preventDefault(); // 기본 제출을 막고 AJAX로 처리
+
         const password = document.getElementById('password').value;
         const passwordConfirm = document.getElementById('passwordConfirm').value;
 
         if (!isUserIdValid || !isEmailValid || !isNameValid || !isNicknameValid || !isPhoneValid) {
-            e.preventDefault();
             alert('모든 필드의 중복 확인을 해주세요.');
             return false;
         }
 
         if (!isPasswordValid) {
-            e.preventDefault();
             alert('비밀번호가 너무 약합니다. 더 강한 비밀번호를 입력해주세요.');
             return false;
         }
 
         if (password !== passwordConfirm) {
-            e.preventDefault();
             alert('비밀번호와 비밀번호 확인이 일치하지 않습니다.');
             return false;
         }
+
+        // FormData로 폼 데이터 전송
+        const formData = new FormData();
+        formData.append('userId', document.getElementById('userId').value);
+        formData.append('email', document.getElementById('email').value);
+        formData.append('password', document.getElementById('password').value);
+        formData.append('confirmPassword', document.getElementById('passwordConfirm').value);
+        formData.append('name', document.getElementById('name').value);
+        formData.append('nickname', document.getElementById('nickname').value);
+        formData.append('phone', document.getElementById('phone').value);
+
+        // 프로필 사진이 있으면 추가
+        const profilePhoto = document.getElementById('profilePhoto').files[0];
+        if (profilePhoto) {
+            formData.append('profilePhoto', profilePhoto);
+        }
+
+        // CSRF 토큰을 동적으로 가져오기
+        const csrfToken = document.querySelector('input[name="_csrf"]').value;
+        formData.append('_csrf', csrfToken);
+
+        // AJAX로 전송
+        fetch('/member/register', {
+            method: 'POST',
+            body: formData
+        })
+            .then(response => {
+                if (response.ok) {
+                    alert('회원가입이 완료되었습니다!');
+                    window.location.href = '/mainPage';
+                } else {
+                    return response.text().then(text => {
+                        alert('회원가입 중 오류가 발생했습니다.');
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('회원가입 오류:', error);
+                alert('회원가입 중 오류가 발생했습니다.');
+            });
     });
 </script>
 </body>

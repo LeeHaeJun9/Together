@@ -1,21 +1,28 @@
 package com.example.together.domain;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import java.time.LocalDateTime;
 
 @Entity
+@Table(name = "user")
 @Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class User extends BaseEntity {
+public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, updatable = true)
+    @Column(name = "user_id", unique = true, nullable = false)
     private String userId;
 
     @Column(nullable = false)
@@ -24,36 +31,64 @@ public class User extends BaseEntity {
     @Column(nullable = false)
     private String name;
 
-    @Column(nullable = false)
+    @Column(unique = true, nullable = false)
     private String email;
 
-    @Column(nullable = false)
-    private  String phone;
+    private String phone;
 
-    @Column(nullable = false)
+    @Column(unique = true)
     private String nickname;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
-    private SystemRole systemRole = SystemRole.USER;
+    @Column(name = "system_role", nullable = false)
+    private SystemRole systemRole;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
-    private Status status = Status.ACTIVE;
-
-    @Override
-    public String toString() {
-        return this.userId;
-    }
+    @Column(nullable = false)
+    private Status status;
 
     @Column(name = "profile_photo")
     private String profilePhoto;
+
+    @CreationTimestamp
+    @Column(name = "regdate", updatable = false)
+    private LocalDateTime regDate;
+
+    @UpdateTimestamp
+    @Column(name = "moddate")
+    private LocalDateTime modDate;
+
+    // Setter 메소드들
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public void setNickname(String nickname) {
+        this.nickname = nickname;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
+    }
 
     public void setProfilePhoto(String profilePhoto) {
         this.profilePhoto = profilePhoto;
     }
 
-    public String getProfilePhoto() {
-        return profilePhoto;
+    @Override
+    public String toString() {
+        return this.userId;
     }
 }
