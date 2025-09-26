@@ -225,6 +225,7 @@ public class MeetingServiceImpl implements MeetingService {
         // organizer가 null일 경우를 대비하여 NullPointerException 방지
         Long organizerId = (meeting.getOrganizer() != null) ? meeting.getOrganizer().getId() : null;
         String organizerName = (meeting.getOrganizer() != null) ? meeting.getOrganizer().getUserId() : null;
+        String organizerNickname = (meeting.getOrganizer() != null) ? meeting.getOrganizer().getNickname() : null;
 
         // Cafe가 null일 경우를 대비하여 NullPointerException 방지
         CafeResponseDTO cafeResponseDTO = null;
@@ -247,6 +248,7 @@ public class MeetingServiceImpl implements MeetingService {
                 .address(meeting.getAddress())
                 .organizerId(organizerId)
                 .organizerName(organizerName)
+                .organizerNickname(organizerNickname)
                 .cafe(cafeResponseDTO)
                 .regDate(meeting.getRegDate())
                 .modDate(meeting.getModDate())
