@@ -133,3 +133,15 @@ main {
     max-width: 90%;
     border-radius: 8px;
 }
+
+.meeting-content {
+    white-space: normal;
+    line-height: 1.8;
+    font-size: 1.1rem;
+    color: #343a40;
+    margin: 0;
+    padding: 0;
+}
+.top-right {
+    float: right;
+}
