@@ -16,6 +16,8 @@ import com.example.together.service.meeting.MeetingService;
 import com.example.together.service.post.PostService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -342,18 +344,24 @@ public class CafeController {
     }
 
     @PostMapping("/{cafeId}/join")
-    public String sendJoinRequest(@PathVariable Long cafeId, Principal principal, RedirectAttributes redirectAttributes) {
+    @ResponseBody // 💡 @ResponseBody를 추가하여 JSON/텍스트 응답을 반환하도록 변경
+    public ResponseEntity<?> sendJoinRequest(@PathVariable Long cafeId, Principal principal) {
         if (principal == null) {
-            return "redirect:/login";
+            // 로그인 필요 시 401 Unauthorized 반환
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
         }
         Long userId = getLoggedInUserId(principal);
         try {
             cafeService.sendJoinRequest(cafeId, userId);
-            redirectAttributes.addFlashAttribute("message", "카페 가입 신청이 완료되었습니다.");
-        } catch (IllegalStateException | IllegalArgumentException e) {
-            redirectAttributes.addFlashAttribute("error", e.getMessage());
+            // 💡 성공 시 200 OK와 성공 메시지 반환
+            return ResponseEntity.ok("카페 가입 신청이 완료되었습니다.");
+        } catch (IllegalStateException e) {
+            // 이미 가입/신청 대기 중인 경우 409 Conflict 반환 (프론트엔드에서 409 처리 가능)
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+        } catch (IllegalArgumentException e) {
+            // 유효하지 않은 cafeId 등인 경우 400 Bad Request 반환
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
-        return "redirect:/cafe/" + cafeId;
     }
 
     @GetMapping("/my/cafe/{cafeId}/joinRequests")

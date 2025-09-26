@@ -135,3 +135,9 @@ main.container {
 .pagination .page-link:hover {
     background: #e9f5ff;
 }
+#searchKeywordText {
+    /* 검색어 입력 필드의 최대 너비를 500px로 제한 (선택적으로 조정 가능) */
+    max-width: 928px;
+    /* 남은 공간을 유연하게 채우되, max-width를 넘지 않도록 합니다. */
+    flex-grow: 1;
+}

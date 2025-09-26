@@ -35,8 +35,8 @@
                         </form>
                     </div>
                     <div th:unless="${cafe.isMember}">
-                        <form th:action="@{/cafe/{cafeId}/join(cafeId=${cafe.id})}" method="post">
-                            <button type="submit" class="btn btn-outline-success">가입신청</button>
+                        <form th:action="@{/cafe/{cafeId}/join(cafeId=${cafe.id})}" method="post" id="joinRequestForm">
+                            <button type="button" class="btn btn-outline-success" onclick="requestCafeJoin()">가입신청</button>
                         </form>
                     </div>
                 </div>
