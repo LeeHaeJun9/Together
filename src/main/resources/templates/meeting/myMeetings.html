@@ -58,9 +58,9 @@
                 <p class="mb-0">참여한 모임과 주최한 모임을 확인하세요</p>
             </div>
             <div class="col-md-4 text-end">
-                <a href="/meeting/create" class="btn btn-light">
-                    <i class="fas fa-plus"></i> 모임 만들기
-                </a>
+<!--                <a href="/meeting/create" class="btn btn-light">-->
+<!--                    <i class="fas fa-plus"></i> 모임 만들기-->
+<!--                </a>-->
             </div>
         </div>
     </div>
@@ -201,7 +201,7 @@
             <div th:if="${upcomingMeetingList == null or upcomingMeetingList.isEmpty()}" class="text-center py-5">
                 <i class="fas fa-calendar-alt fa-3x text-muted mb-3"></i>
                 <h5 class="text-muted">예정된 모임이 없습니다</h5>
-                <a href="/meeting/search" class="btn btn-primary mt-2">모임 찾기</a>
+<!--                <a href="/meeting/search" class="btn btn-primary mt-2">모임 찾기</a>-->
             </div>
         </div>
 
@@ -298,7 +298,7 @@
             <div th:if="${hostedMeetingList == null or hostedMeetingList.isEmpty()}" class="text-center py-5">
                 <i class="fas fa-crown fa-3x text-muted mb-3"></i>
                 <h5 class="text-muted">주최한 모임이 없습니다</h5>
-                <a href="/meeting/create" class="btn btn-info mt-2">모임 만들기</a>
+<!--                <a href="/meeting/create" class="btn btn-info mt-2">모임 만들기</a>-->
             </div>
         </div>
 
@@ -332,9 +332,10 @@
                                         <small class="text-muted" th:text="${review.cafeName}">카페명</small>
                                     </div>
                                     <div class="mt-2">
-<!--                                        <a th:href="@{/cafe/{cafeId}/meeting/review/read(cafeId=${meeting.cafe.id}, id=${meeting.id})}"-->
-                                        <a class="btn btn-sm btn-primary">관리하기</a>
-                                        <a class="btn btn-sm btn-outline-secondary">수정</a>
+                                        <a th:href="@{/cafe/{cafeId}/meeting/review/read(cafeId=${review.cafeId}, id=${review.id})}"
+                                           class="btn btn-sm btn-primary">상세보기</a>
+                                        <a th:href="@{/cafe/{cafeId}/meeting/review/modify(cafeId=${review.cafeId}, id=${review.id})}"
+                                           class="btn btn-sm btn-outline-secondary">수정</a>
                                     </div>
                                 </div>
                             </div>
@@ -345,7 +346,7 @@
             <div th:if="${myReviewsList == null or myReviewsList.isEmpty()}" class="text-center py-5">
                 <i class="fas fa-crown fa-3x text-muted mb-3"></i>
                 <h5 class="text-muted">리뷰한 모임이 없습니다</h5>
-                <a href="/meeting/create" class="btn btn-info mt-2">참여한 모임 보기</a>
+                <a href="#" id="btnShowCompleted" class="btn btn-info mt-2">참여한 모임 보기</a>
             </div>
         </div>
     </div>
@@ -362,54 +363,21 @@
 <!-- Scripts -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    // function leaveMeeting(meetingId) {
-    //     if (confirm('정말로 이 모임 참여를 취소하시겠습니까?')) {
-    //         fetch(`/api/meeting/${meetingId}/leave`, {
-    //             method: 'POST',
-    //             headers: {
-    //                 'Content-Type': 'application/json',
-    //             }
-    //         })
-    //             .then(response => {
-    //                 if (response.ok) {
-    //                     alert('모임 참여가 취소되었습니다.');
-    //                     location.reload();
-    //                 } else {
-    //                     alert('취소 처리 중 오류가 발생했습니다.');
-    //                 }
-    //             })
-    //             .catch(error => {
-    //                 console.error('Error:', error);
-    //                 alert('오류가 발생했습니다.');
-    //             });
-    //     }
-    // }
+    document.addEventListener('DOMContentLoaded', () => {
+        const completedTabBtn = document.getElementById('completed-tab');
+        if (completedTabBtn) {
+            const tabTrigger = new bootstrap.Tab(completedTabBtn);
 
-    // function writeReview(meetingId) {
-    //     // 후기 작성 페이지로 이동 또는 모달 표시
-    //     window.location.href = `/meeting/${meetingId}/review`;
-    // }
-
-    //     document.addEventListener('DOMContentLoaded', function () {
-    //     document.querySelectorAll('.cancel-btn').forEach(button => {
-    //         button.addEventListener('click', () => {
-    //             const meetingId = button.getAttribute('data-meeting-id');
-    //             const cafeId = button.getAttribute('data-cafe-id');
-    //             const form = document.getElementById('cancelForm');
-    //             const modalMeetingId = document.getElementById('modalMeetingId');
-    //
-    //             if (!meetingId || !cafeId) {
-    //                 console.error('meetingId 또는 cafeId가 비어 있음!');
-    //                 return;
-    //             }
-    //
-    //             form.action = `/cafe/${cafeId}/meeting/cancel`;
-    //             modalMeetingId.value = meetingId;
-    //         });
-    //     });
-    // });
-
-
+            // 버튼 클릭 시 완료된 모임 탭 활성화
+            const btnShowCompleted = document.getElementById('btnShowCompleted');
+            if (btnShowCompleted) {
+                btnShowCompleted.addEventListener('click', (e) => {
+                    e.preventDefault();  // 기본 a태그 동작 막기
+                    tabTrigger.show();
+                });
+            }
+        }
+    });
 </script>
 </body>
 </html>

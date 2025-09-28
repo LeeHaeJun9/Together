@@ -34,7 +34,8 @@ public class MeetingMyPageController {
     }
 
     @GetMapping("/my/joined-meetings")
-    public String getMyPageMeetings(Principal principal, Model model) {
+    public String getMyPageMeetings(@RequestParam(required = false, defaultValue = "meetingDate") String sortBy,
+                                    Principal principal, Model model) {
         Long userId = getLoggedInUserId(principal);
         if (userId == null) {
             // 로그인 안 된 경우 로그인 페이지로 리다이렉트

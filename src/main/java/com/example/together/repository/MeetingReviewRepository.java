@@ -1,5 +1,7 @@
 package com.example.together.repository;
 
+import com.example.together.domain.Meeting;
+import com.example.together.domain.MeetingJoinStatus;
 import com.example.together.domain.MeetingReview;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;

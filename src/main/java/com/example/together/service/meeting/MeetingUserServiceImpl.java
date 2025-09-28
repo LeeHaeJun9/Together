@@ -46,6 +46,7 @@ public class MeetingUserServiceImpl implements MeetingUserService{
                             .username(user.getName())      // 진짜 이름
                             .nickname(user.getNickname())      // 닉네임
                             .joinStatus(mu.getJoinStatus())
+                            .regDate(mu.getRegDate())
                             .build();
                 })
                 .collect(Collectors.toList());

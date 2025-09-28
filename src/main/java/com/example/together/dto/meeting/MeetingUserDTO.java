@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Data
 @Builder
 @AllArgsConstructor
@@ -17,4 +19,5 @@ public class MeetingUserDTO {
     private String userIdName;
     private String nickname;
     private MeetingJoinStatus joinStatus;
+    private LocalDateTime regDate;
 }
