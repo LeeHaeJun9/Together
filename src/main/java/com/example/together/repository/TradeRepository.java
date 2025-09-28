@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
 import java.util.Collection;
 import java.util.List;
@@ -38,4 +39,9 @@ public interface TradeRepository extends JpaRepository<Trade, Long>, TradeSearch
 
   List<Trade> findBySellerUserIdAndStatusIn(Long sellerUserId, Collection<String> statuses, Sort sort);
   long countBySellerUserIdAndStatusIn(Long sellerUserId, Collection<String> statuses);
+
+  @Query("SELECT t FROM Trade t LEFT JOIN Favorite f ON t.id = f.trade.id " +
+          "GROUP BY t " +
+          "ORDER BY COUNT(f) DESC, t.regdate DESC")
+  List<Trade> findPopularTradesByFavoriteCount(Pageable pageable);
 }

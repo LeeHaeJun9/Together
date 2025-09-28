@@ -1,99 +1,137 @@
 <!DOCTYPE html>
-<html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-    <meta name="description" content="모여라 프로필 관리" />
-    <meta name="author" content="" />
-    <meta name="_csrf" content="v0LXQo1EKECrn3svnXM6tedPEQtSTpFpOFAnc4T9HyZaNSc92nrgJOglTiGG-UsarF4O0N9_PGljePBECmMWR-XNfRI5VhMJ"/>
-    <meta name="_csrf_header" content="X-XSRF-TOKEN"/>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
     <title>모여라 - 프로필 관리</title>
-    <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="/assets/favicon.ico" />
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
-    <!-- Custom CSS -->
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/mainPage.css}">
+
     <style>
+        /* 프로필 페이지 전용 스타일 */
+        main {
+            background-color: #f8f9fa;
+            min-height: 80vh;
+            padding: 40px 0;
+        }
+
         .profile-container {
-            max-width: 600px;
-            margin: 50px auto;
-            padding: 30px;
+            max-width: 800px;
+            margin: 0 auto;
             background-color: white;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            overflow: hidden;
         }
 
         .profile-header {
-            background-color: #e9ecef;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
         }
 
         .profile-photo {
-            width: 80px;
-            height: 80px;
-            background-color: #ccc;
+            width: 120px;
+            height: 120px;
             border-radius: 50%;
+            margin: 0 auto 20px;
+            background-color: rgba(255,255,255,0.2);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 12px;
-            color: #666;
-            margin-right: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 4px solid rgba(255,255,255,0.3);
         }
 
-        .profile-info h5 {
-            margin: 0;
-            font-weight: bold;
-            color: #333;
+        .profile-photo:hover {
+            background-color: rgba(255,255,255,0.3);
+            transform: scale(1.05);
+        }
+
+        .profile-photo img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .profile-photo span {
+            font-size: 14px;
+            text-align: center;
+            color: white;
+        }
+
+        .profile-info h2 {
+            margin: 0 0 10px 0;
+            font-size: 28px;
+            font-weight: 600;
+        }
+
+        .profile-info .user-id {
+            font-size: 16px;
+            opacity: 0.9;
+            margin-bottom: 20px;
         }
 
         .profile-buttons {
             display: flex;
-            flex-direction: column;
-            gap: 10px;
+            gap: 15px;
+            justify-content: center;
         }
 
         .btn-profile {
-            padding: 8px 16px;
+            padding: 10px 20px;
+            border: 2px solid rgba(255,255,255,0.8);
+            background: transparent;
+            color: white;
+            border-radius: 25px;
             font-size: 14px;
-            border-radius: 5px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
         }
 
-        .profile-form-section {
+        .btn-profile:hover {
+            background: white;
+            color: #667eea;
+        }
+
+        .profile-content {
+            padding: 40px;
+        }
+
+        .section-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .form-section {
             background-color: #f8f9fa;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-        }
-
-        .form-section-title {
-            font-size: 18px;
-            font-weight: bold;
-            margin-bottom: 20px;
-            color: #333;
+            border-radius: 10px;
+            padding: 30px;
+            margin-bottom: 30px;
         }
 
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 25px;
         }
 
         .form-label {
-            font-weight: 500;
-            color: #333;
+            font-weight: 600;
+            color: #2c3e50;
             margin-bottom: 8px;
             display: block;
-        }
-
-        .form-control {
-            border-radius: 5px;
-            border: 1px solid #ced4da;
-            padding: 12px;
-        }
-
-        .form-control:disabled {
-            background-color: #f8f9fa;
+            font-size: 16px;
         }
 
         .input-group {
@@ -102,17 +140,35 @@
             gap: 10px;
         }
 
-        .input-group .form-control {
+        .form-control {
             flex: 1;
+            padding: 12px 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
         }
 
-        .btn-change, .btn-save, .btn-cancel, .check-button {
-            padding: 8px 16px;
+        .form-control:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-control:disabled {
+            background-color: #f8f9fa;
+            color: #6c757d;
+        }
+
+        .btn-action {
+            padding: 10px 20px;
             border: none;
-            border-radius: 5px;
+            border-radius: 6px;
             font-size: 14px;
-            white-space: nowrap;
+            font-weight: 500;
             cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
         }
 
         .btn-change {
@@ -121,7 +177,7 @@
         }
 
         .btn-change:hover {
-            background-color: #5a6268;
+            background-color: #545b62;
         }
 
         .btn-save {
@@ -142,58 +198,81 @@
             background-color: #c82333;
         }
 
-        .check-button {
-            background: #4CAF50;
+        .btn-check {
+            background-color: #17a2b8;
             color: white;
         }
 
-        .check-button:hover {
-            background: #45a049;
+        .btn-check:hover {
+            background-color: #138496;
         }
 
         .password-section {
-            background-color: #fff3cd;
+            background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+            border-radius: 10px;
+            padding: 30px;
             border: 1px solid #ffeaa7;
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 20px;
         }
 
         .alert {
-            padding: 12px;
-            border-radius: 5px;
-            margin-bottom: 15px;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
         }
 
         .hidden {
             display: none;
         }
 
-        /* register.html과 동일한 메시지 스타일 */
-        .message {
-            font-size: 12px;
-            margin-top: 5px;
+        .nickname-result {
+            margin-top: 10px;
+            font-size: 14px;
+            font-weight: 500;
         }
 
-        .error-message {
-            color: #ff6b6b;
+        /* 반응형 디자인 */
+        @media (max-width: 768px) {
+            .profile-container {
+                margin: 0 20px;
+            }
+
+            .profile-header {
+                padding: 30px 20px;
+            }
+
+            .profile-content {
+                padding: 30px 20px;
+            }
+
+            .input-group {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .btn-action {
+                width: 100%;
+                margin-top: 5px;
+            }
+
+            .profile-buttons {
+                flex-direction: column;
+            }
         }
 
-        .success-message {
-            color: #51cf66;
-        }
-
-        .input-success {
-            border: 2px solid #51cf66 !important;
-            background-color: #f0fff4;
-        }
-
-        .input-error {
-            border: 2px solid #ff6b6b !important;
-            background-color: #fff5f5;
-        }
-
-        /* 임시 비밀번호 모달 스타일 */
+        /* 모달 스타일 */
         .temp-password-modal {
             position: fixed;
             top: 0;
@@ -209,8 +288,8 @@
 
         .temp-password-content {
             background-color: white;
-            padding: 30px;
-            border-radius: 10px;
+            padding: 40px;
+            border-radius: 15px;
             max-width: 500px;
             width: 90%;
             text-align: center;
@@ -218,7 +297,7 @@
         }
 
         .temp-password-title {
-            font-size: 20px;
+            font-size: 24px;
             font-weight: bold;
             color: #28a745;
             margin-bottom: 20px;
@@ -227,300 +306,229 @@
         .temp-password-display {
             background-color: #f8f9fa;
             border: 2px solid #28a745;
-            padding: 15px;
-            border-radius: 8px;
+            padding: 20px;
+            border-radius: 10px;
             font-size: 24px;
             font-weight: bold;
             color: #333;
             margin: 20px 0;
             letter-spacing: 2px;
         }
-
-        .temp-password-info {
-            color: #6c757d;
-            font-size: 14px;
-            margin-bottom: 20px;
-        }
-
-        .btn-copy {
-            background-color: #17a2b8;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-right: 10px;
-        }
-
-        .btn-copy:hover {
-            background-color: #138496;
-        }
-
-        .btn-close-modal {
-            background-color: #6c757d;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        .btn-close-modal:hover {
-            background-color: #5a6268;
-        }
     </style>
 </head>
 <body>
-<!-- 헤더 -->
-<header class="container px-4 px-lg-5">
-    <link rel="stylesheet" href="/css/header.css">
-    <div class="header-top">
-        <a href="/mainPage" class="logo-section">
-            <img src="/images/moyeora-logo.png" alt="Together 로고" />
-            <span>모여라</span>
-        </a>
-        <nav>
-            <ul class="nav-links">
-                <li class="nav-link"><a href="/member/mypage">마이페이지</a></li>
-                <li class="nav-link"><a href="/logout">로그아웃</a></li>
-                <li class="nav-link"><a href="/manager">관리자페이지</a></li>
-                <li class="nav-link"><a href="/cafe/admin/applications">카페 가입 승인</a></li>
-            </ul>
-        </nav>
-    </div>
-</header>
 
-<!-- 프로필 관리 메인 -->
-<div class="container">
-    <div class="profile-container">
+<div th:replace="~{/layout/header :: header}"></div>
+
+<main>
+    <div class="container">
         <!-- 알림 메시지 -->
         <div id="alertContainer"></div>
 
-        <!-- 프로필 헤더 -->
-        <div class="profile-header">
-            <div class="row align-items-center">
-                <div class="col-auto">
-                    <div class="profile-photo" onclick="document.getElementById('photoInput').click();" style="cursor: pointer;">
-                        <span>프로필<br>사진</span>
-                    </div>
-                    <input type="file" id="photoInput" name="photo" accept="image/*" style="display: none;">
+        <div class="profile-container">
+            <!-- 프로필 헤더 -->
+            <div class="profile-header">
+                <div class="profile-photo" onclick="document.getElementById('photoInput').click();">
+                    <img th:if="${user.profilePhoto}" th:src="@{${user.profilePhoto}}" alt="프로필 사진" id="profileImage">
+                    <span th:unless="${user.profilePhoto}" id="profilePlaceholder">프로필<br>사진</span>
                 </div>
-                <div class="col">
-                    <div class="profile-info">
-                        <h5></h5>
-                        <small class="text-muted">아이디: </small>
-                    </div>
-                </div>
-                <div class="col-auto">
+                <input type="file" id="photoInput" name="photo" accept="image/*" style="display: none;">
+
+                <div class="profile-info">
+                    <h2 th:text="${user.nickname}">사용자 닉네임</h2>
+                    <div class="user-id" th:text="'아이디: ' + ${user.userId}">아이디: userid</div>
+
                     <div class="profile-buttons">
-                        <button class="btn btn-secondary btn-profile" onclick="document.getElementById('photoInput').click();">이미지 변경</button>
-                        <a href="/member/deleteUser" class="btn btn-danger btn-profile">회원 탈퇴</a>
+                        <button class="btn-profile" onclick="document.getElementById('photoInput').click();">
+                            <i class="fas fa-camera"></i> 사진 선택
+                        </button>
+                        <button class="btn-profile hidden" id="savePhotoBtn" onclick="saveProfilePhoto()">
+                            <i class="fas fa-save"></i> 저장하기
+                        </button>
+                        <button class="btn-profile hidden" id="cancelPhotoBtn" onclick="cancelPhotoChange()">
+                            <i class="fas fa-times"></i> 취소
+                        </button>
+                        <a href="/member/deleteUser" class="btn-profile">
+                            <i class="fas fa-user-minus"></i> 회원 탈퇴
+                        </a>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- 기본 정보 수정 폼 -->
-        <div class="profile-form-section">
-            <div class="form-section-title">기본 정보</div>
-
-            <form id="profileForm">
-                <!-- 닉네임 -->
-                <div class="form-group">
-                    <label class="form-label">닉네임</label>
-                    <div class="input-group">
-                        <input type="text" id="nickname" class="form-control"
-                               value="" placeholder="닉네임을 입력하세요" disabled>
-                        <button type="button" class="btn-change" onclick="enableEdit('nickname')">변경하기</button>
-                        <button type="button" class="check-button hidden" id="checkNicknameBtn" onclick="checkNicknameDuplicate()">중복확인</button>
-                        <button type="button" class="btn-save hidden" onclick="saveField('nickname')" id="saveNicknameBtn" disabled>저장</button>
-                        <button type="button" class="btn-cancel hidden" onclick="cancelEdit('nickname')">취소</button>
-                    </div>
-                    <div id="nicknameMessage" class="message"></div>
+            <!-- 프로필 내용 -->
+            <div class="profile-content">
+                <!-- 기본 정보 수정 -->
+                <div class="section-title">
+                    <i class="fas fa-user-edit"></i> 기본 정보
                 </div>
 
-                <!-- 이름 -->
-                <div class="form-group">
-                    <label class="form-label">이름</label>
-                    <div class="input-group">
-                        <input type="text" id="name" class="form-control"
-                               value="" placeholder="이름을 입력하세요" disabled>
-                        <button type="button" class="btn-change" onclick="enableEdit('name')">변경하기</button>
-                        <button type="button" class="check-button hidden" id="checkNameBtn" onclick="checkNameDuplicate()">중복확인</button>
-                        <button type="button" class="btn-save hidden" onclick="saveField('name')" id="saveNameBtn" disabled>저장</button>
-                        <button type="button" class="btn-cancel hidden" onclick="cancelEdit('name')">취소</button>
-                    </div>
-                    <div id="nameMessage" class="message"></div>
+                <div class="form-section">
+                    <form id="profileForm">
+                        <!-- 닉네임 -->
+                        <div class="form-group">
+                            <label class="form-label">닉네임</label>
+                            <div class="input-group">
+                                <input type="text" id="nickname" class="form-control"
+                                       th:value="${user.nickname}" disabled>
+                                <button type="button" class="btn-action btn-change" onclick="enableEdit('nickname')">변경하기</button>
+                                <button type="button" class="btn-action btn-check hidden" id="checkNicknameBtn" onclick="checkNicknameDuplicate()">중복확인</button>
+                                <button type="button" class="btn-action btn-save hidden" onclick="saveField('nickname')" id="saveNicknameBtn" disabled>저장</button>
+                                <button type="button" class="btn-action btn-cancel hidden" onclick="cancelEdit('nickname')">취소</button>
+                            </div>
+                            <div id="nicknameCheckResult" class="nickname-result"></div>
+                        </div>
+
+                        <!-- 이름 -->
+                        <div class="form-group">
+                            <label class="form-label">이름</label>
+                            <div class="input-group">
+                                <input type="text" id="name" class="form-control"
+                                       th:value="${user.name}" disabled>
+                                <button type="button" class="btn-action btn-change" onclick="enableEdit('name')">변경하기</button>
+                                <button type="button" class="btn-action btn-save hidden" onclick="saveField('name')">저장</button>
+                                <button type="button" class="btn-action btn-cancel hidden" onclick="cancelEdit('name')">취소</button>
+                            </div>
+                        </div>
+
+                        <!-- 이메일 -->
+                        <div class="form-group">
+                            <label class="form-label">이메일</label>
+                            <div class="input-group">
+                                <input type="email" id="email" class="form-control"
+                                       th:value="${user.email}" disabled>
+                                <button type="button" class="btn-action btn-change" onclick="enableEdit('email')">변경하기</button>
+                                <button type="button" class="btn-action btn-save hidden" onclick="saveField('email')">저장</button>
+                                <button type="button" class="btn-action btn-cancel hidden" onclick="cancelEdit('email')">취소</button>
+                            </div>
+                        </div>
+
+                        <!-- 전화번호 -->
+                        <div class="form-group">
+                            <label class="form-label">전화번호</label>
+                            <div class="input-group">
+                                <input type="tel" id="phone" class="form-control"
+                                       th:value="${user.phone}" disabled>
+                                <button type="button" class="btn-action btn-change" onclick="enableEdit('phone')">변경하기</button>
+                                <button type="button" class="btn-action btn-save hidden" onclick="saveField('phone')">저장</button>
+                                <button type="button" class="btn-action btn-cancel hidden" onclick="cancelEdit('phone')">취소</button>
+                            </div>
+                        </div>
+                    </form>
                 </div>
 
-                <!-- 이메일 -->
-                <div class="form-group">
-                    <label class="form-label">이메일</label>
-                    <div class="input-group">
-                        <input type="email" id="email" class="form-control"
-                               value="test@example.com" placeholder="이메일을 입력하세요" disabled>
-                        <button type="button" class="btn-change" onclick="enableEdit('email')">변경하기</button>
-                        <button type="button" class="check-button hidden" id="checkEmailBtn" onclick="checkEmailDuplicate()">중복확인</button>
-                        <button type="button" class="btn-save hidden" onclick="saveField('email')" id="saveEmailBtn" disabled>저장</button>
-                        <button type="button" class="btn-cancel hidden" onclick="cancelEdit('email')">취소</button>
-                    </div>
-                    <div id="emailMessage" class="message"></div>
+                <!-- 비밀번호 변경 -->
+                <div class="section-title">
+                    <i class="fas fa-lock"></i> 비밀번호 변경
                 </div>
 
-                <!-- 전화번호 -->
-                <div class="form-group">
-                    <label class="form-label">전화번호</label>
-                    <div class="input-group">
-                        <input type="tel" id="phone" class="form-control"
-                               value="010-1234-5678" placeholder="전화번호를 입력하세요" disabled>
-                        <button type="button" class="btn-change" onclick="enableEdit('phone')">변경하기</button>
-                        <button type="button" class="check-button hidden" id="checkPhoneBtn" onclick="checkPhoneDuplicate()">중복확인</button>
-                        <button type="button" class="btn-save hidden" onclick="saveField('phone')" id="savePhoneBtn" disabled>저장</button>
-                        <button type="button" class="btn-cancel hidden" onclick="cancelEdit('phone')">취소</button>
-                    </div>
-                    <div id="phoneMessage" class="message"></div>
+                <div class="password-section">
+                    <form id="passwordForm">
+                        <div class="form-group">
+                            <label class="form-label">현재 비밀번호</label>
+                            <input type="password" id="currentPassword" class="form-control"
+                                   placeholder="현재 비밀번호를 입력하세요" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">새 비밀번호</label>
+                            <input type="password" id="newPassword" class="form-control"
+                                   placeholder="새 비밀번호를 입력하세요 (8자 이상)" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">새 비밀번호 확인</label>
+                            <input type="password" id="confirmPassword" class="form-control"
+                                   placeholder="새 비밀번호를 다시 입력하세요" required>
+                        </div>
+
+                        <button type="submit" class="btn-action btn-save" style="width: 100%;">
+                            <i class="fas fa-save"></i> 비밀번호 변경
+                        </button>
+                    </form>
                 </div>
-            </form>
-        </div>
-
-        <!-- 비밀번호 변경 섹션 -->
-        <div class="password-section">
-            <div class="form-section-title">비밀번호 변경</div>
-
-            <form id="passwordForm">
-                <!-- 현재 비밀번호 -->
-                <div class="form-group">
-                    <label class="form-label">현재 비밀번호</label>
-                    <input type="password" id="currentPassword" class="form-control"
-                           placeholder="현재 비밀번호를 입력하세요" required>
-                </div>
-
-                <!-- 새 비밀번호 -->
-                <div class="form-group">
-                    <label class="form-label">새 비밀번호</label>
-                    <input type="password" id="newPassword" class="form-control"
-                           placeholder="새 비밀번호를 입력하세요 (8자 이상)" required>
-                </div>
-
-                <!-- 새 비밀번호 확인 -->
-                <div class="form-group">
-                    <label class="form-label">새 비밀번호 확인</label>
-                    <input type="password" id="confirmPassword" class="form-control"
-                           placeholder="새 비밀번호를 다시 입력하세요" required>
-                </div>
-
-                <button type="submit" class="btn btn-primary">비밀번호 변경</button>
-            </form>
+            </div>
         </div>
     </div>
-</div>
+</main>
 
-<!-- 임시 비밀번호 모달창 -->
+<!-- 임시 비밀번호 모달 -->
 <div id="tempPasswordModal" class="temp-password-modal">
     <div class="temp-password-content">
-        <div class="temp-password-title">✅ 임시 비밀번호 발급 완료</div>
+        <div class="temp-password-title">
+            <i class="fas fa-check-circle"></i> 임시 비밀번호 발급 완료
+        </div>
         <div class="temp-password-display" id="tempPasswordDisplay">temp1234</div>
         <div class="temp-password-info">
             위 임시 비밀번호를 복사하여 로그인하세요.<br>
             로그인 후 새로운 비밀번호로 변경해주세요.
         </div>
         <div>
-            <button class="btn-copy" onclick="copyTempPassword()">비밀번호 복사</button>
-            <button class="btn-close-modal" onclick="closeTempPasswordModal()">확인</button>
+            <button class="btn-action btn-check" onclick="copyTempPassword()">
+                <i class="fas fa-copy"></i> 비밀번호 복사
+            </button>
+            <button class="btn-action btn-cancel" onclick="closeTempPasswordModal()">확인</button>
         </div>
     </div>
 </div>
 
-<footer class="footer">
-    <link rel="stylesheet" href="/css/footer.css">
-    <div class="container">
-        <ul class="footer-links">
-            <li><a href="#">회사소개</a></li>
-            <li><a href="#">이용약관</a></li>
-            <li><a href="#">개인정보처리방침</a></li>
-            <li><a href="#">고객센터</a></li>
-        </ul>
-        <div class="footer-bottom">
-            <p>&copy; 2025 Together. All rights reserved.</p>
-        </div>
-    </div>
-</footer>
+<div th:replace="~{/layout/footer :: footer}"></div>
 
-<!-- Bootstrap JS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
-<!-- 프로필 관리 JavaScript -->
 <script>
-    // CSRF 토큰 변수 정의
+    // CSRF 토큰
     const token = document.querySelector('meta[name="_csrf"]').getAttribute('content');
     const header = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
 
-    let originalValues = {}; // 원본 값 저장
-
-    // 중복확인 상태 변수 (register.html에서 가져온 로직)
-    let isNicknameValid = false;
-    let isNameValid = false;
-    let isEmailValid = false;
-    let isPhoneValid = false;
-
-    // 알림 메시지 표시 함수
-    function showAlert(message, type) {
-        const alertContainer = document.getElementById('alertContainer');
-        const alertDiv = document.createElement('div');
-        alertDiv.className = `alert alert-${type}`;
-        alertDiv.innerHTML = message;
-        alertContainer.innerHTML = '';
-        alertContainer.appendChild(alertDiv);
-    }
-
-    // 필드별 검증 상태 초기화
-    function resetFieldValidation(fieldId) {
-        const messageElement = document.getElementById(`${fieldId}Message`);
-        const inputElement = document.getElementById(fieldId);
-
-        if (messageElement) messageElement.textContent = '';
-        if (inputElement) inputElement.className = 'form-control';
-
-        // 각 필드의 유효성 상태 초기화
-        switch(fieldId) {
-            case 'nickname': isNicknameValid = false; break;
-            case 'name': isNameValid = false; break;
-            case 'email': isEmailValid = false; break;
-            case 'phone': isPhoneValid = false; break;
-        }
-    }
+    let originalValues = {};
+    let isNicknameChecked = false;
+    let isNicknameAvailable = false;
+    let isNameChecked = false;
+    let isNameAvailable = false;
+    let isEmailChecked = false;
+    let isEmailAvailable = false;
+    let isPhoneChecked = false;
+    let isPhoneAvailable = false;
+    let selectedPhotoFile = null; // 선택된 사진 파일 저장
+    let originalPhotoSrc = null; // 원본 사진 경로 저장
 
     // 필드 수정 모드 활성화
     function enableEdit(fieldId) {
         const field = document.getElementById(fieldId);
         const container = field.parentElement;
 
-        // 원본 값 저장
         originalValues[fieldId] = field.value;
-
-        // 입력 필드 활성화
         field.disabled = false;
         field.focus();
 
-        // 기본 버튼 전환
         container.querySelector('.btn-change').classList.add('hidden');
         container.querySelector('.btn-save').classList.remove('hidden');
         container.querySelector('.btn-cancel').classList.remove('hidden');
 
-        // 중복확인 버튼 표시
-        const checkBtn = container.querySelector('.check-button');
-        if (checkBtn) {
-            checkBtn.classList.remove('hidden');
+        // 각 필드별 중복확인 버튼 표시 및 상태 초기화
+        if (fieldId === 'nickname') {
+            document.getElementById('checkNicknameBtn').classList.remove('hidden');
+            document.getElementById('saveNicknameBtn').disabled = true;
+            isNicknameChecked = false;
+            isNicknameAvailable = false;
+            document.getElementById('nicknameCheckResult').innerHTML = '';
+        } else if (fieldId === 'name') {
+            document.getElementById('checkNameBtn').classList.remove('hidden');
+            document.getElementById('saveNameBtn').disabled = true;
+            isNameChecked = false;
+            isNameAvailable = false;
+            document.getElementById('nameCheckResult').innerHTML = '';
+        } else if (fieldId === 'email') {
+            document.getElementById('checkEmailBtn').classList.remove('hidden');
+            document.getElementById('saveEmailBtn').disabled = true;
+            isEmailChecked = false;
+            isEmailAvailable = false;
+            document.getElementById('emailCheckResult').innerHTML = '';
+        } else if (fieldId === 'phone') {
+            document.getElementById('checkPhoneBtn').classList.remove('hidden');
+            document.getElementById('savePhoneBtn').disabled = true;
+            isPhoneChecked = false;
+            isPhoneAvailable = false;
+            document.getElementById('phoneCheckResult').innerHTML = '';
         }
-
-        // 저장 버튼 비활성화 (중복확인 후 활성화)
-        const saveBtn = container.querySelector('.btn-save');
-        if (saveBtn) {
-            saveBtn.disabled = true;
-        }
-
-        // 해당 필드의 검증 상태 초기화
-        resetFieldValidation(fieldId);
     }
 
     // 수정 취소
@@ -528,309 +536,36 @@
         const field = document.getElementById(fieldId);
         const container = field.parentElement;
 
-        // 원본 값 복원
-        field.value = originalValues[fieldId] || '';
+        field.value = originalValues[fieldId];
         field.disabled = true;
 
-        // 버튼 전환
         container.querySelector('.btn-change').classList.remove('hidden');
         container.querySelector('.btn-save').classList.add('hidden');
         container.querySelector('.btn-cancel').classList.add('hidden');
 
-        // 중복확인 버튼 숨기기
-        const checkBtn = container.querySelector('.check-button');
-        if (checkBtn) {
-            checkBtn.classList.add('hidden');
-        }
-
-        // 메시지 및 스타일 초기화
-        resetFieldValidation(fieldId);
-    }
-
-    // 닉네임 중복 체크 함수
-    async function checkNicknameDuplicate() {
-        const nickname = document.getElementById('nickname').value.trim();
-        const messageElement = document.getElementById('nicknameMessage');
-        const inputElement = document.getElementById('nickname');
-        const saveBtn = document.getElementById('saveNicknameBtn');
-        const currentNickname = originalValues['nickname'];
-
-        if (!nickname) {
-            messageElement.textContent = '닉네임을 입력해주세요.';
-            messageElement.className = 'message error-message';
-            inputElement.className = 'form-control input-error';
-            isNicknameValid = false;
-            saveBtn.disabled = true;
-            return;
-        }
-
-        if (nickname === currentNickname) {
-            messageElement.textContent = '현재 사용중인 닉네임입니다.';
-            messageElement.className = 'message success-message';
-            inputElement.className = 'form-control input-success';
-            isNicknameValid = true;
-            saveBtn.disabled = false;
-            return;
-        }
-
-        try {
-            const response = await fetch(`/api/member/check-nickname?nickname=${encodeURIComponent(nickname)}`);
-            const data = await response.json();
-
-            if (data.success) {
-                if (data.isDuplicate) {
-                    messageElement.textContent = '이미 사용중인 닉네임입니다.';
-                    messageElement.className = 'message error-message';
-                    inputElement.className = 'form-control input-error';
-                    isNicknameValid = false;
-                    saveBtn.disabled = true;
-                } else {
-                    messageElement.textContent = '사용 가능한 닉네임입니다.';
-                    messageElement.className = 'message success-message';
-                    inputElement.className = 'form-control input-success';
-                    isNicknameValid = true;
-                    saveBtn.disabled = false;
-                }
-            } else {
-                messageElement.textContent = '닉네임 확인 중 오류가 발생했습니다.';
-                messageElement.className = 'message error-message';
-                inputElement.className = 'form-control input-error';
-                isNicknameValid = false;
-                saveBtn.disabled = true;
-            }
-        } catch (error) {
-            console.error('닉네임 중복 체크 오류:', error);
-            messageElement.textContent = '네트워크 오류가 발생했습니다.';
-            messageElement.className = 'message error-message';
-            inputElement.className = 'form-control input-error';
-            isNicknameValid = false;
-            saveBtn.disabled = true;
+        // 각 필드별 중복확인 버튼 숨기기 및 상태 초기화
+        if (fieldId === 'nickname') {
+            document.getElementById('checkNicknameBtn').classList.add('hidden');
+            document.getElementById('nicknameCheckResult').innerHTML = '';
+            isNicknameChecked = false;
+            isNicknameAvailable = false;
+        } else if (fieldId === 'name') {
+            document.getElementById('checkNameBtn').classList.add('hidden');
+            document.getElementById('nameCheckResult').innerHTML = '';
+            isNameChecked = false;
+            isNameAvailable = false;
+        } else if (fieldId === 'email') {
+            document.getElementById('checkEmailBtn').classList.add('hidden');
+            document.getElementById('emailCheckResult').innerHTML = '';
+            isEmailChecked = false;
+            isEmailAvailable = false;
+        } else if (fieldId === 'phone') {
+            document.getElementById('checkPhoneBtn').classList.add('hidden');
+            document.getElementById('phoneCheckResult').innerHTML = '';
+            isPhoneChecked = false;
+            isPhoneAvailable = false;
         }
     }
-
-    // 이름 중복 체크 함수
-    async function checkNameDuplicate() {
-        const name = document.getElementById('name').value.trim();
-        const messageElement = document.getElementById('nameMessage');
-        const inputElement = document.getElementById('name');
-        const saveBtn = document.getElementById('saveNameBtn');
-        const currentName = originalValues['name'];
-
-        if (!name) {
-            messageElement.textContent = '이름을 입력해주세요.';
-            messageElement.className = 'message error-message';
-            inputElement.className = 'form-control input-error';
-            isNameValid = false;
-            saveBtn.disabled = true;
-            return;
-        }
-
-        if (name === currentName) {
-            messageElement.textContent = '현재 사용중인 이름입니다.';
-            messageElement.className = 'message success-message';
-            inputElement.className = 'form-control input-success';
-            isNameValid = true;
-            saveBtn.disabled = false;
-            return;
-        }
-
-        try {
-            const response = await fetch(`/api/member/check-name?name=${encodeURIComponent(name)}`);
-            const data = await response.json();
-
-            if (data.success) {
-                if (data.isDuplicate) {
-                    messageElement.textContent = '이미 사용중인 이름입니다.';
-                    messageElement.className = 'message error-message';
-                    inputElement.className = 'form-control input-error';
-                    isNameValid = false;
-                    saveBtn.disabled = true;
-                } else {
-                    messageElement.textContent = '사용 가능한 이름입니다.';
-                    messageElement.className = 'message success-message';
-                    inputElement.className = 'form-control input-success';
-                    isNameValid = true;
-                    saveBtn.disabled = false;
-                }
-            } else {
-                messageElement.textContent = '이름 확인 중 오류가 발생했습니다.';
-                messageElement.className = 'message error-message';
-                inputElement.className = 'form-control input-error';
-                isNameValid = false;
-                saveBtn.disabled = true;
-            }
-        } catch (error) {
-            console.error('이름 중복 체크 오류:', error);
-            messageElement.textContent = '네트워크 오류가 발생했습니다.';
-            messageElement.className = 'message error-message';
-            inputElement.className = 'form-control input-error';
-            isNameValid = false;
-            saveBtn.disabled = true;
-        }
-    }
-
-    // 이메일 중복 체크 함수
-    async function checkEmailDuplicate() {
-        const email = document.getElementById('email').value.trim();
-        const messageElement = document.getElementById('emailMessage');
-        const inputElement = document.getElementById('email');
-        const saveBtn = document.getElementById('saveEmailBtn');
-        const currentEmail = originalValues['email'];
-
-        if (!email) {
-            messageElement.textContent = '이메일을 입력해주세요.';
-            messageElement.className = 'message error-message';
-            inputElement.className = 'form-control input-error';
-            isEmailValid = false;
-            saveBtn.disabled = true;
-            return;
-        }
-
-        if (email === currentEmail) {
-            messageElement.textContent = '현재 사용중인 이메일입니다.';
-            messageElement.className = 'message success-message';
-            inputElement.className = 'form-control input-success';
-            isEmailValid = true;
-            saveBtn.disabled = false;
-            return;
-        }
-
-        try {
-            const response = await fetch(`/api/member/check-email?email=${encodeURIComponent(email)}`);
-            const data = await response.json();
-
-            if (data.success) {
-                if (data.isDuplicate) {
-                    messageElement.textContent = '이미 사용중인 이메일입니다.';
-                    messageElement.className = 'message error-message';
-                    inputElement.className = 'form-control input-error';
-                    isEmailValid = false;
-                    saveBtn.disabled = true;
-                } else {
-                    messageElement.textContent = '사용 가능한 이메일입니다.';
-                    messageElement.className = 'message success-message';
-                    inputElement.className = 'form-control input-success';
-                    isEmailValid = true;
-                    saveBtn.disabled = false;
-                }
-            } else {
-                messageElement.textContent = '이메일 확인 중 오류가 발생했습니다.';
-                messageElement.className = 'message error-message';
-                inputElement.className = 'form-control input-error';
-                isEmailValid = false;
-                saveBtn.disabled = true;
-            }
-        } catch (error) {
-            console.error('이메일 중복 체크 오류:', error);
-            messageElement.textContent = '네트워크 오류가 발생했습니다.';
-            messageElement.className = 'message error-message';
-            inputElement.className = 'form-control input-error';
-            isEmailValid = false;
-            saveBtn.disabled = true;
-        }
-    }
-
-    // 전화번호 중복 체크 함수
-    async function checkPhoneDuplicate() {
-        const phone = document.getElementById('phone').value.trim();
-        const messageElement = document.getElementById('phoneMessage');
-        const inputElement = document.getElementById('phone');
-        const saveBtn = document.getElementById('savePhoneBtn');
-        const currentPhone = originalValues['phone'];
-
-        if (!phone) {
-            messageElement.textContent = '전화번호를 입력해주세요.';
-            messageElement.className = 'message error-message';
-            inputElement.className = 'form-control input-error';
-            isPhoneValid = false;
-            saveBtn.disabled = true;
-            return;
-        }
-
-        if (phone === currentPhone) {
-            messageElement.textContent = '현재 사용중인 전화번호입니다.';
-            messageElement.className = 'message success-message';
-            inputElement.className = 'form-control input-success';
-            isPhoneValid = true;
-            saveBtn.disabled = false;
-            return;
-        }
-
-        try {
-            const response = await fetch(`/api/member/check-phone?phone=${encodeURIComponent(phone)}`);
-            const data = await response.json();
-
-            if (data.success) {
-                if (data.isDuplicate) {
-                    messageElement.textContent = '이미 사용중인 전화번호입니다.';
-                    messageElement.className = 'message error-message';
-                    inputElement.className = 'form-control input-error';
-                    isPhoneValid = false;
-                    saveBtn.disabled = true;
-                } else {
-                    messageElement.textContent = '사용 가능한 전화번호입니다.';
-                    messageElement.className = 'message success-message';
-                    inputElement.className = 'form-control input-success';
-                    isPhoneValid = true;
-                    saveBtn.disabled = false;
-                }
-            } else {
-                messageElement.textContent = '전화번호 확인 중 오류가 발생했습니다.';
-                messageElement.className = 'message error-message';
-                inputElement.className = 'form-control input-error';
-                isPhoneValid = false;
-                saveBtn.disabled = true;
-            }
-        } catch (error) {
-            console.error('전화번호 중복 체크 오류:', error);
-            messageElement.textContent = '네트워크 오류가 발생했습니다.';
-            messageElement.className = 'message error-message';
-            inputElement.className = 'form-control input-error';
-            isPhoneValid = false;
-            saveBtn.disabled = true;
-        }
-    }
-
-    // 입력 필드가 변경될 때 검증 상태 초기화 (register.html에서 가져온 로직)
-    document.getElementById('nickname').addEventListener('input', function() {
-        const messageElement = document.getElementById('nicknameMessage');
-        const inputElement = document.getElementById('nickname');
-        const saveBtn = document.getElementById('saveNicknameBtn');
-        messageElement.textContent = '';
-        inputElement.className = 'form-control';
-        isNicknameValid = false;
-        saveBtn.disabled = true;
-    });
-
-    document.getElementById('name').addEventListener('input', function() {
-        const messageElement = document.getElementById('nameMessage');
-        const inputElement = document.getElementById('name');
-        const saveBtn = document.getElementById('saveNameBtn');
-        messageElement.textContent = '';
-        inputElement.className = 'form-control';
-        isNameValid = false;
-        saveBtn.disabled = true;
-    });
-
-    document.getElementById('email').addEventListener('input', function() {
-        const messageElement = document.getElementById('emailMessage');
-        const inputElement = document.getElementById('email');
-        const saveBtn = document.getElementById('saveEmailBtn');
-        messageElement.textContent = '';
-        inputElement.className = 'form-control';
-        isEmailValid = false;
-        saveBtn.disabled = true;
-    });
-
-    document.getElementById('phone').addEventListener('input', function() {
-        const messageElement = document.getElementById('phoneMessage');
-        const inputElement = document.getElementById('phone');
-        const saveBtn = document.getElementById('savePhoneBtn');
-        messageElement.textContent = '';
-        inputElement.className = 'form-control';
-        isPhoneValid = false;
-        saveBtn.disabled = true;
-    });
 
     // 필드 저장
     function saveField(fieldId) {
@@ -842,21 +577,17 @@
             return;
         }
 
-        let isValid = false;
-        let fieldLabel = '';
-        switch(fieldId) {
-            case 'nickname': isValid = isNicknameValid; fieldLabel = '닉네임'; break;
-            case 'name': isValid = isNameValid; fieldLabel = '이름'; break;
-            case 'email': isValid = isEmailValid; fieldLabel = '이메일'; break;
-            case 'phone': isValid = isPhoneValid; fieldLabel = '전화번호'; break;
+        if (fieldId === 'nickname') {
+            if (!isNicknameChecked) {
+                showAlert('닉네임 중복확인을 먼저 해주세요.', 'danger');
+                return;
+            }
+            if (!isNicknameAvailable) {
+                showAlert('사용할 수 없는 닉네임입니다.', 'danger');
+                return;
+            }
         }
 
-        if (!isValid) {
-            showAlert(`${fieldLabel} 중복확인을 먼저 해주세요.`, 'danger');
-            return;
-        }
-
-        // AJAX 요청으로 서버에 업데이트
         fetch('/member/profile/update', {
             method: 'POST',
             headers: {
@@ -872,25 +603,20 @@
             .then(data => {
                 if (data.success) {
                     showAlert(data.message, 'success');
-
-                    // 필드 비활성화
                     field.disabled = true;
 
-                    // 버튼 전환
                     const container = field.parentElement;
                     container.querySelector('.btn-change').classList.remove('hidden');
                     container.querySelector('.btn-save').classList.add('hidden');
                     container.querySelector('.btn-cancel').classList.add('hidden');
 
-                    // 중복확인 버튼 숨기기
-                    const checkBtn = container.querySelector('.check-button');
-                    if (checkBtn) {
-                        checkBtn.classList.add('hidden');
+                    if (fieldId === 'nickname') {
+                        document.getElementById('checkNicknameBtn').classList.add('hidden');
+                        document.getElementById('nicknameCheckResult').innerHTML = '';
+                        document.querySelector('.profile-info h2').textContent = value;
+                        isNicknameChecked = false;
+                        isNicknameAvailable = false;
                     }
-
-                    // 메시지 초기화
-                    resetFieldValidation(fieldId);
-
                 } else {
                     showAlert(data.message, 'danger');
                 }
@@ -901,45 +627,265 @@
             });
     }
 
-    // 페이지 로드 시 기존 값 저장 (초기화 방지)
-    document.addEventListener('DOMContentLoaded', () => {
-        const nicknameEl = document.getElementById('nickname');
-        const nameEl = document.getElementById('name');
-        const emailEl = document.getElementById('email');
-        const phoneEl = document.getElementById('phone');
+    // 이름 중복확인
+    function checkNameDuplicate() {
+        const name = document.getElementById('name').value.trim();
+        const currentName = originalValues['name'];
 
-        if (nicknameEl) originalValues['nickname'] = nicknameEl.value;
-        if (nameEl) originalValues['name'] = nameEl.value;
-        if (emailEl) originalValues['email'] = emailEl.value;
-        if (phoneEl) originalValues['phone'] = phoneEl.value;
-    });
-
-    // 이메일 필드에 대한 'blur' 이벤트 리스너 추가
-    document.getElementById('email').addEventListener('blur', function() {
-        if (!this.value.includes('@')) {
-            showAlert('유효한 이메일 형식을 입력해주세요.', 'danger');
+        if (!name) {
+            showFieldResult('name', '이름을 입력해주세요.', 'danger');
+            return;
         }
-    });
 
-    // 비밀번호 변경 폼 제출 이벤트
+        if (name.length < 2) {
+            showFieldResult('name', '이름은 2자 이상이어야 합니다.', 'danger');
+            return;
+        }
+
+        if (name === currentName) {
+            showFieldResult('name', '현재 사용중인 이름입니다.', 'info');
+            isNameChecked = true;
+            isNameAvailable = true;
+            document.getElementById('saveNameBtn').disabled = false;
+            return;
+        }
+
+        document.getElementById('checkNameBtn').disabled = true;
+        document.getElementById('checkNameBtn').textContent = '확인중...';
+
+        fetch('/api/member/check-name?name=' + encodeURIComponent(name), {
+            method: 'GET',
+            headers: {
+                [header]: token
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                isNameChecked = true;
+                if (!data.isDuplicate) {
+                    isNameAvailable = true;
+                    showFieldResult('name', '✅ 사용 가능한 이름입니다.', 'success');
+                    document.getElementById('saveNameBtn').disabled = false;
+                } else {
+                    isNameAvailable = false;
+                    showFieldResult('name', '❌ 이미 사용 중인 이름입니다.', 'danger');
+                    document.getElementById('saveNameBtn').disabled = true;
+                }
+                document.getElementById('checkNameBtn').disabled = false;
+                document.getElementById('checkNameBtn').textContent = '중복확인';
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showFieldResult('name', '서버 오류가 발생했습니다.', 'danger');
+                isNameChecked = false;
+                isNameAvailable = false;
+                document.getElementById('checkNameBtn').disabled = false;
+                document.getElementById('checkNameBtn').textContent = '중복확인';
+            });
+    }
+
+    // 이메일 중복확인
+    function checkEmailDuplicate() {
+        const email = document.getElementById('email').value.trim();
+        const currentEmail = originalValues['email'];
+
+        if (!email) {
+            showFieldResult('email', '이메일을 입력해주세요.', 'danger');
+            return;
+        }
+
+        if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+            showFieldResult('email', '올바른 이메일 형식을 입력해주세요.', 'danger');
+            return;
+        }
+
+        if (email === currentEmail) {
+            showFieldResult('email', '현재 사용중인 이메일입니다.', 'info');
+            isEmailChecked = true;
+            isEmailAvailable = true;
+            document.getElementById('saveEmailBtn').disabled = false;
+            return;
+        }
+
+        document.getElementById('checkEmailBtn').disabled = true;
+        document.getElementById('checkEmailBtn').textContent = '확인중...';
+
+        fetch('/api/member/check-email?email=' + encodeURIComponent(email), {
+            method: 'GET',
+            headers: {
+                [header]: token
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                isEmailChecked = true;
+                if (!data.isDuplicate) {
+                    isEmailAvailable = true;
+                    showFieldResult('email', '✅ 사용 가능한 이메일입니다.', 'success');
+                    document.getElementById('saveEmailBtn').disabled = false;
+                } else {
+                    isEmailAvailable = false;
+                    showFieldResult('email', '❌ 이미 사용 중인 이메일입니다.', 'danger');
+                    document.getElementById('saveEmailBtn').disabled = true;
+                }
+                document.getElementById('checkEmailBtn').disabled = false;
+                document.getElementById('checkEmailBtn').textContent = '중복확인';
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showFieldResult('email', '서버 오류가 발생했습니다.', 'danger');
+                isEmailChecked = false;
+                isEmailAvailable = false;
+                document.getElementById('checkEmailBtn').disabled = false;
+                document.getElementById('checkEmailBtn').textContent = '중복확인';
+            });
+    }
+
+    // 전화번호 중복확인
+    function checkPhoneDuplicate() {
+        const phone = document.getElementById('phone').value.trim();
+        const currentPhone = originalValues['phone'];
+
+        if (!phone) {
+            showFieldResult('phone', '전화번호를 입력해주세요.', 'danger');
+            return;
+        }
+
+        if (!phone.match(/^010-\d{4}-\d{4}$/)) {
+            showFieldResult('phone', '올바른 전화번호 형식을 입력해주세요. (010-XXXX-XXXX)', 'danger');
+            return;
+        }
+
+        if (phone === currentPhone) {
+            showFieldResult('phone', '현재 사용중인 전화번호입니다.', 'info');
+            isPhoneChecked = true;
+            isPhoneAvailable = true;
+            document.getElementById('savePhoneBtn').disabled = false;
+            return;
+        }
+
+        document.getElementById('checkPhoneBtn').disabled = true;
+        document.getElementById('checkPhoneBtn').textContent = '확인중...';
+
+        fetch('/api/member/check-phone?phone=' + encodeURIComponent(phone), {
+            method: 'GET',
+            headers: {
+                [header]: token
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                isPhoneChecked = true;
+                if (!data.isDuplicate) {
+                    isPhoneAvailable = true;
+                    showFieldResult('phone', '✅ 사용 가능한 전화번호입니다.', 'success');
+                    document.getElementById('savePhoneBtn').disabled = false;
+                } else {
+                    isPhoneAvailable = false;
+                    showFieldResult('phone', '❌ 이미 사용 중인 전화번호입니다.', 'danger');
+                    document.getElementById('savePhoneBtn').disabled = true;
+                }
+                document.getElementById('checkPhoneBtn').disabled = false;
+                document.getElementById('checkPhoneBtn').textContent = '중복확인';
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showFieldResult('phone', '서버 오류가 발생했습니다.', 'danger');
+                isPhoneChecked = false;
+                isPhoneAvailable = false;
+                document.getElementById('checkPhoneBtn').disabled = false;
+                document.getElementById('checkPhoneBtn').textContent = '중복확인';
+            });
+    }
+
+    // 필드별 결과 메시지 표시
+    function showFieldResult(fieldType, message, type) {
+        const resultDiv = document.getElementById(fieldType + 'CheckResult');
+        const colorClass = type === 'success' ? 'text-success' :
+            type === 'danger' ? 'text-danger' : 'text-info';
+        resultDiv.innerHTML = `<span class="${colorClass}">${message}</span>`;
+    }
+
+    // 닉네임 중복확인
+    function checkNicknameDuplicate() {
+        const nickname = document.getElementById('nickname').value.trim();
+        const currentNickname = originalValues['nickname'];
+
+        if (!nickname) {
+            showNicknameResult('닉네임을 입력해주세요.', 'danger');
+            return;
+        }
+
+        if (nickname.length < 2) {
+            showNicknameResult('닉네임은 2자 이상이어야 합니다.', 'danger');
+            return;
+        }
+
+        if (nickname === currentNickname) {
+            showNicknameResult('현재 사용중인 닉네임입니다.', 'info');
+            isNicknameChecked = true;
+            isNicknameAvailable = true;
+            document.getElementById('saveNicknameBtn').disabled = false;
+            return;
+        }
+
+        document.getElementById('checkNicknameBtn').disabled = true;
+        document.getElementById('checkNicknameBtn').textContent = '확인중...';
+
+        fetch('/member/profile/checkNickname', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                [header]: token
+            },
+            body: JSON.stringify({
+                nickname: nickname
+            })
+        })
+            .then(response => response.json())
+            .then(data => {
+                isNicknameChecked = true;
+                if (data.isAvailable) {
+                    isNicknameAvailable = true;
+                    showNicknameResult('✅ 사용 가능한 닉네임입니다.', 'success');
+                    document.getElementById('saveNicknameBtn').disabled = false;
+                } else {
+                    isNicknameAvailable = false;
+                    showNicknameResult('❌ 이미 사용 중인 닉네임입니다.', 'danger');
+                    document.getElementById('saveNicknameBtn').disabled = true;
+                }
+                document.getElementById('checkNicknameBtn').disabled = false;
+                document.getElementById('checkNicknameBtn').textContent = '중복확인';
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNicknameResult('서버 오류가 발생했습니다.', 'danger');
+                isNicknameChecked = false;
+                isNicknameAvailable = false;
+                document.getElementById('checkNicknameBtn').disabled = false;
+                document.getElementById('checkNicknameBtn').textContent = '중복확인';
+            });
+    }
+
+    // 비밀번호 변경
     document.getElementById('passwordForm').addEventListener('submit', function(e) {
         e.preventDefault();
+
         const currentPassword = document.getElementById('currentPassword').value;
         const newPassword = document.getElementById('newPassword').value;
         const confirmPassword = document.getElementById('confirmPassword').value;
 
         if (newPassword !== confirmPassword) {
-            showAlert('새 비밀번호와 확인 비밀번호가 일치하지 않습니다.', 'danger');
+            showAlert('새 비밀번호가 일치하지 않습니다.', 'danger');
             return;
         }
 
         if (newPassword.length < 8) {
-            showAlert('새 비밀번호는 8자 이상이어야 합니다.', 'danger');
+            showAlert('비밀번호는 8자 이상이어야 합니다.', 'danger');
             return;
         }
 
-        // 서버에 비밀번호 변경 요청
-        fetch('/member/profile/update-password', {
+        fetch('/member/profile/password', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -953,8 +899,7 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    showAlert('비밀번호가 성공적으로 변경되었습니다.', 'success');
-                    // 폼 초기화
+                    showAlert(data.message, 'success');
                     document.getElementById('passwordForm').reset();
                 } else {
                     showAlert(data.message, 'danger');
@@ -966,8 +911,163 @@
             });
     });
 
-    // 임시 비밀번호 모달 관련 함수 (기존 코드)
-    function openTempPasswordModal(tempPassword) {
+    // 프로필 사진 선택 (미리보기만)
+    document.getElementById('photoInput').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        // 파일 크기 체크 (5MB 제한)
+        if (file.size > 5 * 1024 * 1024) {
+            showAlert('파일 크기는 5MB 이하여야 합니다.', 'danger');
+            return;
+        }
+
+        // 파일 타입 체크
+        if (!file.type.startsWith('image/')) {
+            showAlert('이미지 파일만 업로드 가능합니다.', 'danger');
+            return;
+        }
+
+        // 선택된 파일 저장
+        selectedPhotoFile = file;
+
+        // 미리보기 표시
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const profilePhoto = document.querySelector('.profile-photo');
+            const currentImg = profilePhoto.querySelector('img');
+
+            // 원본 이미지 경로 저장 (처음만)
+            if (!originalPhotoSrc && currentImg) {
+                originalPhotoSrc = currentImg.src;
+            }
+
+            // 미리보기 표시
+            profilePhoto.innerHTML = `<img src="${e.target.result}" alt="프로필 사진 미리보기" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
+
+            // 저장/취소 버튼 표시
+            document.getElementById('savePhotoBtn').classList.remove('hidden');
+            document.getElementById('cancelPhotoBtn').classList.remove('hidden');
+
+            showAlert('사진을 선택했습니다. 저장하기 버튼을 눌러주세요.', 'success');
+        };
+
+        reader.readAsDataURL(file);
+
+        // 파일 입력 초기화 (같은 파일 재선택 가능하도록)
+        e.target.value = '';
+    });
+
+    // 프로필 사진 저장
+    function saveProfilePhoto() {
+        if (!selectedPhotoFile) {
+            showAlert('저장할 사진이 없습니다.', 'danger');
+            return;
+        }
+
+        // 저장 버튼 비활성화
+        const saveBtn = document.getElementById('savePhotoBtn');
+        const originalText = saveBtn.innerHTML;
+        saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 저장 중...';
+        saveBtn.disabled = true;
+
+        const formData = new FormData();
+        formData.append('photo', selectedPhotoFile);
+
+        fetch('/member/profile/photo', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                [header]: token,
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('서버 응답 오류: ' + response.status);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('서버 응답:', data);
+
+                if (data.success) {
+                    showAlert('프로필 사진이 성공적으로 저장되었습니다.', 'success');
+
+                    // 버튼 숨기기
+                    document.getElementById('savePhotoBtn').classList.add('hidden');
+                    document.getElementById('cancelPhotoBtn').classList.add('hidden');
+
+                    // 선택된 파일 초기화
+                    selectedPhotoFile = null;
+                    originalPhotoSrc = null;
+
+                } else {
+                    showAlert('저장 실패: ' + (data.message || '알 수 없는 오류'), 'danger');
+                }
+            })
+            .catch(error => {
+                console.error('저장 오류:', error);
+                showAlert('저장 중 오류가 발생했습니다: ' + error.message, 'danger');
+            })
+            .finally(() => {
+                // 버튼 상태 복원
+                saveBtn.innerHTML = originalText;
+                saveBtn.disabled = false;
+            });
+    }
+
+    // 사진 변경 취소
+    function cancelPhotoChange() {
+        const profilePhoto = document.querySelector('.profile-photo');
+
+        // 원본 이미지로 복원
+        if (originalPhotoSrc) {
+            profilePhoto.innerHTML = `<img src="${originalPhotoSrc}" alt="프로필 사진" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
+        } else {
+            // 원본 이미지가 없으면 기본 표시
+            profilePhoto.innerHTML = '<span>프로필<br>사진</span>';
+        }
+
+        // 버튼 숨기기
+        document.getElementById('savePhotoBtn').classList.add('hidden');
+        document.getElementById('cancelPhotoBtn').classList.add('hidden');
+
+        // 변수 초기화
+        selectedPhotoFile = null;
+        originalPhotoSrc = null;
+
+        showAlert('사진 변경을 취소했습니다.', 'success');
+    }
+
+    // 알림 메시지
+    function showAlert(message, type) {
+        const alertContainer = document.getElementById('alertContainer');
+        const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
+
+        alertContainer.innerHTML = `
+            <div class="alert ${alertClass}" role="alert">
+                <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
+                ${message}
+            </div>
+        `;
+
+        setTimeout(() => {
+            alertContainer.innerHTML = '';
+        }, 3000);
+
+        window.scrollTo(0, 0);
+    }
+
+    function showNicknameResult(message, type) {
+        const resultDiv = document.getElementById('nicknameCheckResult');
+        const colorClass = type === 'success' ? 'text-success' :
+            type === 'danger' ? 'text-danger' : 'text-info';
+        resultDiv.innerHTML = `<span class="${colorClass}">${message}</span>`;
+    }
+
+    // 모달 관련 함수들
+    function showTempPasswordModal(tempPassword) {
         document.getElementById('tempPasswordDisplay').textContent = tempPassword;
         document.getElementById('tempPasswordModal').style.display = 'flex';
     }
@@ -978,33 +1078,20 @@
 
     function copyTempPassword() {
         const tempPassword = document.getElementById('tempPasswordDisplay').textContent;
-        navigator.clipboard.writeText(tempPassword).then(() => {
-            alert('임시 비밀번호가 복사되었습니다.');
-        }).catch(err => {
-            console.error('복사 실패:', err);
+        navigator.clipboard.writeText(tempPassword).then(function() {
+            const copyBtn = document.querySelector('.btn-copy');
+            copyBtn.innerHTML = '<i class="fas fa-check"></i> 복사됨!';
+            copyBtn.style.backgroundColor = '#28a745';
+
+            setTimeout(() => {
+                copyBtn.innerHTML = '<i class="fas fa-copy"></i> 비밀번호 복사';
+                copyBtn.style.backgroundColor = '#17a2b8';
+            }, 2000);
+        }).catch(function() {
+            alert('복사에 실패했습니다. 수동으로 복사해주세요.');
         });
     }
-
-    // 이전에 정의되지 않았던 함수들
-    function getFieldValidationStatus(fieldId) {
-        switch(fieldId) {
-            case 'nickname': return isNicknameValid;
-            case 'name': return isNameValid;
-            case 'email': return isEmailValid;
-            case 'phone': return isPhoneValid;
-            default: return false;
-        }
-    }
-
-    function getFieldLabel(fieldId) {
-        switch(fieldId) {
-            case 'nickname': return '닉네임';
-            case 'name': return '이름';
-            case 'email': return '이메일';
-            case 'phone': return '전화번호';
-            default: return '';
-        }
-    }
 </script>
+
 </body>
 </html>

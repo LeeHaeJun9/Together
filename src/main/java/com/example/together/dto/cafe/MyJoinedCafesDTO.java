@@ -11,7 +11,13 @@ import java.util.List;
 public class MyJoinedCafesDTO {
     private List<Membership> memberships;
     private long totalCafes;
-    private long musicCafes;
-    private long sportsCafes;
-    private long studyCafes;
+    private long totalJoinedCafes;
+    private long totalOwnedCafes;
+
+    // 💡 선택된 카테고리 1 (이름과 개수)
+    private String selectedCategory1Name;
+    private long selectedCategory1Count;
+
+    // 💡 최근 7일 내 가입한 카페 수 추가
+    private long recentlyJoinedCount;
 }
