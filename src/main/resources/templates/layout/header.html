@@ -1,108 +1,70 @@
 <!-- templates/layout/header.html -->
-<header th:fragment="header" class="container px-4 px-lg-5"
+<header th:fragment="header"
+        class="container px-4 px-lg-5"
         xmlns:th="http://www.thymeleaf.org"
         xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
-    <!-- Bootstrap 먼저 로드 (툴팁용) -->
+    <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- 프로젝트 헤더 전용 CSS -->
+    <!-- 프로젝트 헤더 전용 CSS(있다면 유지) -->
     <link rel="stylesheet" th:href="@{/css/header.css}">
 
-    <!-- 상단 헤더 -->
-    <div class="header-top d-flex align-items-center justify-content-between" style="min-height:64px;">
+    <style>
+        /* 상단 바: 밑줄 제거 */
+        .header-top{
+            min-height:64px;
+            display:flex; align-items:center; justify-content:space-between;
+            background:#fff;
+        }
+
+        .right-area{ display:flex; align-items:center; gap:16px; }
+
+        /* 아이콘 버튼 (마이페이지 왼쪽에 나열) */
+        .quick-icons{ display:flex; align-items:center; gap:12px; }
+        .quick-btn{
+            position:relative; display:inline-flex; align-items:center; justify-content:center;
+            width:40px; height:40px; border-radius:12px; color:#6c757d;
+            text-decoration:none; border:1px solid #e9edf3; background:#fff; transition:.15s;
+        }
+        .quick-btn:hover{ color:#0d6efd; border-color:#d7e6ff; background:#f5f9ff; }
+        .quick-btn svg{ width:22px; height:22px; }
+        .quick-badge{
+            position:absolute; top:-6px; right:-6px; min-width:20px; height:20px; padding:0 6px;
+            font-size:.78rem; line-height:20px; text-align:center; border-radius:999px;
+            background:#e9ecef; color:#495057; border:1px solid #fff;
+        }
+        .quick-btn.fav:hover{ color:#e03131; border-color:#ffe3e3; background:#fff5f5; }
+
+        /* 말풍선 툴팁(검정 버블) */
+        :root .tooltip.bubble .tooltip-inner{
+            position:relative; background:#111 !important; color:#fff !important;
+            padding:6px 10px !important; font-size:.875rem !important; line-height:1.2 !important;
+            border-radius:8px !important; box-shadow:0 4px 12px rgba(0,0,0,.2) !important; white-space:nowrap;
+        }
+        :root .tooltip.bubble .tooltip-arrow{ display:none !important; }
+        :root .tooltip.bubble.bs-tooltip-bottom .tooltip-inner::after{
+            content:""; position:absolute; left:50%; transform:translateX(-50%); top:-8px;
+            width:0; height:0; border-style:solid; border-width:0 8px 8px 8px; border-color:transparent transparent #111 transparent;
+        }
+    </style>
+
+    <div class="header-top">
+        <!-- 로고 -->
         <a th:href="@{/mainPage}" class="logo-section d-inline-flex align-items-center gap-2 text-decoration-none">
             <img th:src="@{/images/moyeora-logo.png}" alt="Together 로고" style="height:34px"/>
             <span class="fw-semibold text-dark">모여라</span>
         </a>
 
-        <nav>
-            <ul class="nav-links list-unstyled d-flex gap-3 mb-0" sec:authorize="!isAuthenticated()">
-                <li class="nav-link"><a th:href="@{/member/login}">로그인</a></li>
-                <li class="nav-link"><a th:href="@{/member/register}">회원가입</a></li>
-            </ul>
+        <!-- 오른쪽: 아이콘(왼쪽) + 내비게이션(오른쪽) -->
+        <div class="right-area">
 
-            <ul class="nav-links list-unstyled d-flex gap-3 mb-0" sec:authorize="isAuthenticated() && !hasRole('ADMIN')">
-                <li class="nav-link"><a th:href="@{/member/mypage}">마이페이지</a></li>
-                <li class="nav-link"><a th:href="@{/logout}">로그아웃</a></li>
-            </ul>
-
-            <ul class="nav-links list-unstyled d-flex gap-3 mb-0" sec:authorize="hasRole('ADMIN')">
-                <li class="nav-link"><a th:href="@{/member/mypage}">마이페이지</a></li>
-                <li class="nav-link"><a th:href="@{/logout}">로그아웃</a></li>
-                <li class="nav-link"><a th:href="@{/manager}">관리자페이지</a></li>
-                <li class="nav-link"><a th:href="@{/cafe/admin/applications}">카페 가입 승인</a></li>
-            </ul>
-        </nav>
-    </div>
-
-    <!-- ▼ 아이콘 바 + 말풍선 툴팁 스타일 -->
-    <style>
-        .quicknav-bar{ background:#fff; border-bottom:1px solid #e9edf3; padding-bottom:6px; }
-        .quicknav-right{ display:flex; justify-content:flex-end; }
-        .quicknav-icons{ display:flex; align-items:center; gap:12px; padding-top:6px; }
-
-        /* 아이콘 버튼 살짝 키움: 34 → 40 */
-        .quicknav-btn{
-            position:relative; display:inline-flex; align-items:center; justify-content:center;
-            width:40px; height:40px; border-radius:12px; color:#6c757d;
-            text-decoration:none; border:1px solid #e9edf3; background:#fff; transition:.15s;
-        }
-        .quicknav-btn:hover{ color:#0d6efd; border-color:#d7e6ff; background:#f5f9ff; }
-
-        /* SVG 아이콘 크기 업: 18 → 22 */
-        .quicknav-btn svg{ width:22px; height:22px; }
-
-        /* 뱃지도 버튼 커진 만큼 위치/크기 보정 */
-        .quicknav-badge{
-            position:absolute; top:-6px; right:-6px; min-width:20px; height:20px; padding:0 6px;
-            font-size:.78rem; line-height:20px; text-align:center; border-radius:999px;
-            background:#e9ecef; color:#495057; border:1px solid #fff;
-        }
-
-        /* 찜 hover 강조 */
-        .quicknav-btn.fav:hover{ color:#e03131; border-color:#ffe3e3; background:#fff5f5; }
-
-        /* ====== 검정 말풍선(버블) 툴팁 ====== */
-        :root .tooltip.bubble .tooltip-inner{
-            position:relative;
-            background:#111 !important;
-            color:#fff !important;
-            padding:6px 10px !important;
-            font-size:.875rem !important;
-            line-height:1.2 !important;
-            border-radius:8px !important;
-            box-shadow:0 4px 12px rgba(0,0,0,.2) !important;
-            white-space:nowrap;
-        }
-        :root .tooltip.bubble .tooltip-arrow{ display:none !important; }
-        :root .tooltip.bubble.bs-tooltip-top .tooltip-inner::after{
-            content:""; position:absolute; left:50%; transform:translateX(-50%); bottom:-8px;
-            width:0; height:0; border-style:solid; border-width:8px 8px 0 8px; border-color:#111 transparent transparent transparent;
-        }
-        :root .tooltip.bubble.bs-tooltip-bottom .tooltip-inner::after{
-            content:""; position:absolute; left:50%; transform:translateX(-50%); top:-8px;
-            width:0; height:0; border-style:solid; border-width:0 8px 8px 8px; border-color:transparent transparent #111 transparent;
-        }
-        :root .tooltip.bubble.bs-tooltip-start .tooltip-inner::after{
-            content:""; position:absolute; top:50%; transform:translateY(-50%); right:-8px;
-            width:0; height:0; border-style:solid; border-width:8px 0 8px 8px; border-color:transparent transparent transparent #111;
-        }
-        :root .tooltip.bubble.bs-tooltip-end .tooltip-inner::after{
-            content:""; position:absolute; top:50%; transform:translateY(-50%); left:-8px;
-            width:0; height:0; border-style:solid; border-width:8px 8px 8px 0; border-color:transparent #111 transparent transparent;
-        }
-    </style>
-
-    <div class="quicknav-bar">
-        <div class="quicknav-right">
-            <div class="quicknav-icons">
+            <!-- 여기 아이콘이 '마이페이지' 왼쪽에 위치 -->
+            <div class="quick-icons">
                 <!-- 카페 목록 -->
-                <a class="quicknav-btn"
+                <a class="quick-btn"
                    th:href="@{/cafe/list}"
                    aria-label="카페목록"
-                   data-bs-toggle="tooltip"
-                   data-bs-placement="top"
-                   data-bs-custom-class="bubble"
+                   data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-custom-class="bubble"
                    title="카페목록">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-cup-hot" viewBox="0 0 16 16">
                         <path fill-rule="evenodd" d="M.5 6a.5.5 0 0 0-.488.608l1.652 7.434A2.5 2.5 0 0 0 4.104 16h5.792a2.5 2.5 0 0 0 2.44-1.958l.131-.59a3 3 0 0 0 1.3-5.854l.221-.99A.5.5 0 0 0 13.5 6zM13 12.5a2 2 0 0 1-.316-.025l.867-3.898A2.001 2.001 0 0 1 13 12.5M2.64 13.825 1.123 7h11.754l-1.517 6.825A1.5 1.5 0 0 1 9.896 15H4.104a1.5 1.5 0 0 1-1.464-1.175"/>
@@ -111,53 +73,53 @@
                 </a>
 
                 <!-- 중고거래 -->
-                <a class="quicknav-btn"
+                <a class="quick-btn"
                    th:href="@{/trade/list}"
                    aria-label="중고거래"
-                   data-bs-toggle="tooltip"
-                   data-bs-placement="top"
-                   data-bs-custom-class="bubble"
+                   data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-custom-class="bubble"
                    title="중고거래">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bi bi-bag" viewBox="0 0 16 16" aria-hidden="true">
                         <path d="M8 1a2.5 2.5 0 0 1 2.5 2.5V4h-5v-.5A2.5 2.5 0 0 1 8 1m3.5 3v-.5a3.5 3.5 0 1 0-7 0V4H1v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V4zM2 5h12v9a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1z"/>
                     </svg>
-                    <span class="quicknav-badge" th:if="${tradeCount != null}" th:text="${tradeCount}">0</span>
+                    <span class="quick-badge" th:if="${tradeCount != null}" th:text="${tradeCount}">0</span>
                 </a>
 
                 <!-- 찜목록 -->
-                <a class="quicknav-btn fav"
+                <a class="quick-btn fav"
                    th:href="@{/member/favorites}"
                    aria-label="찜목록"
-                   data-bs-toggle="tooltip"
-                   data-bs-placement="top"
-                   data-bs-custom-class="bubble"
+                   data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-custom-class="bubble"
                    title="찜목록">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bi bi-bag-heart" viewBox="0 0 16 16" aria-hidden="true">
-                        <path fill-rule="evenodd" d="M10.5 3.5a2.5 2.5 0 0 0-5 0V4h5zm1 0V4H15v10a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V4h3.5v-.5a3.5 3.5 0 1 1 7 0M14 14V5H2v9a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1M8 7.993c1.664-1.711 5.825 1.283 0 5.132-5.825-3.85-1.664-6.843 0-5.132"/>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-cart" viewBox="0 0 16 16">
+                        <path d="M0 1.5A.5.5 0 0 1 .5 1H2a.5.5 0 0 1 .485.379L2.89 3H14.5a.5.5 0 0 1 .491.592l-1.5 8A.5.5 0 0 1 13 12H4a.5.5 0 0 1-.491-.408L2.01 3.607 1.61 2H.5a.5.5 0 0 1-.5-.5M3.102 4l1.313 7h8.17l1.313-7zM5 12a2 2 0 1 0 0 4 2 2 0 0 0 0-4m7 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4m-7 1a1 1 0 1 1 0 2 1 1 0 0 1 0-2m7 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2"/>
                     </svg>
-                </a>
-
-                <!-- 채팅 -->
-                <a class="quicknav-btn"
-                   th:href="@{/chat/list}"
-                   aria-label="내 채팅"
-                   data-bs-toggle="tooltip"
-                   data-bs-placement="top"
-                   data-bs-custom-class="bubble"
-                   title="내 채팅">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bi bi-envelope" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
-                        <path d="M0 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v.217l7 4.2 7-4.2V4a1 1 0 0 0-1-1zm13 2.383-4.708 2.825L15 11.105zm-.034 6.876-5.64-3.471L8 9.583l-1.326-.795-5.64 3.47A1 1 0 0 0 2 13h12a1 1 0 0 0 1-1M1 11.105l4.708-2.897L1 5.383z"/>
-                    </svg>
-                    <span class="quicknav-badge" th:if="${chatCount != null}" th:text="${chatCount}">0</span>
                 </a>
             </div>
+
+            <!-- 내비게이션(아이콘 오른쪽) -->
+            <nav>
+                <ul class="nav-links list-unstyled d-flex gap-3 mb-0" sec:authorize="!isAuthenticated()">
+                    <li class="nav-link"><a th:href="@{/member/login}">로그인</a></li>
+                    <li class="nav-link"><a th:href="@{/member/register}">회원가입</a></li>
+                </ul>
+
+                <ul class="nav-links list-unstyled d-flex gap-3 mb-0" sec:authorize="isAuthenticated() && !hasRole('ADMIN')">
+                    <li class="nav-link"><a th:href="@{/member/mypage}">마이페이지</a></li>
+                    <li class="nav-link"><a th:href="@{/logout}">로그아웃</a></li>
+                </ul>
+
+                <ul class="nav-links list-unstyled d-flex gap-3 mb-0" sec:authorize="hasRole('ADMIN')">
+                    <li class="nav-link"><a th:href="@{/member/mypage}">마이페이지</a></li>
+                    <li class="nav-link"><a th:href="@{/logout}">로그아웃</a></li>
+                    <li class="nav-link"><a th:href="@{/manager}">관리자페이지</a></li>
+                    <li class="nav-link"><a th:href="@{/cafe/admin/applications}">카페 가입 승인</a></li>
+                </ul>
+            </nav>
         </div>
     </div>
 
-    <!-- Bootstrap JS (툴팁 포함) -->
+    <!-- Bootstrap JS & 툴팁 초기화 -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
-    <!-- 툴팁 초기화 (버블 클래스 적용) -->
     <script>
         (function () {
             if (!(window.bootstrap && bootstrap.Tooltip)) return;
