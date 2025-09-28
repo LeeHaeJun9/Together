@@ -1,65 +1,125 @@
-<footer th:fragment="footer" class="footer">
+<footer th:fragment="footer" class="site-footer">
     <style>
         :root{
-            --footer-height:72px;
-            --footer-border:#e9ecef;
-            --footer-bg:#ffffff;
+            --ft-bg: #ffffff;
+            --ft-border: #e9edf3;
+            --ft-text: #4a5568;
+            --ft-muted: #8a94a6;
+            --ft-link: #4453ff;
+            --ft-link-hover: #1f2bff;
+            --ft-radius: 14px;
         }
 
-        /* ★ 스티키 푸터 레이아웃 */
         html, body { height: 100%; }
         body{
             min-height:100vh;
             display:flex;
             flex-direction:column;
+            background:#fff;
         }
-        /* 본문이 공간을 차지하도록 */
         main{ flex:1 0 auto; }
 
-        /* 기존 fixed 제거 → 문서 하단에 자연스럽게 붙음 */
-        .footer{
+        .site-footer{
             margin-top:auto;
-            background:var(--footer-bg);
+            background:var(--ft-bg);
         }
 
-        .footer .footer-container{
-            max-width:1200px; width:100%; margin:0 auto;
-            border-top:1px solid var(--footer-border);
-            min-height:var(--footer-height);
-            padding:14px 20px;
-            display:flex; flex-direction:column;
-            align-items:center; justify-content:center;
-            gap:10px; box-sizing:border-box;
-            background:var(--footer-bg);
-            text-align:center;
+        .site-footer .top-divider{
+            height: 1px;
+            background: linear-gradient(
+                    90deg,
+                    rgba(0,0,0,0) 0%,
+                    var(--ft-border) 15%,
+                    var(--ft-border) 85%,
+                    rgba(0,0,0,0) 100%
+            );
         }
 
-        .footer .footer-links{
-            display:flex; gap:16px; justify-content:center;
-            padding:0; margin:0; list-style:none;
+        .site-footer .wrap{
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 18px 20px 22px;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+            text-align: center;
         }
-        .footer .footer-links a{ color:#495057; text-decoration:none; font-size:.95rem; }
-        .footer .footer-links a:hover{ text-decoration:underline; }
 
-        .footer .footer-bottom p{
-            color:#6c757d; font-size:.9rem; margin:0; text-indent:1.5em;
+        .ft-links{
+            display: inline-flex;
+            flex-wrap: wrap;
+            gap: 10px 18px;
+            justify-content: center;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+        .ft-links a{
+            text-decoration: none;
+            color: var(--ft-text);
+            font-size: 12px;
+            padding: 4px 0;
+            position: relative;
+        }
+        .ft-links a:hover{ color: var(--ft-link); }
+
+        .ft-links li + li a::before{
+            content:"";
+            position:absolute;
+            left:-10px; top:50%;
+            width:4px; height:4px;
+            transform:translateY(-50%);
+            border-radius:50%;
+            background: var(--ft-border);
         }
 
-        @media (max-width:768px){
-            :root{ --footer-height:80px; }
-            .footer .footer-container{ gap:8px; }
+        .ft-bottom{
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            gap: 10px;
+            color: var(--ft-muted);
+            font-size: 11px;
+            line-height: 1.4;
+        }
+
+        .ft-mark{
+            width: 18px; height: 18px;
+            border-radius: 6px;
+            background: radial-gradient(100% 100% at 100% 0, #a3bffa 0%, #667eea 60%, #3b5bdb 100%);
+            box-shadow: 0 1px 3px rgba(60,72,88,.12);
+            flex: 0 0 18px;
+        }
+
+        .ft-icon svg{ width:16px; height:16px; }
+
+        @media (min-width: 640px){
+            .site-footer .wrap{
+                grid-template-columns: 1fr;
+                gap: 14px;
+            }
+            .ft-links a{ font-size: 12px; }
+        }
+
+        @media (min-width: 992px){
+            .site-footer .wrap{
+                padding: 20px 24px 26px;
+            }
         }
     </style>
 
-    <div class="footer-container">
-        <ul class="footer-links">
+    <div class="top-divider"></div>
+
+    <div class="wrap">
+        <ul class="ft-links">
             <li><a href="#">회사소개</a></li>
             <li><a href="#">이용약관</a></li>
             <li><a href="#">개인정보처리방침</a></li>
             <li><a href="#">고객센터</a></li>
         </ul>
-        <div class="footer-bottom">
-            <p>&copy; 2025 Together. All rights reserved.</p>
+
+        <div class="ft-bottom">
+            <span>&copy; 2025 Together. All rights reserved.</span>
         </div>
     </div>
 </footer>

@@ -12,21 +12,39 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
 
     <style>
+        .page-header{
+            background: linear-gradient(135deg, #e83e8c 0%, #ff6b6b 100%);
+            color:#fff;
+            padding: 2rem 0;
+            width: 100%;
+            margin: 0 0 2rem;
+            border-radius: 0;
+            box-shadow: 0 8px 20px rgba(232,62,140,.2);
+        }
+
+        .page-header h2{ font-weight: 700; }
+        .page-header p{ opacity:.95; }
+        .page-header .btn-light{
+            background:#fff; border:none; color:#d6336c;
+            box-shadow: 0 2px 6px rgba(0,0,0,.08);
+        }
+        .page-header .btn-light:hover{
+            background:#fff; color:#b02a58;
+        }
+
         .favorite-card{
             transition:.2s;
             border-left:4px solid #e83e8c;
             overflow: visible;
             position: relative;
         }
-        /* hover 이동 제거 */
+
         .favorite-card:hover{ transform:none; box-shadow:0 4px 8px rgba(0,0,0,.1); }
 
-        /* 카드 클릭 네비게이션 */
         .favorite-card.clickable{ cursor:pointer; }
 
         .product-status{font-size:.8rem;padding:.25rem .5rem;border-radius:15px;}
         .product-thumbnail{width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:8px;}
-        .page-header{width:1200px;background:white;margin:30px auto;}
         .seller-info{color:#6c757d;font-size:.9rem;}
         .stats-row{margin-bottom:2.5rem;}
         .favorite-list{margin-top:.25rem;}
@@ -34,17 +52,17 @@
         .stat-link .card{transition:.2s;}
         .stat-link .card:hover{transform:none;box-shadow:0 6px 14px rgba(0,0,0,.12);}
         .pos-rel{position:relative;}
+
         .soldout-overlay{position:absolute; inset:0; background:rgba(108,117,125,.35); border-radius:.375rem; display:flex; align-items:center; justify-content:center; pointer-events:none;}
         .soldout-badge{background:rgba(33,37,41,.75); color:#fff; padding:.35rem .7rem; border-radius:999px; font-weight:700; font-size:.95rem;}
 
-        /* 하트 아이콘 버튼 */
         .icon-btn{
             display:inline-flex; align-items:center; justify-content:center;
             width:36px; height:36px; border-radius:10px;
-            border:1px solid #e9edf3; background:#fff; color:#e03131;
+            border:1px solid #ffe3ee; background:#fff; color:#e03131;
             transition:.15s;
         }
-        .icon-btn:hover{ background:#fff5f5; border-color:#ffd6d6; }
+        .icon-btn:hover{ background:#fff5f8; border-color:#ffc4da; }
         .icon-btn i{ font-size:16px; line-height:1; }
         .icon-btn.heart{ color:#e03131; }
     </style>
@@ -57,7 +75,9 @@
     <div class="container">
         <div class="row align-items-center">
             <div class="col-md-8">
-                <h2 class="mb-1"><i class="fas fa-heart me-2"></i>찜한 상품</h2>
+                <h2 class="mb-1">
+                    <i class="fas fa-heart me-2"></i>찜한 상품
+                </h2>
                 <p class="mb-0">관심있는 상품들을 모아보세요</p>
             </div>
             <div class="col-md-4 text-end">
@@ -71,9 +91,7 @@
 
 <div class="container">
 
-    <!-- 통계 -->
     <div class="row g-3 stats-row">
-        <!-- 총 찜한 상품 -->
         <div class="col-md-3">
             <div class="card bg-danger text-white">
                 <div class="card-body text-center">
@@ -84,7 +102,6 @@
             </div>
         </div>
 
-        <!-- 판매한 상품 -->
         <div class="col-md-3">
             <a th:href="@{/trade/sold}" class="stat-link">
                 <div class="card bg-success text-white">
@@ -97,7 +114,6 @@
             </a>
         </div>
 
-        <!-- 구매한 상품 -->
         <div class="col-md-3">
             <a th:href="@{/trade/bought}" class="stat-link">
                 <div class="card bg-info text-white">
@@ -110,7 +126,6 @@
             </a>
         </div>
 
-        <!-- 내 채팅방 (맨 마지막) -->
         <div class="col-md-3">
             <a th:href="@{/chat/list}" class="stat-link">
                 <div class="card bg-primary text-white">
@@ -124,18 +139,15 @@
         </div>
     </div>
 
-    <!-- 목록 -->
     <div class="row g-4 favorite-list" th:if="${items != null and !items.isEmpty()}">
         <div class="col-md-6"
              th:each="it : ${items}"
              th:with="st=${it.status != null ? it.status.toString() : ''},
                       isSold=${st == 'SOLD_OUT'},
                       cat=${it.category != null ? it.category.toString() : ''}">
-            <!-- 카드 전체 클릭 이동 -->
             <div class="card favorite-card pos-rel clickable"
                  th:attr="data-href=${!isSold}? @{|/trade/read/${it.tradeId}|} : null,
                           data-sold=${isSold}">
-                <!-- 거래완료 오버레이 -->
                 <div class="soldout-overlay" th:if="${isSold}">
                     <span class="soldout-badge">거래 완료</span>
                 </div>
@@ -154,7 +166,6 @@
                             <div class="d-flex justify-content-between align-items-start mb-2">
                                 <h6 class="card-title mb-0" th:text="${it.title}">상품명</h6>
 
-                                <!-- 하트 아이콘: 찜 해제 -->
                                 <button class="icon-btn heart"
                                         title="찜 해제"
                                         aria-label="찜 해제"
@@ -192,10 +203,9 @@
                     </div>
                 </div>
             </div>
-        </div><!-- /col -->
+        </div>
     </div>
 
-    <!-- 빈 상태 -->
     <div th:if="${items == null or items.isEmpty()}" class="text-center py-5 mt-4">
         <i class="fas fa-heart-broken fa-3x text-muted mb-3"></i>
         <h5 class="text-muted">찜한 상품이 없습니다</h5>
@@ -209,7 +219,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    // 카드 전체 클릭: data-sold에 따라 이동/알럿
     (function(){
         document.querySelectorAll('.favorite-card.clickable').forEach(function(card){
             card.addEventListener('click', function(e){
@@ -222,7 +231,6 @@
         });
     })();
 
-    // 찜 해제
     async function removeFavorite(el, evt){
         if (evt) evt.stopPropagation(); // 카드 클릭으로 인한 이동 방지
 
