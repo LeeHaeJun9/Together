@@ -133,6 +133,9 @@ public class MeetingController {
         log.info(meetingDTO);
         Long id = meetingService.MeetingCreate(meetingDTO, cafeId);
 
+        // 모임 생성 후, 글쓴이를 자동으로 참여자로 추가
+        meetingService.applyToMeeting(user, id);
+
         redirectAttributes.addFlashAttribute("result", id);
         redirectAttributes.addAttribute("cafeId", cafeId); // 성공 시에도 cafeId 유지
         return "redirect:/cafe/{cafeId}/meetings";

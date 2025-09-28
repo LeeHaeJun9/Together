@@ -12,6 +12,17 @@
     <link rel="stylesheet" th:href="@{/css/cafeList.css}">
     <link rel="stylesheet" th:href="@{/css/cafeHeader.css}">
     <link rel="stylesheet" th:href="@{/css/postList.css}">
+
+    <style>
+        table.table thead th:nth-child(2),
+        table.table tbody td:nth-child(2) {
+            width: 400px;       /* 원하는 고정 너비(px, %, em 등 가능) */
+            white-space: nowrap; /* 줄바꿈 방지 */
+            overflow: hidden;    /* 넘칠 때 숨김 */
+            text-overflow: ellipsis; /* 넘친 텍스트는 ... 처리 */
+            /*text-align: left;*/
+        }
+    </style>
 </head>
 
 <body>
@@ -29,7 +40,7 @@
     </div>
 
     <div class="table-container">
-        <table class="table table-striped table-hover">
+        <table class="table table-hover"> <!--table-striped-->
             <thead class="table-custom-header">
             <tr>
                 <th scope="col">No.</th>
@@ -112,21 +123,32 @@
             alert("카페 정보를 찾을 수 없습니다.");
         }
     }, false)
+</script>
+
+
+<script>
+
+    document.querySelectorAll(".pagination a").forEach(a => console.log(a.getAttribute("data-num")));
 
     document.querySelector(".pagination").addEventListener("click", function (e) {
-        e.preventDefault()
-        e.stopPropagation()
+        if (e.target.tagName !== "A") return;
 
-        const target = e.target
+        e.preventDefault();
 
-        if(target.tagName !== "A") {
-            return
+        const num = e.target.getAttribute("data-num");
+        const formObj = document.querySelector("#pageForm");
+
+        if (!formObj) {
+            alert("페이지 폼을 찾을 수 없습니다.");
+            return;
         }
-        const num = target.getAttribute("data-num")
-        const formObj = document.querySelector("form")
+
         formObj.querySelector("input[name=page]").value = num;
         formObj.submit();
-    }, false)
+    });
+
+
 </script>
+
 </body>
 </html>

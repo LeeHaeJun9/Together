@@ -136,6 +136,7 @@ public class MeetingReviewController {
         if (meetingReviewDTO.getMeetingId() != null) {
             // ✅ createReview (모임 리뷰 등록)
             MeetingReview review = meetingReviewService.createReviewWithImages(
+                    cafeId,
                     userId,
                     meetingReviewDTO.getMeetingId(),
                     meetingReviewDTO.getTitle(),
@@ -146,6 +147,7 @@ public class MeetingReviewController {
         } else {
             // ✅ writeReview (임의 리뷰 작성)
             MeetingReview review = meetingReviewService.writeReviewWithImages(
+                    cafeId,
                     userId,
                     meetingReviewDTO.getTitle(),
                     meetingReviewDTO.getContent(),
@@ -156,6 +158,7 @@ public class MeetingReviewController {
             );
             reviewId = review.getId();
         }
+        meetingReviewDTO.setCafeId(cafeId);
 
         redirectAttributes.addFlashAttribute("result", reviewId);
         redirectAttributes.addAttribute("cafeId", cafeId);

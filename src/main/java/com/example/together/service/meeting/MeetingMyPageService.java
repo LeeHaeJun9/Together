@@ -39,14 +39,11 @@ public class MeetingMyPageService {
     private MeetingReviewDTO toMeetingReviewDto(MeetingReview review) {
         if (review == null) return null;
 
-//        CafeResponseDTO cafeDto = null;
-//        if (review.getMeeting() != null && review.getMeeting().getCafe() != null) {
-//            cafeDto = toCafeDto(review.getMeeting().getCafe());
-//        }
-
         String cafeName = null;
+        Long cafeId = null;
         if (review.getMeeting() != null && review.getMeeting().getCafe() != null) {
             cafeName = review.getMeeting().getCafe().getName();
+            cafeId = review.getMeeting().getCafe().getId();  // 여기 추가
         }
 
         return MeetingReviewDTO.builder()
@@ -54,9 +51,8 @@ public class MeetingMyPageService {
                 .title(review.getTitle())
                 .meetingLocation(review.getMeetingLocation())
                 .meetingDate(review.getMeetingDate())
-//                .cafeName(cafeDto.getName())
-//                .cafeId(cafeDto.getId())
                 .cafeName(cafeName)
+                .cafeId(review.getCafe().getId())
                 .build();
     }
 
@@ -118,9 +114,4 @@ public class MeetingMyPageService {
                 .countMyReviews(countMyReviews)
                 .build();
     }
-
-
-
-
-
 }

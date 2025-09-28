@@ -3,6 +3,8 @@ package com.example.together.domain;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Builder
 @AllArgsConstructor
@@ -16,7 +18,8 @@ public class MeetingReviewReply extends BaseEntity {
 
     private String text;
 
-    private String replyer;
+    @ManyToOne(fetch = FetchType.EAGER)
+    private User replyer;
 
     @ManyToOne(fetch = FetchType.LAZY)
     private MeetingReview review; // 이 댓글이 속한 리뷰

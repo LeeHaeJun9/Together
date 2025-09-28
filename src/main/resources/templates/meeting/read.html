@@ -10,6 +10,29 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/postDetail.css}">
+
+    <style>
+        .participant-table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+            text-align: center;
+        }
+        .participant-table th,
+        .participant-table td {
+            padding: 8px 12px;
+            text-align: center;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            border-bottom: 1px solid #ddd;
+        }
+        .participant-table th:nth-child(1) { width: 10%; }
+        .participant-table th:nth-child(2) { width: 25%; }
+        .participant-table th:nth-child(3) { width: 20%; }
+        .participant-table th:nth-child(4) { width: 20%; }
+    </style>
+
 </head>
 
 <body>
@@ -49,7 +72,7 @@
             </div>
             <div class="post-content">
                 <div class="meeting-content">
-                    <span th:text="'날짜 : ' + ${dto.meetingDate}">모임 날짜</span><br>
+                    <span th:text="'날짜 : ' + ${#temporals.format(dto.meetingDate, 'yyyy/MM/dd HH:ss')}">모임 날짜</span><br>
                     <span th:text="'장소 : ' + ${dto.location}">모임 장소</span><br>
                     <span th:text="'상세 주소 : ' + ${dto.address}">상세 주소</span>
                 </div>
@@ -62,78 +85,58 @@
 <!--            </div>-->
         </div>
 
-        <div class="my-2">
-            <form method="post" style="display: inline;"
-                  th:if="${isJoinedUser == null || !isJoinedUser}"
-                  th:action="@{/cafe/{cafeId}/meeting/apply(cafeId=${cafeResponse.id})}">
-                <input type="hidden" name="meetingId" th:value="${dto.id}" />
-                <button type="submit" class="btn"
-                        th:classappend="(${dto.meetingDate.isBefore(T(java.time.LocalDateTime).now())} or ${dto.recruiting.name() == 'END'}) ? 'btn-secondary disabled' : 'btn-success'"
-                        th:disabled="${dto.meetingDate.isBefore(T(java.time.LocalDateTime).now())} or ${dto.recruiting.name() == 'END'}">
-                    <span th:text="(${dto.meetingDate.isBefore(T(java.time.LocalDateTime).now())} or ${dto.recruiting.name() == 'END'}) ? '모집 마감' : '신청하기'">모집 상태</span>
-                </button>
-            </form>
-            <!-- ✅ 신청 취소 (이미 신청한 경우) -->
-            <button type="button"
-                    class="btn btn-danger"
-                    th:if="${isJoinedUser}"
-                    data-bs-toggle="modal"
-                    data-bs-target="#cancelModal">
-                신청 취소
-            </button>
-
-            <button type="button"
-                    class="btn btn-outline-primary ms-2 reviewBtn"
-                    th:if="${isJoinedUser} and ${dto.meetingDate.isBefore(T(java.time.LocalDateTime).now())}"
-                    th:onclick="|location.href='@{/cafe/{cafeId}/meeting/review/register(cafeId=${cafeResponse.id}, meetingId=${dto.id})}'|">
-                모임 후기 작성
-            </button>
-        </div>
-
-        <!-- 신청 취소 확인 모달 -->
-        <div class="modal fade" id="cancelModal" tabindex="-1" aria-labelledby="cancelModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <form th:action="@{/cafe/{cafeId}/meeting/cancel(cafeId=${cafeResponse.id})}" method="post">
+        <div class="comment-section">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2 class="h4">참가자 목록</h2>
+                <div class="my-2">
+                    <form method="post" style="display: inline;"
+                          th:if="${isJoinedUser == null || !isJoinedUser}"
+                          th:action="@{/cafe/{cafeId}/meeting/apply(cafeId=${cafeResponse.id})}">
                         <input type="hidden" name="meetingId" th:value="${dto.id}" />
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="cancelModalLabel">신청 취소</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="닫기"></button>
-                        </div>
-                        <div class="modal-body">
-                            정말로 이 모임 신청을 취소하시겠습니까?
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">돌아가기</button>
-                            <button type="submit" class="btn btn-danger">모임 신청 취소</button>
-                        </div>
+                        <button type="submit" class="btn"
+                                th:classappend="(${dto.meetingDate.isBefore(T(java.time.LocalDateTime).now())} or ${dto.recruiting.name() == 'END'}) ? 'btn-secondary disabled' : 'btn-success'"
+                                th:disabled="${dto.meetingDate.isBefore(T(java.time.LocalDateTime).now())} or ${dto.recruiting.name() == 'END'}">
+                            <span th:text="(${dto.meetingDate.isBefore(T(java.time.LocalDateTime).now())} or ${dto.recruiting.name() == 'END'}) ? '모집 마감' : '신청하기'">모집 상태</span>
+                        </button>
                     </form>
+                    <!-- ✅ 신청 취소 (이미 신청한 경우) -->
+                    <form th:if="${isJoinedUser}"
+                          th:action="@{/cafe/{cafeId}/meeting/cancel(cafeId=${cafeResponse.id})}"
+                          method="post" class="d-inline-block">
+                        <input type="hidden" name="meetingId" th:value="${dto.id}" />
+                        <button type="submit" class="btn btn-custom-danger" onclick="return confirm('정말로 신청 취소하시겠습니까?');">취소</button>
+                    </form>
+
+                    <button type="button"
+                            class="btn btn-outline-primary ms-2 reviewBtn"
+                            th:if="${isJoinedUser} and ${dto.meetingDate.isBefore(T(java.time.LocalDateTime).now())}"
+                            th:onclick="|location.href='@{/cafe/{cafeId}/meeting/review/register(cafeId=${cafeResponse.id}, meetingId=${dto.id})}'|">
+                        모임 후기 작성
+                    </button>
                 </div>
             </div>
-        </div>
-
-        <div class="comment-section">
-            <div class="d-flex justify-content-between align-items-center mb-2">
-                <h2 class="h4">참가자 목록</h2>
-                <div class="participant-actions">
 
             <hr>
 
-            <table class="table table-striped">
+            <table class="table participant-table"> <!-- table-striped-->
                 <thead>
                 <tr>
-                    <th>넘버</th>
-                    <th>아이디</th>
+                    <th>No.</th>
                     <th>닉네임</th>
+                    <th>신청 날짜</th>
                     <th>참가 상태</th>
                 </tr>
                 </thead>
                 <tbody>
-                <tr th:each="mu : ${meetingUser}">
-                    <td th:text="${mu.id}">아이디</td>
-                    <td th:text="${mu.userIdName}">아이디</td>
+                <tr th:each="mu, iterStat : ${meetingUser}">
+                    <td th:text="${iterStat.index + 1}">No</td>
                     <td th:text="${mu.nickname}">닉네임</td>
-                    <td th:text="${mu.joinStatus}">상태</td>
+                    <td th:text="${#temporals.format(mu.regDate, 'yyyy-MM-dd HH:mm')}">신청날짜</td>
+                    <td>
+                        <span th:if="${mu.joinStatus != null and mu.joinStatus.name() == 'ACCEPTED'}">
+                            신청 완료
+                        </span>
+                    </td>
                 </tr>
                 </tbody>
             </table>
@@ -145,20 +148,4 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script th:inline="javascript">
-    document.querySelector(".modBtn").addEventListener("click", function (e) {
-        self.location = `/board/modify?tno=${dto.tno}&${pageRequestDTO.link}`
-    },false)
-
-    document.querySelector(".ListBtn").addEventListener("click", function (e) {
-        self.location = `/board/list?${pageRequestDTO.link}`
-    }, false)
-
-    // document.querySelector(".removeBtn").addEventListener("click", function (e) {
-    //     e.stopPropagation()
-    //     e.preventDefault()
-    //
-    //     formObj.action = `/cafe/${cafeId}/meeting/remove`
-    //     formObj.method = 'post'
-    //     formObj.submit()
-    // }, false)
 </script>

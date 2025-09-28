@@ -38,7 +38,13 @@ public class MeetingReview extends BaseEntity {
     private String meetingAddress;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "cafe_id")
     private Cafe cafe;
+
+    @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<MeetingReviewReply> replies = new ArrayList<>();
+
 
     @OneToMany(mappedBy = "review", cascade = {CascadeType.ALL}, fetch = FetchType.LAZY, orphanRemoval = true)
     @Builder.Default

@@ -1,16 +1,13 @@
 package com.example.together.service.meeting;
 
-import com.example.together.domain.Meeting;
-import com.example.together.domain.MeetingReview;
-import com.example.together.domain.User;
+import com.example.together.domain.*;
 import com.example.together.dto.PageRequestDTO;
 import com.example.together.dto.PageResponseDTO;
+import com.example.together.dto.cafe.CafeResponseDTO;
 import com.example.together.dto.meeting.MeetingDTO;
 import com.example.together.dto.meeting.MeetingReviewDTO;
 import com.example.together.dto.meeting.MeetingReviewImageDTO;
-import com.example.together.repository.MeetingRepository;
-import com.example.together.repository.MeetingReviewRepository;
-import com.example.together.repository.UserRepository;
+import com.example.together.repository.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -36,9 +33,11 @@ import java.util.stream.Collectors;
 @Transactional
 public class MeetingReviewServiceImpl implements MeetingReviewService {
     private final ModelMapper modelMapper;
-    private final MeetingReviewRepository meetingReviewRepository;
-    private final MeetingRepository meetingRepository;
     private final UserRepository userRepository;
+    private final CafeRepository cafeRepository;
+    private final MeetingRepository meetingRepository;
+    private final MeetingReviewRepository meetingReviewRepository;
+    private final MeetingReviewReplyRepository meetingReviewReplyRepository;
 
     // application.properties에 설정된 업로드 경로 주입
     @Value("${org.zerock.upload.path}")
@@ -63,6 +62,15 @@ public class MeetingReviewServiceImpl implements MeetingReviewService {
                         .build())
                 .collect(Collectors.toList());
 
+        Cafe cafe = mtReview.getCafe();
+        CafeResponseDTO cafeDTO = null;
+        if (cafe != null) {
+            cafeDTO = CafeResponseDTO.builder()
+                    .id(cafe.getId())
+                    .name(cafe.getName())
+                    .build();
+        }
+
         return MeetingReviewDTO.builder()
                 .id(mtReview.getId())
                 .title(mtReview.getTitle())
@@ -75,6 +83,9 @@ public class MeetingReviewServiceImpl implements MeetingReviewService {
                 .meetingAddress(meetingDTO != null ? meetingDTO.getAddress() : mtReview.getMeetingAddress())
                 .meetingLocation(meetingDTO != null ? meetingDTO.getLocation() : mtReview.getMeetingLocation())
                 .imageList(imageDTOList)
+                .cafe(cafeDTO)
+                .cafeId(cafe != null ? cafe.getId() : 0)
+                .cafeName(cafe != null ? cafe.getName() : null)
                 .regDate(mtReview.getRegDate())
                 .modDate(mtReview.getModDate())
                 .build();
@@ -115,6 +126,9 @@ public class MeetingReviewServiceImpl implements MeetingReviewService {
 
     @Override
     public void MeetingReviewDelete(Long id) {
+        List<MeetingReviewReply> replies = meetingReviewReplyRepository.findByReview_Id(id);
+        meetingReviewReplyRepository.deleteAll(replies);
+
         meetingReviewRepository.deleteById(id);
     }
 
@@ -141,18 +155,22 @@ public class MeetingReviewServiceImpl implements MeetingReviewService {
 
     @Override
     @Transactional
-    public MeetingReview createReviewWithImages(String userId, Long meetingId, String title, String content, List<MultipartFile> files) {
+    public MeetingReview createReviewWithImages(Long cafeId, String userId, Long meetingId, String title, String content, List<MultipartFile> files) {
         User user = userRepository.findByUserId(userId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 유저가 없습니다. userId=" + userId));
 
         Meeting meeting = meetingRepository.findById(meetingId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 모임이 없습니다. meetingId=" + meetingId));
 
+        Cafe cafe = cafeRepository.findById(cafeId)
+                .orElseThrow(() -> new IllegalArgumentException("No cafe: " + cafeId));
+
         MeetingReview review = MeetingReview.builder()
                 .title(title)
                 .content(content)
                 .reviewer(user)
                 .meeting(meeting)
+                .cafe(cafe)
                 .build();
 
         if (files != null && !files.isEmpty()) {
@@ -163,15 +181,18 @@ public class MeetingReviewServiceImpl implements MeetingReviewService {
     }
     @Override
     @Transactional
-    public MeetingReview writeReviewWithImages(String userId, String title, String content, LocalDateTime meetingDate, String meetingLocation, String meetingAddress, List<MultipartFile> files) {
+    public MeetingReview writeReviewWithImages(Long cafeId, String userId, String title, String content, LocalDateTime meetingDate, String meetingLocation, String meetingAddress, List<MultipartFile> files) {
         User user = userRepository.findByUserId(userId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 유저가 없습니다. userId=" + userId));
 
+        Cafe cafe = cafeRepository.findById(cafeId)
+                .orElseThrow(() -> new IllegalArgumentException("No cafe: " + cafeId));
 
         MeetingReview review = MeetingReview.builder()
                 .title(title)
                 .content(content)
                 .reviewer(user)
+                .cafe(cafe)
                 .meetingDate(meetingDate)
                 .meetingLocation(meetingLocation)
                 .meetingAddress(meetingAddress)
@@ -217,10 +238,17 @@ public class MeetingReviewServiceImpl implements MeetingReviewService {
                     .orElseThrow(() -> new IllegalArgumentException("No meeting: " + dto.getMeetingId()));
         }
 
+        Cafe cafe = null;
+        if (dto.getCafeId() > 0) {  // cafeId가 0이 아니면
+            cafe = cafeRepository.findById(dto.getCafeId())
+                    .orElseThrow(() -> new IllegalArgumentException("No cafe: " + dto.getCafeId()));
+        }
+
         MeetingReview review = MeetingReview.builder()
                 .title(dto.getTitle())
                 .content(dto.getContent())
                 .reviewer(user)
+                .cafe(cafe)
                 .meeting(meeting)
                 .meetingDate(dto.getMeetingDate())
                 .meetingLocation(dto.getMeetingLocation())
