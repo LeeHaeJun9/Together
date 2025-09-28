@@ -1,15 +1,20 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8"/>
     <title>중고거래 목록</title>
+
+    <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
     <style>
         .card-img-top{object-fit:cover;}
         .ratio-4x3{--bs-aspect-ratio:75%;}
+        .card.pos-rel { position: relative; }
 
         /* 거래완료 오버레이 */
-        .card.pos-rel { position: relative; }
         .soldout-overlay{
             position:absolute; inset:0;
             background: rgba(108,117,125,.35);
@@ -23,7 +28,6 @@
             font-weight:700; font-size:.95rem;
         }
 
-        /* 상단 아이콘 버튼 (아이콘만) */
         .icon-btn{
             display:inline-flex; align-items:center; justify-content:center;
             width:34px; height:34px; border-radius:10px;
@@ -32,72 +36,52 @@
         }
         .icon-btn:hover{ color:#0d6efd; border-color:#d7e6ff; background:#f5f9ff; }
         .icon-btn svg{ width:18px; height:18px; }
-
-        /* (참고) 다른 버튼과 간격 맞추기 */
         .gap-2 > .icon-btn{ margin-left:2px; margin-right:2px; }
     </style>
 </head>
 <body>
+
 <!-- 공통 헤더 -->
 <div th:replace="~{/layout/header :: header}"></div>
 
 <main class="container py-3" th:with="noImg=@{/images/no-image.png}">
-    <!-- 상단 액션 -->
+    <!-- 상단 액션 바 -->
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <div>
-      <span class="badge text-bg-light" th:if="${param.category != null}">
-        선택된 카테고리: <strong th:text="${param.category}">전체</strong>
+
+        <div class="d-flex align-items-center gap-2">
+            <!-- 선택된 카테고리 배지(한글 라벨) -->
+            <span class="badge text-bg-light"
+                  th:if="${selectedCategory != null and !#strings.isEmpty(selectedCategory)}">
+        선택된 카테고리: <strong th:text="${selectedCategory}">전체</strong>
+      </span>
+
+            <!-- 검색어/범위 배지 -->
+            <span class="badge text-bg-light" th:if="${q != null and !#strings.isEmpty(q)}">
+        검색: <strong th:text="${q}">키워드</strong>
+        <small class="ms-1" th:text="${'(' + (scope != null ? scope : 'BOTH') + ')'}">(BOTH)</small>
       </span>
         </div>
 
         <div class="d-flex align-items-center gap-2">
-            <!-- 글쓰기: 아이콘만 보이게 + 툴팁 "글쓰기" -->
+            <!-- 글쓰기 -->
             <a sec:authorize="isAuthenticated()" class="icon-btn"
                th:href="@{/trade/register}" title="글쓰기" aria-label="글쓰기"
                data-bs-toggle="tooltip" data-bs-placement="bottom">
-                <!-- chat-square-text 아이콘 -->
-                <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bi bi-chat-square-text" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
-                    <path d="M14 1a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1h-2.5a2 2 0 0 0-1.6.8L8 14.333 6.1 11.8a2 2 0 0 0-1.6-.8H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1zM2 0a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2.5a1 1 0 0 1 .8.4l1.9 2.533a1 1 0 0 0 1.6 0l1.9-2.533a1 1 0 0 1 .8-.4H14a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2z"/>
-                    <path d="M3 3.5a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5M3 6a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9A.5.5 0 0 1 3 6m0 2.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5"/>
-                </svg>
-            </a>
-            <a sec:authorize="isAnonymous()" class="icon-btn"
-               th:href="@{/member/login}" title="글쓰기" aria-label="글쓰기"
-               data-bs-toggle="tooltip" data-bs-placement="bottom">
-                <!-- chat-square-text 아이콘 -->
-                <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bi bi-chat-square-text" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor"
+                     class="bi bi-chat-square-text" viewBox="0 0 16 16" aria-hidden="true">
                     <path d="M14 1a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1h-2.5a2 2 0 0 0-1.6.8L8 14.333 6.1 11.8a2 2 0 0 0-1.6-.8H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1zM2 0a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2.5a1 1 0 0 1 .8.4l1.9 2.533a1 1 0 0 0 1.6 0l1.9-2.533a1 1 0 0 1 .8-.4H14a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2z"/>
                     <path d="M3 3.5a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5M3 6a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9A.5.5 0 0 1 3 6m0 2.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5"/>
                 </svg>
             </a>
 
-            <!-- 아이콘: 찜목록 (bag) -->
-            <a class="icon-btn" th:href="@{/member/favorites}" title="찜목록" aria-label="찜목록"
-               data-bs-toggle="tooltip" data-bs-placement="bottom">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-bag-heart" viewBox="0 0 16 16">
-                    <path fill-rule="evenodd" d="M10.5 3.5a2.5 2.5 0 0 0-5 0V4h5zm1 0V4H15v10a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V4h3.5v-.5a3.5 3.5 0 1 1 7 0M14 14V5H2v9a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1M8 7.993c1.664-1.711 5.825 1.283 0 5.132-5.825-3.85-1.664-6.843 0-5.132"/>
+            <!-- 검색(모달) -->
+            <button type="button" class="icon-btn" title="검색" aria-label="검색"
+                    data-bs-toggle="modal" data-bs-target="#searchModal">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                     fill="currentColor" class="bi bi-search" viewBox="0 0 16 16" aria-hidden="true">
+                    <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
                 </svg>
-            </a>
-
-            <!-- 아이콘: 채팅방 (envelope) -->
-            <a class="icon-btn" th:href="@{/chat/list}" title="채팅방" aria-label="채팅방"
-               data-bs-toggle="tooltip" data-bs-placement="bottom">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bi bi-envelope" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
-                    <path d="M0 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v.217l7 4.2 7-4.2V4a1 1 0 0 0-1-1zm13 2.383-4.708 2.825L15 11.105zm-.034 6.876-5.64-3.471L8 9.583l-1.326-.795-5.64 3.47A1 1 0 0 0 2 13h12a1 1 0 0 0 .966-.741M1 11.105l4.708-2.897L1 5.383z"/>
-                </svg>
-            </a>
-
-            <div class="dropdown">
-                <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">카테고리</button>
-                <ul class="dropdown-menu dropdown-menu-end">
-                    <li><a class="dropdown-item" th:href="@{/trade/list}">전체보기</a></li>
-                    <li><hr class="dropdown-divider"></li>
-                    <li th:each="c : ${categories}">
-                        <a class="dropdown-item" th:classappend="${param.category} == ${c} ? ' active'"
-                           th:text="${c}" th:href="@{/trade/list(category=${c})}">카테고리</a>
-                    </li>
-                </ul>
-            </div>
+            </button>
         </div>
     </div>
 
@@ -116,7 +100,7 @@
                 </div>
 
                 <div class="ratio ratio-4x3">
-                    <img class="card-img-top" alt="thumbnail"
+                    <img class="card-img-top" alt="thumbnail" loading="lazy"
                          th:src="${ (thumbnails != null and thumbnails.containsKey(t.id)) ? thumbnails[t.id]
                          : (#strings.isEmpty(t.thumbnail) ? noImg : t.thumbnail) }"
                          onerror="this.onerror=null;this.src='/images/no-image.png'">
@@ -127,13 +111,16 @@
 
                     <div class="d-flex align-items-center gap-2 mb-2">
             <span class="badge text-bg-secondary"
-                  th:text="${(categoryLabels != null and categoryLabels.containsKey(t.id)) ? categoryLabels[t.id]
-                            : (t.category != null ? t.category.toString() : '미분류')}">
+                  th:text="${
+                    (categoryLabels != null and categoryLabels.containsKey(t.id)) ? categoryLabels[t.id]
+                    : (t.category != null ? t.category.toString() : '미분류')
+                  }">
               카테고리
             </span>
 
                         <span class="badge"
-                              th:classappend="${isSale} ? ' text-bg-primary' : (${isResv} ? ' text-bg-warning' : ' text-bg-secondary')"
+                              th:classappend="${isSale} ? ' text-bg-primary'
+                                   : (${isResv} ? ' text-bg-warning' : ' text-bg-secondary')"
                               th:text="${isSale ? '판매중' : (isResv ? '예약중' : (isSold ? '판매완료' : '미정'))}">
               상태
             </span>
@@ -153,7 +140,6 @@
                 </div>
 
                 <div class="card-footer bg-white d-flex justify-content-between align-items-center">
-                    <!-- SOLD_OUT 이면 알럿만 띄우고 이동 금지 -->
                     <a class="btn btn-sm btn-outline-primary" th:if="${!isSold}"
                        th:href="@{/trade/read/{id}(id=${t.id})}">
                         상세보기
@@ -170,35 +156,88 @@
             </div>
         </div>
     </div>
-
-    <!-- 페이지네이션 -->
-    <nav class="mt-4" th:if="${page != null and page.totalPages > 1}">
-        <ul class="pagination justify-content-center">
-            <li class="page-item" th:classappend="${page.first} ? 'disabled'">
-                <a class="page-link" th:href="@{/trade/list(page=${page.number - 1}, size=${page.size}, category=${param.category})}">이전</a>
-            </li>
-            <li class="page-item" th:each="i : ${#numbers.sequence(0, page.totalPages - 1)}"
-                th:classappend="${i} == ${page.number} ? 'active'">
-                <a class="page-link" th:text="${i + 1}"
-                   th:href="@{/trade/list(page=${i}, size=${page.size}, category=${param.category})}">1</a>
-            </li>
-            <li class="page-item" th:classappend="${page.last} ? 'disabled'">
-                <a class="page-link" th:href="@{/trade/list(page=${page.number + 1}, size=${page.size}, category=${param.category})}">다음</a>
-            </li>
-        </ul>
-    </nav>
 </main>
 
-<!-- 공통 푸터 -->
-<div th:replace="~{/layout/footer2 :: footer2}"></div>
+<!-- 검색 모달 (컨트롤러 enum 매핑 기준: categories=한글 라벨 리스트, selectedCategory=한글) -->
+<div class="modal fade" id="searchModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <form class="modal-content" method="get" th:action="@{/trade/list}">
+            <div class="modal-header">
+                <h5 class="modal-title">상품 검색</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="닫기"></button>
+            </div>
 
+            <div class="modal-body">
+                <!-- 카테고리 선택 -->
+                <div class="mb-3">
+                    <label class="form-label">카테고리</label>
+                    <select class="form-select" name="category">
+                        <option value=""
+                                th:selected="${selectedCategory == null or #strings.isEmpty(selectedCategory)}">전체</option>
+
+                        <option th:each="name : ${categories}"
+                                th:value="${name}"
+                                th:text="${name}"
+                                th:selected="${selectedCategory != null and #strings.equalsIgnoreCase(selectedCategory, name)}">
+                        </option>
+                    </select>
+                </div>
+
+                <!-- 검색어 -->
+                <div class="mb-3">
+                    <label class="form-label">검색어</label>
+                    <input type="text" name="query" class="form-control"
+                           placeholder="검색어를 입력하세요" th:value="${q}">
+                </div>
+
+                <!-- 검색 범위 -->
+                <div class="mb-2">
+                    <label class="form-label d-block">검색 범위</label>
+
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="scope" id="scopeTitle" value="TITLE"
+                               th:checked="${#strings.equalsIgnoreCase(scope, 'TITLE')}">
+                        <label class="form-check-label" for="scopeTitle">제목</label>
+                    </div>
+
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="scope" id="scopeContent" value="CONTENT"
+                               th:checked="${#strings.equalsIgnoreCase(scope, 'CONTENT')}">
+                        <label class="form-check-label" for="scopeContent">내용</label>
+                    </div>
+
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="scope" id="scopeBoth" value="BOTH"
+                               th:checked="${scope == null or #strings.equalsIgnoreCase(scope, 'BOTH')}">
+                        <label class="form-check-label" for="scopeBoth">제목 + 내용</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <a class="btn btn-outline-secondary" th:href="@{/trade/list}">초기화</a>
+                <button type="submit" class="btn btn-primary">검색</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- 공통 푸터 -->
+<div th:replace="~{/layout/footer :: footer}"></div>
+
+<!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
 <script>
-    // 아이콘 툴팁 활성화
+    // 헤더 아이콘 툴팁
     (function(){
-        if (window.bootstrap) {
+        if (window.bootstrap && bootstrap.Tooltip) {
             document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function(el){
-                try{ new bootstrap.Tooltip(el); }catch(e){}
+                try{
+                    const t = bootstrap.Tooltip.getInstance(el);
+                    if (t) t.dispose();
+                    new bootstrap.Tooltip(el, { container: 'body' });
+                }catch(e){}
             });
         }
     })();

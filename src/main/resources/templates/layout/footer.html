@@ -1,14 +1,65 @@
 <footer th:fragment="footer" class="footer">
-  <link rel="stylesheet" th:href="@{/css/footer.css}">
-  <div class="container">
-    <ul class="footer-links">
-      <li><a href="#">회사소개</a></li>
-      <li><a href="#">이용약관</a></li>
-      <li><a href="#">개인정보처리방침</a></li>
-      <li><a href="#">고객센터</a></li>
-    </ul>
-    <div class="footer-bottom">
-      <p>&copy; 2025 Together. All rights reserved.</p>
+    <style>
+        :root{
+            --footer-height:72px;
+            --footer-border:#e9ecef;
+            --footer-bg:#ffffff;
+        }
+
+        /* ★ 스티키 푸터 레이아웃 */
+        html, body { height: 100%; }
+        body{
+            min-height:100vh;
+            display:flex;
+            flex-direction:column;
+        }
+        /* 본문이 공간을 차지하도록 */
+        main{ flex:1 0 auto; }
+
+        /* 기존 fixed 제거 → 문서 하단에 자연스럽게 붙음 */
+        .footer{
+            margin-top:auto;
+            background:var(--footer-bg);
+        }
+
+        .footer .footer-container{
+            max-width:1200px; width:100%; margin:0 auto;
+            border-top:1px solid var(--footer-border);
+            min-height:var(--footer-height);
+            padding:14px 20px;
+            display:flex; flex-direction:column;
+            align-items:center; justify-content:center;
+            gap:10px; box-sizing:border-box;
+            background:var(--footer-bg);
+            text-align:center;
+        }
+
+        .footer .footer-links{
+            display:flex; gap:16px; justify-content:center;
+            padding:0; margin:0; list-style:none;
+        }
+        .footer .footer-links a{ color:#495057; text-decoration:none; font-size:.95rem; }
+        .footer .footer-links a:hover{ text-decoration:underline; }
+
+        .footer .footer-bottom p{
+            color:#6c757d; font-size:.9rem; margin:0; text-indent:1.5em;
+        }
+
+        @media (max-width:768px){
+            :root{ --footer-height:80px; }
+            .footer .footer-container{ gap:8px; }
+        }
+    </style>
+
+    <div class="footer-container">
+        <ul class="footer-links">
+            <li><a href="#">회사소개</a></li>
+            <li><a href="#">이용약관</a></li>
+            <li><a href="#">개인정보처리방침</a></li>
+            <li><a href="#">고객센터</a></li>
+        </ul>
+        <div class="footer-bottom">
+            <p>&copy; 2025 Together. All rights reserved.</p>
+        </div>
     </div>
-  </div>
 </footer>
