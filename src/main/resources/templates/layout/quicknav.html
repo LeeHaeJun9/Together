@@ -1,19 +1,48 @@
 <!-- templates/layout/quicknav.html -->
 <div th:fragment="quicknav">
     <style>
-        .quicknav-bar{ background:#fff; border-bottom:1px solid #e9edf3; }
-        .quicknav-bar .icon-links{ display:flex; align-items:center; gap:10px; padding:6px 0; }
+        .quicknav-bar{
+            background:#fff;
+            border-bottom:1px solid #e9edf3;
+            width: 1200px;
+            margin: 0 auto;
+        }
+        .quicknav-bar .icon-links{
+            display:flex;
+            align-items:center;
+            gap:10px;
+            padding:6px 0;
+        }
         .icon-btn{
-            position:relative; display:inline-flex; align-items:center; justify-content:center;
-            width:34px; height:34px; border-radius:10px; color:#6c757d; text-decoration:none;
-            border:1px solid #e9edf3; background:#fff; transition:.15s;
+            position:relative;
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            width:34px;
+            height:34px;
+            border-radius:10px;
+            color:#6c757d;
+            text-decoration:none;
+            border:1px solid #e9edf3;
+            background:#fff;
+            transition:.15s;
         }
         .icon-btn:hover{ color:#0d6efd; border-color:#d7e6ff; background:#f5f9ff; }
         .icon-btn svg{ width:18px; height:18px; }
         .quicknav-badge{
-            position:absolute; top:-4px; right:-4px; min-width:18px; height:18px; padding:0 6px;
-            font-size:.72rem; line-height:18px; text-align:center; border-radius:999px;
-            background:#e9ecef; color:#495057; border:1px solid #fff;
+            position:absolute;
+            top:-4px;
+            right:-4px;
+            min-width:18px;
+            height:18px;
+            padding:0 6px;
+            font-size:.72rem;
+            line-height:18px;
+            text-align:center;
+            border-radius:999px;
+            background:#e9ecef;
+            color:#495057;
+            border:1px solid #fff;
         }
     </style>
 
@@ -49,7 +78,6 @@
     </div>
 
     <script>
-        // Bootstrap tooltip 활성화 (있을 때만)
         (function(){
             if (window.bootstrap) {
                 document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function(el){
