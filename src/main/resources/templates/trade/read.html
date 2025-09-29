@@ -98,36 +98,40 @@
                 </div>
             </div>
 
-            <!-- 오른쪽: 정보 -->
             <div class="col-lg-6">
-                <!-- 제목 (조금 작게) -->
                 <h1 class="title-lg mb-2" th:text="${dto.title}">제목</h1>
 
-                <!-- 찜 버튼 (카테고리 위로 이동) -->
+
+
+                <!-- 카테고리 (enum: ART, COOK, MUSIC, PET, SPORTS, STUDY, TRAVEL) -->
+                <th:block th:with="
+                    rawCat=${dto.category},
+                    str=${rawCat == null ? '' : rawCat.toString()},
+                    key=${#strings.toUpperCase(#strings.trim(str))}
+                ">
+                    <div class="mb-2">
+                    <span class="badge rounded-pill text-bg-secondary" th:switch="${key}">
+                      <span th:case="'ART'">예술</span>
+                      <span th:case="'COOK'">요리</span>
+                      <span th:case="'MUSIC'">음악</span>
+                      <span th:case="'PET'">반려동물</span>
+                      <span th:case="'SPORTS'">운동</span>
+                      <span th:case="'STUDY'">스터디</span>
+                      <span th:case="'TRAVEL'">여행</span>
+                        <!-- 매칭 실패: 값이 없으면 미분류, 있으면 원문 표시 -->
+                      <span th:case="*" th:text="${#strings.isEmpty(str) ? '미분류' : str}">미분류</span>
+                    </span>
+                    </div>
+                </th:block>
+
                 <div class="d-flex align-items-center gap-2 mb-2">
                     <button id="btnFav" class="btn btn-outline-danger btn-sm"
                             th:attr="data-trade-id=${dto.id}, data-owner=${isOwner}" type="button">
                         <span class="me-1">♥</span>
                         <span id="favText" th:text="${isOwner ? '내 게시물' : (liked != null and liked ? '찜 취소' : '찜하기')}">찜하기</span>
                     </button>
-                    <span class="text-muted">찜 <strong id="favCount" th:text="${likeCount} ?: 0">0</strong></span>
                 </div>
 
-                <!-- 카테고리 (한국어, 케이스 다양화) -->
-                <div class="mb-2">
-          <span class="badge rounded-pill text-bg-secondary" th:switch="${dto.category}">
-            <span th:case="'TRAVEL'">여행</span><span th:case="'travel'">여행</span>
-            <span th:case="'MUSIC'">음악</span><span th:case="'music'">음악</span>
-            <span th:case="'ART'">예술</span><span th:case="'art'">예술</span>
-            <span th:case="'PETS'">반려동물</span><span th:case="'pets'">반려동물</span>
-            <span th:case="'SPORTS'">운동</span><span th:case="'sports'">운동</span>
-            <span th:case="'STUDY'">스터디</span><span th:case="'study'">스터디</span>
-            <span th:case="'COOKING'">요리</span><span th:case="'cooking'">요리</span>
-            <span th:case="*">미분류</span>
-          </span>
-                </div>
-
-                <!-- 가격 (제목보다 작게) -->
                 <div class="price-md mb-3">
                     <span th:text="${#numbers.formatInteger(dto.price, 0, 'COMMA')}">0</span> 원
                 </div>
