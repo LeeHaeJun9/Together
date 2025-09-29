@@ -1,92 +1,151 @@
 document.addEventListener('DOMContentLoaded', function() {
+    // =========================
+    // FullCalendar 초기화
+    // =========================
     var calendarEl = document.getElementById('calendar');
-
-    // ✅ HTML에 심어놓은 전역 변수를 사용합니다.
-    var calendarEvents = calendarEventsData;
-
-    var calendar = new FullCalendar.Calendar(calendarEl, {
-        initialView: 'dayGridMonth',
-        locale: 'ko',
-        headerToolbar: {
-            left: 'prev,next today',
-            center: 'title',
-            right: 'dayGridMonth,timeGridWeek'
-        },
-        events: calendarEvents,
-        eventClick: function(info) {
-            if (info.event.url) {
-                window.location.href = info.event.url;
+    if(calendarEl) {
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            locale: 'ko',
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,timeGridWeek'
+            },
+            events: calendarEventsData,
+            eventClick: function(info) {
+                if (info.event.url) window.location.href = info.event.url;
+            },
+            eventDidMount: function(info) {
+                var now = new Date();
+                var eventEnd = info.event.end || info.event.start;
+                if (eventEnd < now) {
+                    info.el.style.backgroundColor = '#d3d3d3';
+                    info.el.style.color = '#777';
+                    info.el.title = '(지난 일정) ' + info.event.title;
+                }
             }
-        }
-    });
-
-    calendar.render();
-});
-
-function confirmDelete() {
-    if (confirm("정말로 이 카페를 삭제하시겠습니까? 삭제 후에는 복구할 수 없습니다.")) {
-        document.getElementById("deleteForm").submit();
-    }
-}
-
-function confirmLeave() {
-    if (confirm("정말로 이 카페를 탈퇴하시겠습니까?")) {
-        document.getElementById("leaveForm").submit();
-    }
-}
-
-window.requestCafeJoin = function() {
-    const form = document.getElementById('joinRequestForm');
-
-    if (!form) return;
-
-    if (!confirm('카페 가입을 신청하시겠습니까?')) {
-        return;
-    }
-
-    // 1. CSRF 토큰 추출
-    const url = form.action;
-    // Thymeleaf가 렌더링한 hidden input에서 _csrf 값을 찾습니다.
-    const csrfTokenInput = form.querySelector('input[name="_csrf"]');
-    const csrfToken = csrfTokenInput ? csrfTokenInput.value : null;
-
-    if (!csrfToken) {
-        alert('🚨 보안 토큰(_csrf)을 찾을 수 없습니다. 페이지를 새로고침해주세요.');
-        return;
-    }
-
-    // 2. 요청 본문 준비: application/x-www-form-urlencoded 형식
-    const requestBody = new URLSearchParams();
-    requestBody.append('_csrf', csrfToken); // 💡 CSRF 토큰을 본문에 추가 (필수)
-
-    // 3. fetch API를 사용한 비동기 POST 요청
-    fetch(url, {
-        method: 'POST',
-        headers: {
-            // 💡 폼 제출 방식을 모방하는 Content-Type
-            'Content-Type': 'application/x-www-form-urlencoded',
-            // 💡 X-CSRF-TOKEN 헤더에도 토큰 추가 (이중 보장)
-            'X-CSRF-TOKEN': csrfToken
-        },
-        body: requestBody.toString() // URLSearchParams 객체를 문자열로 변환
-    })
-        .then(response => {
-            // HTTP 상태 코드 확인
-            if (response.ok) {
-                return response.text();
-            } else if (response.status === 403) {
-                throw new Error('권한이 부족하거나 CSRF 토큰이 유효하지 않습니다. (403)');
-            } else if (response.status === 409) {
-                return response.text().then(msg => { throw new Error(msg); });
-            }
-            throw new Error('가입 신청 처리 중 알 수 없는 오류가 발생했습니다. (HTTP Code: ' + response.status + ')');
-        })
-        .then(message => {
-            alert(`✅ ${message}`);
-            window.location.reload();
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('🚨 오류 발생: ' + error.message);
         });
-}
+        calendar.render();
+    }
+
+    // =========================
+    // 모달 관련 함수
+    // =========================
+    function showInfoModal(message) {
+        const modal = document.getElementById('infoModal');
+        document.getElementById('infoModalMessage').textContent = message;
+        modal.style.display = 'flex';
+    }
+
+    window.closeInfoModal = function() {
+        document.getElementById('infoModal').style.display = 'none';
+    }
+
+    function showConfirmModal(message, onConfirm) {
+        const modal = document.getElementById('confirmModal');
+        const yesBtn = document.getElementById('confirmModalYesBtn');
+        const noBtn = document.getElementById('confirmModalNoBtn');
+
+        document.getElementById('confirmModalMessage').textContent = message;
+
+        // 기존 이벤트 제거 후 새로 등록
+        const newYesBtn = yesBtn.cloneNode(true);
+        yesBtn.parentNode.replaceChild(newYesBtn, yesBtn);
+
+        const newNoBtn = noBtn.cloneNode(true);
+        noBtn.parentNode.replaceChild(newNoBtn, noBtn);
+
+        newYesBtn.addEventListener('click', () => {
+            onConfirm();
+            closeConfirmModal();
+        });
+
+        newNoBtn.addEventListener('click', () => {
+            closeConfirmModal();
+        });
+
+        modal.style.display = 'flex';
+    }
+
+    window.closeConfirmModal = function() {
+        document.getElementById('confirmModal').style.display = 'none';
+    }
+
+    // =========================
+    // 공통 fetch 처리
+    // =========================
+    async function handleFormSubmit(formId, successCallback, failCallback) {
+        const form = document.getElementById(formId);
+        if (!form) {
+            showInfoModal("오류: 폼을 찾을 수 없습니다.");
+            return;
+        }
+
+        const url = form.action;
+        const csrfToken = document.querySelector('meta[name="_csrf"]').content;
+        const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
+
+        try {
+            const res = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    [csrfHeader]: csrfToken
+                },
+                body: `_csrf=${csrfToken}`
+            });
+
+            const msg = await res.text();
+
+            if (!res.ok) throw new Error(msg);
+
+            successCallback(msg, form);
+
+        } catch (err) {
+            failCallback(err);
+        }
+    }
+
+    // =========================
+    // 가입신청 / 탈퇴 / 삭제
+    // =========================
+    window.confirmJoin = function() {
+        showConfirmModal('카페 가입을 신청하시겠습니까?', () => {
+            handleFormSubmit('joinRequestForm',
+                (msg, form) => {
+                    showInfoModal(`✅ ${msg}`);
+                    const button = form.querySelector('button');
+                    button.textContent = '신청 완료';
+                    button.disabled = true;
+                },
+                (err) => showInfoModal(`🚨 오류: ${err.message}`)
+            );
+        });
+    }
+
+    window.confirmLeave = function() {
+        showConfirmModal('정말 카페를 탈퇴하시겠습니까?', () => {
+            handleFormSubmit('leaveForm',
+                (msg) => {
+                    showInfoModal(`✅ ${msg}`);
+                    window.location.href = '/cafe/list';
+                },
+                (err) => showInfoModal(`🚨 오류: ${err.message}`)
+            );
+        });
+    }
+
+    window.confirmDelete = function() {
+        showConfirmModal('정말 카페를 삭제하시겠습니까? 삭제 후에는 복구할 수 없습니다.', () => {
+            handleFormSubmit('deleteForm',
+                (msg) => {
+                    showInfoModal(`✅ ${msg}`);
+                    window.location.href = '/cafe/list';
+                },
+                (err) => showInfoModal(`🚨 오류: ${err.message}`)
+            );
+        });
+    }
+
+});

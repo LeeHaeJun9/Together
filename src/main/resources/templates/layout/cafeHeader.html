@@ -1,5 +1,6 @@
 <th:block th:fragment="cafeHeader(cafe)">
-    <header class="py-5 bg-light border-bottom mb-4 page-header-bg" th:style="'background-image: url(' + ${cafe.cafeImage} + ');'">
+    <header class="py-5 bg-light border-bottom mb-4 page-header-bg"
+            th:style="'background-image: url(' + ${cafe.cafeImage} + ');'">
         <div class="page-header-overlay"></div>
         <div class="container px-4 px-lg-5 my-5 page-header-content text-white">
             <div class="text-center">
@@ -29,15 +30,22 @@
                             <a class="nav-link" th:href="@{/cafe/my/cafe/{cafeId}/joinRequests(cafeId=${cafe.id})}">가입 신청 목록</a>
                         </li>
                     </ul>
-                    <div th:if="${cafe.isMember and !cafe.isOwner}" class="ms-auto">
-                        <form th:action="@{/api/cafe/{cafeId}/leave(cafeId=${cafe.id})}" method="post" id="leaveForm">
-                            <button type="button" class="btn btn-outline-danger" onclick="confirmLeave()">카페 탈퇴</button>
-                        </form>
-                    </div>
+
+                    <!-- 카페 탈퇴 폼 -->
+                    <form th:if="${cafe.isMember and !cafe.isOwner}" th:action="@{/cafe/{cafeId}/leave(cafeId=${cafe.id})}" method="post"
+                          id="leaveForm">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                        <button type="button" class="btn btn-outline-danger" onclick="confirmLeave()">카페 탈퇴</button>
+                    </form>
+
+
+                    <!-- 카페 가입 신청 폼 -->
                     <div th:unless="${cafe.isMember}">
                         <form th:action="@{/cafe/{cafeId}/join(cafeId=${cafe.id})}" method="post" id="joinRequestForm">
-                            <button type="button" class="btn btn-outline-success" onclick="requestCafeJoin()">가입신청</button>
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                            <button type="button" class="btn btn-outline-success" onclick="confirmJoin()">가입신청</button>
                         </form>
+                        <span id="joinStatus" class="ms-2"></span> <!-- 상태 표시용 -->
                     </div>
                 </div>
             </nav>

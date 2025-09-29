@@ -31,7 +31,7 @@ public class CategoryController {
             @RequestParam(defaultValue = "1", name = "c_page") int cPage,
             @RequestParam(defaultValue = "4", name = "c_size") int cSize,
             @RequestParam(defaultValue = "1", name = "t_page") int tPage,
-            @RequestParam(defaultValue = "10", name = "t_size") int tSize,
+            @RequestParam(defaultValue = "4", name = "t_size") int tSize,
             @RequestParam(required = false, name = "m_type") String mType,
             @RequestParam(required = false, name = "m_keyword") String mKeyword,
             @RequestParam(required = false, name = "c_type") String cType,
