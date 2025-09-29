@@ -7,6 +7,7 @@ import com.example.together.dto.member.memberRegisterDTO;
 import com.example.together.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -29,6 +30,9 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
   private final UserRepository userRepository;
   private final PasswordEncoder passwordEncoder;
+
+  @Value("${org.zerock.upload.path:C:\\upload}")
+  private String uploadRootPath;
 
   /* ====================== 인증 (Spring Security) ====================== */
 
@@ -220,8 +224,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
   @Override
   public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-    // username 파라미터에는 SecurityConfig.usernameParameter("userId")로 전달된 userId가 들어옵니다.
-    final String userId = username;
+    final String userId = username; // SecurityConfig.usernameParameter("userId") 기준
     User user = userRepository.findByUserId(userId)
         .orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다: " + userId));
 
@@ -239,7 +242,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
   /* ====================== 회원가입 ====================== */
 
-  /** 실제 저장하는 오버로드 (프로필 사진 제외) */
+  /** 회원가입(프로필 사진 없이) — 이름 중복 검사는 제외했습니다. */
   @Override
   @Transactional
   public User register(memberRegisterDTO registerDTO) {
@@ -251,7 +254,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     final String nickname = safeTrim(registerDTO.getNickname());
     final String rawPw    = registerDTO.getPassword();
 
-    // 2) 필수값 검증(엔티티 제약과 동일선상)
+    // 2) 필수값 검증
     requireNonEmpty(userId,   "아이디는 필수입니다.");
     requireNonEmpty(email,    "이메일은 필수입니다.");
     requireNonEmpty(name,     "이름은 필수입니다.");
@@ -259,19 +262,11 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     requireNonEmpty(nickname, "닉네임은 필수입니다.");
     requireNonEmpty(rawPw,    "비밀번호는 필수입니다.");
 
-    // 3) 중복 체크 (사전 차단)
-    if (isUserIdExists(userId)) {
-      throw new IllegalArgumentException("이미 존재하는 아이디입니다.");
-    }
-    if (isEmailExists(email)) {
-      throw new IllegalArgumentException("이미 존재하는 이메일입니다.");
-    }
-    if (isNicknameExists(nickname)) {
-      throw new IllegalArgumentException("이미 존재하는 닉네임입니다.");
-    }
-    if (isPhoneExists(phone)) {
-      throw new IllegalArgumentException("이미 존재하는 전화번호입니다.");
-    }
+    // 3) 중복 체크 (이름 제외)
+    if (isUserIdExists(userId))    throw new IllegalArgumentException("이미 존재하는 아이디입니다.");
+    if (isEmailExists(email))      throw new IllegalArgumentException("이미 존재하는 이메일입니다.");
+    if (isNicknameExists(nickname))throw new IllegalArgumentException("이미 존재하는 닉네임입니다.");
+    if (isPhoneExists(phone))      throw new IllegalArgumentException("이미 존재하는 전화번호입니다.");
 
     // 4) 저장
     User user = User.builder()
@@ -287,8 +282,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     try {
       User saved = userRepository.save(user);
-      // 필요 시 즉시 flush해서 DB 반영 보장 (등록 직후 로그인을 시도할 때 안정적)
-      userRepository.flush();
+      userRepository.flush(); // 즉시 반영
       return saved;
     } catch (DataIntegrityViolationException e) {
       log.error("회원가입 저장 실패(제약 위반) userId={}, email={}, nickname={}, phone={}, err={}",
@@ -450,7 +444,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     if (registerDTO.getName() != null)     user.setName(safeTrim(registerDTO.getName()));
     if (registerDTO.getPhone() != null)    user.setPhone(safeTrim(registerDTO.getPhone()));
     if (registerDTO.getNickname() != null) user.setNickname(safeTrim(registerDTO.getNickname()));
-    // dirty checking 으로 반영
+    // dirty checking
     return user;
   }
 
@@ -490,8 +484,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
   @Transactional
   public String uploadProfilePhoto(String userId, MultipartFile photo) {
     try {
-      String currentDir = System.getProperty("user.dir");
-      String uploadDir = currentDir + File.separator + "uploads" + File.separator + "profile" + File.separator;
+      String uploadDir = uploadRootPath + File.separator + "profile" + File.separator;
 
       File directory = new File(uploadDir);
       if (!directory.exists()) {
@@ -508,7 +501,8 @@ public class UserServiceImpl implements UserService, UserDetailsService {
       File targetFile = new File(uploadDir, newFilename);
       photo.transferTo(targetFile);
 
-      String photoUrl = "/uploads/profile/" + newFilename;
+      // URL은 /upload/** 매핑 사용 (WebMvcConfig에서 매핑되어 있어야 함)
+      String photoUrl = "/upload/profile/" + newFilename;
 
       User user = userRepository.findByUserId(userId)
           .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다: " + userId));
@@ -586,7 +580,8 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
   @Override
   public User findUserForPasswordReset(String userId, String email, String name) {
-    return userRepository.findByUserIdAndEmailAndName(safeTrim(userId), toEmailCanonical(email), safeTrim(name))
+    return userRepository.findByUserIdAndEmailAndName(
+            safeTrim(userId), toEmailCanonical(email), safeTrim(name))
         .orElse(null);
   }
 
@@ -633,8 +628,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         return false;
       }
     }
-
-    userRepository.saveAndFlush(user); // 즉시 반영
+    userRepository.saveAndFlush(user);
     return true;
   }
 
