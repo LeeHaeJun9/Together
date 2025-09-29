@@ -47,6 +47,20 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Override
     @Transactional
     public User register(memberRegisterDTO registerDTO) {
+        // Delegate to the full method with null photo
+        register(registerDTO, null);
+
+        // Return the saved user
+        return userRepository.findByUserId(registerDTO.getUserId())
+                .orElseThrow(() -> new IllegalArgumentException("사용자 저장 실패"));
+    }
+
+    @Override
+    @Transactional
+    public void register(memberRegisterDTO registerDTO, MultipartFile profilePhoto) {
+        log.info("회원가입 시작: userId = {}", registerDTO.getUserId());
+
+        // 1️⃣ Duplicate validation
         if (isUserIdExists(registerDTO.getUserId())) {
             throw new IllegalArgumentException("이미 존재하는 아이디입니다.");
         }
@@ -54,6 +68,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
             throw new IllegalArgumentException("이미 존재하는 이메일입니다.");
         }
 
+        // 2️⃣ Create user entity
         User user = User.builder()
                 .userId(registerDTO.getUserId())
                 .password(passwordEncoder.encode(registerDTO.getPassword()))
@@ -65,7 +80,53 @@ public class UserServiceImpl implements UserService, UserDetailsService {
                 .status(Status.ACTIVE)
                 .build();
 
-        return userRepository.save(user);
+        log.info("User 엔티티 생성 완료: userId = {}", user.getUserId());
+
+        // 3️⃣ Handle optional profile photo
+        if (profilePhoto != null && !profilePhoto.isEmpty()) {
+            try {
+                String photoUrl = uploadProfilePhotoForNewUser(user.getUserId(), profilePhoto);
+                user.setProfilePhoto(photoUrl);
+                log.info("프로필 사진 업로드 성공: userId = {}, photoUrl = {}", user.getUserId(), photoUrl);
+            } catch (Exception e) {
+                log.warn("프로필 사진 업로드 실패 (회원가입은 계속 진행): userId = {}, error = {}",
+                        user.getUserId(), e.getMessage());
+            }
+        }
+
+        // 4️⃣ ⭐ CRITICAL: Save user to database ⭐
+        User savedUser = userRepository.save(user);
+        log.info("✅ 회원가입 완료: userId = {}, DB ID = {}", savedUser.getUserId(), savedUser.getId());
+    }
+
+    /**
+     * Helper method for uploading profile photo during registration
+     */
+
+
+    /**
+     * Helper method for uploading profile photo during registration
+     */
+    private String uploadProfilePhotoForNewUser(String userId, MultipartFile photo) throws IOException {
+        String currentDir = System.getProperty("user.dir");
+        String uploadDir = currentDir + File.separator + "uploads" + File.separator + "profile" + File.separator;
+
+        File directory = new File(uploadDir);
+        if (!directory.exists()) {
+            directory.mkdirs();
+            log.info("업로드 디렉토리 생성: {}", uploadDir);
+        }
+
+        String originalFilename = photo.getOriginalFilename();
+        String extension = originalFilename != null && originalFilename.contains(".")
+                ? originalFilename.substring(originalFilename.lastIndexOf("."))
+                : ".jpg";
+
+        String newFilename = userId + "_" + System.currentTimeMillis() + extension;
+        File targetFile = new File(uploadDir, newFilename);
+        photo.transferTo(targetFile);
+
+        return "/uploads/profile/" + newFilename;
     }
 
     @Override
@@ -142,7 +203,6 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         return userRepository.findByEmail(email).isPresent();
     }
 
-    // 새로 추가된 중복 확인 메소드들
     @Override
     public boolean isNameExists(String name) {
         return userRepository.findByName(name).isPresent();
@@ -272,7 +332,6 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
             String photoUrl = "/uploads/profile/" + newFilename;
 
-            // ⭐ 핵심 수정: 데이터베이스에 프로필 사진 URL 저장
             User user = userRepository.findByUserId(userId)
                     .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다: " + userId));
 
@@ -315,12 +374,11 @@ public class UserServiceImpl implements UserService, UserDetailsService {
                         log.warn("유효하지 않은 닉네임: nickname = {}", value);
                         return false;
                     }
-                    // 닉네임 중복 확인 추가
                     if (!isNicknameAvailable(value.trim(), userId)) {
                         log.warn("이미 사용 중인 닉네임: nickname = {}", value);
                         return false;
                     }
-                    user.setNickname(value.trim()); // 수정: setName → setNickname
+                    user.setNickname(value.trim());
                     break;
 
                 case "name":
@@ -328,7 +386,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
                         log.warn("유효하지 않은 이름: name = {}", value);
                         return false;
                     }
-                    user.setName(value.trim()); // 이름은 setName 사용
+                    user.setName(value.trim());
                     break;
 
                 case "phone":
@@ -393,9 +451,5 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Override
     public User findUserForPasswordReset(String userId, String email, String name) {
         return userRepository.findByUserIdAndEmailAndName(userId, email, name).orElse(null);
-    }
-    @Override
-    public void register(memberRegisterDTO registerDTO, MultipartFile profilePhoto) {
-        // 기존 로직 + 프로필 사진 저장 로직
     }
 }

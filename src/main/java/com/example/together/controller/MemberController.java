@@ -69,17 +69,25 @@ public class MemberController {
             log.warn("회원가입 폼 유효성 검사 실패");
             return "member/register";
         }
-
         // 모든 검증 통과 후 회원가입 진행
         try {
-            userService.register(registerDTO,profilePhoto);
+            log.info("✅ userService.register() 호출 직전: userId = {}", registerDTO.getUserId());
+            userService.register(registerDTO, profilePhoto);
+            log.info("✅ userService.register() 호출 완료: userId = {}", registerDTO.getUserId());
             redirectAttributes.addFlashAttribute("message", "회원가입에 성공했습니다. 로그인해주세요.");
             return "redirect:/mainPage";
         } catch (IllegalArgumentException e) {
-            log.warn("회원가입 처리 중 예외 발생: {}", e.getMessage());
+            log.error("❌ 회원가입 처리 중 IllegalArgumentException 발생: userId = {}, error = {}",
+                    registerDTO.getUserId(), e.getMessage(), e);
             model.addAttribute("error", e.getMessage());
             return "member/register";
+        } catch (Exception e) {
+            log.error("❌ 회원가입 처리 중 예상치 못한 예외 발생: userId = {}, error = {}",
+                    registerDTO.getUserId(), e.getMessage(), e);
+            model.addAttribute("error", "회원가입 처리 중 오류가 발생했습니다: " + e.getMessage());
+            return "member/register";
         }
+
     }
 
     // ==================== 중복 확인 AJAX API ====================
