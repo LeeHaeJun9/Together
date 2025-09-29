@@ -10,7 +10,12 @@ public interface ChatMessageRepository extends JpaRepository<ChatMessage, Long> 
 
   ChatMessage findTop1ByChatRoomIdOrderByRegDateDesc(Long chatRoomId);
 
-  List<ChatMessage> findTop50ByChatRoomIdOrderByRegDateAsc(Long chatRoomId);
+  List<ChatMessage> findTop50ByChatRoomIdOrderByIdAsc(Long chatRoomId);
 
+  List<ChatMessage> findByChatRoomIdAndIdGreaterThanOrderByIdAsc(Long chatRoomId, Long afterId);
+
+  List<ChatMessage> findTop50ByChatRoomIdOrderByRegDateAsc(Long chatRoomId);
   List<ChatMessage> findByChatRoomIdAndRegDateAfterOrderByRegDateAsc(Long chatRoomId, LocalDateTime after);
+  void deleteByChatRoomId(Long chatRoomId);
+
 }

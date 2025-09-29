@@ -21,8 +21,8 @@ public interface MeetingReviewService {
     PageResponseDTO<MeetingReviewDTO> list(PageRequestDTO pageRequestDTO);
 
     // 이미지 파일까지 함께 저장하는 메서드들 추가
-    MeetingReview createReviewWithImages(String userId, Long meetingId, String title, String content, List<MultipartFile> files);
-    MeetingReview writeReviewWithImages(String userId, String title, String content, LocalDateTime meetingDate, String meetingLocation, String meetingAddress, List<MultipartFile> files);
+    MeetingReview createReviewWithImages(Long cafeId, String userId, Long meetingId, String title, String content, List<MultipartFile> files);
+    MeetingReview writeReviewWithImages(Long cafeId, String userId, String title, String content, LocalDateTime meetingDate, String meetingLocation, String meetingAddress, List<MultipartFile> files);
 //    MeetingReview createReview(String userId, Long meetingId, String title, String content);
 //    public MeetingReview writeReview(String userId, String title, String content, LocalDateTime meetingDate, String meetingLocation, String meetingAddress);
 

@@ -1,263 +1,304 @@
 <!DOCTYPE html>
 <html lang="en"
-      xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layout/tab.html}">
+      xmlns:th="http://www.thymeleaf.org">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MeetingReview Read</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>모임후기 상세</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/postDetail.css}">
 
     <meta name="_csrf" th:content="${_csrf.token}"/>
     <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+
+    <style>
+        .participant-table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+            text-align: center;
+        }
+        .participant-table th,
+        .participant-table td {
+            padding: 8px 12px;
+            text-align: center;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            border-bottom: 1px solid #ddd;
+        }
+        .participant-table th:nth-child(1) { width: 10%; }
+        .participant-table th:nth-child(2) { width: 25%; }
+        .participant-table th:nth-child(3) { width: 20%; }
+        .participant-table th:nth-child(4) { width: 20%; }
+    </style>
 </head>
+
 <body>
 
-<div layout:fragment="content">
-    <h1>MeetingReview Detail</h1>
+<div th:replace="~{/layout/header :: header}"></div>
 
-    <div class="card-body">
-        <div class="input-group mb-3">
-            <span class="input-group-text">Id</span>
-            <input type="text" class="form-control" th:value="${dto.id}" readonly>
-        </div>
+<main>
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4" th:with="link = ${pageRequestDTO.getLink()}">
+            <a th:href="@{/cafe/{cafeId}/meeting/review/list(cafeId=${cafeResponse.id}, page=${pageRequestDTO.page}, type=${pageRequestDTO.type}, keyword=${pageRequestDTO.keyword})}"
+               class="btn btn-custom-secondary">목록으로
+            </a>
+            <div class="post-actions">
+                <a th:if="${#authentication.principal != null and #authentication.principal.username == dto.reviewerUserId}"
+                   th:href="|@{/cafe/{cafeId}/meeting/review/modify(cafeId=${cafeResponse.id}, id=${dto.id})}&${link}|"
+                   class="btn btn-custom-primary me-2">수정
+                </a>
 
-        <div class="input-group mb-3">
-            <span class="input-group-text">Title</span>
-            <input type="text" class="form-control" th:value="${dto.title}" readonly>
-        </div>
-
-        <div class="input-group mb-3">
-            <span class="input-group-text">Writer</span>
-            <input type="text" name="reviewer" class="form-control" th:value="${dto.reviewerUserId}" readonly>
-            <input type="text" name="reviewer" class="form-control" th:value="${dto.reviewerNickname}" readonly>
-        </div>
-
-
-        <div class="input-group mb-3">
-            <span class="input-group-text">MeetingDate</span>
-            <input type="datetime-local" class="form-control" th:value="${dto.meetingDate}" readonly>
-        </div>
-        <div class="input-group mb-3">
-            <span class="input-group-text">Location</span>
-            <input type="text" name="location" class="form-control" th:value="${dto.meetingLocation}" readonly>
-        </div>
-        <div class="input-group mb-3">
-            <span class="input-group-text">Address</span>
-            <input type="text" class="form-control" th:value="${dto.meetingAddress}" readonly>
+                <form th:if="${#authentication.principal != null and #authentication.principal.username == dto.reviewerUserId}"
+                      th:action="@{/cafe/{cafeId}/meeting/review/remove(cafeId=${cafeResponse.id})}"
+                      method="post" class="d-inline-block">
+                    <input type="hidden" name="id" th:value="${dto.id}" />
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    <button type="submit" class="btn btn-custom-danger" onclick="return confirm('정말로 삭제하시겠습니까?');">삭제</button>
+                </form>
+            </div>
         </div>
 
 
-        <div class="input-group mb-3">
-            <span class="input-group-text">Content</span>
-            <textarea class="form-control col-sm-5" rows="5" readonly>[[${dto.content}]]</textarea>
-        </div>
-        <div th:if="${dto.imageList != null and not #lists.isEmpty(dto.imageList)}" class="mt-4">
-            <h4>후기 사진</h4>
-            <div class="d-flex flex-wrap">
-                <div th:each="image : ${dto.imageList}" class="p-2">
-                    <img th:src="@{/upload/display(fileName='s_' + ${image.uuid} + '_' + ${image.fileName})}"
-                         alt="Review Image"
-                         class="img-fluid rounded"
-                         style="max-width: 200px; height: auto;">
+        <div class="post-content-section mb-4">
+            <div class="post-header-container">
+                <input type="hidden" class="form-control" th:value="${dto.id}" readonly>
+
+                <h1 th:text="${dto.title}">모임 제목</h1>
+                <div class="post-meta">
+                    <span th:if="*{cafeResponse != null}" th:text="'[' + *{cafeResponse.category} + ']'">카테고리</span>
+                    <span th:if="*{cafeResponse != null}" th:text="*{cafeResponse.name}">카페</span> |
+                    <span th:text="${dto.reviewerNickname}">작성자</span>
+                </div>
+            </div>
+
+            <div class="post-content">
+                <div class="meeting-content">
+                    <span th:text="'날짜 : ' + ${#temporals.format(dto.meetingDate, 'yyyy/MM/dd HH:ss')}">모임 날짜</span><br>
+                    <span th:text="'장소 : ' + ${dto.meetingLocation}">모임 장소</span><br>
+                    <span th:text="'상세 주소 : ' + ${dto.meetingAddress}">상세 주소</span>
+                </div>
+                <p th:text="${dto.content}">게시글 내용</p>
+            </div>
+
+            <div th:if="${dto.imageList != null and not #lists.isEmpty(dto.imageList)}" class="mt-4">
+                <h4>후기 사진</h4>
+                <div class="d-flex flex-wrap">
+                    <div th:each="image : ${dto.imageList}" class="p-2">
+                        <img th:src="@{/upload/display(fileName='s_' + ${image.uuid} + '_' + ${image.fileName})}"
+                             alt="Review Image"
+                             class="img-fluid rounded"
+                             style="max-width: 200px; height: auto;">
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="my-4">
-            <div class="float-end" th:with="link = ${pageRequestDTO.getLink()}">
-                <a th:href="@{/cafe/{cafeId}/meeting/review/list(cafeId=${cafeResponse.id}, page=${pageRequestDTO.page}, type=${pageRequestDTO.type}, keyword=${pageRequestDTO.keyword})}">
-                    <button type="button" class="btn btn-primary">List</button>
-                </a>
-                <a th:if="${#authentication.principal != null and #authentication.principal.username == dto.reviewerUserId}"
-                   th:href="|@{/cafe/{cafeId}/meeting/review/modify(cafeId=${cafeResponse.id}, id=${dto.id})}&${link}|" class="text-decoration-none">
-                    <button type="button" class="btn btn-secondary">Modify</button>
-                </a>
+        <div class="comment-section mt-5">
+            <h2 class="h4">댓글</h2>
+            <hr>
+
+            <div id="replyList" class="reply-list">
+            </div>
+
+            <div class="comment-form-container mt-4">
+                <h3 class="h5">댓글 작성</h3>
+                <div th:if="${#authentication.principal}">
+                    <form id="commentForm">
+                        <textarea id="replyText" class="form-control mb-2" rows="3" required></textarea>
+                        <div class="text-end">
+                            <button type="button" id="replyRegisterBtn" class="btn btn-primary">댓글 작성</button>
+                        </div>
+                    </form>
+                </div>
+                <div th:unless="${#authentication.principal}" class="text-center py-3">
+                    <p class="text-muted">댓글을 작성하려면 <a th:href="@{/login}">로그인</a>이 필요합니다.</p>
+                </div>
             </div>
         </div>
     </div>
+</main>
 
-    <div class="comment-section mt-5">
-        <h2 class="h4">댓글</h2>
-        <hr>
-
-        <div id="replyList" class="reply-list">
-        </div>
-
-        <div class="comment-form-container mt-4">
-            <h3 class="h5">댓글 작성</h3>
-            <div th:if="${#authentication.principal}">
-                <form id="commentForm">
-                    <textarea id="replyText" class="form-control mb-2" rows="3" required></textarea>
-                    <div class="text-end">
-                        <button type="button" id="replyRegisterBtn" class="btn btn-primary">댓글 작성</button>
-                    </div>
-                </form>
-            </div>
-            <div th:unless="${#authentication.principal}" class="text-center py-3">
-                <p class="text-muted">댓글을 작성하려면 <a th:href="@{/login}">로그인</a>이 필요합니다.</p>
-            </div>
-        </div>
+<div id="editCommentModal" class="modal">
+    <div class="modal-content">
+        <span class="close-button">&times;</span>
+        <h3 class="h5">댓글 수정하기</h3>
+        <form id="editCommentForm" class="mt-3">
+            <input type="hidden" id="editCommentId" name="commentId">
+            <textarea id="editCommentContent" name="content" class="form-control mb-3" rows="3" required></textarea>
+            <button type="submit" class="btn btn-custom-primary w-100">수정 완료</button>
+        </form>
     </div>
 </div>
 
-    <script layout:fragment="script" th:inline="javascript">
-        const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
-        const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
-        const reviewId = [[${dto.id}]];
-        const loggedInUser = [[${#authentication.principal != null ? #authentication.principal.username : null}]];
+<div th:replace="~{/layout/footer :: footer}"></div>
 
-        async function getReplyList(reviewId) {
-            try {
-                const response = await fetch(`/replies/reviews/${reviewId}`);
-                if (!response.ok) {
-                    throw new Error('Failed to fetch replies');
-                }
-                const replies = await response.json();
-                const replyListDiv = document.getElementById('replyList');
-                replyListDiv.innerHTML = ''; // 기존 목록 초기화
 
-                if (replies.length > 0) {
-                    replies.forEach(reply => {
-                        const isMyReply = loggedInUser && loggedInUser === reply.replyer;
-                        const controlsHtml = isMyReply ? `
+<script th:inline="javascript">
+    const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+    const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+    const reviewId = [[${dto.id}]];
+    const loggedInUser = [[${#authentication.principal != null ? #authentication.principal.username : null}]];
+
+    async function getReplyList(reviewId) {
+        try {
+            const response = await fetch(`/replies/reviews/${reviewId}`);
+            if (!response.ok) {
+                throw new Error('Failed to fetch replies');
+            }
+            const replies = await response.json();
+            const replyListDiv = document.getElementById('replyList');
+            replyListDiv.innerHTML = ''; // 기존 목록 초기화
+
+            if (replies.length > 0) {
+                replies.forEach(reply => {
+                    function formatDate(dateString) {
+                        const date = new Date(dateString);
+                        return date.toISOString().slice(0, 16).replace('T', ' ');
+                    }
+
+                    const isMyReply = loggedInUser && loggedInUser === reply.replyer;
+                    const controlsHtml = isMyReply ? `
                         <button class="btn btn-sm btn-outline-secondary me-2 edit-comment-btn" data-reply-id="${reply.id}" data-content="${reply.text}">수정</button>
                         <button class="btn btn-sm btn-outline-danger delete-comment-btn" data-reply-id="${reply.id}">삭제</button>
                     ` : '';
 
-                        const replyHtml = `
-                        <div class="comment d-flex justify-content-between align-items-center border-bottom py-2">
-                            <div>
-                                <strong>${reply.replyer}</strong>
-                                <p>${reply.text}</p>
-                            </div>
+                    const replyHtml = `
+                        <div class="comment-item"></div>
+                            <p class="mb-1">${reply.text}</p>
+                            <div class="comment d-flex justify-content-between align-items-center border-bottom py-2">
+                                <div>
+                                    <span>${reply.replyerNickname}</span> |
+                                    <span>${formatDate(reply.regDate)}</span>
+                                </div>
                             <div class="d-flex" data-reply-id="${reply.id}">
                                 ${controlsHtml}
                             </div>
                         </div>
                     `;
-                        replyListDiv.insertAdjacentHTML('beforeend', replyHtml);
-                    });
+                    replyListDiv.insertAdjacentHTML('beforeend', replyHtml);
+                });
+            } else {
+                replyListDiv.innerHTML = `<div class="text-center text-muted py-4"><p>아직 댓글이 없습니다. 첫 댓글을 남겨보세요!</p></div>`;
+            }
+        } catch (error) {
+            console.error('댓글 목록 로딩 중 오류 발생:', error);
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        getReplyList(reviewId);
+    });
+
+
+    const replyRegisterBtn = document.getElementById('replyRegisterBtn');
+    const replyTextarea = document.getElementById('replyText');
+
+    // 댓글 등록 버튼이 존재할 때만 이벤트 리스너 추가
+    if (replyRegisterBtn) {
+        replyRegisterBtn.addEventListener('click', async () => {
+            const text = replyTextarea.value.trim();
+            if (!text) {
+                alert('댓글 내용을 입력해주세요.');
+                return;
+            }
+
+            const replyData = {
+                reviewId: reviewId,
+                replyer: loggedInUser,
+                text: text
+            };
+
+            try {
+                const response = await fetch(`/replies/reviews/${reviewId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        [csrfHeader]: csrfToken
+                    },
+                    body: JSON.stringify(replyData)
+                });
+
+                if (response.ok) {
+                    alert('댓글이 성공적으로 등록되었습니다.');
+                    window.location.reload();
                 } else {
-                    replyListDiv.innerHTML = `<div class="text-center text-muted py-4"><p>아직 댓글이 없습니다. 첫 댓글을 남겨보세요!</p></div>`;
+                    alert('댓글 등록에 실패했습니다.');
                 }
             } catch (error) {
-                console.error('댓글 목록 로딩 중 오류 발생:', error);
+                console.error('댓글 등록 중 오류 발생:', error);
             }
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            getReplyList(reviewId);
         });
+    }
 
+    // 수정/삭제 버튼 이벤트를 클릭 이벤트 위임으로 처리
+    document.addEventListener('click', async (e) => {
+        const target = e.target;
+        if (target.classList.contains('edit-comment-btn')) {
+            const replyId = target.dataset.replyId;
+            const currentContent = target.dataset.content;
+            const newContent = prompt('댓글을 수정하세요:', currentContent);
 
-        const replyRegisterBtn = document.getElementById('replyRegisterBtn');
-        const replyTextarea = document.getElementById('replyText');
-
-        // 댓글 등록 버튼이 존재할 때만 이벤트 리스너 추가
-        if (replyRegisterBtn) {
-            replyRegisterBtn.addEventListener('click', async () => {
-                const text = replyTextarea.value.trim();
-                if (!text) {
-                    alert('댓글 내용을 입력해주세요.');
-                    return;
-                }
-
-                const replyData = {
-                    reviewId: reviewId,
-                    replyer: loggedInUser,
-                    text: text
-                };
-
+            if (newContent !== null && newContent.trim() !== '') {
                 try {
-                    const response = await fetch(`/replies/reviews/${reviewId}`, {
-                        method: 'POST',
+                    const response = await fetch(`/replies/${replyId}`, {
+                        method: 'PUT',
                         headers: {
                             'Content-Type': 'application/json',
                             [csrfHeader]: csrfToken
                         },
-                        body: JSON.stringify(replyData)
+                        body: JSON.stringify({ text: newContent })
                     });
-
                     if (response.ok) {
-                        alert('댓글이 성공적으로 등록되었습니다.');
+                        alert('댓글이 성공적으로 수정되었습니다.');
                         window.location.reload();
                     } else {
-                        alert('댓글 등록에 실패했습니다.');
+                        alert('댓글 수정에 실패했습니다.');
                     }
                 } catch (error) {
-                    console.error('댓글 등록 중 오류 발생:', error);
-                }
-            });
-        }
-
-        // 수정/삭제 버튼 이벤트를 클릭 이벤트 위임으로 처리
-        document.addEventListener('click', async (e) => {
-            const target = e.target;
-            if (target.classList.contains('edit-comment-btn')) {
-                const replyId = target.dataset.replyId;
-                const currentContent = target.dataset.content;
-                const newContent = prompt('댓글을 수정하세요:', currentContent);
-
-                if (newContent !== null && newContent.trim() !== '') {
-                    try {
-                        const response = await fetch(`/replies/${replyId}`, {
-                            method: 'PUT',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                [csrfHeader]: csrfToken
-                            },
-                            body: JSON.stringify({ text: newContent })
-                        });
-                        if (response.ok) {
-                            alert('댓글이 성공적으로 수정되었습니다.');
-                            window.location.reload();
-                        } else {
-                            alert('댓글 수정에 실패했습니다.');
-                        }
-                    } catch (error) {
-                        console.error('댓글 수정 중 오류 발생:', error);
-                    }
-                }
-            } else if (target.classList.contains('delete-comment-btn')) {
-                const replyId = target.dataset.replyId;
-                if (confirm('정말로 이 댓글을 삭제하시겠습니까?')) {
-                    try {
-                        const response = await fetch(`/replies/${replyId}`, {
-                            method: 'DELETE',
-                            headers: {
-                                [csrfHeader]: csrfToken
-                            }
-                        });
-                        if (response.ok) {
-                            alert('댓글이 성공적으로 삭제되었습니다.');
-                            window.location.reload();
-                        } else {
-                            alert('댓글 삭제에 실패했습니다.');
-                        }
-                    } catch (error) {
-                        console.error('댓글 삭제 중 오류 발생:', error);
-                    }
+                    console.error('댓글 수정 중 오류 발생:', error);
                 }
             }
-        });
-
-        // 기존 버튼 이벤트 리스너는 선택된 요소가 존재하는지 확인하는 코드를 추가
-        const listBtn = document.querySelector(".btn-primary");
-        if (listBtn) {
-            listBtn.addEventListener("click", function (e) {
-                e.preventDefault();
-                self.location = `/cafe/${cafeId}/meeting/review/list?${pageRequestDTO.link}`;
-            }, false);
+        } else if (target.classList.contains('delete-comment-btn')) {
+            const replyId = target.dataset.replyId;
+            if (confirm('정말로 이 댓글을 삭제하시겠습니까?')) {
+                try {
+                    const response = await fetch(`/replies/${replyId}`, {
+                        method: 'DELETE',
+                        headers: {
+                            [csrfHeader]: csrfToken
+                        }
+                    });
+                    if (response.ok) {
+                        alert('댓글이 성공적으로 삭제되었습니다.');
+                        window.location.reload();
+                    } else {
+                        alert('댓글 삭제에 실패했습니다.');
+                    }
+                } catch (error) {
+                    console.error('댓글 삭제 중 오류 발생:', error);
+                }
+            }
         }
+    });
 
-        const modifyBtn = document.querySelector(".btn-secondary");
-        if (modifyBtn) {
-            modifyBtn.addEventListener("click", function (e) {
-                e.preventDefault();
-                self.location = `/cafe/${cafeId}/meeting/review/modify?id=${dto.id}&${pageRequestDTO.link}`;
-            }, false);
-        }
-    </script>
+    // 기존 버튼 이벤트 리스너는 선택된 요소가 존재하는지 확인하는 코드를 추가
+    const listBtn = document.querySelector(".btn-primary");
+    if (listBtn) {
+        listBtn.addEventListener("click", function (e) {
+            e.preventDefault();
+            self.location = `/cafe/${cafeId}/meeting/review/list?${pageRequestDTO.link}`;
+        }, false);
+    }
+
+    const modifyBtn = document.querySelector(".btn-secondary");
+    if (modifyBtn) {
+        modifyBtn.addEventListener("click", function (e) {
+            e.preventDefault();
+            self.location = `/cafe/${cafeId}/meeting/review/modify?id=${dto.id}&${pageRequestDTO.link}`;
+        }, false);
+    }
+</script>

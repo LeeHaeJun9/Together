@@ -17,6 +17,51 @@
   <div class="row g-5 mt-3">
 
     <div class="col-12">
+      <div class="p-4 rounded-3 section-box search-box">
+        <h3 class="mb-3">통합 검색</h3>
+
+        <ul class="nav nav-pills mb-3" id="searchTabs" role="tablist">
+          <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="tab-meeting" data-section="meeting" type="button" role="tab" aria-selected="true">모임</button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="tab-cafe" data-section="cafe" type="button" role="tab" aria-selected="false">카페</button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="tab-trade" data-section="trade" type="button" role="tab" aria-selected="false">중고거래</button>
+          </li>
+        </ul>
+
+        <form th:action="@{/categories}" method="get" id="categorySearchForm" class="d-flex align-items-center">
+          <input type="hidden" name="category" th:value="${category}">
+          <input type="hidden" name="m_page" th:value="${meetingsPage.pageRequestDTO.page}">
+          <input type="hidden" name="m_size" th:value="${meetingsPage.size > 0 ? meetingsPage.size : 10}">
+          <input type="hidden" name="c_page" th:value="${cafesPage.pageRequestDTO.page}">
+          <input type="hidden" name="c_size" th:value="${cafesPage.size > 0 ? cafesPage.size : 4}">
+          <input type="hidden" name="t_page" th:value="${tradesPage.pageRequestDTO.page}">
+          <input type="hidden" name="t_size" th:value="${tradesPage.size > 0 ? tradesPage.size : 10}">
+
+          <input type="hidden" id="searchTypeInput" name="m_type" th:value="${meetingsPage.pageRequestDTO.type}">
+          <input type="hidden" id="searchKeywordInput" name="m_keyword" th:value="${meetingsPage.pageRequestDTO.keyword}">
+
+
+          <select class="form-select me-2" id="searchTypeSelect" style="width: 150px;">
+            <option value="tc" selected>제목+내용</option>
+            <option value="t">제목</option>
+            <option value="c">내용</option>
+<!--            <option value="w">작성자</option>-->
+          </select>
+
+          <input class="form-control me-2" type="search" placeholder="검색어를 입력하세요."
+                 aria-label="Search" id="searchKeywordText"
+                 th:value="${meetingsPage.pageRequestDTO.keyword}">
+
+          <button class="btn btn-primary" type="submit">검색</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="col-12">
       <div class="p-4 rounded-3 section-box meeting-section">
         <div class="d-flex justify-content-between align-items-center mb-4">
           <h3 class="mb-0">모임</h3>
@@ -41,7 +86,15 @@
           <ul class="pagination justify-content-center">
             <li class="page-item" th:each="pageNum : ${#numbers.sequence(meetingsPage.start, meetingsPage.end)}"
                 th:classappend="${pageNum == meetingsPage.pageRequestDTO.page} ? 'active'">
-              <a class="page-link" th:href="@{/categories(category=${category}, m_page=${pageNum}, m_size=${meetingsPage.size}, c_page=${cafesPage.pageRequestDTO.page}, c_size=${cafesPage.pageRequestDTO.size}, t_page=${tradesPage.pageRequestDTO.page}, t_size=${tradesPage.pageRequestDTO.size}, type=${meetingsPage.pageRequestDTO.type}, keyword=${meetingsPage.pageRequestDTO.keyword}, sort=${meetingsPage.pageRequestDTO.sort})}"
+              <a class="page-link"
+                 th:href="@{/categories(category=${category},
+             m_page=${pageNum}, m_size=${meetingsPage.size},
+             c_page=${cafesPage.pageRequestDTO.page}, c_size=${cafesPage.pageRequestDTO.size},
+             t_page=${tradesPage.pageRequestDTO.page}, t_size=${tradesPage.pageRequestDTO.size},
+             m_type=${meetingsPage.pageRequestDTO.type}, m_keyword=${meetingsPage.pageRequestDTO.keyword},
+             c_type=${cafesPage.pageRequestDTO.type}, c_keyword=${cafesPage.pageRequestDTO.keyword},
+             t_type=${tradesPage.pageRequestDTO.type}, t_keyword=${tradesPage.pageRequestDTO.keyword},
+             sort=${meetingsPage.pageRequestDTO.sort})}"
                  th:text="${pageNum}"></a>
             </li>
           </ul>
@@ -76,7 +129,15 @@
           <ul class="pagination justify-content-center">
             <li class="page-item" th:each="pageNum : ${#numbers.sequence(cafesPage.start, cafesPage.end)}"
                 th:classappend="${pageNum == cafesPage.pageRequestDTO.page} ? 'active'">
-              <a class="page-link" th:href="@{/categories(category=${category}, m_page=${meetingsPage.pageRequestDTO.page}, m_size=${meetingsPage.pageRequestDTO.size}, c_page=${pageNum}, c_size=${cafesPage.size}, t_page=${tradesPage.pageRequestDTO.page}, t_size=${tradesPage.pageRequestDTO.size}, type=${cafesPage.pageRequestDTO.type}, keyword=${cafesPage.pageRequestDTO.keyword}, sort=${cafesPage.pageRequestDTO.sort})}"
+              <a class="page-link"
+                 th:href="@{/categories(category=${category},
+             m_page=${meetingsPage.pageRequestDTO.page}, m_size=${meetingsPage.pageRequestDTO.size},
+             c_page=${pageNum}, c_size=${cafesPage.size},
+             t_page=${tradesPage.pageRequestDTO.page}, t_size=${tradesPage.pageRequestDTO.size},
+             m_type=${meetingsPage.pageRequestDTO.type}, m_keyword=${meetingsPage.pageRequestDTO.keyword},
+             c_type=${cafesPage.pageRequestDTO.type}, c_keyword=${cafesPage.pageRequestDTO.keyword},
+             t_type=${tradesPage.pageRequestDTO.type}, t_keyword=${tradesPage.pageRequestDTO.keyword},
+             sort=${cafesPage.pageRequestDTO.sort})}"
                  th:text="${pageNum}"></a>
             </li>
           </ul>
@@ -113,7 +174,15 @@
           <ul class="pagination justify-content-center">
             <li class="page-item" th:each="pageNum : ${#numbers.sequence(tradesPage.start, tradesPage.end)}"
                 th:classappend="${pageNum == tradesPage.pageRequestDTO.page} ? 'active'">
-              <a class="page-link" th:href="@{/categories(category=${category}, m_page=${meetingsPage.pageRequestDTO.page}, m_size=${meetingsPage.pageRequestDTO.size}, c_page=${cafesPage.pageRequestDTO.page}, c_size=${cafesPage.pageRequestDTO.size}, t_page=${pageNum}, t_size=${tradesPage.size}, type=${tradesPage.pageRequestDTO.type}, keyword=${tradesPage.pageRequestDTO.keyword}, sort=${tradesPage.pageRequestDTO.sort})}"
+              <a class="page-link"
+                 th:href="@{/categories(category=${category},
+             m_page=${meetingsPage.pageRequestDTO.page}, m_size=${meetingsPage.pageRequestDTO.size},
+             c_page=${cafesPage.pageRequestDTO.page}, c_size=${cafesPage.pageRequestDTO.size},
+             t_page=${pageNum}, t_size=${tradesPage.size},
+             m_type=${meetingsPage.pageRequestDTO.type}, m_keyword=${meetingsPage.pageRequestDTO.keyword},
+             c_type=${cafesPage.pageRequestDTO.type}, c_keyword=${cafesPage.pageRequestDTO.keyword},
+             t_type=${tradesPage.pageRequestDTO.type}, t_keyword=${tradesPage.pageRequestDTO.keyword},
+             sort=${tradesPage.pageRequestDTO.sort})}"
                  th:text="${pageNum}"></a>
             </li>
           </ul>
@@ -126,5 +195,114 @@
 <div th:replace="~{/layout/footer :: footer}"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const searchForm = document.getElementById('categorySearchForm');
+    const searchTabs = document.getElementById('searchTabs');
+    const searchTypeInput = document.getElementById('searchTypeInput'); // hidden type
+    const searchKeywordInput = document.getElementById('searchKeywordInput'); // hidden keyword
+    const searchTypeSelect = document.getElementById('searchTypeSelect'); // select tag
+    const searchKeywordText = document.getElementById('searchKeywordText'); // visible text input
+
+    // 현재 검색 상태를 저장하는 객체 (페이지 로드 시 Thymeleaf 값으로 초기화)
+    const searchState = {
+      'meeting': {
+        prefix: 'm_',
+        type: '[[${meetingsPage.pageRequestDTO.type}]]',
+        keyword: '[[${meetingsPage.pageRequestDTO.keyword}]]',
+        options: [
+          { value: 'tc', text: '제목+내용' },
+          { value: 't', text: '제목' },
+          { value: 'c', text: '내용' },
+        ]
+      },
+      'cafe': {
+        prefix: 'c_',
+        type: '[[${cafesPage.pageRequestDTO.type}]]',
+        keyword: '[[${cafesPage.pageRequestDTO.keyword}]]',
+        options: [
+          { value: 'nd', text: '카페명+설명' },
+          { value: 'n', text: '카페명' },
+          { value: 'd', text: '설명' }
+        ]
+      },
+      'trade': {
+        prefix: 't_',
+        type: '[[${tradesPage.pageRequestDTO.type}]]',
+        keyword: '[[${tradesPage.pageRequestDTO.keyword}]]',
+        options: [
+          { value: 'tw', text: '제목+판매자' },
+          { value: 't', text: '제목' },
+          { value: 'w', text: '판매자' }
+        ]
+      }
+    };
+
+    // 현재 활성화된 섹션을 저장 (초기값 'meeting')
+    let activeSection = 'meeting';
+
+    // 탭 클릭 이벤트 핸들러
+    searchTabs.querySelectorAll('.nav-link').forEach(button => {
+      button.addEventListener('click', function() {
+        // 1. 활성화 상태 변경
+        searchTabs.querySelectorAll('.nav-link').forEach(btn => btn.classList.remove('active'));
+        this.classList.add('active');
+
+        // 2. 현재 활성 섹션 업데이트
+        activeSection = this.getAttribute('data-section');
+        const state = searchState[activeSection];
+
+        // 3. 폼 필드 이름 및 값 업데이트
+        searchTypeInput.name = state.prefix + 'type';
+        searchKeywordInput.name = state.prefix + 'keyword';
+        searchTypeInput.value = state.type;
+        searchKeywordInput.value = state.keyword;
+        searchKeywordText.value = state.keyword;
+
+        // 4. 드롭다운 옵션 업데이트
+        searchTypeSelect.innerHTML = ''; // 기존 옵션 제거
+        state.options.forEach(option => {
+          const newOption = document.createElement('option');
+          newOption.value = option.value;
+          newOption.textContent = option.text;
+          if (option.value === state.type) {
+            newOption.selected = true;
+          }
+          searchTypeSelect.appendChild(newOption);
+        });
+      });
+    });
+
+    // 폼 제출 이벤트 핸들러
+    searchForm.addEventListener('submit', function() {
+      // 1. 드롭다운에서 선택된 값을 hidden type input에 반영
+      searchTypeInput.value = searchTypeSelect.value;
+
+      // 2. 텍스트 필드의 값을 hidden keyword input에 반영
+      searchKeywordInput.value = searchKeywordText.value;
+
+      // 3. 검색을 시작하면 해당 섹션의 페이지는 1로 초기화 (m_page, c_page, t_page)
+      const pageInputName = searchState[activeSection].prefix + 'page';
+      const pageInput = document.querySelector(`input[name="${pageInputName}"]`);
+      if (pageInput) {
+        pageInput.value = 1;
+      }
+    });
+
+    // 페이지 로드 시 URL 파라미터를 확인하여 올바른 탭이 활성화되도록 처리
+    const urlParams = new URLSearchParams(window.location.search);
+    let initialSection = 'meeting';
+
+    if (urlParams.get('c_keyword') || urlParams.get('c_type')) {
+      initialSection = 'cafe';
+    } else if (urlParams.get('t_keyword') || urlParams.get('t_type')) {
+      initialSection = 'trade';
+    }
+
+    // 초기 활성화 탭 클릭 시뮬레이션
+    document.getElementById(`tab-${initialSection}`).click();
+  });
+</script>
+
 </body>
 </html>

@@ -1,0 +1,89 @@
+<!-- templates/layout/quicknav.html -->
+<div th:fragment="quicknav">
+    <style>
+        .quicknav-bar{
+            background:#fff;
+            border-bottom:1px solid #e9edf3;
+            width: 1200px;
+            margin: 0 auto;
+        }
+        .quicknav-bar .icon-links{
+            display:flex;
+            align-items:center;
+            gap:10px;
+            padding:6px 0;
+        }
+        .icon-btn{
+            position:relative;
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            width:34px;
+            height:34px;
+            border-radius:10px;
+            color:#6c757d;
+            text-decoration:none;
+            border:1px solid #e9edf3;
+            background:#fff;
+            transition:.15s;
+        }
+        .icon-btn:hover{ color:#0d6efd; border-color:#d7e6ff; background:#f5f9ff; }
+        .icon-btn svg{ width:18px; height:18px; }
+        .quicknav-badge{
+            position:absolute;
+            top:-4px;
+            right:-4px;
+            min-width:18px;
+            height:18px;
+            padding:0 6px;
+            font-size:.72rem;
+            line-height:18px;
+            text-align:center;
+            border-radius:999px;
+            background:#e9ecef;
+            color:#495057;
+            border:1px solid #fff;
+        }
+    </style>
+
+    <div class="quicknav-bar">
+        <div class="container">
+            <div class="d-flex">
+                <div class="ms-auto icon-links">
+
+                    <!-- 거래 리스트로 -->
+                    <a class="icon-btn" th:href="@{/trade/list}" title="거래" aria-label="거래"
+                       data-bs-toggle="tooltip" data-bs-placement="bottom">
+                        <!-- Bootstrap Icons: bag -->
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bi bi-bag" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+                            <path d="M8 1a2.5 2.5 0 0 1 2.5 2.5V4h-5v-.5A2.5 2.5 0 0 1 8 1m3.5 3v-.5a3.5 3.5 0 1 0-7 0V4H1v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V4zM2 5h12v9a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1z"/>
+                        </svg>
+                        <span class="quicknav-badge" th:if="${tradeCount != null}" th:text="${tradeCount}">0</span>
+                    </a>
+
+                    <!-- 채팅 리스트로 -->
+                    <a class="icon-btn" th:href="@{/chat/list}" title="채팅" aria-label="채팅"
+                       data-bs-toggle="tooltip" data-bs-placement="bottom">
+                        <!-- Bootstrap Icons: chat-square-text -->
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bi bi-chat-square-text" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+                            <path d="M14 1a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1h-2.5a2 2 0 0 0-1.6.8L8 14.333 6.1 11.8a2 2 0 0 0-1.6-.8H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1zM2 0a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2.5a1 1 0 0 1 .8.4l1.9 2.533a1 1 0 0 0 1.6 0l1.9-2.533a1 1 0 0 1 .8-.4H14a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2z"/>
+                            <path d="M3 3.5a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5M3 6a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9A.5.5 0 0 1 3 6m0 2.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5"/>
+                        </svg>
+                        <span class="quicknav-badge" th:if="${chatCount != null}" th:text="${chatCount}">0</span>
+                    </a>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function(){
+            if (window.bootstrap) {
+                document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function(el){
+                    try{ new bootstrap.Tooltip(el); } catch(e){}
+                });
+            }
+        })();
+    </script>
+</div>

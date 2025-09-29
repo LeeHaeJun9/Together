@@ -34,9 +34,11 @@ public class MeetingDTO {
 
     private Visibility visibility = Visibility.PUBLIC;
 
-    private Long organizerId;
-    private String organizerName;
+    private Long organizerId; // 유저 부여 ID
+    private String organizerName; // 유저 생성 아이디
+    private String organizerNickname;
     private String userId;
+
 
     private CafeResponseDTO cafe;
 
@@ -47,7 +49,6 @@ public class MeetingDTO {
     private String address;
     private String location;
 
-
     public static MeetingDTO fromEntity(Meeting meeting) {
         return MeetingDTO.builder()
                 .id(meeting.getId())
@@ -57,8 +58,8 @@ public class MeetingDTO {
                 .recruiting(meeting.getRecruiting())
                 .visibility(meeting.getVisibility())
                 .organizerId(meeting.getOrganizer() != null ? meeting.getOrganizer().getId() : null)
-                .organizerName(meeting.getOrganizer() != null ? meeting.getOrganizer().getNickname() : null)
-                .userId(meeting.getOrganizer() != null ? meeting.getOrganizer().getName() : null)
+                .organizerNickname(meeting.getOrganizer() != null ? meeting.getOrganizer().getNickname() : null)
+                .organizerName(meeting.getOrganizer() != null ? meeting.getOrganizer().getName() : null)
                 .cafe(meeting.getCafe() != null ? CafeResponseDTO.fromEntity(meeting.getCafe()) : null)
                 .regDate(meeting.getRegDate())
                 .modDate(meeting.getModDate())

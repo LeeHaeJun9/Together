@@ -3,6 +3,7 @@ package com.example.together.dto.meeting;
 import com.example.together.domain.Cafe;
 import com.example.together.domain.Meeting;
 import com.example.together.domain.User;
+import com.example.together.dto.cafe.CafeResponseDTO;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.ManyToOne;
 import jakarta.validation.constraints.NotEmpty;
@@ -45,4 +46,8 @@ public class MeetingReviewDTO {
 
     private LocalDateTime regDate;  // 생성일
     private LocalDateTime modDate;  // 수정일
+
+    private CafeResponseDTO cafe;
+    private String cafeName;
+    private Long cafeId;
 }

@@ -19,6 +19,7 @@ public class ChatServiceImpl implements ChatService {
   private final ChatRoomRepository roomRepo;
   private final ChatMessageRepository msgRepo;
 
+
   @Override
   public ChatRoom start(Long tradeId, Long sellerId, Long buyerId) {
     return roomRepo.findTopByTradeIdAndBuyerIdOrderByIdDesc(tradeId, buyerId)
@@ -66,5 +67,21 @@ public class ChatServiceImpl implements ChatService {
     ChatMessage saved = msgRepo.save(m);
     roomRepo.touchModDate(roomId);
     return saved;
+  }
+
+  @Transactional(readOnly = true)
+  @Override
+  public int countRooms(Long myUserId) {
+    if (myUserId == null) return 0;
+    return (int) roomRepo.countBySellerIdOrBuyerId(myUserId, myUserId);
+  }
+
+
+  @Override
+  public void deleteRoom(Long roomId, Long requesterId) {
+    roomRepo.findIfParticipant(roomId, requesterId)
+        .orElseThrow(() -> new IllegalStateException("No permission"));
+    msgRepo.deleteByChatRoomId(roomId);
+    roomRepo.deleteById(roomId);
   }
 }
