@@ -17,9 +17,7 @@
     /* CATEGORY */
     --cat-gap:16px;
     --cat-row:128px;
-    --cat-blur:2px;        /* 색상 유지 + 약한 블러 */
-
-    /* 공용 연회색(‘탐색’/‘카페’/‘중고거래’에 사용) */
+    --cat-blur:2px;       
     --muted-color:#707070;
 }
 
@@ -185,6 +183,5 @@ main section.container{margin-top:3rem;margin-bottom:6rem;}
 @media (max-width:576px){.slider-card{flex-basis:85%;max-width:85%;}}
 
 /* ---- 인기 중고거래: 제목과 카드 사이 간격 축소 ---- */
-.trade-section .section-title{margin-bottom:.5rem;}     /* 기본 1.1rem → 0.5rem */
-.trade-section .slider-container{padding-top:.6rem;}    /* 기본 2rem → 0.6rem */
-
+.trade-section .section-title{margin-bottom:.5rem;}    
+.trade-section .slider-container{padding-top:.6rem;}    

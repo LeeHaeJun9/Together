@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -16,56 +16,53 @@
 <!-- 헤더 프래그먼트 -->
 <div th:replace="~{/layout/header :: header}"></div>
 <div class="container px-4 px-lg-5">
-<div th:replace="~{/layout/cafeHeader :: cafeHeader(cafe=${cafe})}"></div>
+  <div th:replace="~{/layout/cafeHeader :: cafeHeader(cafe=${cafe})}"></div>
 
-<main class="container py-5">
-  <div class="page-header-container">
-    <h3 class="mb-0">가입 신청 목록</h3>
-  </div>
+  <main class="container py-5">
 
-  <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
-    <span th:text="${error}"></span>
-    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-  </div>
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+      <span th:text="${error}"></span>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
 
-  <div th:if="${#lists.isEmpty(requests)}" class="text-center text-muted py-5">
-    현재 보류 중인 가입 신청이 없습니다.
-  </div>
+    <div th:if="${#lists.isEmpty(requests)}" class="text-center text-muted py-5">
+      현재 보류 중인 가입 신청이 없습니다.
+    </div>
 
-  <div class="table-container" th:unless="${#lists.isEmpty(requests)}">
-    <table class="table table-striped table-hover mb-0">
-      <thead class="table-custom-header text-center">
-      <tr>
-        <th scope="col">신청자 이름</th>
-        <th scope="col">신청일</th>
-        <th scope="col">상태</th>
-        <th scope="col">액션</th>
-      </tr>
-      </thead>
-      <tbody class="text-center">
-      <tr th:each="request : ${requests}">
-        <td th:text="${request.username}"></td>
-        <td th:text="${#temporals.format(request.requestDate, 'yyyy-MM-dd HH:mm')}"></td>
-        <td th:text="${request.status}"></td>
-        <td>
-          <div class="d-flex justify-content-center">
-            <form th:action="@{/cafe/my/cafe/joinRequests/approve/{requestId}(requestId=${request.requestId})}" method="post">
-              <button type="submit" class="btn btn-sm btn-success me-2">
-                <i class="fas fa-check-circle me-1"></i>승인
-              </button>
-            </form>
-            <form th:action="@{/cafe/my/cafe/joinRequests/reject/{requestId}(requestId=${request.requestId})}" method="post">
-              <button type="submit" class="btn btn-sm btn-danger">
-                <i class="fas fa-times-circle me-1"></i>거절
-              </button>
-            </form>
-          </div>
-        </td>
-      </tr>
-      </tbody>
-    </table>
-  </div>
-</main>
+    <div class="table-container" th:unless="${#lists.isEmpty(requests)}">
+      <table class="table table-hover mb-0">
+        <thead class="table-custom-header text-center">
+        <tr>
+          <th scope="col">신청자 이름</th>
+          <th scope="col">신청일</th>
+          <th scope="col">상태</th>
+          <th scope="col">액션</th>
+        </tr>
+        </thead>
+        <tbody class="text-center">
+        <tr th:each="request : ${requests}">
+          <td th:text="${request.username}"></td>
+          <td th:text="${#temporals.format(request.requestDate, 'yyyy-MM-dd HH:mm')}"></td>
+          <td th:text="${request.status}"></td>
+          <td>
+            <div class="d-flex justify-content-center">
+              <form th:action="@{/cafe/my/cafe/joinRequests/approve/{requestId}(requestId=${request.requestId})}" method="post" onsubmit="return confirm('정말 이 가입 신청을 승인하시겠습니까?');">
+                <button type="submit" class="btn btn-sm btn-success me-2">
+                  <i class="fas fa-check-circle me-1"></i>승인
+                </button>
+              </form>
+              <form th:action="@{/cafe/my/cafe/joinRequests/reject/{requestId}(requestId=${request.requestId})}" method="post" onsubmit="return confirm('정말 이 가입 신청을 거절하시겠습니까?');">
+                <button type="submit" class="btn btn-sm btn-danger">
+                  <i class="fas fa-times-circle me-1"></i>거절
+                </button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
 </div>
 <!-- 푸터 프래그먼트 -->
 <div th:replace="~{/layout/footer :: footer}"></div>
