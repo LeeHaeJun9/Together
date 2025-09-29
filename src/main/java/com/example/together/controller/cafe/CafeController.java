@@ -324,23 +324,20 @@ public class CafeController {
     }
 
     @PostMapping("/{cafeId}/delete")
-    public String deleteCafe(
-            @PathVariable Long cafeId,
-            RedirectAttributes redirectAttributes,
-            Principal principal) {
-
-        Long userId = getLoggedInUserId(principal); // 로그인된 사용자 ID
-        if (userId == null) {
-            return "redirect:/login";
+    @ResponseBody
+    public ResponseEntity<String> deleteCafeAjax(@PathVariable Long cafeId, Principal principal) {
+        if (principal == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
         }
-
+        Long userId = getLoggedInUserId(principal);
         try {
             cafeService.deleteCafe(cafeId, userId);
-            redirectAttributes.addFlashAttribute("message", "카페가 성공적으로 삭제되었습니다.");
-        } catch (IllegalAccessException | IllegalArgumentException e) {
-            redirectAttributes.addFlashAttribute("error", e.getMessage());
+            return ResponseEntity.ok("카페가 삭제되었습니다.");
+        } catch (IllegalAccessException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("카페 삭제 중 오류 발생");
         }
-        return "redirect:/cafe/list";
     }
 
     @PostMapping("/{cafeId}/join")
@@ -450,19 +447,17 @@ public class CafeController {
     }
 
     @PostMapping("/{cafeId}/leave")
-    @ResponseBody // API 요청임을 나타내기 위해 @ResponseBody 사용
-    public String leaveCafe(@PathVariable Long cafeId, Principal principal) {
+    @ResponseBody
+    public ResponseEntity<String> leaveCafeAjax(@PathVariable Long cafeId, Principal principal) {
         if (principal == null) {
-            return "redirect:/login"; // 로그인되지 않았으면 로그인 페이지로 리다이렉트
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
         }
         Long userId = getLoggedInUserId(principal);
         try {
             cafeService.leaveCafe(cafeId, userId);
-            return "redirect:/cafe/list"; // 탈퇴 후 카페 목록 페이지로 리다이렉트
+            return ResponseEntity.ok("카페 탈퇴가 완료되었습니다.");
         } catch (Exception e) {
-            // 오류 처리: 에러 페이지로 리디렉션하거나 JSON 응답 반환
-            log.error("Failed to leave cafe {}: {}", cafeId, e.getMessage());
-            return "redirect:/error"; // 예시: 에러 페이지로 리다이렉트
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("카페 탈퇴 중 오류 발생");
         }
     }
 }

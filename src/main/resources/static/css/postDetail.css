@@ -21,6 +21,8 @@ main {
     font-weight: bold;
     color: #212529;
     margin-bottom: 0.5rem;
+    margin-top: 1.5rem;
+    padding-top: 30px;
 }
 .post-meta {
     font-size: 0.9rem;
@@ -28,15 +30,16 @@ main {
 }
 .post-content-section {
     background-color: white;
-    padding: 2.5rem;
+    padding: 0 2.5rem 2.5rem 2.5rem;
     border-radius: 0.5rem;
     box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
 }
-.post-content {
+.post-content p {
     white-space: pre-wrap;
     line-height: 1.8;
     font-size: 1.1rem;
     color: #343a40;
+    margin-top: 0; /* 본문의 상단 마진 제거 */
 }
 .post-content img {
     max-width: 100%;
