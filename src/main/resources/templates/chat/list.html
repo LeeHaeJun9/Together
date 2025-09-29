@@ -12,25 +12,80 @@
     <meta name="_csrf_header" th:content="${_csrf.headerName}">
 
     <style>
-        :root{ --line:#e9edf3; --muted:#6c757d; }
-        .chatlist-wrap{ max-width: 960px; margin: 0 auto; }
-        .room-card{ border:1px solid var(--line); border-radius:14px; padding:12px; background:#fff; position:relative; cursor:pointer; }
-        .room-card:hover{ box-shadow:0 6px 14px rgba(0,0,0,.06); }
-        .thumb{ width: 92px; height: 92px; border-radius:12px; object-fit:cover; border:1px solid var(--line); background:#f8f9fa; }
-        .title{ font-weight:600; margin-bottom:2px; }
-        .preview{ color:var(--muted); font-size:.9rem; }
-        .right small{ color:var(--muted); display:block; }
+        :root{
+            --line:#e9edf3;
+            --muted:#6c757d;
+        }
+        .chatlist-wrap{
+            max-width: 960px;
+            margin: 0 auto;
+        }
+        .room-card{
+            border:1px solid var(--line);
+            border-radius:14px;
+            padding:12px;
+            background:#fff;
+            position:relative;
+            cursor:pointer;
+        }
+        .room-card:hover{
+            box-shadow:0 6px 14px rgba(0,0,0,.06);
+        }
+        .thumb{
+            width: 92px; height: 92px;
+            border-radius:12px;
+            object-fit:cover;
+            border:1px solid var(--line);
+            background:#f8f9fa;
+        }
+        .title{
+            font-weight:600;
+            margin-bottom:2px;
+        }
+        .preview{
+            color:var(--muted);
+            font-size:.9rem;
+        }
+        .right small{
+            color:var(--muted);
+            display:block;
+        }
 
-        .action-wrap{ opacity:.6; transition:.15s; }
-        .room-card:hover .action-wrap{ opacity:1; }
+        .action-wrap{
+            opacity:.6;
+            transition:.15s;
+        }
+        .room-card:hover .action-wrap{
+            opacity:1;
+        }
 
         /* ‘목록’ 아이콘 전용: 보더 제거 */
-        .icon-btn{ width:44px; height:44px; padding:0; border-radius:10px;
-            display:inline-flex; align-items:center; justify-content:center;
-            border:none; background:transparent; color:#6c757d; text-decoration:none; transition:.15s; }
-        .icon-btn:hover{ color:#0d6efd; background:#f5f9ff; }
-        .icon-btn:focus{ outline:none; box-shadow:0 0 0 .2rem rgba(13,110,253,.15); }
-        .icon-btn svg{ width:27px; height:27px; }
+        .icon-btn{
+            width:44px;
+            height:44px;
+            padding:0;
+            border-radius:10px;
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            border:none;
+            background:transparent;
+            color:#6c757d;
+            text-decoration:none;
+            transition:.15s;
+        }
+        .icon-btn:hover{
+            color:#0d6efd;
+            background:#f5f9ff;
+        }
+        .icon-btn:focus {
+            outline:none;
+            box-shadow:0 0 0 .2rem rgba(13,110,253,.15);
+        }
+        .icon-btn svg{
+            width:27px;
+            height:27px;
+        }
     </style>
 </head>
 <body>
@@ -40,7 +95,6 @@
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h4 class="mb-0">내 채팅</h4>
         <div class="d-flex gap-2">
-            <!-- 목록 아이콘 (보더 제거됨) -->
             <a class="icon-btn"
                th:href="@{/trade/list}"
                title="목록" aria-label="목록"

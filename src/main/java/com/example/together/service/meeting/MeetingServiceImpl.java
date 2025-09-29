@@ -19,6 +19,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -148,6 +149,7 @@ public class MeetingServiceImpl implements MeetingService {
                 .user(user)
                 .meeting(meeting)
                 .joinStatus(MeetingJoinStatus.ACCEPTED)
+                .regDate(LocalDateTime.now())
                 .build();
 
         log.info("Applying user {} to meeting {}", user.getUserId(), meetingId);

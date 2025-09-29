@@ -2,6 +2,7 @@ package com.example.together.repository;
 
 import com.example.together.domain.CafeCategory;
 import com.example.together.domain.Meeting;
+import com.example.together.domain.MeetingJoinStatus;
 import com.example.together.domain.Visibility;
 import com.example.together.repository.search.MeetingSearch;
 import org.springframework.data.domain.Page;
