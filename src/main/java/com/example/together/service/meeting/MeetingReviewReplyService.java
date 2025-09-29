@@ -2,15 +2,18 @@ package com.example.together.service.meeting;
 
 import com.example.together.domain.MeetingReview;
 import com.example.together.domain.MeetingReviewReply;
+import com.example.together.domain.User;
 import com.example.together.dto.meeting.MeetingReviewReplyDTO;
 import com.example.together.repository.MeetingReviewReplyRepository;
 import com.example.together.repository.MeetingReviewRepository;
+import com.example.together.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.security.access.AccessDeniedException;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -19,8 +22,12 @@ import java.util.stream.Collectors;
 public class MeetingReviewReplyService {
     private final MeetingReviewReplyRepository replyRepository;
     private final MeetingReviewRepository reviewRepository; // 주입받을 필드 선언
+    private final UserRepository userRepository;
 
     public Long register(MeetingReviewReplyDTO replyDTO) {
+        User user = userRepository.findByUsername(replyDTO.getReplyer())
+                .orElseThrow(() -> new EntityNotFoundException("User not found: " + replyDTO.getReplyer()));
+
         // DTO에서 받은 reviewId를 사용해 MeetingReview 엔티티를 찾습니다.
         MeetingReview review = reviewRepository.findById(replyDTO.getReviewId())
                 .orElseThrow(() -> new EntityNotFoundException("Review not found with id: " + replyDTO.getReviewId()));
@@ -28,8 +35,8 @@ public class MeetingReviewReplyService {
         // DTO를 Entity로 변환하며, 찾은 review 엔티티를 설정합니다.
         MeetingReviewReply reply = MeetingReviewReply.builder()
                 .text(replyDTO.getText())
-                .replyer(replyDTO.getReplyer())
-                .review(review) // <<-- 이 부분이 가장 중요합니다!
+                .replyer(user)
+                .review(review)
                 .build();
 
         replyRepository.save(reply);
@@ -50,7 +57,7 @@ public class MeetingReviewReplyService {
                 .orElseThrow(() -> new EntityNotFoundException("Reply not found with id: " + replyDTO.getId()));
 
         String currentUserId = SecurityContextHolder.getContext().getAuthentication().getName();
-        if (!reply.getReplyer().equals(currentUserId)) {
+        if (!reply.getReplyer().getUserId().equals(currentUserId)) {  // User 객체에서 아이디를 꺼내서 비교
             throw new AccessDeniedException("You do not have permission to modify this reply.");
         }
 
@@ -63,8 +70,8 @@ public class MeetingReviewReplyService {
                 .orElseThrow(() -> new EntityNotFoundException("Reply not found with id: " + replyId));
 
         String currentUserId = SecurityContextHolder.getContext().getAuthentication().getName();
-        if (!reply.getReplyer().equals(currentUserId)) {
-            throw new AccessDeniedException("You do not have permission to delete this reply.");
+        if (!reply.getReplyer().getUserId().equals(currentUserId)) {  // User 객체에서 아이디를 꺼내서 비교
+            throw new AccessDeniedException("You do not have permission to modify this reply.");
         }
 
         replyRepository.deleteById(replyId);
@@ -72,11 +79,17 @@ public class MeetingReviewReplyService {
 
     // DTO를 Entity로 변환하는 헬퍼 메서드
     private MeetingReviewReply dtoToEntity(MeetingReviewReplyDTO dto) {
+        User user = userRepository.findByUsername(dto.getReplyer())
+                .orElseThrow(() -> new EntityNotFoundException("User not found: " + dto.getReplyer()));
+
+        MeetingReview review = reviewRepository.findById(dto.getReviewId())
+                .orElseThrow(() -> new EntityNotFoundException("Review not found: " + dto.getReviewId()));
+
         return MeetingReviewReply.builder()
                 .id(dto.getId())
                 .text(dto.getText())
-                .replyer(dto.getReplyer())
-                // 주의: 여기에 review 엔티티를 설정하는 로직이 필요합니다.
+                .replyer(user)
+                .review(review)
                 .build();
     }
 
@@ -85,7 +98,11 @@ public class MeetingReviewReplyService {
         return MeetingReviewReplyDTO.builder()
                 .id(entity.getId())
                 .text(entity.getText())
-                .replyer(entity.getReplyer())
+                .replyer(entity.getReplyer().getUserId())
+                .replyerNickname(entity.getReplyer().getNickname())
+                .reviewId(entity.getReview().getId())
+                .regDate(entity.getRegDate())
+                .modDate(entity.getModDate())
                 .build();
     }
 }

@@ -5,25 +5,22 @@
     <title th:text="${dto != null ? dto.title + ' 수정' : '수정'}">수정</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
+        /* register와 동일한 업로더/썸네일 스타일 */
         .uploader{border:1px dashed #c9c9c9;border-radius:10px;padding:16px;background:#fafafa;}
         .uploader.dragover{border-color:#0d6efd;background:#eef5ff;}
         .upload-tile{display:flex;align-items:center;justify-content:center;width:100%;height:140px;cursor:pointer;}
         .thumb-grid{display:flex;flex-wrap:wrap;gap:8px;}
         .thumb{position:relative;width:90px;height:90px;border:1px solid #eee;border-radius:8px;overflow:hidden;background:#fff;}
         .thumb img{width:100%;height:100%;object-fit:cover;}
-        .thumb .remove{position:absolute;right:4px;top:4px;width:22px;height:22px;border:none;border-radius:50%;background:#00000080;color:#fff;line-height:22px;text-align:center;}
+        .thumb .remove{position:absolute;right:4px;top:4px;width:22px;height:22px;border:none;border-radius:50%;background:#00000080;color:#fff;line-height:22px;text-align:center;cursor:pointer;}
         .badge-top{position:absolute;left:6px;top:6px;}
-        .old-grid{display:flex;gap:10px;flex-wrap:wrap;}
-        .old{position:relative;width:110px;}
-        .old img{width:110px;height:110px;object-fit:cover;border:1px solid #eee;border-radius:8px;}
-        .old .form-check{margin-top:6px;}
     </style>
 </head>
 <body>
 <!-- 공통 헤더 -->
 <div th:replace="~{/layout/header :: header}"></div>
 
-<main class="container py-4">
+<main class="container py-4" style="max-width:1100px;">
     <div class="d-flex align-items-center justify-content-between mb-3">
         <h3 class="mb-0" th:text="${dto.title}">수정</h3>
     </div>
@@ -56,11 +53,12 @@
 
                     <div class="mb-3">
                         <label class="form-label fw-semibold">카테고리</label>
-                        <select name="category" class="form-select" required>
-                            <option value="" hidden>카테고리 선택</option>
+                        <select id="categorySelect" name="category" class="form-select" required
+                                th:attr="data-current=${dto.category}">
+                            <option value="" th:selected="${dto.category == null}" disabled hidden>카테고리 선택</option>
                             <option th:each="cat : ${categories}"
                                     th:value="${cat}" th:text="${cat}"
-                                    th:selected="${#strings.equalsIgnoreCase(cat, dto.category)}"></option>
+                                    th:selected="${#strings.equalsIgnoreCase(#strings.trim(cat), #strings.trim(dto.category))}"></option>
                         </select>
                     </div>
 
@@ -81,7 +79,7 @@
                     <div class="mb-3">
                         <label class="form-label fw-semibold">내용</label>
                         <textarea name="description" rows="7" class="form-control" required
-                                  th:text="${dto.description}"></textarea>
+                                  th:text="${dto != null && dto.description != null ? dto.description : ''}"></textarea>
                     </div>
                 </div></div>
             </div>
@@ -89,30 +87,11 @@
             <!-- 우측: 이미지 -->
             <div class="col-12 col-lg-6">
                 <div class="card shadow-sm"><div class="card-body">
-                    <div class="mb-3">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <div class="fw-semibold">기존 이미지</div>
-                            <small class="text-muted">삭제할 이미지를 체크하세요</small>
-                        </div>
-
-                        <div class="old-grid" th:if="${!#lists.isEmpty(images)}">
-                            <div class="old" th:each="img : ${images}">
-                                <img th:src="${img.imageUrl}" alt="old" onerror="this.onerror=null;this.src='/images/no-image.png'">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="deleteImageIds"
-                                           th:value="${img.id}" id="del-[[${img.id}]]">
-                                    <label class="form-check-label" th:for="${'del-' + img.id}">삭제</label>
-                                </div>
-                            </div>
-                        </div>
-                        <div th:if="${#lists.isEmpty(images)}" class="text-muted">등록된 이미지가 없습니다.</div>
-                    </div>
-
-                    <hr/>
-
                     <div class="d-flex align-items-center justify-content-between mb-2">
-                        <div class="fw-semibold">새 이미지 추가</div>
-                        <div class="counter"><span id="count">0</span> / 10</div>
+                        <div class="fw-semibold">상품 이미지</div>
+                        <div class="counter">
+                            <span id="count" th:text="${images != null ? images.size() : 0}">0</span> / 10
+                        </div>
                     </div>
 
                     <div id="dropzone" class="uploader mb-3">
@@ -125,7 +104,18 @@
                         <input id="fileInput" name="images" type="file" accept="image/*" multiple class="visually-hidden">
                     </div>
 
-                    <div id="thumbs" class="thumb-grid"></div>
+                    <!-- 기존 이미지 -->
+                    <div id="thumbs" class="thumb-grid">
+                        <th:block th:if="${!#lists.isEmpty(images)}">
+                            <div class="thumb existing" th:each="img,stat : ${images}" th:attr="data-id=${img.id}">
+                                <img th:src="${img.imageUrl}" alt="old" onerror="this.onerror=null;this.src='/images/no-image.png'">
+                                <button type="button" class="remove" aria-label="삭제">&times;</button>
+                                <!-- 삭제 전달용(숨김) -->
+                                <input class="del-check visually-hidden" type="checkbox" name="deleteImageIds" th:value="${img.id}">
+                                <span class="badge text-bg-primary badge-top" th:if="${stat.index == 0}">대표</span>
+                            </div>
+                        </th:block>
+                    </div>
                 </div></div>
             </div>
         </div>
@@ -142,42 +132,162 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    (function(){
-        if (window.__tradeModifyInited) return; window.__tradeModifyInited = true;
-        const form=document.getElementById('modifyForm'), fileInput=document.getElementById('fileInput'),
-            dropzone=document.getElementById('dropzone'), thumbs=document.getElementById('thumbs'),
-            counter=document.getElementById('count');
-        if(!form||!fileInput||!dropzone||!thumbs) return;
-
-        let filesBuffer=[];
-        document.addEventListener('click', (e)=>{ if(e.target.closest('#uploadTile')){ e.preventDefault(); fileInput.click(); }});
-        ['dragenter','dragover'].forEach(evt=> dropzone.addEventListener(evt, e=>{e.preventDefault();e.stopPropagation();dropzone.classList.add('dragover');}));
-        ['dragleave','drop'].forEach(evt=> dropzone.addEventListener(evt, e=>{e.preventDefault();e.stopPropagation();dropzone.classList.remove('dragover');}));
-        dropzone.addEventListener('drop', e=> addFiles(Array.from(e.dataTransfer?.files||[])));
-        fileInput.addEventListener('change', e=>{ addFiles(Array.from(e.target.files||[])); if(window.DataTransfer) fileInput.value=''; });
-
-        function addFiles(incoming){
-            if(!incoming.length) return;
-            const images=incoming.filter(f=>f.type.startsWith('image/'));
-            const room=Math.max(0,10-filesBuffer.length);
-            const toAdd=images.slice(0,room);
-            if(images.length>room) alert('최대 10장까지만 등록 가능합니다.');
-            filesBuffer.push(...toAdd); renderThumbs(); if(window.DataTransfer) syncToInput();
+    (function () {
+        // ===== 카테고리 강제 선택 =====
+        const CAT_LABEL = {
+            ART:'예술', COOK:'요리', MUSIC:'음악', PET:'반려동물',
+            SPORTS:'스포츠', STUDY:'스터디', TRAVEL:'여행'
+        };
+        const lower = (s)=> (s||'').trim().toLowerCase();
+        function forceSelectCategory(select){
+            if (!select) return;
+            const fromEnum  = (select.dataset.currentEnum || select.getAttribute('data-current') || '').trim();
+            if (!fromEnum) return;
+            const asLabel = CAT_LABEL[fromEnum] || fromEnum;
+            const opts = Array.from(select.options);
+            let target =
+                opts.find(o => lower(o.value) === lower(fromEnum))  ||
+                opts.find(o => lower(o.text)  === lower(fromEnum))  ||
+                opts.find(o => lower(o.value) === lower(asLabel))   ||
+                opts.find(o => lower(o.text)  === lower(asLabel));
+            if (target) select.value = target.value;
         }
-        function removeAt(i){ filesBuffer.splice(i,1); renderThumbs(); if(window.DataTransfer) syncToInput(); }
-        function renderThumbs(){
-            thumbs.innerHTML=''; if(counter) counter.textContent=String(filesBuffer.length);
-            filesBuffer.forEach((file,i)=>{
-                const url=URL.createObjectURL(file);
-                const wrap=document.createElement('div'); wrap.className='thumb';
-                const img=document.createElement('img'); img.src=url; img.alt='preview';
-                if(i===0){ const badge=document.createElement('span'); badge.className='badge text-bg-primary badge-top'; badge.textContent='대표'; wrap.appendChild(badge); }
-                const btn=document.createElement('button'); btn.type='button'; btn.className='remove'; btn.innerHTML='&times;'; btn.addEventListener('click',()=>removeAt(i));
-                wrap.appendChild(img); wrap.appendChild(btn); thumbs.appendChild(wrap);
+
+        function ensureCategorySelected(form) {
+            const sel = form.querySelector('#categorySelect');
+            if (!sel) return true;
+            if (!sel.value || !sel.value.trim()) {
+                alert('카테고리를 설정해 주세요.');
+                sel.focus();
+                return false;
+            }
+            return true;
+        }
+
+        // ===== 이미지 관리 =====
+        const form     = document.getElementById('modifyForm');
+        const sel      = document.getElementById('categorySelect');
+        const fileInput= document.getElementById('fileInput');
+        const dropzone = document.getElementById('dropzone');
+        const thumbs   = document.getElementById('thumbs');
+        const counter  = document.getElementById('count');
+
+        forceSelectCategory(sel);
+
+        // 현재 DOM에 남아있는 기존 썸네일 수
+        function currentExistingCount(){
+            return thumbs ? thumbs.querySelectorAll('.thumb.existing').length : 0;
+        }
+        // 전체(기존+신규)
+        let filesBuffer = [];
+        function currentTotalCount(){
+            return currentExistingCount() + filesBuffer.length;
+        }
+        function updateCount(){
+            if (counter) counter.textContent = String(currentTotalCount());
+        }
+
+        // 대표 배지: 남아있는 첫 타일에만 '대표'
+        function updateBadge(){
+            if (!thumbs) return;
+            thumbs.querySelectorAll('.badge-top').forEach(b=>b.remove());
+            const first = thumbs.querySelector('.thumb');
+            if (first){
+                const badge = document.createElement('span');
+                badge.className = 'badge text-bg-primary badge-top';
+                badge.textContent = '대표';
+                first.appendChild(badge);
+            }
+        }
+
+        // ── ✅ 기존 이미지 즉시 삭제(뷰에서 제거 + 전송 유지) ──
+        function removeExistingTile(tile){
+            if (!tile) return;
+            const chk = tile.querySelector('.del-check');
+            if (chk) {
+                chk.checked = true;     // 서버로 삭제 의사 전달
+                form.appendChild(chk);  // 썸네일을 지워도 submit에 포함되도록 폼으로 이동
+            }
+            tile.remove();              // 화면에서 즉시 제거
+            updateBadge();
+            updateCount();
+        }
+
+        function bindExistingThumbEvents(){
+            thumbs?.querySelectorAll('.thumb.existing').forEach(tile=>{
+                const img = tile.querySelector('img');
+                const btn = tile.querySelector('.remove');
+                img?.addEventListener('click', ()=> removeExistingTile(tile));
+                btn?.addEventListener('click', ()=> removeExistingTile(tile));
             });
         }
-        form.addEventListener('submit', ()=>{ if(window.DataTransfer) syncToInput(); });
-        function syncToInput(){ if(typeof DataTransfer==='undefined') return; const dt=new DataTransfer(); filesBuffer.forEach(f=>dt.items.add(f)); fileInput.files=dt.files; }
+        bindExistingThumbEvents();
+
+        // ── 신규 업로드 ──
+        function renderNewThumbs(){
+            if (!thumbs) return;
+            // 기존 new 타일 제거 후 재생성
+            thumbs.querySelectorAll('.thumb.new').forEach(n=>n.remove());
+            filesBuffer.forEach((file)=>{
+                const url = URL.createObjectURL(file);
+                const tile = document.createElement('div'); tile.className='thumb new';
+                const img  = document.createElement('img');  img.src=url; img.alt='preview';
+                const btn  = document.createElement('button'); btn.type='button'; btn.className='remove'; btn.innerHTML='&times;';
+                btn.addEventListener('click', ()=>{
+                    const allNew = Array.from(thumbs.querySelectorAll('.thumb.new'));
+                    const idx = allNew.indexOf(tile);
+                    if (idx > -1) filesBuffer.splice(idx,1);
+                    tile.remove();
+                    updateBadge(); updateCount(); syncToInput();
+                });
+                tile.appendChild(img); tile.appendChild(btn);
+                thumbs.appendChild(tile);
+            });
+        }
+
+        function syncToInput(){
+            if (!fileInput || typeof DataTransfer==='undefined') return;
+            const dt = new DataTransfer();
+            filesBuffer.forEach(f=>dt.items.add(f));
+            fileInput.files = dt.files;
+        }
+
+        // 업로더 이벤트
+        function addFiles(incoming){
+            if (!incoming?.length) return;
+            const images = incoming.filter(f=> f.type?.startsWith('image/'));
+            const room   = Math.max(0, 10 - currentTotalCount());
+            const toAdd  = images.slice(0, room);
+            if (images.length > room) alert('최대 10장까지만 등록 가능합니다.');
+            filesBuffer.push(...toAdd);
+            renderNewThumbs(); updateBadge(); updateCount(); syncToInput();
+        }
+
+        if (dropzone && fileInput){
+            document.addEventListener('click', e=>{
+                if (e.target.closest('#uploadTile')) { e.preventDefault(); fileInput.click(); }
+            });
+            ['dragenter','dragover'].forEach(evt=> dropzone.addEventListener(evt, e=>{
+                e.preventDefault(); e.stopPropagation(); dropzone.classList.add('dragover');
+            }));
+            ['dragleave','drop'].forEach(evt=> dropzone.addEventListener(evt, e=>{
+                e.preventDefault(); e.stopPropagation(); dropzone.classList.remove('dragover');
+            }));
+            dropzone.addEventListener('drop', e=> addFiles(Array.from(e.dataTransfer?.files||[])));
+            fileInput.addEventListener('change', e=>{
+                addFiles(Array.from(e.target.files||[]));
+                if (window.DataTransfer) fileInput.value='';
+            });
+        }
+
+        // 초기 상태 보정
+        updateBadge(); updateCount();
+
+        // 제출 전 필수 체크 + 파일 동기화
+        form?.addEventListener('submit', (e)=>{
+            if (!ensureCategorySelected(form)) { e.preventDefault(); e.stopPropagation(); return; }
+            syncToInput();
+        });
     })();
 </script>
 </body>

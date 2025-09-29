@@ -5,15 +5,87 @@
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <title>내 채팅</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+
+    <!-- 레이아웃 대비용 CSRF -->
+    <meta name="_csrf" th:content="${_csrf.token}">
+    <meta name="_csrf_header" th:content="${_csrf.headerName}">
 
     <style>
-        :root{ --line:#e9edf3; --muted:#6c757d; }
-        .chatlist-wrap{ max-width: 960px; margin: 0 auto; }
-        .room-card{ border:1px solid var(--line); border-radius:14px; padding:12px; background:#fff; }
-        .thumb{ width: 92px; height: 92px; border-radius:12px; object-fit:cover; border:1px solid var(--line); background:#f8f9fa; }
-        .title{ font-weight:600; margin-bottom:2px; }
-        .preview{ color:var(--muted); font-size:.9rem; }
-        .right small{ color:var(--muted); }
+        :root{
+            --line:#e9edf3;
+            --muted:#6c757d;
+        }
+        .chatlist-wrap{
+            max-width: 960px;
+            margin: 0 auto;
+        }
+        .room-card{
+            border:1px solid var(--line);
+            border-radius:14px;
+            padding:12px;
+            background:#fff;
+            position:relative;
+            cursor:pointer;
+        }
+        .room-card:hover{
+            box-shadow:0 6px 14px rgba(0,0,0,.06);
+        }
+        .thumb{
+            width: 92px; height: 92px;
+            border-radius:12px;
+            object-fit:cover;
+            border:1px solid var(--line);
+            background:#f8f9fa;
+        }
+        .title{
+            font-weight:600;
+            margin-bottom:2px;
+        }
+        .preview{
+            color:var(--muted);
+            font-size:.9rem;
+        }
+        .right small{
+            color:var(--muted);
+            display:block;
+        }
+
+        .action-wrap{
+            opacity:.6;
+            transition:.15s;
+        }
+        .room-card:hover .action-wrap{
+            opacity:1;
+        }
+
+        /* ‘목록’ 아이콘 전용: 보더 제거 */
+        .icon-btn{
+            width:44px;
+            height:44px;
+            padding:0;
+            border-radius:10px;
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            border:none;
+            background:transparent;
+            color:#6c757d;
+            text-decoration:none;
+            transition:.15s;
+        }
+        .icon-btn:hover{
+            color:#0d6efd;
+            background:#f5f9ff;
+        }
+        .icon-btn:focus {
+            outline:none;
+            box-shadow:0 0 0 .2rem rgba(13,110,253,.15);
+        }
+        .icon-btn svg{
+            width:27px;
+            height:27px;
+        }
     </style>
 </head>
 <body>
@@ -23,7 +95,14 @@
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h4 class="mb-0">내 채팅</h4>
         <div class="d-flex gap-2">
-            <a class="btn btn-sm btn-outline-secondary" th:href="@{/trade/list}">상품목록</a>
+            <a class="icon-btn"
+               th:href="@{/trade/list}"
+               title="목록" aria-label="목록"
+               data-bs-toggle="tooltip" data-bs-placement="bottom">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-list" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5"/>
+                </svg>
+            </a>
         </div>
     </div>
 
@@ -32,9 +111,9 @@
     </div>
 
     <div class="vstack gap-2" th:if="${!#lists.isEmpty(items)}">
-        <a class="room-card d-flex align-items-center gap-3 text-decoration-none text-reset"
-           th:each="it : ${items}"
-           th:href="@{'/chat/room/' + ${it.roomId}}">
+        <div class="room-card d-flex align-items-center gap-3"
+             th:each="it : ${items}"
+             th:attr="data-room-id=${it.roomId}">
             <img class="thumb"
                  th:with="noImg=@{/images/no-image.png}"
                  th:src="${it.thumbnail != null && !#strings.isEmpty(it.thumbnail) ? it.thumbnail : noImg}"
@@ -54,14 +133,143 @@
                 </div>
             </div>
 
-            <div class="right text-end">
+            <div class="right text-end d-flex align-items-center gap-2">
                 <small th:text="${#temporals.format(it.lastTime, 'yyyy.MM.dd HH:mm')}">날짜</small>
+
+                <div class="action-wrap">
+                    <div class="dropdown">
+                        <button class="btn btn-light border" style="width:34px;height:34px;border-radius:10px;"
+                                type="button"
+                                data-bs-toggle="dropdown"
+                                aria-expanded="false"
+                                aria-label="메뉴"
+                                onclick="event.stopPropagation();">
+                            <i class="fa-solid fa-ellipsis-vertical"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end" onclick="event.stopPropagation();">
+                            <li>
+                                <a class="dropdown-item text-danger"
+                                   href="#"
+                                   th:attr="data-room-id=${it.roomId}, data-title=${it.tradeTitle}"
+                                   onclick="event.preventDefault(); event.stopPropagation(); askDelete(this);">
+                                    <i class="fa-regular fa-trash-can me-2"></i>삭제
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
             </div>
-        </a>
+        </div><!-- /room-card -->
     </div>
 </div>
 
+<!-- 삭제 확인 모달 -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">채팅방 삭제</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="닫기"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-1">선택한 채팅방을 삭제할까요?</div>
+                <small class="text-muted">대화 내용도 함께 삭제됩니다.</small>
+                <div class="mt-2 fw-semibold" id="deleteRoomTitle"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">취소</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">삭제</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 성공 토스트 -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <div id="okToast" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body">삭제되었습니다.</div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="닫기"></button>
+        </div>
+    </div>
+</div>
+
+<th:block th:if="${_csrf != null}">
+    <input type="hidden" id="csrfName"  th:value="${_csrf.headerName}">
+    <input type="hidden" id="csrfToken" th:value="${_csrf.token}">
+</th:block>
+
 <div th:replace="~{/layout/footer :: footer}"></div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Tooltip init
+    (function(){
+        if (window.bootstrap) {
+            document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function(el){
+                try{ new bootstrap.Tooltip(el); }catch(e){}
+            });
+        }
+    })();
+
+    // 카드 클릭 → 방 이동
+    document.addEventListener('click', (e)=>{
+        const card = e.target.closest('.room-card');
+        if (!card) return;
+        const roomId = card.getAttribute('data-room-id');
+        if (!roomId) return;
+        location.href = `/chat/room/${roomId}`;
+    });
+
+    const deleteModalEl = document.getElementById('deleteModal');
+    const deleteModal = deleteModalEl ? new bootstrap.Modal(deleteModalEl) : null;
+    const okToast = document.getElementById('okToast') ? new bootstrap.Toast(document.getElementById('okToast')) : null;
+
+    let targetRoomId = null;
+    function askDelete(a){
+        targetRoomId = a.getAttribute('data-room-id');
+        const title = a.getAttribute('data-title') || '';
+        document.getElementById('deleteRoomTitle').textContent = title ? `『${title}』` : '';
+        deleteModal?.show();
+    }
+
+    function getCsrf(){
+        const metaHeader = document.querySelector('meta[name="_csrf_header"]')?.content;
+        const metaToken  = document.querySelector('meta[name="_csrf"]')?.content;
+        const hiddenHeader = document.getElementById('csrfName')?.value;
+        const hiddenToken  = document.getElementById('csrfToken')?.value;
+        return { name: metaHeader || hiddenHeader, value: metaToken || hiddenToken };
+    }
+
+    async function doDelete(roomId){
+        const {name, value} = getCsrf();
+        const headers = {'Content-Type':'application/x-www-form-urlencoded'};
+        if (name && value) headers[name] = value;
+        return fetch(`/chat/room/${roomId}/delete`, { method:'POST', headers, credentials:'same-origin' });
+    }
+
+    document.getElementById('confirmDeleteBtn')?.addEventListener('click', async ()=>{
+        if (!targetRoomId) return;
+        try{
+            const res = await doDelete(targetRoomId);
+            if (res.ok){
+                const card = document.querySelector(`.room-card[data-room-id="${targetRoomId}"]`);
+                if (card) card.remove();
+                deleteModal?.hide();
+                okToast?.show();
+            }else if (res.status === 401){
+                alert('로그인이 필요합니다.');
+            }else if (res.status === 403){
+                alert('삭제 권한이 없습니다.');
+            }else{
+                alert('삭제 중 오류가 발생했습니다.');
+            }
+        }catch(e){
+            console.error(e);
+            alert('삭제 중 오류가 발생했습니다.');
+        }finally{
+            targetRoomId = null;
+        }
+    });
+</script>
 </body>
 </html>

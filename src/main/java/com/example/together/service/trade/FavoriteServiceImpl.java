@@ -38,14 +38,13 @@ public class FavoriteServiceImpl implements FavoriteService {
     var existing = favoriteRepository.findByTrade_IdAndUser_Id(tradeId, userId).orElse(null);
     if (existing != null) {
       favoriteRepository.delete(existing);
-      return false; // 찜 해제
+      return false;
     }
-    // 연관관계로 설정해서 저장
     var fav = new Favorite();
     fav.setTrade(tradeRepository.getReferenceById(tradeId));
     fav.setUser(userRepository.getReferenceById(userId));
     favoriteRepository.save(fav);
-    return true; // 찜 추가
+    return true;
   }
 
   @Override
@@ -63,5 +62,19 @@ public class FavoriteServiceImpl implements FavoriteService {
         .map(User::getId)
         .map(favoriteRepository::findByUser_Id)
         .orElseGet(Collections::emptyList);
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public List<FavoriteRepository.CountProj> countByTradeIds(List<Long> tradeIds) {
+    if (tradeIds == null || tradeIds.isEmpty()) return Collections.emptyList();
+    return favoriteRepository.countByTradeIds(tradeIds);
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public List<FavoriteRepository.FavoriteItemView> listItemViewsByUser(Long userId) {
+    if (userId == null) return Collections.emptyList();
+    return favoriteRepository.findItemViewsByUserId(userId);
   }
 }

@@ -7,6 +7,7 @@ import com.example.together.dto.cafe.CafeResponseDTO;
 import com.example.together.dto.meeting.MeetingDTO;
 import com.example.together.dto.trade.TradeDTO;
 import com.example.together.repository.CafeRepository;
+import com.example.together.repository.search.CafeSearch;
 import com.example.together.repository.MeetingRepository;
 import com.example.together.repository.TradeRepository;
 import lombok.RequiredArgsConstructor;
@@ -30,15 +31,27 @@ public class CategoryService {
 
     // -------------------- Meeting --------------------
     public PageResponseDTO<MeetingDTO> getMeetings(String category, PageRequestDTO pageRequestDTO) {
-        Pageable pageable = pageRequestDTO.getPageable("regDate"); // 정렬 기준 regDate
-
+        Pageable pageable = pageRequestDTO.getPageable("regDate");
         Page<Meeting> meetingPage;
-        if ("ALL".equalsIgnoreCase(category)) {
-            meetingPage = meetingRepository.findByVisibilityWithCafeAndUser(Visibility.PUBLIC, pageable);
+
+        if (pageRequestDTO.getKeyword() != null && !pageRequestDTO.getKeyword().isEmpty()) {
+            if ("ALL".equalsIgnoreCase(category)) {
+                // 새로운 Repository 메소드 호출: 카테고리 관계없이 검색
+                meetingPage = meetingRepository.findByVisibilityAndSearch(Visibility.PUBLIC, pageRequestDTO.getType(), pageRequestDTO.getKeyword(), pageable);
+            } else {
+                CafeCategory cafeCategory = CafeCategory.valueOf(category.toUpperCase());
+                // 새로운 Repository 메소드 호출: 특정 카테고리 내에서 검색
+                meetingPage = meetingRepository.findByCategoryAndVisibilityAndSearch(cafeCategory, Visibility.PUBLIC, pageRequestDTO.getType(), pageRequestDTO.getKeyword(), pageable);
+            }
         } else {
-            CafeCategory cafeCategory = CafeCategory.valueOf(category.toUpperCase());
-            meetingPage = meetingRepository.findByCafeCategoryAndVisibilityWithCafeAndUser(cafeCategory, Visibility.PUBLIC, pageable);
+            if ("ALL".equalsIgnoreCase(category)) {
+                meetingPage = meetingRepository.findByVisibilityWithCafeAndUser(Visibility.PUBLIC, pageable);
+            } else {
+                CafeCategory cafeCategory = CafeCategory.valueOf(category.toUpperCase());
+                meetingPage = meetingRepository.findByCafeCategoryAndVisibilityWithCafeAndUser(cafeCategory, Visibility.PUBLIC, pageable);
+            }
         }
+
         List<MeetingDTO> dtoList = meetingPage.stream()
                 .map(MeetingDTO::fromEntity)
                 .toList();
@@ -50,16 +63,28 @@ public class CategoryService {
                 .build();
     }
 
+
     // -------------------- Cafe --------------------
     public PageResponseDTO<CafeResponseDTO> getCafes(String category, PageRequestDTO pageRequestDTO) {
         Pageable pageable = pageRequestDTO.getPageable("regDate");
-
         Page<Cafe> cafePage;
-        if ("ALL".equalsIgnoreCase(category)) {
-            cafePage = cafeRepository.findAll(pageable);
-        } else {
-            CafeCategory cafeCategory = CafeCategory.valueOf(category.toUpperCase());
-            cafePage = cafeRepository.findPageByCategory(cafeCategory, pageable);
+
+        if (pageRequestDTO.getKeyword() != null && !pageRequestDTO.getKeyword().isEmpty()) {
+            if ("ALL".equalsIgnoreCase(category)) {
+                // 새로운 Repository 메소드 호출: 카테고리 관계없이 검색
+                cafePage = cafeRepository.findBySearch(pageRequestDTO.getType(), pageRequestDTO.getKeyword(), pageable);
+            } else {
+                CafeCategory cafeCategory = CafeCategory.valueOf(category.toUpperCase());
+                // 새로운 Repository 메소드 호출: 특정 카테고리 내에서 검색
+                cafePage = cafeRepository.findByCategoryAndSearch(cafeCategory, pageRequestDTO.getType(), pageRequestDTO.getKeyword(), pageable);
+            }
+        } else { // 💡 검색 조건이 없는 경우
+            if ("ALL".equalsIgnoreCase(category)) {
+                cafePage = cafeRepository.findAll(pageable);
+            } else {
+                CafeCategory cafeCategory = CafeCategory.valueOf(category.toUpperCase());
+                cafePage = cafeRepository.findPageByCategory(cafeCategory, pageable);
+            }
         }
 
         List<CafeResponseDTO> dtoList = cafePage.stream()
@@ -76,24 +101,26 @@ public class CategoryService {
     // -------------------- Trade --------------------
     public PageResponseDTO<TradeDTO> getTrades(String category, PageRequestDTO pageRequestDTO) {
         Pageable pageable = pageRequestDTO.getPageable("regdate");
-
         Page<Trade> tradePage;
-        if ("ALL".equalsIgnoreCase(category)) {
-            tradePage = tradeRepository.findAll(pageable);
-        } else {
+
+        if (pageRequestDTO.getKeyword() != null && !pageRequestDTO.getKeyword().isEmpty()) {
             TradeCategory tradeCategory = mapLabelToEnum(category);
-
-            if (tradeCategory == null) {
-                // 유효하지 않은 카테고리가 들어왔거나 매핑에 실패한 경우
-                // 빈 페이지 목록을 반환하여 서버 에러(IllegalArgumentException)를 방지합니다.
-                return PageResponseDTO.<TradeDTO>withAll()
-                        .pageRequestDTO(pageRequestDTO)
-                        .dtoList(Collections.emptyList())
-                        .total(0)
-                        .build();
+            // 새로운 Repository 메소드 호출
+            tradePage = tradeRepository.findByCategoryAndSearch(tradeCategory, pageRequestDTO.getType(), pageRequestDTO.getKeyword(), pageable);
+        } else { // 💡 검색 조건이 없는 경우
+            if ("ALL".equalsIgnoreCase(category)) {
+                tradePage = tradeRepository.findAll(pageable);
+            } else {
+                TradeCategory tradeCategory = mapLabelToEnum(category);
+                if (tradeCategory == null) {
+                    return PageResponseDTO.<TradeDTO>withAll()
+                            .pageRequestDTO(pageRequestDTO)
+                            .dtoList(Collections.emptyList())
+                            .total(0)
+                            .build();
+                }
+                tradePage = tradeRepository.findByCategory(tradeCategory, pageable);
             }
-
-            tradePage = tradeRepository.findByCategory(tradeCategory, pageable);
         }
 
         List<TradeDTO> dtoList = tradePage.stream()
@@ -121,13 +148,13 @@ public class CategoryService {
         try {
             return switch (t) {
                 // TradeController의 mapLabelToEnum 로직을 그대로 사용
-                case "운동"     -> TradeCategory.valueOf("SPORTS");
+                case "스포츠"     -> TradeCategory.valueOf("SPORTS");
                 case "예술"     -> TradeCategory.valueOf("ART");
                 case "음악"     -> TradeCategory.valueOf("MUSIC");
-                case "반려동물" -> TradeCategory.valueOf("PETS"); // 팀원 코드를 따라 PETS 사용
-                case "수집"     -> TradeCategory.valueOf("COLLECTION");
-                case "언어"     -> TradeCategory.valueOf("LANGUAGE");
-                case "요리"     -> TradeCategory.valueOf("COOKING");
+                case "반려동물" -> TradeCategory.valueOf("PET");
+                case "요리"     -> TradeCategory.valueOf("COOK");
+                case "스터디"     -> TradeCategory.valueOf("STUDY");
+                case "여행"     -> TradeCategory.valueOf("TRAVEL");
                 default -> null;
             };
         } catch (Exception e) {
