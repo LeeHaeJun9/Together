@@ -161,6 +161,7 @@ public class MeetingController {
             isJoinedUser = meetingUserService.isUserJoined(id, userId);
         }
         model.addAttribute("isJoinedUser", isJoinedUser);
+        model.addAttribute("applicantCount", meetingUser.size());
 
         CafeResponseDTO cafeResponse;
         if (user != null) {

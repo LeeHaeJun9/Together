@@ -33,6 +33,12 @@
         .participant-table th:nth-child(2) { width: 25%; }
         .participant-table th:nth-child(3) { width: 20%; }
         .participant-table th:nth-child(4) { width: 20%; }
+
+        /* 리스트 아이콘 버튼 */
+        .icon-btn{ display:inline-flex; align-items:center; justify-content:center; width:44px; height:44px; border-radius:10px; border:none;
+            background:transparent; color:#6c757d; transition:.15s; }
+        .icon-btn:hover{ color:#0d6efd; background:#f5f9ff; }
+        .icon-btn svg{ width:22px; height:22px; }
     </style>
 </head>
 
@@ -43,8 +49,11 @@
 <main>
     <div class="container">
         <div class="d-flex justify-content-between align-items-center mb-4" th:with="link = ${pageRequestDTO.getLink()}">
-            <a th:href="@{/cafe/{cafeId}/meeting/review/list(cafeId=${cafeResponse.id}, page=${pageRequestDTO.page}, type=${pageRequestDTO.type}, keyword=${pageRequestDTO.keyword})}"
-               class="btn btn-custom-secondary">목록으로
+            <a class="icon-btn btn btn-custom-secondary" title="목록" aria-label="목록"
+               th:href="@{/cafe/{cafeId}/meeting/review/list(cafeId=${cafeResponse.id}, page=${pageRequestDTO.page}, type=${pageRequestDTO.type}, keyword=${pageRequestDTO.keyword})}">
+                <svg xmlns="http://www.w3.org/2000/svg" class="bi bi-list" viewBox="0 0 16 16" aria-hidden="true">
+                    <path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5"/>
+                </svg>
             </a>
             <div class="post-actions">
                 <a th:if="${#authentication.principal != null and #authentication.principal.username == dto.reviewerUserId}"
@@ -81,6 +90,7 @@
                     <span th:text="'장소 : ' + ${dto.meetingLocation}">모임 장소</span><br>
                     <span th:text="'상세 주소 : ' + ${dto.meetingAddress}">상세 주소</span>
                 </div>
+                <br>
                 <p th:text="${dto.content}">게시글 내용</p>
             </div>
 
@@ -167,17 +177,18 @@
                     ` : '';
 
                     const replyHtml = `
-                        <div class="comment-item"></div>
-                            <p class="mb-1">${reply.text}</p>
-                            <div class="comment d-flex justify-content-between align-items-center border-bottom py-2">
+                     <div class="comment-item">
+                         <p class="mb-1">${reply.text}</p>
+                         <div class="comment-meta d-flex justify-content-between align-items-center">
                                 <div>
                                     <span>${reply.replyerNickname}</span> |
                                     <span>${formatDate(reply.regDate)}</span>
                                 </div>
-                            <div class="d-flex" data-reply-id="${reply.id}">
-                                ${controlsHtml}
-                            </div>
-                        </div>
+                                <div class="d-flex " data-reply-id="${reply.id}">
+                                    ${controlsHtml}
+                                </div>
+                         </div>
+                     </div>
                     `;
                     replyListDiv.insertAdjacentHTML('beforeend', replyHtml);
                 });

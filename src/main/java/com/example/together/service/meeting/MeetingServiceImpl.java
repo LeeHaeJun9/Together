@@ -77,6 +77,13 @@ public class MeetingServiceImpl implements MeetingService {
         Optional<Meeting> result = meetingRepository.findById(id);
         Meeting meeting = result.orElseThrow(() -> new IllegalArgumentException("Meeting not found with ID: " + id));
         // 엔티티를 DTO로 직접 변환하는 헬퍼 메서드 사용
+
+        if (meeting.getMeetingDate().isBefore(LocalDateTime.now())
+                && meeting.getRecruiting() != RecruitingStatus.END) {
+            meeting.setRecruiting(RecruitingStatus.END);
+            meetingRepository.save(meeting);
+        }
+
         return entityToDto(meeting);
     }
 
@@ -106,6 +113,7 @@ public class MeetingServiceImpl implements MeetingService {
 
         calendarEntry.ifPresent(cafeCalendarRepository::delete);
 
+        meetingUserRepository.deleteByMeetingId(id);
         meetingRepository.deleteById(id);
     }
 
@@ -118,8 +126,20 @@ public class MeetingServiceImpl implements MeetingService {
         Page<Meeting> result = meetingRepository.searchAll(types, keyword, pageable);
 
         // 엔티티 리스트를 DTO 리스트로 직접 변환합니다.
+//        List<MeetingDTO> dtoList = result.getContent().stream()
+//                .map(this::entityToDto).collect(Collectors.toList());
+
         List<MeetingDTO> dtoList = result.getContent().stream()
-                .map(this::entityToDto).collect(Collectors.toList());
+                .map(meeting -> {
+                    // ✅ 마감 처리
+                    if (meeting.getMeetingDate().isBefore(LocalDateTime.now())
+                            && meeting.getRecruiting() != RecruitingStatus.END) {
+                        meeting.setRecruiting(RecruitingStatus.END);
+                        meetingRepository.save(meeting);
+                    }
+                    return entityToDto(meeting);
+                })
+                .collect(Collectors.toList());
 
         return PageResponseDTO.<MeetingDTO>withAll()
                 .pageRequestDTO(pageRequestDTO)

@@ -50,4 +50,5 @@ public class MeetingReviewDTO {
     private CafeResponseDTO cafe;
     private String cafeName;
     private Long cafeId;
+    private String category;
 }
