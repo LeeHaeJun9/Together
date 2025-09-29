@@ -33,7 +33,7 @@ a{text-decoration:none;color:inherit;}
 .container{max-width:1200px;margin:0 auto;padding:0 1rem;}
 
 /* ---------- HERO ---------- */
-.hero-section{padding:3rem 1rem 2rem;}
+.hero-section{padding:3rem 1rem 0;}
 .hero-content{
     display:grid!important;
     grid-template-columns:1fr var(--hero-img-col-desktop);
@@ -187,3 +187,4 @@ main section.container{margin-top:3rem;margin-bottom:6rem;}
 /* ---- 인기 중고거래: 제목과 카드 사이 간격 축소 ---- */
 .trade-section .section-title{margin-bottom:.5rem;}     /* 기본 1.1rem → 0.5rem */
 .trade-section .slider-container{padding-top:.6rem;}    /* 기본 2rem → 0.6rem */
+
