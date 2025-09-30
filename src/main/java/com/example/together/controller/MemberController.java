@@ -329,13 +329,17 @@ public class MemberController {
     }
 
     // 아이디 찾기 요청 처리
+
     @PostMapping("/member/findId")
     @ResponseBody
-    public Map<String, Object> findId(@RequestParam("name") String name,
-                                      @RequestParam("email") String email) {
+    public Map<String, Object> findId(@RequestBody Map<String, String> request) { // 👈 이 부분을 수정하세요.
         Map<String, Object> response = new HashMap<>();
 
         try {
+            // request 맵에서 name과 email 값을 꺼냅니다.
+            String name = request.get("name");
+            String email = request.get("email");
+
             log.info("아이디 찾기 요청: name = {}, email = {}", name, email);
 
             String userId = userService.findUserIdByNameAndEmail(name, email);
