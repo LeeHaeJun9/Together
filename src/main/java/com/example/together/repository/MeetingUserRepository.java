@@ -19,18 +19,22 @@ public interface MeetingUserRepository extends JpaRepository<MeetingUser,Long> {
     boolean existsByMeetingIdAndUserIdAndJoinStatus(Long meetingId, Long userId, MeetingJoinStatus joinStatus);
 
     List<MeetingUser> findByUserIdAndJoinStatus(Long userId, MeetingJoinStatus joinStatus);
+    void deleteByMeetingId(Long meetingId);
 
-    // 예정된 모임 리스트
+    // 예정된 모임 리스트 (최신순 정렬 추가)
     @Query("SELECT mu.meeting FROM MeetingUser mu " +
             "WHERE mu.user.id = :userId " +
             "AND mu.joinStatus = 'ACCEPTED' " +
-            "AND mu.meeting.meetingDate > CURRENT_TIMESTAMP")
+            "AND mu.meeting.meetingDate > CURRENT_TIMESTAMP " +
+            "ORDER BY mu.meeting.meetingDate DESC")
     List<Meeting> findUpcomingMeetingsByUserId(Long userId);
 
-    // 완료된 모임 리스트
+    // 완료된 모임 리스트 (최신순 정렬 추가)
     @Query("SELECT mu.meeting FROM MeetingUser mu " +
             "WHERE mu.user.id = :userId " +
             "AND mu.joinStatus = 'ACCEPTED' " +
-            "AND mu.meeting.meetingDate <= CURRENT_TIMESTAMP")
+            "AND mu.meeting.meetingDate <= CURRENT_TIMESTAMP " +
+            "ORDER BY mu.meeting.meetingDate DESC")
     List<Meeting> findCompletedMeetingsByUserId(Long userId);
+
 }

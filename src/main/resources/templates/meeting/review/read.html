@@ -10,12 +10,45 @@
     <meta name="_csrf" th:content="${_csrf.token}"/>
     <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
     <style>
+
         .participant-table{width:100%;border-collapse:collapse;table-layout:fixed;text-align:center;}
         .participant-table th,.participant-table td{padding:8px 12px;text-align:center;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;border-bottom:1px solid #ddd;}
         .participant-table th:nth-child(1){width:10%;}
         .participant-table th:nth-child(2){width:25%;}
         .participant-table th:nth-child(3){width:20%;}
         .participant-table th:nth-child(4){width:20%;}
+
+        .participant-table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+            text-align: center;
+        }
+        .participant-table th,
+        .participant-table td {
+            padding: 8px 12px;
+            text-align: center;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            border-bottom: 1px solid #ddd;
+        }
+        .participant-table th:nth-child(1) { width: 10%; }
+        .participant-table th:nth-child(2) { width: 25%; }
+        .participant-table th:nth-child(3) { width: 20%; }
+        .participant-table th:nth-child(4) { width: 20%; }
+
+        /* 리스트 아이콘 버튼 */
+        .icon-btn{ display:inline-flex; align-items:center; justify-content:center; width:44px; height:44px; border-radius:10px; border:none;
+            background:transparent; color:#6c757d; transition:.15s; }
+        .icon-btn:hover{ color:#0d6efd; background:#f5f9ff; }
+        .icon-btn svg{ width:22px; height:22px; }
+
+        button.btn {
+            background-color: white;
+            font-size: 14px;
+        }
+
     </style>
 </head>
 <body>
@@ -24,11 +57,21 @@
 <main>
     <div class="container">
         <div class="d-flex justify-content-between align-items-center mb-4" th:with="link = ${pageRequestDTO.getLink()}">
+
             <a th:href="@{/cafe/{cafeId}/meeting/review/list(cafeId=${cafeResponse.id}, page=${pageRequestDTO.page}, type=${pageRequestDTO.type}, keyword=${pageRequestDTO.keyword})}"
                class="btn btn-custom-secondary">목록으로</a>
             <div class="post-actions d-flex gap-2">
                 <!-- ✅ 후기글 신고 (POST) -->
                 <span th:replace="~{/fragments/report :: reportBtn2('POST', ${dto.id})}"></span>
+
+
+            <a class="icon-btn btn btn-custom-secondary" title="목록" aria-label="목록"
+               th:href="@{/cafe/{cafeId}/meeting/review/list(cafeId=${cafeResponse.id}, page=${pageRequestDTO.page}, type=${pageRequestDTO.type}, keyword=${pageRequestDTO.keyword})}">
+                <svg xmlns="http://www.w3.org/2000/svg" class="bi bi-list" viewBox="0 0 16 16" aria-hidden="true">
+                    <path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5"/>
+                </svg>
+            </a>
+            <div class="post-actions">
 
                 <a th:if="${#authentication.principal != null and #authentication.principal.username == dto.reviewerUserId}"
                    th:href="|@{/cafe/{cafeId}/meeting/review/modify(cafeId=${cafeResponse.id}, id=${dto.id})}&${link}|"
@@ -57,12 +100,38 @@
             </div>
             <div class="post-content">
                 <div class="meeting-content">
+                    <div id="map" th:if="${dto.meetingAddress != null and !#strings.isEmpty(dto.meetingAddress)}"
+                         style="width:400px;height:300px;"></div>
+                    <br>
                     <span th:text="'날짜 : ' + ${#temporals.format(dto.meetingDate, 'yyyy/MM/dd HH:ss')}">모임 날짜</span><br>
                     <span th:text="'장소 : ' + ${dto.meetingLocation}">모임 장소</span><br>
                     <span th:text="'상세 주소 : ' + ${dto.meetingAddress}">상세 주소</span>
                 </div>
+                <br>
                 <p th:text="${dto.content}">게시글 내용</p>
             </div>
+
+            <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=00d1cc9629760bc7ec0a4a9e59c66965&libraries=services"></script>
+            <script th:inline="javascript">
+                var address = [[${dto.meetingAddress}]]
+
+                var map = new kakao.maps.Map(document.getElementById('map'), {
+                    center: new kakao.maps.LatLng(33.450701, 126.570667),  // 기본 위치
+                    level: 3
+                });
+
+                var geocoder = new kakao.maps.services.Geocoder();
+
+                geocoder.addressSearch(address, function(result, status) {
+                    if (status === kakao.maps.services.Status.OK) {
+                        var coords = new kakao.maps.LatLng(result[0].y, result[0].x);
+
+                        map.setCenter(coords);  // 지도 중심 이동
+
+                        new kakao.maps.Marker({ map: map, position: coords });  // 마커 표시
+                    }
+                });
+            </script>
 
             <div th:if="${dto.imageList != null and not #lists.isEmpty(dto.imageList)}" class="mt-4">
                 <h4>후기 사진</h4>
@@ -85,7 +154,7 @@
                     <form id="commentForm">
                         <textarea id="replyText" class="form-control mb-2" rows="3" required></textarea>
                         <div class="text-end">
-                            <button type="button" id="replyRegisterBtn" class="btn btn-primary">댓글 작성</button>
+                            <button type="button" id="replyRegisterBtn" class="btn" style="font-size: 16px;">댓글 작성</button>
                         </div>
                     </form>
                 </div>
@@ -97,17 +166,28 @@
     </div>
 </main>
 
-<div id="editCommentModal" class="modal">
-    <div class="modal-content">
-        <span class="close-button">&times;</span>
-        <h3 class="h5">댓글 수정하기</h3>
-        <form id="editCommentForm" class="mt-3">
-            <input type="hidden" id="editCommentId" name="commentId">
-            <textarea id="editCommentContent" name="content" class="form-control mb-3" rows="3" required></textarea>
-            <button type="submit" class="btn btn-custom-primary w-100">수정 완료</button>
-        </form>
+<!-- 댓글 수정 모달 -->
+<div id="editCommentModal" class="modal fade" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">댓글 수정하기</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="닫기"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editCommentForm">
+                    <input type="hidden" id="editCommentId" name="commentId">
+                    <textarea id="editCommentContent" name="content" class="form-control" rows="3" required></textarea>
+                </form>
+            </div>
+            <div class="modal-footer">
+<!--                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>-->
+                <button type="submit" form="editCommentForm" class="btn btn-custom-primary">수정 완료</button>
+            </div>
+        </div>
     </div>
 </div>
+
 
 <div th:replace="~{/layout/footer :: footer}"></div>
 
@@ -122,9 +202,217 @@
     const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
     const reviewId = [[${dto.id}]];
     const loggedInUser = [[${#authentication.principal != null ? #authentication.principal.username : null}]];
+
     async function getReplyList(reviewId){ /* ... 기존 구현 그대로 ... */ }
     document.addEventListener('DOMContentLoaded', () => { getReplyList(reviewId); });
     // 나머지 핸들러들 그대로…
 </script>
 </body>
 </html>
+
+
+    async function getReplyList(reviewId) {
+        try {
+            const response = await fetch(`/replies/reviews/${reviewId}`);
+            if (!response.ok) {
+                throw new Error('Failed to fetch replies');
+            }
+            const replies = await response.json();
+            const replyListDiv = document.getElementById('replyList');
+            replyListDiv.innerHTML = ''; // 기존 목록 초기화
+
+            if (replies.length > 0) {
+                replies.forEach(reply => {
+                    function formatDate(dateString) {
+                        const date = new Date(dateString);
+                        return date.toISOString().slice(0, 16).replace('T', ' ');
+                    }
+
+                    const isMyReply = loggedInUser && loggedInUser === reply.replyer;
+                    const controlsHtml = isMyReply ? `
+                         <button class="btn edit-comment-btn"
+            data-bs-toggle="modal"
+            data-bs-target="#editCommentModal"
+            data-reply-id="${reply.id}"
+            data-content="${reply.text}">
+        수정
+    </button>
+    <button class="btn delete-comment-btn" data-reply-id="${reply.id}">삭제</button>
+                    ` : '';
+
+                    const replyHtml = `
+                     <div class="comment-item">
+                         <p class="mb-1">${reply.text}</p>
+                         <div class="comment-meta d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span>${reply.replyerNickname}</span> |
+                                    <span>${formatDate(reply.regDate)}</span>
+                                </div>
+                                <div class="d-flex " data-reply-id="${reply.id}">
+                                    ${controlsHtml}
+                                </div>
+                         </div>
+                     </div>
+                    `;
+                    replyListDiv.insertAdjacentHTML('beforeend', replyHtml);
+                });
+            } else {
+                replyListDiv.innerHTML = `<div class="text-center text-muted py-4"><p>아직 댓글이 없습니다. 첫 댓글을 남겨보세요!</p></div>`;
+            }
+        } catch (error) {
+            console.error('댓글 목록 로딩 중 오류 발생:', error);
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        getReplyList(reviewId);
+    });
+
+
+    const replyRegisterBtn = document.getElementById('replyRegisterBtn');
+    const replyTextarea = document.getElementById('replyText');
+
+    // 댓글 등록 버튼이 존재할 때만 이벤트 리스너 추가
+    if (replyRegisterBtn) {
+        replyRegisterBtn.addEventListener('click', async () => {
+            const text = replyTextarea.value.trim();
+            if (!text) {
+                alert('댓글 내용을 입력해주세요.');
+                return;
+            }
+
+            const replyData = {
+                reviewId: reviewId,
+                replyer: loggedInUser,
+                text: text
+            };
+
+            try {
+                const response = await fetch(`/replies/reviews/${reviewId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        [csrfHeader]: csrfToken
+                    },
+                    body: JSON.stringify(replyData)
+                });
+
+                if (response.ok) {
+                    alert('댓글이 성공적으로 등록되었습니다.');
+                    window.location.reload();
+                } else {
+                    alert('댓글 등록에 실패했습니다.');
+                }
+            } catch (error) {
+                console.error('댓글 등록 중 오류 발생:', error);
+            }
+        });
+    }
+
+    // 수정/삭제 버튼 이벤트를 클릭 이벤트 위임으로 처리
+    document.addEventListener('click', async (e) => {
+        const target = e.target;
+        if (target.classList.contains('edit-comment-btn')) {
+            const replyId = target.dataset.replyId;
+            const currentContent = target.dataset.content;
+            // const newContent = prompt('댓글을 수정하세요:', currentContent);
+
+            // if (newContent !== null && newContent.trim() !== '') {
+            //     try {
+            //         const response = await fetch(`/replies/${replyId}`, {
+            //             method: 'PUT',
+            //             headers: {
+            //                 'Content-Type': 'application/json',
+            //                 [csrfHeader]: csrfToken
+            //             },
+            //             body: JSON.stringify({ text: newContent })
+            //         });
+            //         if (response.ok) {
+            //             alert('댓글이 성공적으로 수정되었습니다.');
+            //             window.location.reload();
+            //         } else {
+            //             alert('댓글 수정에 실패했습니다.');
+            //         }
+            //     } catch (error) {
+            //         console.error('댓글 수정 중 오류 발생:', error);
+            //     }
+            if (target.classList.contains('edit-comment-btn')) {
+                const replyId = target.dataset.replyId;
+                const currentContent = target.dataset.content;
+
+                // 모달에 값 넣기
+                document.getElementById('editCommentId').value = replyId;
+                document.getElementById('editCommentContent').value = currentContent;
+            } else if (target.classList.contains('delete-comment-btn')) {
+                const replyId = target.dataset.replyId;
+                if (confirm('정말로 이 댓글을 삭제하시겠습니까?')) {
+                    try {
+                        const response = await fetch(`/replies/${replyId}`, {
+                            method: 'DELETE',
+                            headers: {
+                                [csrfHeader]: csrfToken
+                            }
+                        });
+                        if (response.ok) {
+                            alert('댓글이 성공적으로 삭제되었습니다.');
+                            window.location.reload();
+                        } else {
+                            alert('댓글 삭제에 실패했습니다.');
+                        }
+                    } catch (error) {
+                        console.error('댓글 삭제 중 오류 발생:', error);
+                    }
+                }
+            }
+        }
+    });
+
+    // 기존 버튼 이벤트 리스너는 선택된 요소가 존재하는지 확인하는 코드를 추가
+    const listBtn = document.querySelector(".btn-primary");
+    if (listBtn) {
+        listBtn.addEventListener("click", function (e) {
+            e.preventDefault();
+            self.location = `/cafe/${cafeId}/meeting/review/list?${pageRequestDTO.link}`;
+        }, false);
+    }
+
+    const modifyBtn = document.querySelector(".btn-secondary");
+    if (modifyBtn) {
+        modifyBtn.addEventListener("click", function (e) {
+            e.preventDefault();
+            self.location = `/cafe/${cafeId}/meeting/review/modify?id=${dto.id}&${pageRequestDTO.link}`;
+        }, false);
+    }
+
+        document.getElementById('editCommentForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const replyId = document.getElementById('editCommentId').value;
+            const newText = document.getElementById('editCommentContent').value;
+
+            if (!newText.trim()) {
+                alert('댓글 내용을 입력해주세요.');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/replies/${replyId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        [csrfHeader]: csrfToken
+                    },
+                    body: JSON.stringify({ text: newText })
+                });
+
+                if (response.ok) {
+                    alert('댓글이 성공적으로 수정되었습니다.');
+                    window.location.reload();
+                } else {
+                    alert('댓글 수정에 실패했습니다.');
+                }
+            } catch (error) {
+                console.error('댓글 수정 중 오류 발생:', error);
+            }
+        });
+</script>
