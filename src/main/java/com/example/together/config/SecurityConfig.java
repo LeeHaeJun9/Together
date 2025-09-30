@@ -1,7 +1,12 @@
 package com.example.together.config;
 
+
 import com.example.together.domain.Status;
+import com.example.together.service.CustomOAuth2UserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import com.example.together.domain.User;
+import com.example.together.domain.SystemRole;
+import com.example.together.domain.Status;
 import com.example.together.repository.UserRepository;
 import com.example.together.service.CustomOAuth2UserService;
 import jakarta.servlet.http.HttpSession;
@@ -28,11 +33,17 @@ import org.springframework.security.web.csrf.CsrfFilter;
 import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
+
+import jakarta.servlet.http.HttpSession;
+import java.util.Map;
+
+
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity(prePostEnabled = true)
 @RequiredArgsConstructor
 public class SecurityConfig {
+
 
   private final UserRepository userRepository;
 
@@ -187,6 +198,3 @@ public class SecurityConfig {
     };
   }
 }
-
-
-//test

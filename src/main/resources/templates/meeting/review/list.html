@@ -22,6 +22,9 @@
             text-overflow: ellipsis; /* 넘친 텍스트는 ... 처리 */
             /*text-align: left;*/
         }
+        .table-container table.table tbody {
+            vertical-align: middle;
+        }
     </style>
 </head>
 
@@ -36,7 +39,7 @@
     <main>
         <div class="page-header-container">
             <h3>모임후기 목록</h3>
-            <button type="button" class="btn btn-primary-custom btn-primary registerBtn" th:data-cafe-id="${cafeResponse.id}">글쓰기</button>
+            <button type="button" class="btn btn-primary-custom registerBtn" th:data-cafe-id="${cafeResponse.id}">글쓰기</button>
         </div>
 
         <div class="table-container">
@@ -63,9 +66,12 @@
                     <td th:text="${#temporals.format(dto.regDate, 'yyyy-MM-dd HH:mm')}"></td>
                     <td>
                         <th:block th:if="${dto.imageList != null and not #lists.isEmpty(dto.imageList)}">
-                            <img th:src="@{/upload/display(fileName='s_' + ${dto.imageList[0].uuid} + '_' + ${dto.imageList[0].fileName})}"
-                                 alt="Review Thumbnail"
-                                 style="width: 50px; height: 50px; object-fit: cover;">
+                            <a th:href="@{/cafe/{cafeId}/meeting/review/read(cafeId=${cafeResponse.id}, id=${dto.id}, page=${pageRequestDTO.page}, size=${pageRequestDTO.size})}"
+                               class="text-decoration-none">
+                                <img th:src="@{/upload/display(fileName='s_' + ${dto.imageList[0].uuid} + '_' + ${dto.imageList[0].fileName})}"
+                                     alt="Review Thumbnail"
+                                     style="width: 50px; height: 50px; object-fit: cover;">
+                            </a>
                         </th:block>
                     </td>
                 </tr>

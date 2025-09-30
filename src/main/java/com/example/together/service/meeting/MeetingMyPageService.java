@@ -4,6 +4,7 @@ import com.example.together.domain.*;
 import com.example.together.dto.cafe.CafeResponseDTO;
 import com.example.together.dto.meeting.MeetingDTO;
 import com.example.together.dto.meeting.MeetingReviewDTO;
+import com.example.together.dto.meeting.MeetingReviewImageDTO;
 import com.example.together.dto.meeting.MyJoinedMeetingsDTO;
 import com.example.together.repository.MeetingRepository;
 import com.example.together.repository.MeetingReviewRepository;
@@ -13,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -41,18 +43,22 @@ public class MeetingMyPageService {
 
         String cafeName = null;
         Long cafeId = null;
+        String category = null;
         if (review.getMeeting() != null && review.getMeeting().getCafe() != null) {
             cafeName = review.getMeeting().getCafe().getName();
             cafeId = review.getMeeting().getCafe().getId();  // 여기 추가
+            category = review.getMeeting().getCafe().getCategory().name();
         }
 
         return MeetingReviewDTO.builder()
                 .id(review.getId())
                 .title(review.getTitle())
+                .imageList(ToImageDTOs(review.getImages()))
                 .meetingLocation(review.getMeetingLocation())
                 .meetingDate(review.getMeetingDate())
                 .cafeName(cafeName)
                 .cafeId(review.getCafe().getId())
+                .category(review.getCafe().getCategory().name())
                 .build();
     }
 
@@ -62,6 +68,7 @@ public class MeetingMyPageService {
         return CafeResponseDTO.builder()
                 .id(cafe.getId())
                 .name(cafe.getName())
+                .category(cafe.getCategory().name())
                 .cafeImage(cafe.getCafeImage())
                 .cafeThumbnail(cafe.getCafeThumbnail())
                 .build();
@@ -114,4 +121,16 @@ public class MeetingMyPageService {
                 .countMyReviews(countMyReviews)
                 .build();
     }
+
+    private List<MeetingReviewImageDTO> ToImageDTOs(List<MeetingReviewImage> images) {
+        if (images == null || images.isEmpty()) return new ArrayList<>();
+
+        return images.stream()
+                .map(img -> MeetingReviewImageDTO.builder()
+                        .uuid(img.getUuid())
+                        .fileName(img.getFileName())
+                        .build())
+                .toList();
+    }
+
 }

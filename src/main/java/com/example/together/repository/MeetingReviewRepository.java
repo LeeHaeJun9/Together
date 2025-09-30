@@ -15,7 +15,7 @@ public interface MeetingReviewRepository extends JpaRepository<MeetingReview,Lon
 
 //    @Query("SELECT mr FROM MeetingReview mr JOIN FETCH mr.reviewer WHERE mr.reviewer.userId = :userId")
 //    List<MeetingReview> findAllByReviewer(@Param("userId") String userId);
-    @Query("SELECT mr FROM MeetingReview mr JOIN FETCH mr.reviewer WHERE mr.reviewer.id = :userId")
+    @Query("SELECT mr FROM MeetingReview mr JOIN FETCH mr.reviewer WHERE mr.reviewer.id = :userId ORDER BY mr.modDate DESC")
     List<MeetingReview> findAllByReviewer(@Param("userId") Long userId);
 
     @EntityGraph(attributePaths = {"images"})

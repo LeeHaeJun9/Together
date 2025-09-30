@@ -21,8 +21,10 @@
             border-radius: 15px;
         }
         .meeting-thumbnail {
-            width: 80px;
-            height: 80px;
+            /*width: 100px;*/
+            /*height: 100px;*/
+            width: 100%;
+            height: 100%;
             object-fit: cover;
             border-radius: 8px;
         }
@@ -142,7 +144,7 @@
                             <div class="row">
                                 <div class="col-3">
                                     <th:block th:if="${meeting.cafe != null and meeting.cafe.cafeThumbnail != null}">
-                                        <img th:src="@{${meeting.cafe.cafeThumbnail}}" alt="Cafe Thumbnail" />
+                                        <img th:src="@{${meeting.cafe.cafeThumbnail}}" alt="Cafe Thumbnail" class="meeting-thumbnail" />
                                     </th:block>
                                 </div>
                                 <div class="col-9">
@@ -160,7 +162,7 @@
 <!--                                            <i class="fas fa-users"></i>-->
 <!--                                            <span th:text="|${meetingUser.meeting.currentParticipants}/${meetingUser.meeting.maxParticipants}명|">0/0명</span>-->
 <!--                                        </span>-->
-                                        <small class="text-muted" th:text="${meeting.cafe.name}">카페명</small>
+                                        <small class="text-muted" th:text="'[' + ${meeting.cafe.category} + '] '+${meeting.cafe.name}">[카테고리] 카페명</small>
                                     </div>
                                     <div class="mt-2">
                                         <a th:href="@{/cafe/{cafeId}/meeting/read(cafeId=${meeting.cafe.id}, id=${meeting.id})}"
@@ -214,7 +216,7 @@
                             <div class="row">
                                 <div class="col-3">
                                     <th:block th:if="${meeting.cafe != null and meeting.cafe.cafeThumbnail != null}">
-                                        <img th:src="@{${meeting.cafe.cafeThumbnail}}" alt="Cafe Thumbnail" />
+                                        <img th:src="@{${meeting.cafe.cafeThumbnail}}" alt="Cafe Thumbnail" class="meeting-thumbnail" />
                                     </th:block>
                                 </div>
                                 <div class="col-9">
@@ -232,7 +234,7 @@
 <!--                                            <i class="fas fa-users"></i>-->
 <!--                                            <span th:text="|참여자 ${meeting.currentParticipants}명|">참여자 0명</span>-->
 <!--                                        </span>-->
-                                        <small class="text-muted" th:text="${meeting.cafe.name}">카페명</small>
+                                        <small class="text-muted" th:text="'[' + ${meeting.cafe.category} + '] '+${meeting.cafe.name}">[카테고리] 카페명</small>
                                     </div>
                                     <div class="mt-2">
                                         <a th:href="@{/cafe/{cafeId}/meeting/read(cafeId=${meeting.cafe.id}, id=${meeting.id})}"
@@ -281,7 +283,7 @@
 <!--                                            <i class="fas fa-users"></i>-->
 <!--                                            <span th:text="|${meeting.currentParticipants}/${meeting.maxParticipants}명|">0/0명</span>-->
 <!--                                        </span>-->
-                                        <small class="text-muted" th:text="${meeting.cafe.name}">카페명</small>
+                                        <small class="text-muted" th:text="'[' + ${meeting.cafe.category} + '] '+${meeting.cafe.name}">[카테고리] 카페명</small>
                                     </div>
                                     <div class="mt-2">
                                         <a th:href="@{/cafe/{cafeId}/meeting/read(cafeId=${meeting.cafe.id}, id=${meeting.id})}"
@@ -305,19 +307,20 @@
         <!-- 내가 쓴 리뷰 -->
         <div class="tab-pane fade" id="myreviews" role="tabpanel">
             <div class="row" th:if="${myJoinedMeetings.myReviews != null and !myJoinedMeetings.myReviews.isEmpty()}">
-                <div class="col-md-12 mb-3" th:each="review : ${myJoinedMeetings.myReviews}">
+                <div class="col-md-6 mb-3" th:each="review : ${myJoinedMeetings.myReviews}">
                     <div class="card meeting-card">
                         <div class="card-body">
                             <div class="row">
                                 <div class="col-3">
-                                    <!--                                <img th:if="${meeting.cafe != null and meeting.cafe.cafeThumbnail != null}"-->
-                                    <!--                                     th:src="@{${meeting.cafe.cafeThumbnail}}"-->
-                                    <!--                                     alt="모임 이미지" class="meeting-thumbnail">-->
+                                    <th:block th:if="${review.imageList != null and not #lists.isEmpty(review.imageList)}">
+                                        <img th:src="@{/upload/display(fileName='s_' + ${review.imageList[0].uuid} + '_' + ${review.imageList[0].fileName})}"
+                                             alt="Review Thumbnail" class="meeting-thumbnail">
+                                    </th:block>
                                 </div>
                                 <div class="col-9">
                                     <div class="d-flex justify-content-between align-items-start mb-2">
                                         <h6 class="card-title mb-0" th:text="${review.title}">리뷰 제목</h6>
-                                        <span class="badge meeting-status bg-info">리뷰</span>
+                                        <span class="badge meeting-status bg-warning text-dark">리뷰</span>
                                     </div>
                                     <p class="text-muted small mb-1" th:text="${review.meetingLocation}">모임 장소</p>
                                     <div class="meeting-date mb-2">
@@ -329,7 +332,7 @@
                                         <!--                                            <i class="fas fa-users"></i>-->
                                         <!--                                            <span th:text="|${meeting.currentParticipants}/${meeting.maxParticipants}명|">0/0명</span>-->
                                         <!--                                        </span>-->
-                                        <small class="text-muted" th:text="${review.cafeName}">카페명</small>
+                                        <small class="text-muted" th:text="'[' + ${review.category} + '] '+${review.cafeName}">[카테고리] 카페명</small>
                                     </div>
                                     <div class="mt-2">
                                         <a th:href="@{/cafe/{cafeId}/meeting/review/read(cafeId=${review.cafeId}, id=${review.id})}"
@@ -352,12 +355,13 @@
     </div>
 
     <!-- Back to MyPage -->
-    <div class="text-center mt-4">
+    <div class="text-center mt-4 mb-4">
         <a href="/member/mypage" class="btn btn-secondary">
             <i class="fas fa-arrow-left"></i> 마이페이지로 돌아가기
         </a>
     </div>
 </div>
+
 <div th:replace="~{/layout/footer :: footer}"></div>
 
 <!-- Scripts -->
