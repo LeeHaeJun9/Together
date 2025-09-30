@@ -219,7 +219,11 @@
         </div>
 
         <!-- 탈퇴 폼 -->
-        <form action="/member/delete" method="post">
+        <!-- 탈퇴 폼 -->
+        <form action="/member/deleteUser" method="post">
+            <!-- CSRF 토큰 - 수정됨 -->
+            <input type="hidden" name="_csrf" th:value="${_csrf.token}" />
+
             <!-- 비밀번호 확인 -->
             <div class="mb-3">
                 <label class="form-label">비밀번호 확인 <span class="required">*</span></label>
