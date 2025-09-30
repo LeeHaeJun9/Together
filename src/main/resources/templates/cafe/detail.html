@@ -15,6 +15,41 @@
 
     <link rel="stylesheet" th:href="@{/css/cafeDetail.css}">
     <link rel="stylesheet" th:href="@{/css/cafeHeader.css}">
+    <style>
+        /* Custom Modal for alerts and confirms */
+        .custom-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1050;
+            display: none; /* Initial state is hidden */
+        }
+
+        .custom-modal-content {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+        }
+
+        .custom-modal-content h5 {
+            margin-bottom: 1rem;
+            font-weight: bold;
+        }
+
+        .custom-modal-content .btn {
+            margin: 0 5px;
+        }
+    </style>
 </head>
 <body>
 
@@ -141,6 +176,22 @@
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
+    <!-- 커스텀 모달 HTML 구조 -->
+    <div id="infoModal" class="custom-modal">
+        <div class="custom-modal-content">
+            <h5 id="infoModalMessage"></h5>
+            <button type="button" class="btn btn-primary" onclick="closeInfoModal()">확인</button>
+        </div>
+    </div>
+
+    <!-- 확인 모달 -->
+    <div id="confirmModal" class="custom-modal">
+        <div class="custom-modal-content">
+            <h5 id="confirmModalMessage"></h5>
+            <button type="button" class="btn btn-success" id="confirmModalYesBtn">예</button>
+            <button type="button" class="btn btn-secondary" id="confirmModalNoBtn">아니오</button>
         </div>
     </div>
 
