@@ -44,7 +44,6 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-
   private final UserRepository userRepository;
 
   @Autowired
