@@ -28,7 +28,7 @@
         .quick-btn{
             position:relative; display:inline-flex; align-items:center; justify-content:center;
             width:40px; height:40px; border-radius:12px; color:#6c757d;
-            text-decoration:none; background:#fff; transition:.15s;
+            text-decoration:none; border:1px solid #e9edf3; background:#fff; transition:.15s;
         }
         .quick-btn:hover{ color:#0d6efd; border-color:#d7e6ff; background:#f5f9ff; }
         .quick-btn svg{ width:22px; height:22px; }
@@ -116,7 +116,8 @@
                 <ul class="nav-links list-unstyled d-flex gap-3 mb-0" sec:authorize="hasRole('ADMIN')">
                     <li class="nav-link"><a th:href="@{/member/mypage}">마이페이지</a></li>
                     <li class="nav-link"><a th:href="@{/logout}">로그아웃</a></li>
-                    <li class="nav-link"><a th:href="@{/admin/report}">회원 관리</a></li>
+                    <!-- 🔁 여기만 수정: /admin/report  →  /admin/reports -->
+                    <li class="nav-link"><a th:href="@{/admin/reports}">회원 관리</a></li>
                     <li class="nav-link"><a th:href="@{/cafe/admin/applications}">카페 가입 승인</a></li>
                 </ul>
             </nav>
