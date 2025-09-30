@@ -162,17 +162,28 @@
     </div>
 </main>
 
-<div id="editCommentModal" class="modal">
-    <div class="modal-content">
-        <span class="close-button">&times;</span>
-        <h3 class="h5">댓글 수정하기</h3>
-        <form id="editCommentForm" class="mt-3">
-            <input type="hidden" id="editCommentId" name="commentId">
-            <textarea id="editCommentContent" name="content" class="form-control mb-3" rows="3" required></textarea>
-            <button type="submit" class="btn btn-custom-primary w-100">수정 완료</button>
-        </form>
+<!-- 댓글 수정 모달 -->
+<div id="editCommentModal" class="modal fade" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">댓글 수정하기</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="닫기"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editCommentForm">
+                    <input type="hidden" id="editCommentId" name="commentId">
+                    <textarea id="editCommentContent" name="content" class="form-control" rows="3" required></textarea>
+                </form>
+            </div>
+            <div class="modal-footer">
+<!--                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>-->
+                <button type="submit" form="editCommentForm" class="btn btn-custom-primary">수정 완료</button>
+            </div>
+        </div>
     </div>
 </div>
+
 
 <div th:replace="~{/layout/footer :: footer}"></div>
 
@@ -202,8 +213,14 @@
 
                     const isMyReply = loggedInUser && loggedInUser === reply.replyer;
                     const controlsHtml = isMyReply ? `
-                        <button class="btn" data-reply-id="${reply.id}" data-content="${reply.text}">수정</button>
-                        <button class="btn" data-reply-id="${reply.id}">삭제</button>
+                         <button class="btn edit-comment-btn"
+            data-bs-toggle="modal"
+            data-bs-target="#editCommentModal"
+            data-reply-id="${reply.id}"
+            data-content="${reply.text}">
+        수정
+    </button>
+    <button class="btn delete-comment-btn" data-reply-id="${reply.id}">삭제</button>
                     ` : '';
 
                     const replyHtml = `
@@ -281,46 +298,53 @@
         if (target.classList.contains('edit-comment-btn')) {
             const replyId = target.dataset.replyId;
             const currentContent = target.dataset.content;
-            const newContent = prompt('댓글을 수정하세요:', currentContent);
+            // const newContent = prompt('댓글을 수정하세요:', currentContent);
 
-            if (newContent !== null && newContent.trim() !== '') {
-                try {
-                    const response = await fetch(`/replies/${replyId}`, {
-                        method: 'PUT',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            [csrfHeader]: csrfToken
-                        },
-                        body: JSON.stringify({ text: newContent })
-                    });
-                    if (response.ok) {
-                        alert('댓글이 성공적으로 수정되었습니다.');
-                        window.location.reload();
-                    } else {
-                        alert('댓글 수정에 실패했습니다.');
-                    }
-                } catch (error) {
-                    console.error('댓글 수정 중 오류 발생:', error);
-                }
-            }
-        } else if (target.classList.contains('delete-comment-btn')) {
-            const replyId = target.dataset.replyId;
-            if (confirm('정말로 이 댓글을 삭제하시겠습니까?')) {
-                try {
-                    const response = await fetch(`/replies/${replyId}`, {
-                        method: 'DELETE',
-                        headers: {
-                            [csrfHeader]: csrfToken
+            // if (newContent !== null && newContent.trim() !== '') {
+            //     try {
+            //         const response = await fetch(`/replies/${replyId}`, {
+            //             method: 'PUT',
+            //             headers: {
+            //                 'Content-Type': 'application/json',
+            //                 [csrfHeader]: csrfToken
+            //             },
+            //             body: JSON.stringify({ text: newContent })
+            //         });
+            //         if (response.ok) {
+            //             alert('댓글이 성공적으로 수정되었습니다.');
+            //             window.location.reload();
+            //         } else {
+            //             alert('댓글 수정에 실패했습니다.');
+            //         }
+            //     } catch (error) {
+            //         console.error('댓글 수정 중 오류 발생:', error);
+            //     }
+            if (target.classList.contains('edit-comment-btn')) {
+                const replyId = target.dataset.replyId;
+                const currentContent = target.dataset.content;
+
+                // 모달에 값 넣기
+                document.getElementById('editCommentId').value = replyId;
+                document.getElementById('editCommentContent').value = currentContent;
+            } else if (target.classList.contains('delete-comment-btn')) {
+                const replyId = target.dataset.replyId;
+                if (confirm('정말로 이 댓글을 삭제하시겠습니까?')) {
+                    try {
+                        const response = await fetch(`/replies/${replyId}`, {
+                            method: 'DELETE',
+                            headers: {
+                                [csrfHeader]: csrfToken
+                            }
+                        });
+                        if (response.ok) {
+                            alert('댓글이 성공적으로 삭제되었습니다.');
+                            window.location.reload();
+                        } else {
+                            alert('댓글 삭제에 실패했습니다.');
                         }
-                    });
-                    if (response.ok) {
-                        alert('댓글이 성공적으로 삭제되었습니다.');
-                        window.location.reload();
-                    } else {
-                        alert('댓글 삭제에 실패했습니다.');
+                    } catch (error) {
+                        console.error('댓글 삭제 중 오류 발생:', error);
                     }
-                } catch (error) {
-                    console.error('댓글 삭제 중 오류 발생:', error);
                 }
             }
         }
@@ -342,4 +366,36 @@
             self.location = `/cafe/${cafeId}/meeting/review/modify?id=${dto.id}&${pageRequestDTO.link}`;
         }, false);
     }
+
+        document.getElementById('editCommentForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const replyId = document.getElementById('editCommentId').value;
+            const newText = document.getElementById('editCommentContent').value;
+
+            if (!newText.trim()) {
+                alert('댓글 내용을 입력해주세요.');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/replies/${replyId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        [csrfHeader]: csrfToken
+                    },
+                    body: JSON.stringify({ text: newText })
+                });
+
+                if (response.ok) {
+                    alert('댓글이 성공적으로 수정되었습니다.');
+                    window.location.reload();
+                } else {
+                    alert('댓글 수정에 실패했습니다.');
+                }
+            } catch (error) {
+                console.error('댓글 수정 중 오류 발생:', error);
+            }
+        });
 </script>
