@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-    <meta name="description" content="" />
-    <meta name="author" content="" />
     <title th:text="${cafe.name} + ' 상세 페이지'"></title>
     <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -15,46 +15,6 @@
 
     <link rel="stylesheet" th:href="@{/css/cafeDetail.css}">
     <link rel="stylesheet" th:href="@{/css/cafeHeader.css}">
-
-    <!-- CSRF 토큰을 JavaScript에서 사용하기 위한 meta 태그 추가 -->
-    <meta name="_csrf" th:content="${_csrf.token}" />
-    <meta name="_csrf_header" th:content="${_csrf.headerName}" />
-
-    <style>
-        /* Custom Modal for alerts and confirms */
-        .custom-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1050;
-            display: none; /* Initial state is hidden */
-        }
-
-        .custom-modal-content {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            max-width: 400px;
-            width: 90%;
-            text-align: center;
-        }
-
-        .custom-modal-content h5 {
-            margin-bottom: 1rem;
-            font-weight: bold;
-        }
-
-        .custom-modal-content .btn {
-            margin: 0 5px;
-        }
-    </style>
 </head>
 <body>
 
@@ -81,6 +41,7 @@
                     </div>
                 </div>
             </section>
+
             <section>
                 <div class="card mb-4">
                     <div class="card-header">최신 공지 & 이벤트</div>
@@ -123,40 +84,39 @@
                 </div>
             </section>
         </div>
+
         <div class="col-lg-4">
             <div class="card mb-4">
                 <div class="card-header">비슷한 카페</div>
                 <div class="card-body">
                     <p>비슷한 카테고리의 다른 카페들을 추천합니다.</p>
                     <div class="row" th:if="${similarCafes != null and !similarCafes.isEmpty()}">
-                        <div class="col-12 mb-3" th:each="cafe : ${similarCafes}">
+                        <div class="col-12 mb-3" th:each="c : ${similarCafes}">
                             <div class="card cafe-card">
                                 <div class="card-body">
                                     <div class="row">
                                         <div class="col-3">
-                                            <img th:src="${cafe.cafeThumbnail  ?: '/images/default-cafe.png'}"
+                                            <img th:src="${c.cafeThumbnail  ?: '/images/default-cafe.png'}"
                                                  alt="카페 이미지" class="cafe-thumbnail">
                                         </div>
                                         <div class="col-9">
                                             <div class="d-flex flex-column h-100 justify-content-between">
                                                 <div>
                                                     <div class="d-flex justify-content-between align-items-start mb-2">
-                                                        <h6 class="card-title mb-0" th:text="${cafe.name}">카페명</h6>
+                                                        <h6 class="card-title mb-0" th:text="${c.name}">카페명</h6>
                                                         <span class="badge cafe-category text-dark"
-                                                              th:text="${cafe.category.toString() == 'MUSIC' ? '음악' : (cafe.category.toString() == 'SPORTS' ? '스포츠' : '스터디')}">
-                                                            카테고리
-                                                        </span>
+                                                              th:text="${c.category.toString() == 'MUSIC' ? '음악' : (c.category.toString() == 'SPORTS' ? '스포츠' : '스터디')}">카테고리</span>
                                                     </div>
-                                                    <p class="text-muted small mb-1" th:text="${cafe.description}">카페 설명</p>
+                                                    <p class="text-muted small mb-1" th:text="${c.description}">카페 설명</p>
                                                     <div class="d-flex justify-content-between align-items-center mb-2">
                                                         <span class="member-count">
                                                             <i class="fas fa-users"></i>
-                                                            <span th:text="|멤버 ${cafe.memberCount ?: 0}명|">멤버 0명</span>
+                                                            <span th:text="|멤버 ${c.memberCount ?: 0}명|">멤버 0명</span>
                                                         </span>
                                                     </div>
                                                 </div>
                                                 <div class="mt-2 ms-auto">
-                                                    <a th:href="|/cafe/${cafe.id}|" class="btn btn-sm btn-success">카페 입장</a>
+                                                    <a th:href="|/cafe/${c.id}|" class="btn btn-sm btn-success">카페 입장</a>
                                                 </div>
                                             </div>
                                         </div>
@@ -165,11 +125,10 @@
                             </div>
                         </div>
                     </div>
-                    <p th:if="${similarCafes == null or similarCafes.isEmpty()}" class="text-muted">
-                        비슷한 카테고리의 카페가 없습니다.
-                    </p>
+                    <p th:if="${similarCafes == null or similarCafes.isEmpty()}" class="text-muted">비슷한 카테고리의 카페가 없습니다.</p>
                 </div>
             </div>
+
             <div class="card mb-4" th:if="${cafe.isOwner}">
                 <div class="card-header">카페 관리</div>
                 <div class="card-body">
@@ -184,33 +143,110 @@
             </div>
         </div>
     </div>
-</div>
 
-<!-- 커스텀 모달 HTML 구조 -->
-<div id="infoModal" class="custom-modal">
-    <div class="custom-modal-content">
-        <h5 id="infoModalMessage"></h5>
-        <button type="button" class="btn btn-primary" onclick="closeInfoModal()">확인</button>
+    <!-- ✅ 카페 하단 신고 버튼 (모달 사용) -->
+    <div class="row gx-4 gx-lg-5 mt-3">
+        <div class="col-12 d-flex justify-content-end">
+            <button type="button"
+                    class="btn btn-sm btn-outline-danger report-btn"
+                    th:attr="data-report-type='CAFE',data-target-id=${cafe.id},data-use-modal=true">
+                <i class="fa-solid fa-flag me-1"></i> 신고
+            </button>
+        </div>
     </div>
 </div>
 
-<!-- 확인 모달 -->
-<div id="confirmModal" class="custom-modal">
-    <div class="custom-modal-content">
-        <h5 id="confirmModalMessage"></h5>
-        <button type="button" class="btn btn-success" id="confirmModalYesBtn">예</button>
-        <button type="button" class="btn btn-secondary" id="confirmModalNoBtn">아니오</button>
+<!-- 신고 모달 -->
+<div class="modal fade" id="reportModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <form class="modal-content" id="reportForm">
+            <div class="modal-header">
+                <h5 class="modal-title">신고하기</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="닫기"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="reportType">
+                <input type="hidden" id="targetId">
+                <div class="mb-3">
+                    <label class="form-label">사유</label>
+                    <textarea id="reason" class="form-control" rows="4" placeholder="스팸/욕설/불법 등"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                <button type="submit" class="btn btn-danger">신고</button>
+            </div>
+        </form>
     </div>
 </div>
-
 
 <div th:replace="~{/layout/footer :: footer}"></div>
 
 <script th:inline="javascript">
-    // 서버에서 가져온 이벤트 데이터를 자바스크립트 변수로 정의
     var calendarEventsData = /*[[${calendarEvents}]]*/ [];
 </script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 <script th:src="@{/js/cafeDetail.js}"></script>
+
+<!-- 페이지 전용 JS: 모달 열기/전송 (AJAX만; 이동 없음) -->
+<script>
+    (function(){
+        const modalEl = document.getElementById('reportModal');
+        const bsModal = modalEl ? new bootstrap.Modal(modalEl) : null;
+
+        document.addEventListener('click', function(e){
+            const btn = e.target.closest('.report-btn[data-use-modal="true"]');
+            if (!btn) return;
+            e.preventDefault();
+            e.stopPropagation();
+
+            document.getElementById('reportType').value = btn.dataset.reportType;
+            document.getElementById('targetId').value  = btn.dataset.targetId;
+            document.getElementById('reason').value    = '';
+            bsModal.show();
+        }, true);
+
+        document.getElementById('reportForm').addEventListener('submit', async function(e){
+            e.preventDefault();
+            e.stopPropagation();
+
+            const type = document.getElementById('reportType').value;
+            const id   = Number(document.getElementById('targetId').value);
+            const reason = document.getElementById('reason').value?.trim();
+            if (!reason) { alert('사유를 입력해 주세요.'); return; }
+
+            const m = document.cookie.match(/(?:^|; )TOGETHER-XSRF=([^;]*)/);
+            const xsrf = m ? m[1] : null;
+
+            try {
+                const res = await fetch('/report', {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: Object.assign(
+                        {'Content-Type': 'application/json'},
+                        xsrf ? {'X-XSRF-TOKEN': xsrf, 'X-CSRF-TOKEN': xsrf} : {}
+                    ),
+                    body: JSON.stringify({ reportType: type, targetId: id, reason })
+                });
+
+                if (res.status === 401) {
+                    if (confirm('로그인이 필요합니다. 로그인 페이지로 이동할까요?')) location.href='/login';
+                    return;
+                }
+                if (!res.ok) {
+                    const body = await res.text().catch(()=> '');
+                    alert(`신고 실패: ${res.status} ${res.statusText}\n${body.slice(0,200)}`);
+                    return;
+                }
+
+                bsModal.hide();
+                alert('신고가 접수되었습니다.'); // 페이지는 그대로 유지
+            } catch (err) {
+                alert('신고 실패: ' + err.message);
+            }
+        });
+    })();
+</script>
+
 </body>
 </html>

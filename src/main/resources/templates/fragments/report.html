@@ -1,0 +1,19 @@
+<!-- templates/fragments/report.html -->
+<!--<div th:fragment="reportBtn(type, targetId, useModal)">-->
+<!--    <button type="button"-->
+<!--            class="btn btn-outline-danger btn-sm report-btn"-->
+<!--            th:attr="data-report-type=${type}, data-target-id=${targetId}, data-use-modal=${useModal}"-->
+<!--            title="신고하기">-->
+<!--        <i class="fa-solid fa-flag" aria-hidden="true"></i> 신고-->
+<!--    </button>-->
+<!--</div>-->
+
+<!-- 편의용: 매개변수 2개 버전 (useModal=false 고정) -->
+<div th:fragment="reportBtn2(type, targetId)">
+    <button type="button"
+            class="btn btn-outline-danger btn-sm report-btn"
+            th:attr="data-report-type=${type}, data-target-id=${targetId}, data-use-modal=${false}"
+            title="신고하기">
+        <i class="fa-solid fa-flag" aria-hidden="true"></i> 신고
+    </button>
+</div>
