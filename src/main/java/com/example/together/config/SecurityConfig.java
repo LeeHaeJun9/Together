@@ -46,7 +46,7 @@ public class SecurityConfig {
                 "/member/register/check-userid", "/member/register/check-email",
                 "/member/register/check-name", "/member/register/check-nickname", "/member/register/check-phone",
                 "/api/member/**",
-                "/upload/**"
+                "/upload/**", "/categories"
             ).permitAll()
 
             .requestMatchers(HttpMethod.GET, "/trade/list").permitAll()

@@ -39,6 +39,11 @@
             background:transparent; color:#6c757d; transition:.15s; }
         .icon-btn:hover{ color:#0d6efd; background:#f5f9ff; }
         .icon-btn svg{ width:22px; height:22px; }
+
+        button.btn {
+            background-color: white;
+            font-size: 14px;
+        }
     </style>
 </head>
 
@@ -145,7 +150,7 @@
                     <form id="commentForm">
                         <textarea id="replyText" class="form-control mb-2" rows="3" required></textarea>
                         <div class="text-end">
-                            <button type="button" id="replyRegisterBtn" class="btn btn-primary">댓글 작성</button>
+                            <button type="button" id="replyRegisterBtn" class="btn" style="font-size: 16px;">댓글 작성</button>
                         </div>
                     </form>
                 </div>
@@ -197,8 +202,8 @@
 
                     const isMyReply = loggedInUser && loggedInUser === reply.replyer;
                     const controlsHtml = isMyReply ? `
-                        <button class="btn btn-sm btn-outline-secondary me-2 edit-comment-btn" data-reply-id="${reply.id}" data-content="${reply.text}">수정</button>
-                        <button class="btn btn-sm btn-outline-danger delete-comment-btn" data-reply-id="${reply.id}">삭제</button>
+                        <button class="btn" data-reply-id="${reply.id}" data-content="${reply.text}">수정</button>
+                        <button class="btn" data-reply-id="${reply.id}">삭제</button>
                     ` : '';
 
                     const replyHtml = `
