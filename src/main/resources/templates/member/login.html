@@ -49,28 +49,24 @@
             </div>
         </div>
 
-
-        <form action="/login" method="post">
+        <form th:action="@{/login}" method="post">
+            <!-- 아이디 -->
             <div class="mb-3">
                 <label class="form-label">아이디</label>
-                <input type="text" name="userId" class="form-control" placeholder="아이디를 입력하세요" required>
-
-        <form th:action="@{/login}" method="post" autocomplete="off">
-            <!-- 아이디 또는 이메일 -->
-            <div class="mb-3">
-                <label class="form-label">아이디 또는 이메일</label>
                 <input type="text" name="userId" class="form-control"
-                       placeholder="아이디나 이메일을 입력하세요" autocomplete="off" required>
-
+                       placeholder="아이디를 입력하세요" required>
             </div>
+
+            <!-- 비밀번호 -->
             <div class="mb-3">
                 <label class="form-label">비밀번호</label>
-
-                <input type="password" name="password" class="form-control" placeholder="비밀번호를 입력하세요" required>
                 <input type="password" name="password" class="form-control"
-                       placeholder="비밀번호를 입력하세요" autocomplete="new-password" required>
+                       placeholder="비밀번호를 입력하세요" required>
             </div>
+
+            <!-- CSRF Token -->
             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
             <button type="submit" class="btn-login">로그인</button>
         </form>
 
@@ -81,7 +77,7 @@
         </div>
 
         <button type="button" class="btn-kakao" onclick="location.href='/oauth2/authorization/kakao'">카카오톡 로그인</button>
-        <button type="button" class="btn-naver"  onclick="location.href='/oauth2/authorization/naver'">네이버 로그인</button>
+        <button type="button" class="btn-naver" onclick="location.href='/oauth2/authorization/naver'">네이버 로그인</button>
     </div>
 </div>
 
