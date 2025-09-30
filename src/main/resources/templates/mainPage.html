@@ -7,6 +7,20 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <!-- 캐시 무효화: System 금지, #dates 사용 -->
     <link rel="stylesheet" th:href="@{/css/mainPage.css(v=${#dates.createNow().time})}">
+
+    <style>
+        .hero-content {
+            margin-top: 100px;
+            height: 350px;
+        }
+        .slider-container {
+            padding: 0;
+        }
+        main section.container {
+            margin-top: 3rem;
+            margin-bottom: 3rem;
+        }
+    </style>
 </head>
 <body>
 
