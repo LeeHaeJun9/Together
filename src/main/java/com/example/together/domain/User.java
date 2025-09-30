@@ -91,4 +91,9 @@ public class User {
     public String toString() {
         return this.userId;
     }
+
+  @PrePersist
+  private void applyDefaults() {
+    if (this.status == null) this.status = Status.ACTIVE;
+  }
 }

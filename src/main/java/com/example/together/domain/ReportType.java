@@ -1,7 +1,5 @@
 package com.example.together.domain;
 
 public enum ReportType {
-    POST,
-    USER,
-    CHAT
+  CAFE, POST, COMMENT, CHAT, USER, TRADE
 }
