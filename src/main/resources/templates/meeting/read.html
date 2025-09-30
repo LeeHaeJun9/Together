@@ -86,6 +86,9 @@
             </div>
             <div class="post-content">
                 <div class="meeting-content">
+                    <div id="map" th:if="${dto.address != null and !#strings.isEmpty(dto.address)}"
+                         style="width:400px;height:300px;"></div>
+                    <br>
                     <span th:text="'날짜 : ' + ${#temporals.format(dto.meetingDate, 'yyyy/MM/dd HH:ss')}">모임 날짜</span><br>
                     <span th:text="'장소 : ' + ${dto.location}">모임 장소</span><br>
                     <span th:text="'상세 주소 : ' + ${dto.address}">상세 주소</span>
@@ -99,6 +102,28 @@
 <!--                <span th:text="${dto.recruiting != null and dto.recruiting.name() == 'END'} ? '모집 마감' : '모집 중'"></span>-->
 <!--            </div>-->
         </div>
+
+        <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=00d1cc9629760bc7ec0a4a9e59c66965&libraries=services"></script>
+        <script th:inline="javascript">
+            var address = [[${dto.address}]]
+
+            var map = new kakao.maps.Map(document.getElementById('map'), {
+                center: new kakao.maps.LatLng(33.450701, 126.570667),  // 기본 위치
+                level: 3
+            });
+
+            var geocoder = new kakao.maps.services.Geocoder();
+
+            geocoder.addressSearch(address, function(result, status) {
+                if (status === kakao.maps.services.Status.OK) {
+                    var coords = new kakao.maps.LatLng(result[0].y, result[0].x);
+
+                    map.setCenter(coords);  // 지도 중심 이동
+
+                    new kakao.maps.Marker({ map: map, position: coords });  // 마커 표시
+                }
+            });
+        </script>
 
         <div class="comment-section">
             <div class="d-flex justify-content-between align-items-center mb-3">
