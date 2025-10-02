@@ -36,6 +36,102 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
+  private final UserRepository userRepository;
+
+  @Autowired
+  private CustomOAuth2UserService customOAuth2UserService;
+
+  @Bean
+  public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    http
+        .csrf(csrf -> csrf.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()))
+        .authorizeHttpRequests(auth -> auth
+            // ✅ 누구나 접근 가능
+            .requestMatchers(
+                    "/", "/intro","/mainPage", "/index", "/home",
+                    "/login", "/register", "/member/register", "/member/findId", "/member/findPw",
+                    "/css/**", "/js/**", "/images/**", "/assets/**", "/lib/**", "/resources/**",
+                    "/join", "/categories", "/cafe/{id}", // 두 번째 코드 블록에서 추가된 경로
+                    "/member/register/check-userid", "/member/register/check-email",
+                    "/member/register/check-name", "/member/register/check-nickname", "/member/register/check-phone",
+                    "/api/member/**",
+                    "/upload/**"
+            ).permitAll()
+
+            .requestMatchers(HttpMethod.GET, "/trade/list").permitAll()
+
+            .requestMatchers(HttpMethod.GET, "/trade/read/*").permitAll()
+
+
+            // 역할 필요한 경로
+            .requestMatchers("/admin/**", "/manager/**").hasRole("ADMIN")
+            // 그 외는 인증 필요
+            .anyRequest().authenticated()
+        )
+        // 폼 로그인
+        .formLogin(formLogin -> formLogin
+            .loginPage("/login")
+            .loginProcessingUrl("/login")
+            .usernameParameter("userId")
+            .passwordParameter("password")
+            .successHandler(customSuccessHandler())
+            .failureUrl("/login?error=true")
+        )
+        // OAuth2 로그인
+        .oauth2Login(oauth2 -> oauth2
+            .loginPage("/login")
+            .successHandler(oAuth2SuccessHandler())
+            .userInfoEndpoint(userInfo -> userInfo
+                .userService(customOAuth2UserService)
+            )
+        )
+        // 로그아웃
+        .logout(logout -> logout
+            .logoutUrl("/logout")
+            .logoutRequestMatcher(new AntPathRequestMatcher("/logout", "GET"))
+            .logoutSuccessUrl("/login?logout=true")
+            .invalidateHttpSession(true)
+            .deleteCookies("JSESSIONID")
+        );
+
+    return http.build();
+  }
+
+  // 일반 로그인 성공 핸들러
+  @Bean
+  public AuthenticationSuccessHandler customSuccessHandler() {
+    return (request, response, authentication) -> {
+      String authenticatedUserId = authentication.getName();
+      User user = userRepository.findByUserId(authenticatedUserId)
+          .orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다: " + authenticatedUserId));
+
+      HttpSession session = request.getSession();
+      session.setAttribute("loginUser", user);
+      session.setAttribute("userId", user.getUserId());
+
+      response.sendRedirect("/mainPage");
+    };
+  }
+
+  // OAuth2 로그인 성공 핸들러
+  @Bean
+  public AuthenticationSuccessHandler oAuth2SuccessHandler() {
+    return (request, response, authentication) -> {
+      OAuth2User oauth2User = (OAuth2User) authentication.getPrincipal();
+      String socialId = (String) oauth2User.getAttributes().get("id");
+
+      User user = userRepository.findByUserId(socialId)
+          .orElseThrow(() -> new UsernameNotFoundException("OAuth2 사용자를 찾을 수 없습니다: " + socialId));
+
+      HttpSession session = request.getSession();
+      session.setAttribute("loginUser", user);
+      session.setAttribute("userId", user.getUserId());
+
+      response.sendRedirect("/mainPage");
+    };
+  }
+}
+=======
     private final UserRepository userRepository;
 
     @Autowired
