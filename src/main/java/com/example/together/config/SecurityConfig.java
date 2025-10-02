@@ -78,7 +78,7 @@ public class SecurityConfig {
                                 "/", "/intro","/mainPage", "/index", "/home",
                                 "/login", "/register", "/member/register", "/member/findId", "/member/findPw",
                                 "/css/**", "/js/**", "/images/**", "/assets/**", "/lib/**", "/resources/**",
-                                "/join", "/categories", "/cafe/**", // 두 번째 코드 블록에서 추가된 경로
+                                "/join", "/categories", "/cafe/{id}", // 두 번째 코드 블록에서 추가된 경로
                                 "/member/register/check-userid", "/member/register/check-email",
                                 "/member/register/check-name", "/member/register/check-nickname", "/member/register/check-phone",
                                 "/api/member/**",
@@ -136,13 +136,12 @@ public class SecurityConfig {
             User user = userRepository.findByUserId(authenticatedUserId)
                     .orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다: " + authenticatedUserId));
 
-            if (user.getStatus() == Status.LOCKED) {
-                HttpSession s = request.getSession(false);
-                if (s != null) s.invalidate();
-                SecurityContextHolder.clearContext();
-                response.sendRedirect("/login?locked=1");
-                return;
-            }
+          if (user.getStatus() != Status.ACTIVE) {
+            request.getSession().invalidate();
+            SecurityContextHolder.clearContext();
+            response.sendRedirect("/login?inactive=1");
+            return;
+          }
 
             HttpSession session = request.getSession();
             session.setAttribute("loginUser", user);

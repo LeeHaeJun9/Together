@@ -14,9 +14,9 @@
 <body>
 
 <!-- 헤더 프래그먼트 -->
-<div th:replace="~{/layout/header :: header}"></div>
+<div th:replace="~{layout/header :: header}"></div>
 <div class="container px-4 px-lg-5">
-  <div th:replace="~{/layout/cafeHeader :: cafeHeader(cafe=${cafe})}"></div>
+  <div th:replace="~{layout/cafeHeader :: cafeHeader(cafe=${cafe})}"></div>
 
   <main class="container py-5">
 
@@ -65,7 +65,7 @@
   </main>
 </div>
 <!-- 푸터 프래그먼트 -->
-<div th:replace="~{/layout/footer :: footer}"></div>
+<div th:replace="~{layout/footer :: footer}"></div>
 
 <!-- Bootstrap Bundle with Popper -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

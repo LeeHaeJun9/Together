@@ -5,11 +5,7 @@ import com.example.together.dto.PageRequestDTO;
 import com.example.together.dto.PageResponseDTO;
 import com.example.together.dto.cafe.CafeResponseDTO;
 import com.example.together.dto.meeting.MeetingDTO;
-import com.example.together.repository.CafeCalendarRepository;
-import com.example.together.repository.CafeRepository;
-import com.example.together.repository.MeetingRepository;
-import com.example.together.repository.MeetingUserRepository;
-import com.example.together.repository.UserRepository;
+import com.example.together.repository.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -276,4 +272,12 @@ public class MeetingServiceImpl implements MeetingService {
                 .modDate(meeting.getModDate())
                 .build();
     }
+
+  private final MembershipRepository membershipRepository;
+
+    @Override
+  public boolean isMember(Long cafeId, String loginUserId) {
+    if (loginUserId == null) return false;
+    return membershipRepository.existsByCafe_IdAndUser_UserId(cafeId, loginUserId);
+  }
 }

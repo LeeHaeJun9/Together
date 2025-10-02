@@ -30,10 +30,10 @@
 
 <body>
 <!-- 공통 상단 네비게이션 바 -->
-<div th:replace="~{/layout/header :: header}"></div>
+<div th:replace="~{layout/header :: header}"></div>
 <div class="container px-4 px-lg-5">
     <!-- 카페 전용 헤더 (배경 이미지 + 탭 메뉴) -->
-    <div th:replace="~{/layout/cafeHeader :: cafeHeader(cafe=${cafeResponse})}"></div>
+    <div th:replace="~{layout/cafeHeader :: cafeHeader(cafe=${cafeResponse})}"></div>
 
     <!-- 메인 컨텐츠 -->
     <main>
@@ -103,7 +103,7 @@
     </main>
 </div>
 
-<div th:replace="~{/layout/footer :: footer}"></div>
+<div th:replace="~{layout/footer :: footer}"></div>
 
 
 <!-- Bootstrap JS -->

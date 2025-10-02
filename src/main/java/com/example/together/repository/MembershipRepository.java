@@ -21,6 +21,7 @@ public interface MembershipRepository extends JpaRepository<Membership, Long> {
     @EntityGraph(attributePaths = "cafe")
     List<Membership> findByUserId(Long userId);
 
+  boolean existsByCafe_IdAndUser_UserId(Long cafeId, String userId);
 
 
 }

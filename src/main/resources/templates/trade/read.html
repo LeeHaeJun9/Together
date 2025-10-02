@@ -38,13 +38,13 @@
     </style>
 </head>
 <body>
-<div th:replace="~{/layout/header :: header}"></div>
+<div th:replace="~{layout/header :: header}"></div>
 
 <main class="container page-wrap py-4">
     <!-- 우측 상단: 신고 + 목록 -->
     <div class="d-flex justify-content-end mb-3 gap-2">
         <!-- ✅ 거래 신고 버튼 (TRADE) -->
-        <span th:if="${dto != null}" th:replace="~{/fragments/report :: reportBtn2('TRADE', ${dto.id})}"></span>
+        <span th:if="${dto != null}" th:replace="~{fragments/report :: reportBtn2('TRADE', ${dto.id})}"></span>
 
         <!-- 기존 목록 아이콘들 -->
         <a class="icon-btn" th:if="${backUrl != null}" th:href="${backUrl}" title="목록" aria-label="목록">
@@ -168,7 +168,7 @@
     </div>
 </main>
 
-<div th:replace="~{/layout/footer :: footer}"></div>
+<div th:replace="~{layout/footer :: footer}"></div>
 
 
 

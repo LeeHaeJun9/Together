@@ -44,7 +44,7 @@
 
 <body>
 
-<div th:replace="~{/layout/header :: header}"></div>
+<div th:replace="~{layout/header :: header}"></div>
 
 <main>
     <div class="container">
@@ -74,7 +74,7 @@
                 </div>
 
                 <!-- 신고 버튼: 오른쪽으로 이동 -->
-                <span th:replace="~{/fragments/report :: reportBtn2('POST', ${dto.id})}"></span>
+                <span th:replace="~{fragments/report :: reportBtn2('POST', ${dto.id})}"></span>
             </div>
         </div>
 
@@ -103,26 +103,34 @@
                 <p th:text="${dto.content}">게시글 내용</p>
             </div>
 
-            <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=00d1cc9629760bc7ec0a4a9e59c66965&libraries=services"></script>
+            <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=921ffea2cae15dd5f4c2aa5b5f5aee9c&libraries=services"></script>
             <script th:inline="javascript">
-                var address = [[${dto.meetingAddress}]]
+                var address = [[${dto.meetingAddress}]];
 
-                var map = new kakao.maps.Map(document.getElementById('map'), {
-                    center: new kakao.maps.LatLng(33.450701, 126.570667),  // 기본 위치
-                    level: 3
-                });
+                function initKakaoMap() {
+                    var map = new kakao.maps.Map(document.getElementById('map'), {
+                        center: new kakao.maps.LatLng(33.450701, 126.570667),
+                        level: 3
+                    });
 
-                var geocoder = new kakao.maps.services.Geocoder();
+                    var geocoder = new kakao.maps.services.Geocoder();
 
-                geocoder.addressSearch(address, function(result, status) {
-                    if (status === kakao.maps.services.Status.OK) {
-                        var coords = new kakao.maps.LatLng(result[0].y, result[0].x);
+                    geocoder.addressSearch(address, function(result, status) {
+                        if (status === kakao.maps.services.Status.OK) {
+                            var coords = new kakao.maps.LatLng(result[0].y, result[0].x);
+                            map.setCenter(coords);
+                            new kakao.maps.Marker({ map: map, position: coords });
+                        }
+                    });
+                }
 
-                        map.setCenter(coords);  // 지도 중심 이동
-
-                        new kakao.maps.Marker({ map: map, position: coords });  // 마커 표시
-                    }
-                });
+                // Kakao 지도 API 동적으로 로드
+                const kakaoScript = document.createElement('script');
+                kakaoScript.src = "//dapi.kakao.com/v2/maps/sdk.js?appkey=00d1cc9629760bc7ec0a4a9e59c66965&libraries=services";
+                kakaoScript.onload = function () {
+                    initKakaoMap(); // kakao 로딩 완료 후 실행
+                };
+                document.head.appendChild(kakaoScript);
             </script>
 
             <div th:if="${dto.imageList != null and not #lists.isEmpty(dto.imageList)}" class="mt-4">
@@ -175,7 +183,7 @@
     </div>
 </div>
 
-<div th:replace="~{/layout/footer :: footer}"></div>
+<div th:replace="~{layout/footer :: footer}"></div>
 <script th:src="@{/js/report-quick.js}"></script>
 
 <script th:inline="javascript">
