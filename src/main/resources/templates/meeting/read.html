@@ -17,7 +17,7 @@
     </style>
 </head>
 <body>
-<div th:replace="~{layou/header :: header}"></div>
+<div th:replace="~{layout/header :: header}"></div>
 
 <main>
     <div class="container">
@@ -25,7 +25,7 @@
             <a th:href="|@{/cafe/{cafeId}/meetings(cafeId=${cafeResponse.id})}?${link}|" class="btn btn-custom-secondary">목록으로</a>
             <div class="post-actions d-flex gap-2">
                 <!-- ✅ 모임글 신고 (POST) -->
-                <span th:replace="~{/fragments/report :: reportBtn2('POST', ${dto.id})}"></span>
+                <span th:replace="~{fragments/report :: reportBtn2('POST', ${dto.id})}"></span>
 
                 <a th:if="${#authentication.principal != null and #authentication.principal.username == dto.organizerName}"
                    th:href="|@{/cafe/{cafeId}/meeting/modify(cafeId=${cafeResponse.id}, id=${dto.id})}&${link}|"
@@ -71,7 +71,7 @@
             <!--            </div>-->
         </div>
 
-        <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=00d1cc9629760bc7ec0a4a9e59c66965&libraries=services"></script>
+        <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=921ffea2cae15dd5f4c2aa5b5f5aee9c&libraries=services"></script>
         <script th:inline="javascript">
             var address = [[${dto.address}]]
 
@@ -94,7 +94,7 @@
         </script>
 
         <!-- 참가자 목록/버튼들: 기존 그대로 -->
-        <div class="comment-section">
+        <div class="comment-section" th:if="${isCafeMember}">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h2 class="h4">참가자 목록</h2>
                 <div class="my-2">
@@ -148,7 +148,7 @@
     </div>
 </main>
 
-<div th:replace="~{layou/footer :: footer}"></div>
+<div th:replace="~{layout/footer :: footer}"></div>
 
 <!-- ✅ 신고 스크립트 -->
 <script th:src="@{/js/report-quick.js}"></script>

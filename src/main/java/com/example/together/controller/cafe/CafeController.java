@@ -77,7 +77,7 @@ public class CafeController {
                 .collect(Collectors.toList());
 
         model.addAttribute("applications", applicationDTOs);
-        return "/cafe/admin/applicationList";
+        return "cafe/admin/applicationList";
     }
 
     @GetMapping("/admin/applications/{applicationId}")
@@ -91,7 +91,7 @@ public class CafeController {
 
         if (applicationDTO == null) {
             redirectAttributes.addFlashAttribute("error", "해당 신청서를 찾을 수 없습니다.");
-            return "redirect:/cafe/admin/applications";
+            return "redirect:cafe/admin/applications";
         }
 
         model.addAttribute("name", applicationDTO.getName());
@@ -100,7 +100,7 @@ public class CafeController {
         model.addAttribute("applicantId", applicationDTO.getApplicantId());
         model.addAttribute("regDate", applicationDTO.getRegDate());
 
-        return "/cafe/admin/applicationDetail";
+        return "cafe/admin/applicationDetail";
     }
 
 

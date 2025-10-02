@@ -7,49 +7,61 @@
 
     <style>
         .page-header{width:1200px;background:#fff;margin:30px auto;}
+
         /* 목록 아이콘: 테두리 없음 + 말풍선 툴팁 */
         .icon-btn{
             display:inline-flex; align-items:center; justify-content:center;
             width:44px; height:44px; border-radius:10px;
             border:none; background:transparent; color:#212529;
+            transition:none;
         }
         .icon-btn:hover{ color:#212529; background:transparent; }
         .icon-btn svg{ width:28px; height:28px; }
+
         :root .tooltip.bubble .tooltip-inner{
             position:relative; background:#111 !important; color:#fff !important;
             padding:6px 10px !important; font-size:.875rem !important; line-height:1.2 !important;
-            border-radius:8px !important; box-shadow:0 4px 12px rgba(0,0,0,.2) !important; white-space:nowrap;
+            border-radius:8px !important; box-shadow:0 4px 12px rgba(0,0,0,.2) !important;
+            white-space:nowrap;
         }
         :root .tooltip.bubble .tooltip-arrow{ display:none !important; }
         :root .tooltip.bubble.bs-tooltip-bottom .tooltip-inner::after{
             content:""; position:absolute; left:50%; transform:translateX(-50%); top:-8px;
-            width:0; height:0; border-style:solid; border-width:0 8px 8px 8px; border-color:transparent transparent #111 transparent;
+            width:0; height:0; border-style:solid; border-width:0 8px 8px 8px;
+            border-color:transparent transparent #111 transparent;
         }
 
-        /* trade/list 카드 스타일 복제 */
-        .card-img-top{object-fit:cover;}
-        .ratio-4x3{--bs-aspect-ratio:75%;}
-        .card.pos-rel { position: relative; }
-        .soldout-overlay{
-            position:absolute; inset:0; background: rgba(108,117,125,.35);
-            border-radius: .375rem; display:flex; align-items:center; justify-content:center; pointer-events:none;
+        /* 카드 (구매한 상품 스타일과 동일 톤) */
+        .favorite-list{margin-top:.25rem;}
+        .favorite-card{border-left:4px solid #0dcaf0; position:relative; overflow:visible; transition:none;}
+        .favorite-card:hover{transform:none; box-shadow:0 4px 8px rgba(0,0,0,.1);}
+        .favorite-card.clickable{cursor:pointer;}
+        .product-thumbnail{width:100%; aspect-ratio:1/1; object-fit:cover; border-radius:8px;}
+        .product-status{font-size:.8rem; padding:.25rem .5rem; border-radius:15px;}
+        .pos-rel{position:relative;}
+        .soldout-overlay{position:absolute; inset:0; background:rgba(108,117,125,.35); border-radius:.375rem; display:flex; align-items:center; justify-content:center; pointer-events:none;}
+        .soldout-badge{background:rgba(33,37,41,.75); color:#fff; padding:.35rem .7rem; border-radius:999px; font-weight:700; font-size:.95rem;}
+
+        .icon-heart{
+            display:inline-flex; align-items:center; justify-content:center;
+            width:36px; height:36px; border-radius:10px;
+            border:1px solid #e9edf3; background:#fff; color:#e03131;
+            transition:.15s;
         }
-        .soldout-badge{
-            background: rgba(33,37,41,.75); color:#fff; padding:.35rem .7rem; border-radius:999px;
-            font-weight:700; font-size:.95rem;
-        }
+        .icon-heart:hover{ background:#fff5f5; border-color:#ffd6d6; }
+        .icon-heart i{ font-size:16px; line-height:1; }
     </style>
 </head>
 <body>
 
-<div th:replace="~{layou/header :: header}"></div>
+<div th:replace="~{layout/header :: header}"></div>
 
 <div class="page-header">
     <div class="container">
         <div class="d-flex align-items-center justify-content-between">
             <div>
                 <h2 class="mb-1">판매한 상품</h2>
-                <p class="mb-0 text-muted">거래 완료된 내 판매 상품 목록</p>
+                <p class="mb-0 text-muted">거래 완료된 내 판매 상품</p>
             </div>
 
             <!-- 목록 아이콘 (버블 툴팁) -->
@@ -69,86 +81,80 @@
     </div>
 </div>
 
-<main class="container py-3" th:with="noImg=@{/images/no-image.png}">
-    <!-- 카드 그리드 (trade/list와 동일 구조) -->
-    <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-4">
-        <div class="col" th:each="t : ${trades}"
-             th:with="
-           stat=${t.status != null ? t.status.toString() : ''},
-           isSold=${stat == 'SOLD_OUT'},
-           isSale=${stat == 'FOR_SALE'},
-           isResv=${stat == 'RESERVED'}">
-
-            <div class="card h-100 shadow-sm pos-rel">
-                <!-- 거래완료 오버레이 -->
+<div class="container" th:with="noImg=@{/images/no-image.png}">
+    <!-- 목록 (구매한 상품과 동일 레이아웃) -->
+    <div class="row g-4 favorite-list" th:if="${trades != null and !trades.isEmpty()}">
+        <div class="col-md-6" th:each="t : ${trades}">
+            <div class="card favorite-card pos-rel clickable"
+                 th:with="isSold=${t.status != null and (#strings.equalsIgnoreCase(t.status, 'SOLD_OUT') or #strings.equalsIgnoreCase(t.status, '판매완료'))}"
+                 th:attr="data-href=${!isSold}? @{|/trade/read/${t.id}|} : null, data-sold=${isSold}">
                 <div class="soldout-overlay" th:if="${isSold}">
                     <span class="soldout-badge">거래 완료</span>
                 </div>
 
-                <div class="ratio ratio-4x3">
-                    <img class="card-img-top" alt="thumbnail" loading="lazy"
-                         th:src="${ (thumbnails != null and thumbnails.containsKey(t.id)) ? thumbnails[t.id]
-                        : (#strings.isEmpty(t.thumbnail) ? noImg : t.thumbnail) }"
-                         onerror="this.onerror=null;this.src='/images/no-image.png'">
-                </div>
-
                 <div class="card-body">
-                    <h6 class="card-title mb-1 text-truncate" th:text="${t.title}">제목</h6>
+                    <div class="row g-2">
+                        <div class="col-4">
+                            <img class="product-thumbnail"
+                                 th:src="${ (thumbnails != null and thumbnails.containsKey(t.id)) ? thumbnails[t.id]
+                                          : (#strings.isEmpty(t.thumbnail) ? noImg : t.thumbnail) }"
+                                 alt="상품 이미지"
+                                 onerror="this.onerror=null;this.src='/images/no-image.png'">
+                        </div>
+                        <div class="col-8">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h6 class="card-title mb-0 text-truncate" th:text="${t.title}">상품명</h6>
+                            </div>
 
-                    <div class="d-flex align-items-center gap-2 mb-2">
-            <span class="badge text-bg-secondary"
-                  th:text="${
-                    (categoryLabels != null and categoryLabels.containsKey(t.id)) ? categoryLabels[t.id]
-                    : (t.category != null ? t.category.toString() : '미분류')
-                  }">카테고리</span>
+                            <div class="mb-2">
+                                <span class="badge product-status bg-secondary">판매완료</span>
+                                <span class="badge bg-light text-dark ms-1"
+                                      th:text="${categoryLabels != null ? (categoryLabels[t.id] ?: '카테고리') : (t.category != null ? t.category.toString() : '카테고리')}">카테고리</span>
+                            </div>
 
-                        <span class="badge"
-                              th:classappend="${isSale} ? ' text-bg-primary'
-                       : (${isResv} ? ' text-bg-warning' : ' text-bg-secondary')"
-                              th:text="${isSale ? '판매중' : (isResv ? '예약중' : (isSold ? '판매완료' : '미정'))}">
-              상태
-            </span>
+                            <div class="seller-info mb-2 text-muted">
+                                <i class="fas fa-user"></i>
+                                <span th:text="${t.sellerNickname != null ? t.sellerNickname : '판매자'}">판매자</span>
+                            </div>
+
+                            <div class="d-flex justify-content-between align-items-center">
+                                <strong class="text-primary fs-5"
+                                        th:text="${priceTexts != null and priceTexts.containsKey(t.id) ? priceTexts[t.id] : (t.price != null ? #numbers.formatInteger(t.price) + '원' : '가격문의')}">0원</strong>
+                                <span class="text-muted">❤️ <span th:text="${favoriteCounts != null ? (favoriteCounts[t.id] ?: 0) : 0}">0</span></span>
+                            </div>
+                        </div>
                     </div>
-
-                    <div class="d-flex justify-content-between align-items-center">
-            <span class="fw-semibold"
-                  th:text="${(priceTexts != null and priceTexts.containsKey(t.id)) ? priceTexts[t.id]
-                            : (t.price != null ? #numbers.formatInteger(t.price) + '원' : '가격문의')}">0원</span>
-                    </div>
-
-                    <p class="card-text small text-muted mb-0">
-                        작성자: <span th:text="${t.sellerNickname != null ? t.sellerNickname : '알수없음'}">nickname</span>
-                    </p>
-                </div>
-
-                <div class="card-footer bg-white d-flex justify-content-between align-items-center">
-                    <a class="btn btn-sm btn-outline-primary" th:if="${!isSold}"
-                       th:href="@{/trade/read/{id}(id=${t.id})}">상세보기</a>
-                    <button type="button" class="btn btn-sm btn-outline-secondary" th:if="${isSold}"
-                            onclick="alert('이미 거래가 된 상품입니다');">상세보기</button>
-
-                    <span class="small">❤️
-            <span th:text="${(favoriteCounts != null and favoriteCounts.containsKey(t.id)) ? favoriteCounts[t.id] : 0}">0</span>
-          </span>
                 </div>
             </div>
-        </div>
+        </div><!-- /col -->
     </div>
 
     <!-- 빈 상태 -->
     <div th:if="${trades == null or trades.isEmpty()}" class="text-center py-5 mt-4">
         <i class="fas fa-box-open fa-3x text-muted mb-3"></i>
         <h5 class="text-muted">판매 완료된 상품이 없습니다</h5>
-        <p class="text-muted">판매 완료 처리된 상품이 이곳에 표시됩니다.</p>
+        <p class="text-muted">거래 완료 처리된 상품이 이곳에 표시됩니다.</p>
         <a th:href="@{/trade/list}" class="btn btn-primary mt-2">상품 둘러보기</a>
     </div>
-</main>
+</div>
 
-<div th:replace="~{layou/footer :: footer}"></div>
+<div th:replace="~{layout/footer :: footer}"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/js/all.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
+    // 카드 클릭 이동 (판매완료면 알림)
+    (function(){
+        document.querySelectorAll('.favorite-card.clickable').forEach(function(card){
+            card.addEventListener('click', function(){
+                const isSold = card.getAttribute('data-sold') === 'true';
+                if (isSold) { alert('이미 거래가 된 상품입니다'); return; }
+                const href = card.getAttribute('data-href');
+                if (href) window.location.href = href;
+            });
+        });
+    })();
+
     // 툴팁 초기화 (버블)
     (function () {
         if (!(window.bootstrap && bootstrap.Tooltip)) return;
