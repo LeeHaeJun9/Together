@@ -2,26 +2,33 @@ package com.example.together.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+import java.time.LocalDateTime;
 
-@Entity
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
-public class Report extends BaseEntity {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+@Getter @Setter @Builder
+@NoArgsConstructor @AllArgsConstructor
+@Entity @Table(name = "report")
+public class Report {
+  @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    @Column(nullable = false)
-    private String reason;
+  @UpdateTimestamp
+  private LocalDateTime moddate;
 
-    private Long targetId;
+  @CreationTimestamp
+  @Column(updatable = false)
+  private LocalDateTime regdate;   // ✅ 등록일 표시
 
-    @Enumerated(EnumType.STRING)
-    private ReportType reportType;
+  @Column(nullable = false, length = 255)
+  private String reason;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    private User reporter;
+  @Enumerated(EnumType.STRING)
+  @Column(name="report_type", length = 20, nullable = false)
+  private ReportType reportType;
+
+  private Long targetId;           // 신고 대상의 PK (카페/게시글/댓글/거래/유저 등)
+
+  @Column(name = "reporter_id")
+  private Long reporterId;         // 신고자 user.id
 }

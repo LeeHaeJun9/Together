@@ -171,6 +171,10 @@ public class MeetingController {
         }
         model.addAttribute("cafeResponse", cafeResponse);
 
+      String loginUserId = (principal != null ? principal.getName() : null);
+      boolean isCafeMember = meetingService.isMember(cafeId, loginUserId);
+      model.addAttribute("isCafeMember", isCafeMember);
+
         return "meeting/read";
     }
 

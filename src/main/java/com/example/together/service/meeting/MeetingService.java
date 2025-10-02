@@ -32,4 +32,6 @@ public interface MeetingService {
     String getUserNicknameById(Long userId);
 
     PageResponseDTO<MeetingDTO> listByCategory(String category, PageRequestDTO pageRequestDTO);
+
+  boolean isMember(Long cafeId, String loginUserId);
 }

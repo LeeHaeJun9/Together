@@ -44,10 +44,11 @@
 
 <body>
 
-<div th:replace="~{/layout/header :: header}"></div>
+<div th:replace="~{layout/header :: header}"></div>
 
 <main>
     <div class="container">
+        <!-- 헤더 바: 신고 버튼을 오른쪽(수정/삭제 옆)으로 이동 -->
         <div class="d-flex justify-content-between align-items-center mb-4" th:with="link = ${pageRequestDTO.getLink()}">
             <a class="icon-btn btn btn-custom-secondary" title="목록" aria-label="목록"
                th:href="@{/cafe/{cafeId}/meeting/review/list(cafeId=${cafeResponse.id}, page=${pageRequestDTO.page}, type=${pageRequestDTO.type}, keyword=${pageRequestDTO.keyword})}">
@@ -55,22 +56,27 @@
                     <path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5"/>
                 </svg>
             </a>
-            <div class="post-actions">
-                <a th:if="${#authentication.principal != null and #authentication.principal.username == dto.reviewerUserId}"
-                   th:href="|@{/cafe/{cafeId}/meeting/review/modify(cafeId=${cafeResponse.id}, id=${dto.id})}&${link}|"
-                   class="btn btn-custom-primary me-2">수정
-                </a>
 
-                <form th:if="${#authentication.principal != null and #authentication.principal.username == dto.reviewerUserId}"
-                      th:action="@{/cafe/{cafeId}/meeting/review/remove(cafeId=${cafeResponse.id})}"
-                      method="post" class="d-inline-block">
-                    <input type="hidden" name="id" th:value="${dto.id}" />
-                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                    <button type="submit" class="btn btn-custom-danger" onclick="return confirm('정말로 삭제하시겠습니까?');">삭제</button>
-                </form>
+            <div class="d-flex align-items-center gap-2">
+                <div class="post-actions">
+                    <a th:if="${#authentication.principal != null and #authentication.principal.username == dto.reviewerUserId}"
+                       th:href="|@{/cafe/{cafeId}/meeting/review/modify(cafeId=${cafeResponse.id}, id=${dto.id})}&${link}|"
+                       class="btn btn-custom-primary me-2">수정
+                    </a>
+
+                    <form th:if="${#authentication.principal != null and #authentication.principal.username == dto.reviewerUserId}"
+                          th:action="@{/cafe/{cafeId}/meeting/review/remove(cafeId=${cafeResponse.id})}"
+                          method="post" class="d-inline-block">
+                        <input type="hidden" name="id" th:value="${dto.id}" />
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                        <button type="submit" class="btn btn-custom-danger" onclick="return confirm('정말로 삭제하시겠습니까?');">삭제</button>
+                    </form>
+                </div>
+
+                <!-- 신고 버튼: 오른쪽으로 이동 -->
+                <span th:replace="~{fragments/report :: reportBtn2('POST', ${dto.id})}"></span>
             </div>
         </div>
-
 
         <div class="post-content-section mb-4">
             <div class="post-header-container">
@@ -97,26 +103,34 @@
                 <p th:text="${dto.content}">게시글 내용</p>
             </div>
 
-            <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=00d1cc9629760bc7ec0a4a9e59c66965&libraries=services"></script>
+            <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=921ffea2cae15dd5f4c2aa5b5f5aee9c&libraries=services"></script>
             <script th:inline="javascript">
-                var address = [[${dto.meetingAddress}]]
+                var address = [[${dto.meetingAddress}]];
 
-                var map = new kakao.maps.Map(document.getElementById('map'), {
-                    center: new kakao.maps.LatLng(33.450701, 126.570667),  // 기본 위치
-                    level: 3
-                });
+                function initKakaoMap() {
+                    var map = new kakao.maps.Map(document.getElementById('map'), {
+                        center: new kakao.maps.LatLng(33.450701, 126.570667),
+                        level: 3
+                    });
 
-                var geocoder = new kakao.maps.services.Geocoder();
+                    var geocoder = new kakao.maps.services.Geocoder();
 
-                geocoder.addressSearch(address, function(result, status) {
-                    if (status === kakao.maps.services.Status.OK) {
-                        var coords = new kakao.maps.LatLng(result[0].y, result[0].x);
+                    geocoder.addressSearch(address, function(result, status) {
+                        if (status === kakao.maps.services.Status.OK) {
+                            var coords = new kakao.maps.LatLng(result[0].y, result[0].x);
+                            map.setCenter(coords);
+                            new kakao.maps.Marker({ map: map, position: coords });
+                        }
+                    });
+                }
 
-                        map.setCenter(coords);  // 지도 중심 이동
-
-                        new kakao.maps.Marker({ map: map, position: coords });  // 마커 표시
-                    }
-                });
+                // Kakao 지도 API 동적으로 로드
+                const kakaoScript = document.createElement('script');
+                kakaoScript.src = "//dapi.kakao.com/v2/maps/sdk.js?appkey=00d1cc9629760bc7ec0a4a9e59c66965&libraries=services";
+                kakaoScript.onload = function () {
+                    initKakaoMap(); // kakao 로딩 완료 후 실행
+                };
+                document.head.appendChild(kakaoScript);
             </script>
 
             <div th:if="${dto.imageList != null and not #lists.isEmpty(dto.imageList)}" class="mt-4">
@@ -169,8 +183,8 @@
     </div>
 </div>
 
-<div th:replace="~{/layout/footer :: footer}"></div>
-
+<div th:replace="~{layout/footer :: footer}"></div>
+<script th:src="@{/js/report-quick.js}"></script>
 
 <script th:inline="javascript">
     const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
@@ -228,7 +242,6 @@
     document.addEventListener('DOMContentLoaded', () => {
         getReplyList(reviewId);
     });
-
 
     const replyRegisterBtn = document.getElementById('replyRegisterBtn');
     const replyTextarea = document.getElementById('replyText');
@@ -338,3 +351,5 @@
         }, false);
     }
 </script>
+</body>
+</html>

@@ -42,6 +42,11 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     User user = userRepository.findByUserId(userId)
         .orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다: " + userId));
 
+    // 명시적으로 '탈퇴' 계정 차단
+    if (user.getStatus() == Status.DELETED) {
+      throw new UsernameNotFoundException("탈퇴한 계정입니다: " + userId);
+    }
+    // ACTIVE 외 나머지 상태(정지 등)도 차단
     if (user.getStatus() != Status.ACTIVE) {
       throw new UsernameNotFoundException("비활성 계정입니다: " + userId);
     }

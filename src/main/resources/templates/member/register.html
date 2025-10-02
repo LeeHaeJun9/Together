@@ -261,7 +261,7 @@
 </head>
 <body>
 <!-- 헤더 -->
-<div th:replace="~{/layout/header :: header}"></div>
+<div th:replace="~{layout/header :: header}"></div>
 
 
 <!-- 회원가입 폼 -->
@@ -377,7 +377,7 @@
 </div>
 
 <!-- 푸터 -->
-<div th:replace="~{/layout/footer :: footer}"></div>
+<div th:replace="~{layout/footer :: footer}"></div>
 
 
 <!-- Bootstrap JS -->
@@ -831,7 +831,7 @@
             .then(response => {
                 if (response.ok) {
                     alert('회원가입이 완료되었습니다!');
-                    window.location.href = '/mainPage';
+                    window.location.href = '/login';
                 } else {
                     return response.text().then(text => {
                         alert('회원가입 중 오류가 발생했습니다.');
