@@ -71,7 +71,7 @@
     </style>
 </head>
 <body>
-<div th:replace="~{layou/header :: header}"></div>
+<div th:replace="~{layout/header :: header}"></div>
 
 <div class="container py-3 chat-wrap">
     <!-- 상단(상품 표시 카드) -->
@@ -112,7 +112,7 @@
 
             <!-- ✅ 채팅 상대 유저 신고 버튼 (targetId = 상대방 유저 PK) -->
             <th:block th:with="otherId=${me == room.sellerId ? room.buyerId : room.sellerId}">
-                <span th:replace="~{/fragments/report :: reportBtn2('CHAT', ${otherId})}"></span>
+                <span th:replace="~{fragments/report :: reportBtn2('CHAT', ${otherId})}"></span>
             </th:block>
 
             <!-- 판매자 전용 상태 변경 -->
@@ -177,7 +177,7 @@
            th:value="${#lists.isEmpty(messages) ? '' : messages.get(messages.size()-1).id}">
 </div>
 
-<div th:replace="~{layou/footer :: footer}"></div>
+<div th:replace="~{layout/footer :: footer}"></div>
 
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
