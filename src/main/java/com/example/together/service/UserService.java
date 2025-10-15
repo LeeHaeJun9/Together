@@ -6,6 +6,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Optional;
+
 public interface UserService {
     // 로그인 관련
     User authenticate(String userId, String password);
@@ -46,4 +48,6 @@ public interface UserService {
     // 기타 유틸리티
     boolean isAdmin(Long adminId);
     String getUserNicknameById(Long userId);
+
+    Optional<User> findById(Long id);
 }

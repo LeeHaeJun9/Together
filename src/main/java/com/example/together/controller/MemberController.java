@@ -735,7 +735,7 @@ public class MemberController {
             case "name":
                 return "이름 변경에 실패했습니다.";
             case "phone":
-                return "전화번호 변경에 실패했습니다.";
+                return "전화번호 변경에 실패했습니다. 이미 사용 중인 전화번호일 수 있습니다.";
             default:
                 return "정보 수정에 실패했습니다.";
         }

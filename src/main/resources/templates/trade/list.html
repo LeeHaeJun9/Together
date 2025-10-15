@@ -42,7 +42,7 @@
 <body>
 
 <!-- 공통 헤더 -->
-<div th:replace="~{layou/header :: header}"></div>
+<div th:replace="~{layout/header :: header}"></div>
 
 <main class="container py-3" th:with="noImg=@{/images/no-image.png}">
     <!-- 상단 액션 바 -->
@@ -230,7 +230,7 @@
 </div>
 
 <!-- 공통 푸터 -->
-<div th:replace="~{layou/footer :: footer}"></div>
+<div th:replace="~{layout/footer :: footer}"></div>
 
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

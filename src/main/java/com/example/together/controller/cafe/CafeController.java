@@ -1,9 +1,6 @@
 package com.example.together.controller.cafe;
 
-import com.example.together.domain.Cafe;
-import com.example.together.domain.CafeApplication;
-import com.example.together.domain.CafeApplicationStatus;
-import com.example.together.domain.CafeCategory;
+import com.example.together.domain.*;
 import com.example.together.dto.PageRequestDTO;
 import com.example.together.dto.PageResponseDTO;
 import com.example.together.dto.cafe.*;
@@ -94,10 +91,15 @@ public class CafeController {
             return "redirect:cafe/admin/applications";
         }
 
+        User applicant = userService.findById(applicationDTO.getApplicantId())
+                .orElseThrow(() -> new IllegalArgumentException("신청자 정보를 찾을 수 없습니다."));
+
+
         model.addAttribute("name", applicationDTO.getName());
         model.addAttribute("description", applicationDTO.getDescription());
         model.addAttribute("category", applicationDTO.getCategory());
-        model.addAttribute("applicantId", applicationDTO.getApplicantId());
+//        model.addAttribute("applicantId", applicationDTO.getApplicantId());
+        model.addAttribute("applicantId", applicant.getUserId());
         model.addAttribute("regDate", applicationDTO.getRegDate());
 
         return "cafe/admin/applicationDetail";
