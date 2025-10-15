@@ -1,63 +1,127 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>최종 카페 등록</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-  <link rel="stylesheet" th:href="@{/css/finalForm.css}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>최종 카페 등록</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/finalForm.css}">
+    <style>
+        .page-container {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: linear-gradient(145deg, #f5f7fa, #e4ebf5);
+            border-radius: 15px;
+        }
+
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            padding: 25px;
+        }
+
+        .page-header-container h3 {
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        .form-label {
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+
+        .btn {
+            background-color: #0d6efd;
+            border: #dee2e6 solid 0.5px !important;
+            border-radius: 0.25rem;
+            padding: 0.45rem 0.9rem;
+            font-weight: 500;
+            color: #fff;
+            transition: 0.2s ease-in-out;
+        }
+        .btn:hover {
+            background-color: #0b5ed7 !important;
+            border-color: #0a58ca !important;
+            color: #fff !important;
+        }
+
+        .btn-primary-custom {
+            background-color: #2575fc;
+            border: none;
+            transition: background-color 0.3s;
+        }
+
+        .btn-primary-custom:hover {
+            background-color: #1a5edb;
+        }
+
+        .btn-secondary-custom {
+            background-color: #6c757d;
+            border: none;
+        }
+
+        .alert {
+            border-radius: 10px;
+        }
+
+        .info-section p {
+            margin-bottom: 0.3rem;
+        }
+    </style>
 </head>
 <body>
 
 <div th:replace="~{layout/header :: header}"></div>
 
 <main>
-  <div class="page-header-container">
-    <h3 class="mb-0">최종 카페 등록</h3>
-  </div>
+    <div class="page-container">
+        <div class="card shadow-sm">
+            <div class="page-header-container">
+                <h3>최종 카페 등록</h3>
+            </div>
 
-  <div class="container">
-    <div class="card-custom">
-      <p th:if="${error}" class="alert alert-danger" role="alert" th:text="${error}"></p>
-      <p th:if="${message}" class="alert alert-success" role="alert" th:text="${message}"></p>
+            <p th:if="${error}" class="alert alert-danger text-center" th:text="${error}"></p>
+            <p th:if="${message}" class="alert alert-success text-center" th:text="${message}"></p>
 
-      <p class="mb-4 text-center">아래는 승인된 카페 신청 정보입니다. 추가 이미지를 업로드하여 등록을 완료하세요.</p>
+            <p class="text-center mb-4">
+                아래는 승인된 카페 신청 정보입니다.<br>
+                추가 이미지를 업로드하여 등록을 완료하세요.
+            </p>
 
-      <div class="mb-4">
-        <p><strong>카페명:</strong> <span th:text="${name}"></span></p>
-        <p><strong>설명:</strong> <span th:text="${description}"></span></p>
-        <p class="mb-0"><strong>카테고리:</strong> <span th:text="${category}"></span></p>
-      </div>
+            <div class="info-section mb-4">
+                <p><strong>카페명:</strong> <span th:text="${name}"></span></p>
+                <p><strong>설명:</strong> <span th:text="${description}"></span></p>
+                <p><strong>카테고리:</strong> <span th:text="${category}"></span></p>
+            </div>
 
-      <hr class="my-4"/>
+            <hr class="my-4"/>
 
-      <form th:action="@{/cafe/myApplications/{applicationId}/register(applicationId=${applicationId})}"
-            method="post"
-            enctype="multipart/form-data">
+            <form th:action="@{/cafe/myApplications/{applicationId}/register(applicationId=${applicationId})}"
+                  method="post" enctype="multipart/form-data">
 
-        <div class="form-group-spaced">
-          <label for="cafeImage" class="form-label">카페 대표 이미지:</label>
-          <input type="file" id="cafeImage" name="cafeImage" class="form-control" required>
+                <div class="mb-3">
+                    <label for="cafeImage" class="form-label">카페 대표 이미지</label>
+                    <input type="file" id="cafeImage" name="cafeImage" class="form-control" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="cafeThumbnail" class="form-label">카페 썸네일</label>
+                    <input type="file" id="cafeThumbnail" name="cafeThumbnail" class="form-control" required>
+                </div>
+
+                <div class="d-grid mt-4">
+                    <button type="submit" class="btn btn-primary-custom">등록 완료</button>
+                </div>
+            </form>
+
+            <div class="d-grid mt-3">
+                <a th:href="@{/cafe/myApplications}" class="btn btn-secondary-custom">신청 목록</a>
+            </div>
         </div>
-
-        <div class="form-group-spaced">
-          <label for="cafeThumbnail" class="form-label">카페 썸네일:</label>
-          <input type="file" id="cafeThumbnail" name="cafeThumbnail" class="form-control" required>
-        </div>
-
-        <div class="d-grid mt-4">
-          <button type="submit" class="btn btn-primary-custom">등록 완료</button>
-        </div>
-      </form>
     </div>
-
-    <div class="d-flex justify-content-center">
-      <div class="mt-4" style="max-width: 600px; width: 100%;">
-        <a th:href="@{/cafe/myApplications}" class="btn btn-secondary-custom">신청 목록</a>
-      </div>
-    </div>
-  </div>
 </main>
 
 <div th:replace="~{layout/footer :: footer}"></div>

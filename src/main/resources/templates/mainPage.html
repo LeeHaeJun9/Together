@@ -20,6 +20,13 @@
             margin-top: 3rem;
             margin-bottom: 3rem;
         }
+        .text-muted {
+            padding-left: 30px;
+            font-size: 17px;
+        }
+        .card-body p {
+            padding: 0px;
+        }
     </style>
 </head>
 <body>
@@ -105,7 +112,7 @@
                     </div>
                 </th:block>
                 <div th:if="${recomCafes == null or #lists.isEmpty(recomCafes)}" class="slider-card empty-card">
-                    <p class="text-center text-muted">추천 카페가 아직 없습니다.</p>
+                    <p class="text-muted">추천 카페가 아직 없습니다.</p>
                 </div>
             </div>
             <button class="slider-button next"><i class="fas fa-chevron-right"></i></button>
@@ -140,7 +147,7 @@
                     </div>
                 </th:block>
                 <div th:if="${recomTrades == null or #lists.isEmpty(recomTrades)}" class="slider-card empty-card">
-                    <p class="text-center text-muted" style="min-width: 100%;">인기 중고거래 상품이 아직 없습니다.</p>
+                    <p class="text-muted">인기 중고거래 상품이 아직 없습니다.</p>
                 </div>
             </div>
             <button class="slider-button next trade-next"><i class="fas fa-chevron-right"></i></button>

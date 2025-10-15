@@ -176,6 +176,18 @@
                     </div>
                 </div>
             </div>
+
+            <!-- ✅ 카페 하단 신고 버튼 (모달 사용) -->
+            <div class="row gx-4 gx-lg-5 mt-1 mb-3">
+                <div class="col-12 d-flex justify-content-end">
+                    <button type="button"
+                            class="btn btn-sm btn-outline-danger report-btn"
+                            th:attr="data-report-type='CAFE',data-target-id=${cafe.id},data-use-modal=true">
+                        <i class="fa-solid fa-flag me-1"></i> 신고
+                    </button>
+                </div>
+            </div>
+
         </div>
     </div>
     <!-- 커스텀 모달 HTML 구조 -->
@@ -192,17 +204,6 @@
             <h5 id="confirmModalMessage"></h5>
             <button type="button" class="btn btn-success" id="confirmModalYesBtn">예</button>
             <button type="button" class="btn btn-secondary" id="confirmModalNoBtn">아니오</button>
-        </div>
-    </div>
-
-    <!-- ✅ 카페 하단 신고 버튼 (모달 사용) -->
-    <div class="row gx-4 gx-lg-5 mt-3">
-        <div class="col-12 d-flex justify-content-end">
-            <button type="button"
-                    class="btn btn-sm btn-outline-danger report-btn"
-                    th:attr="data-report-type='CAFE',data-target-id=${cafe.id},data-use-modal=true">
-                <i class="fa-solid fa-flag me-1"></i> 신고
-            </button>
         </div>
     </div>
 </div>
