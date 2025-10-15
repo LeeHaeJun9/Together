@@ -50,4 +50,6 @@ public interface UserService {
     String getUserNicknameById(Long userId);
 
     Optional<User> findById(Long id);
+    Optional<User> findByUserIdAndEmailAndName(String userId, String email, String name);
+    Optional<User> findByNameAndEmail(String name, String email);
 }
