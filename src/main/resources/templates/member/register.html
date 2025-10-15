@@ -49,7 +49,7 @@
         }
 
         .form-container {
-            max-width: 400px;
+            max-width: 450px;
             margin: 50px auto;
             padding: 40px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -289,83 +289,89 @@
                 </div>
             </div>
 
-            <!-- 사용자 ID -->
-            <div class="form-group">
-                <label>사용자 ID <span style="color: #ff6b6b;">*</span></label>
-                <div class="input-group">
-                    <input type="text" name="userId" id="userId" class="form-control"
-                           placeholder="사용자 ID를 입력하세요" required>
-                    <button type="button" class="check-button" onclick="checkIdDuplicate()">중복확인</button>
-                </div>
-                <div id="userIdMessage" class="message"></div>
-            </div>
-
-            <!-- 이메일 -->
-            <div class="form-group">
-                <label>이메일 <span style="color: #ff6b6b;">*</span></label>
-                <div class="input-group">
-                    <input type="email" name="email" id="email" class="form-control"
-                           placeholder="이메일을 입력하세요" required>
-                    <button type="button" class="check-button" onclick="checkEmailDuplicate()">중복확인</button>
-                </div>
-                <div id="emailMessage" class="message"></div>
-            </div>
-
-            <!-- 비밀번호 -->
-            <div class="form-group">
-                <label>비밀번호 <span style="color: #ff6b6b;">*</span></label>
-                <input type="password" name="password" id="password" class="form-control"
-                       placeholder="6-20자" required>
-                <div class="message" style="color: #e9ecef;">
-                    영문자, 숫자, 특수문자를 조합하여 6자 이상 입력해주세요
-                </div>
-                <div id="passwordStrength" class="password-strength" style="margin-top: 10px;">
-                    <div class="strength-bar">
-                        <div class="strength-fill" id="strengthFill"></div>
+            <div>
+                <!-- 사용자 ID -->
+                <div class="form-group">
+                    <label>아이디 <span style="color: #ff6b6b;">*</span></label>
+                    <div class="input-group">
+                        <input type="text" name="userId" id="userId" class="form-control"
+                               placeholder="사용자 ID를 입력하세요" required>
+                        <button type="button" class="check-button" onclick="checkIdDuplicate()">중복확인</button>
                     </div>
-                    <div id="strengthText" class="strength-text"></div>
+                    <div id="userIdMessage" class="message"></div>
+                </div>
+
+                <!-- 이메일 -->
+                <div class="form-group">
+                    <label>이메일 <span style="color: #ff6b6b;">*</span></label>
+                    <div class="input-group">
+                        <input type="email" name="email" id="email" class="form-control"
+                               placeholder="이메일을 입력하세요" required>
+                        <button type="button" class="check-button" onclick="checkEmailDuplicate()">중복확인</button>
+                    </div>
+                    <div id="emailMessage" class="message"></div>
+                </div>
+
+                <!-- 비밀번호 -->
+                <div class="form-group">
+                    <label>비밀번호 <span style="color: #ff6b6b;">*</span></label>
+                    <input type="password" name="password" id="password" class="form-control"
+                           placeholder="6-20자" required>
+                    <div class="message" style="color: #e9ecef;">
+                        영문자, 숫자, 특수문자를 조합하여 6자 이상 입력해주세요
+                    </div>
+                    <div id="passwordStrength" class="password-strength" style="margin-top: 10px;">
+                        <div class="strength-bar">
+                            <div class="strength-fill" id="strengthFill"></div>
+                        </div>
+                        <div id="strengthText" class="strength-text"></div>
+                    </div>
+                </div>
+
+                <!-- 비밀번호 확인 -->
+                <div class="form-group">
+                    <label>비밀번호 확인 <span style="color: #ff6b6b;">*</span></label>
+                    <input type="password" name="passwordConfirm" id="passwordConfirm" class="form-control"
+                           placeholder="비밀번호를 다시 입력하세요" required>
+                    <div id="passwordConfirmMessage" class="message"></div>
                 </div>
             </div>
 
-            <!-- 비밀번호 확인 -->
-            <div class="form-group">
-                <label>비밀번호 확인 <span style="color: #ff6b6b;">*</span></label>
-                <input type="password" name="passwordConfirm" id="passwordConfirm" class="form-control"
-                       placeholder="비밀번호를 다시 입력하세요" required>
-                <div id="passwordConfirmMessage" class="message"></div>
-            </div>
+            <br>
 
-            <!-- 이름 -->
-            <div class="form-group">
-                <label>이름 <span style="color: #ff6b6b;">*</span></label>
-                <div class="input-group">
-                    <input type="text" name="name" id="name" class="form-control"
-                           placeholder="이름을 입력하세요" required>
-                    <button type="button" class="check-button" onclick="checkNameDuplicate()">중복확인</button>
+            <div>
+                <!-- 이름 -->
+                <div class="form-group">
+                    <label>이름 <span style="color: #ff6b6b;">*</span></label>
+                    <div class="input-group">
+                        <input type="text" name="name" id="name" class="form-control"
+                               placeholder="이름을 입력하세요" required>
+<!--                        <button type="button" class="check-button" onclick="checkNameDuplicate()">중복확인</button>-->
+                    </div>
+                    <div id="nameMessage" class="message"></div>
                 </div>
-                <div id="nameMessage" class="message"></div>
-            </div>
 
-            <!-- 닉네임 -->
-            <div class="form-group">
-                <label>닉네임 <span style="color: #ff6b6b;">*</span></label>
-                <div class="input-group">
-                    <input type="text" name="nickname" id="nickname" class="form-control"
-                           placeholder="닉네임을 입력하세요" required>
-                    <button type="button" class="check-button" onclick="checkNicknameDuplicate()">중복확인</button>
+                <!-- 닉네임 -->
+                <div class="form-group">
+                    <label>닉네임 <span style="color: #ff6b6b;">*</span></label>
+                    <div class="input-group">
+                        <input type="text" name="nickname" id="nickname" class="form-control"
+                               placeholder="닉네임을 입력하세요" required>
+                        <button type="button" class="check-button" onclick="checkNicknameDuplicate()">중복확인</button>
+                    </div>
+                    <div id="nicknameMessage" class="message"></div>
                 </div>
-                <div id="nicknameMessage" class="message"></div>
-            </div>
 
-            <!-- 전화번호 -->
-            <div class="form-group">
-                <label>전화번호 <span style="color: #ff6b6b;">*</span></label>
-                <div class="input-group">
-                    <input type="tel" name="phone" id="phone" class="form-control"
-                           placeholder="전화번호를 입력하세요" required>
-                    <button type="button" class="check-button" onclick="checkPhoneDuplicate()">중복확인</button>
+                <!-- 전화번호 -->
+                <div class="form-group">
+                    <label>전화번호 <span style="color: #ff6b6b;">*</span></label>
+                    <div class="input-group">
+                        <input type="tel" name="phone" id="phone" class="form-control"
+                               placeholder="전화번호를 입력하세요" required maxlength="13">
+                        <button type="button" class="check-button" onclick="checkPhoneDuplicate()">중복확인</button>
+                    </div>
+                    <div id="phoneMessage" class="message"></div>
                 </div>
-                <div id="phoneMessage" class="message"></div>
             </div>
 
             <!-- 제출 버튼 -->
@@ -761,13 +767,28 @@
         isNicknameValid = false;
     });
 
-    document.getElementById('phone').addEventListener('input', function() {
+    document.getElementById('phone').addEventListener('input', function(e) {
         const messageElement = document.getElementById('phoneMessage');
         const inputElement = document.getElementById('phone');
+
+        // 기존 메시지 초기화
         messageElement.textContent = '';
         inputElement.className = 'form-control';
         isPhoneValid = false;
+
+        // 숫자만 남기고 자동 포맷
+        let number = this.value.replace(/[^0-9]/g, '');
+        if (number.length < 4) {
+            this.value = number;
+        } else if (number.length < 8) {
+            this.value = number.substr(0,3) + '-' + number.substr(3);
+        } else if (number.length <= 11) {
+            this.value = number.substr(0,3) + '-' + number.substr(3,4) + '-' + number.substr(7,4);
+        } else {
+            this.value = number.substr(0,3) + '-' + number.substr(3,4) + '-' + number.substr(7,4);
+        }
     });
+
 
     // 비밀번호 입력 시 강도 체크
     document.getElementById('password').addEventListener('input', function() {
@@ -788,7 +809,8 @@
         const password = document.getElementById('password').value;
         const passwordConfirm = document.getElementById('passwordConfirm').value;
 
-        if (!isUserIdValid || !isEmailValid || !isNameValid || !isNicknameValid || !isPhoneValid) {
+        // if (!isUserIdValid || !isEmailValid || !isNameValid || !isNicknameValid || !isPhoneValid) {
+        if (!isUserIdValid || !isEmailValid || !isNicknameValid || !isPhoneValid) {
             alert('모든 필드의 중복 확인을 해주세요.');
             return false;
         }
