@@ -1,5 +1,6 @@
 package com.example.together.controller;
 
+import com.example.together.domain.Status;
 import com.example.together.domain.User;
 import com.example.together.dto.member.memberRegisterDTO;
 import com.example.together.service.UserService;
@@ -22,6 +23,7 @@ import java.security.Principal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @Slf4j
 @Controller
@@ -342,16 +344,26 @@ public class MemberController {
 
             log.info("아이디 찾기 요청: name = {}, email = {}", name, email);
 
-            String userId = userService.findUserIdByNameAndEmail(name, email);
+            Optional<User> userOpt = userService.findByNameAndEmail(name, email);
 
-            if (userId != null) {
-                response.put("success", true);
-                response.put("userId", userId);
-                response.put("message", "아이디를 찾았습니다.");
-                log.info("아이디 찾기 성공: userId = {}", userId);
+            if(userOpt.isPresent()) {
+                User user = userOpt.get();
+
+                // 탈퇴/정지 계정 체크
+                if(user.getStatus() == Status.DELETED || user.getStatus() != Status.ACTIVE) {
+                    response.put("success", false);
+                    response.put("message", "탈퇴 또는 정지된 계정입니다.");
+                    log.info("탈퇴/정지 계정 아이디 찾기 시도 - userId = {}, status = {}", user.getUserId(), user.getStatus());
+                } else {
+                    response.put("success", true);
+                    response.put("userId", user.getUserId());
+                    response.put("message", "아이디를 찾았습니다.");
+                    log.info("아이디 찾기 성공: userId = {}", user.getUserId());
+                }
+
             } else {
                 response.put("success", false);
-                response.put("message", "일치하는 회원 정보를 찾을 수 없습니다.");
+                response.put("message", "입력하신 정보와 일치하는 회원을 찾을 수 없습니다.");
                 log.warn("아이디 찾기 실패: name = {}, email = {}", name, email);
             }
 
@@ -379,22 +391,33 @@ public class MemberController {
         Map<String, Object> response = new HashMap<>();
 
         try {
-            boolean userExists = userService.isUserIdExists(userId) && userService.isEmailExists(email);
+            Optional<User> userOpt = userService.findByUserIdAndEmailAndName(userId, email, name);
 
-            if (userExists) {
-                String tempPassword = "temp" + System.currentTimeMillis() % 10000;
-                userService.updateUserPassword(userId, tempPassword);
-
-                response.put("success", true);
-                response.put("tempPassword", tempPassword);
-                response.put("message", "임시 비밀번호가 발급되었습니다.");
-
-                log.info("임시 비밀번호 발급 성공: userId = {}", userId);
-            } else {
+            if (userOpt.isEmpty()) {
                 response.put("success", false);
                 response.put("message", "입력하신 정보와 일치하는 회원을 찾을 수 없습니다.");
                 log.warn("비밀번호 찾기 실패: 사용자 정보 불일치 - userId = {}", userId);
+                return response;
             }
+
+            User user = userOpt.get();
+
+            // ✅ 탈퇴/정지 계정 체크 (Status enum 기준)
+            if (user.getStatus() == Status.DELETED || user.getStatus() != Status.ACTIVE) {
+                response.put("success", false);
+                response.put("message", "탈퇴 또는 정지된 계정입니다.");
+                log.info("탈퇴/정지 계정 비밀번호 발급 시도 - userId = {}, status = {}", userId, user.getStatus());
+                return response;
+            }
+
+            // 정상 계정 → 임시 비밀번호 발급
+            String tempPassword = "temp" + System.currentTimeMillis() % 10000;
+            userService.updateUserPassword(userId, tempPassword);
+
+            response.put("success", true);
+            response.put("tempPassword", tempPassword);
+            response.put("message", "임시 비밀번호가 발급되었습니다.");
+            log.info("임시 비밀번호 발급 성공: userId = {}", userId);
 
         } catch (Exception e) {
             response.put("success", false);

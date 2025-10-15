@@ -24,8 +24,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     // 전화번호로 사용자 찾기
     Optional<User> findByPhone(String phone);
 
-    Optional<User> findByNameAndEmail(String name, String email);
-
     // userId 존재 여부 체크
     boolean existsByUserId(String userId);
 
@@ -41,6 +39,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     long countByStatus(Status status);
 
     Optional<User> findByUserIdAndEmailAndName(String userId, String email, String name);
+    Optional<User> findByNameAndEmail(String name, String email);
 
     // 이름으로 사용자 찾기
     Optional<User> findByName(String name);

@@ -269,13 +269,15 @@
                 const copyButton = document.getElementById('copyButton');
                 const loginButton = document.getElementById('loginButton');
 
-                // 폼과 링크 숨기기
-                document.getElementById('findPwForm').style.display = 'none';
-                document.querySelector('.link-section').style.display = 'none';
-                document.querySelector('.find-title').textContent = '비밀번호 찾기 결과';
+                // 기본적으로 결과 섹션 숨기기
+                resultSection.style.display = 'block';
+                tempPasswordDisplay.style.display = 'none';
+                tempPasswordInfo.style.display = 'none';
+                copyButton.style.display = 'none';
+                loginButton.style.display = 'none';
 
                 if (data.success) {
-                    // 성공 시
+                    // 정상 계정 → 임시 비밀번호 발급
                     resultText.textContent = '임시 비밀번호가 발급되었습니다:';
                     tempPasswordDisplay.textContent = data.tempPassword;
                     tempPasswordDisplay.style.display = 'block';
@@ -285,17 +287,16 @@
                     copyButton.style.display = 'inline-block';
                     loginButton.style.display = 'inline-block';
                 } else {
-                    // 실패 시
+                    // 탈퇴/정지 계정 또는 실패 → 경고만
                     resultText.textContent = '';
-                    tempPasswordDisplay.style.display = 'none';
-                    tempPasswordInfo.style.display = 'none';
-                    errorMessage.textContent = data.message;
+                    errorMessage.textContent = data.message || '탈퇴/정지된 계정입니다.';
                     errorMessage.style.display = 'block';
-                    copyButton.style.display = 'none';
-                    loginButton.style.display = 'none';
                 }
 
-                resultSection.style.display = 'block';
+                // 원래 폼과 링크는 숨기기
+                document.getElementById('findPwForm').style.display = 'none';
+                document.querySelector('.link-section').style.display = 'none';
+                document.querySelector('.find-title').textContent = '비밀번호 찾기 결과';
             })
             .catch(error => {
                 console.error('Error:', error);

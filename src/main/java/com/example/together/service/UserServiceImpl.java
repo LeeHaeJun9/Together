@@ -39,6 +39,14 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         return userRepository.findById(id);
     }
 
+    @Override
+    public Optional<User> findByUserIdAndEmailAndName(String userId, String email, String name) {
+        return userRepository.findByUserIdAndEmailAndName(userId, email, name);
+    }
+    @Override
+    public Optional<User> findByNameAndEmail(String name, String email) {
+        return userRepository.findByNameAndEmail(name, email); // UserRepository에서 Optional<User> 반환
+    }
 
     /* ====================== 인증 (Spring Security) ====================== */
 
