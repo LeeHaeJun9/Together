@@ -9,6 +9,22 @@
   <!-- Font Awesome for icons -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
   <link rel="stylesheet" th:href="@{/css/applicationDetail.css}">
+    <style>
+        dl {
+            padding: 10px;
+        }
+
+        dl.row dt {
+            margin-bottom: 0.25rem;
+            padding-right: 0.75rem;
+            font-weight: 500;
+        }
+
+        dl.row dd {
+            margin-bottom: 0.5rem;
+            padding-left: 0.75rem;
+        }
+    </style>
 </head>
 <body>
 
@@ -23,20 +39,20 @@
     </div>
     <div class="card-body">
       <dl class="row mb-4">
-        <dt class="col-sm-4 text-muted">카페명:</dt>
-        <dd class="col-sm-8" th:text="${name}">[카페명]</dd>
+        <dt class="col-sm-3 text-muted">카페명</dt>
+        <dd class="col-sm-9" th:text="${name}">[카페명]</dd>
 
-        <dt class="col-sm-4 text-muted">설명:</dt>
-        <dd class="col-sm-8" th:text="${description}">[설명]</dd>
+        <dt class="col-sm-3 text-muted">설명</dt>
+        <dd class="col-sm-9" th:text="${description}">[설명]</dd>
 
-        <dt class="col-sm-4 text-muted">카테고리:</dt>
-        <dd class="col-sm-8" th:text="${category}">[카테고리]</dd>
+        <dt class="col-sm-3 text-muted">카테고리</dt>
+        <dd class="col-sm-9" th:text="${category}">[카테고리]</dd>
 
-        <dt class="col-sm-4 text-muted">신청자ID:</dt>
-        <dd class="col-sm-8" th:text="${applicantId}">[신청자ID]</dd>
+        <dt class="col-sm-3 text-muted">신청자ID</dt>
+        <dd class="col-sm-9" th:text="${applicantId}">[신청자ID]</dd>
 
-        <dt class="col-sm-4 text-muted">신청일:</dt>
-        <dd class="col-sm-8" th:text="${#temporals.format(regDate, 'yyyy-MM-dd HH:mm')}">[신청일]</dd>
+        <dt class="col-sm-3 text-muted">신청일</dt>
+        <dd class="col-sm-9" th:text="${#temporals.format(regDate, 'yyyy-MM-dd HH:mm')}">[신청일]</dd>
       </dl>
 
       <div class="d-grid gap-2">
