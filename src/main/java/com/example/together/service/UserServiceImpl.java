@@ -34,7 +34,13 @@ public class UserServiceImpl implements UserService, UserDetailsService {
   @Value("${org.zerock.upload.path:C:\\upload}")
   private String uploadRootPath;
 
-  /* ====================== 인증 (Spring Security) ====================== */
+    @Override
+    public Optional<User> findById(Long id) {
+        return userRepository.findById(id);
+    }
+
+
+    /* ====================== 인증 (Spring Security) ====================== */
 
   @Override
   public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
