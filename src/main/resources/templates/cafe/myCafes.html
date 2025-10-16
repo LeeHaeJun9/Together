@@ -127,8 +127,10 @@
                 <div class="card-body">
                     <div class="row">
                         <div class="col-3">
-                            <img th:src="${membership.cafe.cafeThumbnail  ?: '/images/default-cafe.png'}"
-                                 alt="카페 이미지" class="cafe-thumbnail">
+                            <a th:href="|/cafe/${membership.cafe.id}|">
+                                <img th:src="${membership.cafe.cafeThumbnail  ?: '/images/default-cafe.png'}"
+                                     alt="카페 이미지" class="cafe-thumbnail">
+                            </a>
                         </div>
                         <div class="col-9">
                             <div class="d-flex justify-content-between align-items-start mb-2">

@@ -143,9 +143,11 @@
                         <div class="card-body">
                             <div class="row">
                                 <div class="col-3">
-                                    <th:block th:if="${meeting.cafe != null and meeting.cafe.cafeThumbnail != null}">
-                                        <img th:src="@{${meeting.cafe.cafeThumbnail}}" alt="Cafe Thumbnail" class="meeting-thumbnail" />
-                                    </th:block>
+                                    <a th:href="@{/cafe/{cafeId}/meeting/read(cafeId=${meeting.cafe.id}, id=${meeting.id})}">
+                                        <th:block th:if="${meeting.cafe != null and meeting.cafe.cafeThumbnail != null}">
+                                            <img th:src="@{${meeting.cafe.cafeThumbnail}}" alt="Cafe Thumbnail" class="meeting-thumbnail" />
+                                        </th:block>
+                                    </a>
                                 </div>
                                 <div class="col-9">
                                     <div class="d-flex justify-content-between align-items-start mb-2">
@@ -215,9 +217,11 @@
                         <div class="card-body">
                             <div class="row">
                                 <div class="col-3">
-                                    <th:block th:if="${meeting.cafe != null and meeting.cafe.cafeThumbnail != null}">
-                                        <img th:src="@{${meeting.cafe.cafeThumbnail}}" alt="Cafe Thumbnail" class="meeting-thumbnail" />
-                                    </th:block>
+                                    <a th:href="@{/cafe/{cafeId}/meeting/read(cafeId=${meeting.cafe.id}, id=${meeting.id})}">
+                                        <th:block th:if="${meeting.cafe != null and meeting.cafe.cafeThumbnail != null}">
+                                            <img th:src="@{${meeting.cafe.cafeThumbnail}}" alt="Cafe Thumbnail" class="meeting-thumbnail" />
+                                        </th:block>
+                                    </a>
                                 </div>
                                 <div class="col-9">
                                     <div class="d-flex justify-content-between align-items-start mb-2">
@@ -264,9 +268,11 @@
                         <div class="card-body">
                             <div class="row">
                                 <div class="col-3">
-                                    <img th:if="${meeting.cafe != null and meeting.cafe.cafeThumbnail != null}"
-                                         th:src="@{${meeting.cafe.cafeThumbnail}}"
-                                         alt="모임 이미지" class="meeting-thumbnail">
+                                    <a th:href="@{/cafe/{cafeId}/meeting/read(cafeId=${meeting.cafe.id}, id=${meeting.id})}">
+                                        <img th:if="${meeting.cafe != null and meeting.cafe.cafeThumbnail != null}"
+                                             th:src="@{${meeting.cafe.cafeThumbnail}}"
+                                             alt="모임 이미지" class="meeting-thumbnail">
+                                    </a>
                                 </div>
                                 <div class="col-9">
                                     <div class="d-flex justify-content-between align-items-start mb-2">
@@ -312,10 +318,12 @@
                         <div class="card-body">
                             <div class="row">
                                 <div class="col-3">
-                                    <th:block th:if="${review.imageList != null and not #lists.isEmpty(review.imageList)}">
-                                        <img th:src="@{/upload/display(fileName='s_' + ${review.imageList[0].uuid} + '_' + ${review.imageList[0].fileName})}"
-                                             alt="Review Thumbnail" class="meeting-thumbnail">
-                                    </th:block>
+                                    <a th:href="@{/cafe/{cafeId}/meeting/review/read(cafeId=${review.cafeId}, id=${review.id})}">
+                                        <th:block th:if="${review.imageList != null and not #lists.isEmpty(review.imageList)}">
+                                            <img th:src="@{/upload/display(fileName='s_' + ${review.imageList[0].uuid} + '_' + ${review.imageList[0].fileName})}"
+                                                 alt="Review Thumbnail" class="meeting-thumbnail">
+                                        </th:block>
+                                    </a>
                                 </div>
                                 <div class="col-9">
                                     <div class="d-flex justify-content-between align-items-start mb-2">

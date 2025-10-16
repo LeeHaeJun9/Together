@@ -1,6 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"
-      xmlns:th="http://www.thymeleaf.org">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 
 <head>
     <meta charset="UTF-8">
@@ -15,190 +14,191 @@
             display: flex;
             flex-direction: column;
             min-height: 100vh;
-            background-color: #f8f9fa; /* Consistent background color */
+            background-color: #f8f9fa;
         }
+
         main {
             flex-grow: 1;
-            padding-top: 2rem;
-            padding-bottom: 2rem;
+            padding: 3rem 1rem;
         }
 
         .page-header-container {
-            max-width: 1100px;
-            margin: 0 auto;
-            padding-left: 1rem;
-            padding-right: 1rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 1.5rem;
+            text-align: center;
+            margin-bottom: 2rem;
         }
+
         .page-header-container h3 {
-            font-size: 1.75rem;
-            font-weight: bold;
+            font-weight: 700;
+            font-size: 1.8rem;
             color: #212529;
-            margin-bottom: 0;
         }
 
         .card-custom {
-            max-width: 800px;
+            max-width: 850px;
             margin: 0 auto;
-            padding: 2rem;
-            border-radius: 0.25rem;
-            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075) !important;
-            border: 1px solid rgba(0,0,0,.125);
-            background-color: white;
+            background-color: #fff;
+            border: none;
+            border-radius: 0.75rem;
+            box-shadow: 0 0.3rem 1rem rgba(0,0,0,0.08);
+            padding: 2.5rem;
         }
 
-        /* Form elements */
         .form-label-custom {
             font-weight: 600;
+            margin-bottom: 0.5rem;
             color: #343a40;
         }
+
         .form-control {
-            border-radius: 0.25rem;
+            border-radius: 0.4rem;
             border: 1px solid #ced4da;
             padding: 0.5rem 0.75rem;
         }
+
         .form-control:focus {
-            border-color: #80bdff;
-            box-shadow: 0 0 0 0.25rem rgba(0, 123, 255, 0.25);
+            border-color: #0d6efd;
+            box-shadow: 0 0 0 0.15rem rgba(13,110,253,0.25);
         }
 
-        /* Buttons */
         .btn-primary-custom {
             background-color: #0d6efd;
-            border-color: #0d6efd;
-            border-radius: 0.25rem;
-            padding: 0.5rem 1rem;
-            font-weight: normal;
+            border: none;
+            padding: 0.6rem 1.5rem;
+            font-weight: 500;
+            border-radius: 0.4rem;
+            transition: all 0.2s ease;
             color: white;
-            text-decoration: none;
-            transition: all 0.2s ease-in-out;
         }
+
         .btn-primary-custom:hover {
             background-color: #0b5ed7;
-            border-color: #0a58ca;
-            color: white;
         }
+
         .btn-secondary-custom {
             background-color: #6c757d;
-            border-color: #6c757d;
-            border-radius: 0.25rem;
-            padding: 0.5rem 1rem;
-            font-weight: normal;
+            border: none;
+            padding: 0.6rem 1.5rem;
+            font-weight: 500;
+            border-radius: 0.4rem;
             color: white;
-            text-decoration: none;
-            transition: all 0.2s ease-in-out;
         }
+
         .btn-secondary-custom:hover {
             background-color: #5c636a;
-            border-color: #565e64;
-            color: white;
+        }
+
+        .form-check-label {
+            margin-left: 0.25rem;
+            font-weight: 500;
+        }
+
+        .d-grid.d-md-flex {
+            margin-top: 1.5rem;
+        }
+
+        .btn-outline-secondary {
+            border-radius: 0.4rem;
+            padding: 0.45rem 1rem;
         }
     </style>
 </head>
+
 <body>
 
 <div th:replace="~{layout/header :: header}"></div>
 
 <main>
     <div class="page-header-container">
-        <h3>모임 만들기</h3>
+        <h3><i class="fa-solid fa-people-group me-2"></i>모임 만들기</h3>
     </div>
 
-    <div class="container">
-        <div class="card card-custom">
+    <div class="card card-custom">
         <form th:action="@{/cafe/{cafeId}/meeting/register(cafeId=${cafeResponse.id})}"
-              th:object="${meetingDTO}" method="post" enctype="multipart/form-data">
+              th:object="${meetingDTO}" method="post" enctype="multipart/form-data" id="meetingForm">
 
             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
             <input type="hidden" name="cafeId" th:value="${cafeResponse.id}" />
+            <input type="hidden" class="form-control" id="category" th:value="${cafeResponse.category}" readonly>
+            <input type="hidden" class="form-control" id="cafe" th:value="${cafeResponse.name}" readonly>
+            <input type="hidden" th:field="*{userId}" th:value="${#authentication.principal.username}" />
 
             <div class="mb-3">
-                <label for="title" class="form-label-custom">제목:</label>
-                <input type="text" class="form-control" id="title" th:field="*{title}" required>
+                <label for="title" class="form-label-custom">제목</label>
+                <input type="text" class="form-control" id="title" th:field="*{title}" placeholder="제목을 입력하세요" required>
             </div>
 
-<!--            <div class="mb-3">-->
-<!--                <label for="category" class="form-label-custom">카테고리:</label>-->
-                <input type="hidden" class="form-control" id="category" th:value="${cafeResponse.category}" readonly>
-<!--            </div>-->
-<!--            <div class="mb-3">-->
-<!--                <label for="cafe" class="form-label-custom">소속된 카페:</label>-->
-                <input type="hidden" class="form-control" id="cafe" th:value="${cafeResponse.name}" readonly>
-<!--            </div>-->
-
-<!--            <div class="mb-3">-->
-<!--                <label for="writer" class="form-label-custom">작성자:</label>-->
-<!--                <input type="text" class="form-control" id="writer" th:value="${#authentication.principal.username}" readonly>-->
-                <input type="hidden" th:field="*{userId}" th:value="${#authentication.principal.username}" />
-<!--            </div>-->
-
-
             <div class="mb-3">
-                <label for="meetingDate" class="form-label-custom">모임 날짜:</label>
+                <label for="meetingDate" class="form-label-custom">모임 날짜</label>
                 <input type="datetime-local" class="form-control" id="meetingDate" th:field="*{meetingDate}">
             </div>
 
             <div class="mb-3">
-                <label for="location" class="form-label-custom">모임 장소:</label>
-                <input type="text" class="form-control" id="location" th:field="*{location}">
+                <label for="location" class="form-label-custom">모임 장소</label>
+                <input type="text" class="form-control" id="location" th:field="*{location}" placeholder="장소를 입력하세요">
             </div>
+
             <div class="mb-3">
-                <label for="address" class="form-label-custom">모임 주소:</label>
+                <label for="address" class="form-label-custom">모임 주소</label>
                 <input type="text" class="form-control" id="address" th:field="*{address}" readonly>
-                <button type="button" onclick="execDaumPostcode()" class="btn btn-outline-secondary">주소 찾기</button>
+                <button type="button" onclick="execDaumPostcode()" class="btn btn-outline-secondary mt-2">주소 찾기</button>
             </div>
 
             <div class="mb-3">
-                <label for="content" class="form-label-custom">세부 내용:</label>
-                <textarea class="form-control col-sm-5" rows="5" id="content" th:field="*{content}" required></textarea>
+                <label for="content" class="form-label-custom">세부 내용</label>
+                <textarea class="form-control" id="content" th:field="*{content}" rows="5" placeholder="세부 내용을 입력하세요" required></textarea>
             </div>
 
-            <div class="form-check">
+            <div class="form-check mb-3">
+                <label class="form-label-custom">공개 여부</label><br>
                 <div class="form-check form-check-inline">
                     <input class="form-check-input" type="radio" th:field="*{visibility}" id="public" value="PUBLIC">
-                    <label for="public">공개</label>
+                    <label class="form-check-label" for="public">공개</label>
                 </div>
                 <div class="form-check form-check-inline">
                     <input class="form-check-input" type="radio" th:field="*{visibility}" id="private" value="PRIVATE">
-                    <label for="private">비공개</label>
+                    <label class="form-check-label" for="private">비공개</label>
                 </div>
             </div>
 
-            <div class="form-check">
+            <div class="form-check mb-3">
+                <label class="form-label-custom">모집 여부</label><br>
                 <div class="form-check form-check-inline">
                     <input class="form-check-input" type="radio" th:field="*{recruiting}" id="ing" value="ING" checked>
-                    <label for="ing">모집 중</label>
+                    <label class="form-check-label" for="ing">모집 중</label>
                 </div>
                 <div class="form-check form-check-inline">
                     <input class="form-check-input" type="radio" th:field="*{recruiting}" id="end" value="END">
-                    <label for="end">모집 마감</label>
+                    <label class="form-check-label" for="end">모집 마감</label>
                 </div>
             </div>
 
-            <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
                 <button type="submit" class="btn btn-primary-custom me-md-2">작성하기</button>
-                <a th:href="@{/cafe/{cafeId}/meetings(cafeId=${cafeResponse.id}, page=${pageRequestDTO.page}, type=${pageRequestDTO.type}, keyword=${pageRequestDTO.keyword})}">
-                    <button type="button" class="btn btn-secondary-custom">취소</button>
-                </a>
+                <a th:href="@{/cafe/{cafeId}/meetings(cafeId=${cafeResponse.id}, page=${pageRequestDTO.page}, type=${pageRequestDTO.type}, keyword=${pageRequestDTO.keyword})}" class="btn btn-secondary-custom">취소</a>
             </div>
         </form>
     </div>
-</div>
 </main>
 
 <div th:replace="~{layout/footer :: footer}"></div>
 
 <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
 <script>
-    // 함수 이름을 execDaumPostcode()로 통일
+    const form = document.getElementById('meetingForm');
+
+    form.addEventListener('submit', function(e) {
+        const dateInput = document.getElementById('meetingDate').value;
+        if (!dateInput) {
+            e.preventDefault(); // 제출 막기
+            alert('모임 날짜를 입력해주세요!');
+            document.getElementById('meetingDate').focus();
+        }
+    });
+
     function execDaumPostcode() {
         new daum.Postcode({
             oncomplete: function(data) {
-                var addr = data.address;
-                document.getElementById("address").value = addr;
+                document.getElementById("address").value = data.address;
             }
         }).open();
     }
