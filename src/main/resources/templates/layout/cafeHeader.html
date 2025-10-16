@@ -19,7 +19,7 @@
                             <a class="nav-link" th:href="@{/cafe/{cafeId}(cafeId=${cafe.id})}">카페 홈</a>
                         </li>
                         <li class="nav-item" th:if="${cafe.isMember}">
-                            <a class="nav-link" th:href="@{/cafe/{cafeId}/posts(cafeId=${cafe.id})}">게시글</a>
+                            <a class="nav-link" th:href="@{/cafe/{cafeId}/posts(cafeId=${cafe.id})}">게시판</a>
                         </li>
                         <li class="nav-item" th:if="${cafe.isMember}">
                             <a class="nav-link" th:href="@{/cafe/{cafeId}/meetings(cafeId=${cafe.id})}">모임목록</a>

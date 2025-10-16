@@ -5,6 +5,9 @@ import com.example.together.domain.Post;
 import com.example.together.domain.PostType;
 import com.example.together.domain.User;
 import com.example.together.dto.demandSurvey.DemandSurveyCreateRequestDTO;
+import com.example.together.dto.demandSurvey.DemandSurveyResponseDTO;
+import com.example.together.dto.post.PostCreateRequestDTO;
+import com.example.together.repository.CafeRepository;
 import com.example.together.repository.DemandSurveyRepository;
 import com.example.together.repository.PostRepository;
 import com.example.together.repository.UserRepository;
@@ -12,12 +15,15 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+
 @Service
 @RequiredArgsConstructor
 public class DemandSurveyServiceImpl implements DemandSurveyService {
     private final DemandSurveyRepository demandSurveyRepository;
     private final PostRepository postRepository;
     private final UserRepository userRepository;
+    private final CafeRepository cafeRepository;
 
     @Override
     @Transactional
@@ -42,10 +48,26 @@ public class DemandSurveyServiceImpl implements DemandSurveyService {
                 .content(requestDTO.getContent())
                 .deadline(requestDTO.getDeadline())
                 .voteType(requestDTO.getVoteType())
+                .options(requestDTO.getOptions())
                 .post(post)
                 .author(author)
                 .build();
 
         return demandSurveyRepository.save(demandSurvey);
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public DemandSurveyResponseDTO getDemandSurveyByPostId(Long postId) {
+        DemandSurvey survey = demandSurveyRepository.findByPostId(postId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 게시글의 수요조사가 없습니다."));
+        return new DemandSurveyResponseDTO(survey);
+    }
+
+    @Override
+    public DemandSurvey getSurveyById(Long surveyId) {
+        return demandSurveyRepository.findById(surveyId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 수요조사가 존재하지 않습니다. id=" + surveyId));
+    }
+
 }
