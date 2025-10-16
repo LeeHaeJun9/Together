@@ -23,21 +23,21 @@ import java.util.Map;
 @RequestMapping
 public class ReportController {
 
-  private final ReportService reportService;
-  private final UserRepository userRepository;
+    private final ReportService reportService;
+    private final UserRepository userRepository;
 
-  @PostMapping("/report")
-  @PreAuthorize("isAuthenticated()")
-  @ResponseBody
-  public ResponseEntity<Map<String, Object>> create(@Valid @RequestBody ReportCreateDTO dto, Authentication auth) {
-    User user = userRepository.findByUserId(auth.getName())
-        .orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다: " + auth.getName()));
-    Long id = reportService.create(user.getId(), dto);
+    @PostMapping("/report")
+    @PreAuthorize("isAuthenticated()")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> create(@Valid @RequestBody ReportCreateDTO dto, Authentication auth) {
+        User user = userRepository.findByUserId(auth.getName())
+                .orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다: " + auth.getName()));
+        Long id = reportService.create(user.getId(), dto);
 
-    Map<String, Object> body = new HashMap<>();
-    body.put("id", id);
-    body.put("ok", true);
-    body.put("message", "신고가 접수되었습니다.");
-    return ResponseEntity.status(HttpStatus.CREATED).body(body); // ← 201 Created, JSON
-  }
+        Map<String, Object> body = new HashMap<>();
+        body.put("id", id);
+        body.put("ok", true);
+        body.put("message", "신고가 접수되었습니다.");
+        return ResponseEntity.status(HttpStatus.CREATED).body(body);
+    }
 }

@@ -29,6 +29,9 @@ public class Post extends BaseEntity{
     @Column(length = 300)
     private PostType postType;
 
+    @Enumerated(EnumType.STRING)
+    private PostSubType postSubType = PostSubType.GENERAL;
+
     private boolean pinned;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -39,4 +42,9 @@ public class Post extends BaseEntity{
 
     @OneToOne(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private DemandSurvey demandSurvey;
+
+    @PrePersist
+    public void prePersist() {
+        if (postSubType == null) postSubType = PostSubType.GENERAL;
+    }
 }
