@@ -95,9 +95,9 @@
                     <div id="map" th:if="${dto.meetingAddress != null and !#strings.isEmpty(dto.meetingAddress)}"
                          style="width:400px;height:300px;"></div>
                     <br>
-                    <span th:text="'날짜 : ' + ${#temporals.format(dto.meetingDate, 'yyyy/MM/dd HH:ss')}">모임 날짜</span><br>
-                    <span th:text="'장소 : ' + ${dto.meetingLocation}">모임 장소</span><br>
-                    <span th:text="'상세 주소 : ' + ${dto.meetingAddress}">상세 주소</span>
+                    <span th:text="${dto.meetingDate != null ? '모임 날짜 : ' + #temporals.format(dto.meetingDate, 'yyyy/MM/dd HH:mm') : '모임 날짜 : '}"></span><br>
+                    <span th:text="${dto.meetingLocation != null ? '모임 장소 : ' + dto.meetingLocation : '모임 장소 : '}"></span><br>
+                    <span th:text="${dto.meetingAddress != null ? '상세 주소 : ' + dto.meetingAddress : '상세 주소 : '}"></span><br>
                 </div>
                 <br>
                 <p th:text="${dto.content}">게시글 내용</p>
