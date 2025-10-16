@@ -135,12 +135,12 @@ public class MeetingReviewServiceImpl implements MeetingReviewService {
 
     // 모임 리뷰는 검색 기능 없음
     @Override
-    public PageResponseDTO<MeetingReviewDTO> list(PageRequestDTO pageRequestDTO) {
+    public PageResponseDTO<MeetingReviewDTO> list(Long cafeId, PageRequestDTO pageRequestDTO) {
         String[] types = pageRequestDTO.getTypes();
         String keyword = pageRequestDTO.getKeyword();
         Pageable pageable = pageRequestDTO.getPageable("id");
 
-        Page<MeetingReview> result = meetingReviewRepository.findAll(pageable);
+        Page<MeetingReview> result = meetingReviewRepository.findByCafe_Id(cafeId, pageable);
 
         List<MeetingReviewDTO> dtoList = result.getContent().stream()
                 .map(this::EntitytoDTO)
@@ -149,7 +149,7 @@ public class MeetingReviewServiceImpl implements MeetingReviewService {
         return PageResponseDTO.<MeetingReviewDTO>withAll()
                 .pageRequestDTO(pageRequestDTO)
                 .dtoList(dtoList)
-                .total((int)result.getTotalElements())
+                .total((int) result.getTotalElements())
                 .build();
     }
 
@@ -171,6 +171,7 @@ public class MeetingReviewServiceImpl implements MeetingReviewService {
                 .reviewer(user)
                 .meeting(meeting)
                 .cafe(cafe)
+                .postSubType(PostSubType.REVIEW)
                 .build();
 
         if (files != null && !files.isEmpty()) {
@@ -196,6 +197,7 @@ public class MeetingReviewServiceImpl implements MeetingReviewService {
                 .meetingDate(meetingDate)
                 .meetingLocation(meetingLocation)
                 .meetingAddress(meetingAddress)
+                .postSubType(PostSubType.REVIEW)
                 .build();
 
         if (files != null && !files.isEmpty()) {
@@ -253,6 +255,7 @@ public class MeetingReviewServiceImpl implements MeetingReviewService {
                 .meetingDate(dto.getMeetingDate())
                 .meetingLocation(dto.getMeetingLocation())
                 .meetingAddress(dto.getMeetingAddress())
+                .postSubType(PostSubType.REVIEW)
                 .build();
 
         // 이미지 파일 처리

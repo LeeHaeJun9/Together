@@ -1,5 +1,6 @@
 package com.example.together.dto.report;
 
+import com.example.together.domain.PostSubType;
 import com.example.together.domain.ReportType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,6 +17,7 @@ public class ReportAdminRow {
 
   private final Long id;
   private final ReportType type;
+  private PostSubType postSubType;
 
   private final Long targetId;
   private final String targetLabel;
@@ -31,6 +33,8 @@ public class ReportAdminRow {
   // 신고자
   private final String reporterNickname;
   private final String reporterLoginId;
+
+  private Long cafeId;
 
   // ▶ 버튼 제어
   private final boolean canDelete;    // 콘텐츠 삭제 가능

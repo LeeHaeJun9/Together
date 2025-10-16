@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -41,6 +43,9 @@ public class Meeting extends BaseEntity {
 //    private Address addressId;
     private String address;
     private String location;
+
+    @Enumerated(EnumType.STRING)
+    private PostSubType postSubType = PostSubType.MEETING;
 
     public void change(String title, String content, LocalDateTime meetingDate, RecruitingStatus recruiting, Visibility visibility, String address, String location) {
         this.title = title;

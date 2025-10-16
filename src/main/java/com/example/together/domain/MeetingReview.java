@@ -29,8 +29,8 @@ public class MeetingReview extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     private User reviewer;
 
-//    @ManyToOne(fetch = FetchType.LAZY)
-    @ManyToOne(optional = true)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "meeting_id")
     private Meeting meeting;
 
     private LocalDateTime meetingDate;
@@ -45,11 +45,13 @@ public class MeetingReview extends BaseEntity {
     @Builder.Default
     private List<MeetingReviewReply> replies = new ArrayList<>();
 
-
     @OneToMany(mappedBy = "review", cascade = {CascadeType.ALL}, fetch = FetchType.LAZY, orphanRemoval = true)
     @Builder.Default
     @OrderBy("sortOrder ASC")
     private List<MeetingReviewImage> images = new ArrayList<>();
+
+    @Enumerated(EnumType.STRING)
+    private PostSubType postSubType = PostSubType.REVIEW;
 
     public void change(String title, String content, LocalDateTime meetingDate, String meetingLocation, String meetingAddress) {
         this.title = title;

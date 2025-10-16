@@ -18,7 +18,7 @@ public interface MeetingReviewService {
     void MeetingReviewModify(MeetingReviewDTO meetingReviewDTO); // 모임 후기 수정
     void MeetingReviewDelete(Long id); // 모임 후기 삭제
 
-    PageResponseDTO<MeetingReviewDTO> list(PageRequestDTO pageRequestDTO);
+    PageResponseDTO<MeetingReviewDTO> list(Long cafeId, PageRequestDTO pageRequestDTO);
 
     // 이미지 파일까지 함께 저장하는 메서드들 추가
     MeetingReview createReviewWithImages(Long cafeId, String userId, Long meetingId, String title, String content, List<MultipartFile> files);

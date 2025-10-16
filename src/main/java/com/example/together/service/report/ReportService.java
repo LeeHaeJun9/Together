@@ -10,8 +10,8 @@ public interface ReportService {
   Long create(Long reporterUserPk, ReportCreateDTO dto);
   Page<ReportAdminRow> listAdmin(ReportType type, Pageable pageable);
   void deleteTarget(Long reportId);
+  void deleteCafeWithChildren(Long cafeId);
+
   void banUser(Long reportId);
-
   void removeReportOnly(Long reportId);
-
 }

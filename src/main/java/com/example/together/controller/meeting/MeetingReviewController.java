@@ -50,7 +50,7 @@ public class MeetingReviewController {
 
     @GetMapping("/list")
     public String mtReviewList(@PathVariable("cafeId") Long cafeId, PageRequestDTO pageRequestDTO, Model model, Principal principal) {
-        PageResponseDTO<MeetingReviewDTO> responseDTO = meetingReviewService.list(pageRequestDTO);
+        PageResponseDTO<MeetingReviewDTO> responseDTO = meetingReviewService.list(cafeId, pageRequestDTO);
         log.info(responseDTO);
         model.addAttribute("responseDTO", responseDTO);
 

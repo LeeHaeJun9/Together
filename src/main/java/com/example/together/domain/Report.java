@@ -27,6 +27,10 @@ public class Report {
   @Column(name="report_type", length = 20, nullable = false)
   private ReportType reportType;
 
+  @Enumerated(EnumType.STRING)
+  @Column(name="post_sub_type", length = 20)
+  private PostSubType postSubType;
+
   private Long targetId;           // 신고 대상의 PK (카페/게시글/댓글/거래/유저 등)
 
   @Column(name = "reporter_id")

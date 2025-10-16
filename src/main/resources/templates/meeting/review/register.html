@@ -121,6 +121,7 @@
         <form th:action="@{/cafe/{cafeId}/meeting/review/register(cafeId=${cafeResponse.id})}"
               th:object="${dto}" method="post" enctype="multipart/form-data" id="reviewForm">
 
+            <input type="hidden" name="meetingId" th:value="${dto.meetingId}" />
             <input type="hidden" th:field="*{cafeId}" />
             <input type="hidden" id="writer" name="reviewer" class="form-control"
                    th:value="${#authentication.principal.username}" readonly />

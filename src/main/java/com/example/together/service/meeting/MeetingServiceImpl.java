@@ -54,6 +54,7 @@ public class MeetingServiceImpl implements MeetingService {
                 .address(meetingDTO.getAddress())
                 .organizer(organizer)
                 .cafe(cafe)
+                .postSubType(PostSubType.MEETING)
                 .build();
 
         Long savedMeetingId = meetingRepository.save(meeting).getId();
