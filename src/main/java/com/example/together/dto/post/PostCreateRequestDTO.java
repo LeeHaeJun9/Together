@@ -18,7 +18,6 @@ public class PostCreateRequestDTO {
     private Long cafeId;
     private boolean pinned;
 
-    private DemandSurveyCreateRequestDTO demandSurvey;
-
-
+    private DemandSurveyCreateRequestDTO demandSurvey; // 여기에 옵션 포함
 }
+

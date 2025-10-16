@@ -85,7 +85,7 @@
             <input type="hidden" name="cafeId" th:value="${cafeResponse.id}" />
         </form>
 
-        <nav aria-label="게시글 페이지네이션" class="mt-4">
+        <nav aria-label="게시글 페이지네이션" class="mt-4" th:if="${!#lists.isEmpty(responseDTO.dtoList)}">
             <ul class="pagination justify-content-center">
                 <li class="page-item" th:if="${responseDTO.prev}">
                     <a class="page-link" th:data-num="${responseDTO.start -1}">Previous</a>

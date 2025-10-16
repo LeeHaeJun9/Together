@@ -41,10 +41,20 @@ public class DemandSurvey extends BaseEntity {
     @OneToMany(mappedBy = "survey", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Vote> votes = new ArrayList<>();
 
-    public void update(String title, String content, LocalDateTime deadline, VoteType voteType) {
+    //    작성자가 입력한 옵션들
+    @ElementCollection(fetch = FetchType.EAGER)  // Lazy → EAGER
+    @CollectionTable(name = "demand_survey_options", joinColumns = @JoinColumn(name = "survey_id"))
+    @Column(name = "option_content")
+    private List<String> options = new ArrayList<>();
+
+    public void update(String title, String content, LocalDateTime deadline, VoteType voteType, List<String> options) {
         this.title = title;
         this.content = content;
         this.deadline = deadline;
         this.voteType = voteType;
+        this.options.clear();
+        if (options != null) {
+            this.options.addAll(options);
+        }
     }
 }

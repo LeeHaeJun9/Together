@@ -28,6 +28,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.List;
 
 @Controller
@@ -206,7 +207,13 @@ public class PostController {
                 demandSurveyDTO.setContent(post.getDemandSurvey().getContent());
                 demandSurveyDTO.setDeadline(post.getDemandSurvey().getDeadline());
                 demandSurveyDTO.setVoteType(post.getDemandSurvey().getVoteType());
+                // 기존 옵션도 DTO로 변환
+                if (post.getDemandSurvey().getOptions() != null) {
+                    demandSurveyDTO.setOptions(new ArrayList<>(post.getDemandSurvey().getOptions()));
+                }
                 requestDTO.setDemandSurvey(demandSurveyDTO);
+            } else {
+                requestDTO.setDemandSurvey(new DemandSurveyCreateRequestDTO());
             }
 
             model.addAttribute("post", post); // 기존 이미지를 표시하기 위해 필요

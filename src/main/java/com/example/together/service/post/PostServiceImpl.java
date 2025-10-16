@@ -20,6 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -84,6 +85,7 @@ public class PostServiceImpl implements PostService {
                     .content(requestDTO.getDemandSurvey().getContent())
                     .deadline(requestDTO.getDemandSurvey().getDeadline())
                     .voteType(requestDTO.getDemandSurvey().getVoteType())
+                    .options(new ArrayList<>(requestDTO.getDemandSurvey().getOptions())) // 옵션 저장
                     .post(savedPost)
                     .author(author)
                     .build();
@@ -168,7 +170,7 @@ public class PostServiceImpl implements PostService {
     @Transactional
     @Override
     public PostResponseDTO getPostById(Long postId, Long userId) {
-        Post post = postRepository.findById(postId)
+        Post post = postRepository.findPostWithSurvey(postId)
                 .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다."));
 //        post.setViewCount(post.getViewCount() + 1);
 //        postRepository.save(post);
@@ -225,7 +227,8 @@ public class PostServiceImpl implements PostService {
                         requestDTO.getDemandSurvey().getTitle(),
                         requestDTO.getDemandSurvey().getContent(),
                         requestDTO.getDemandSurvey().getDeadline(),
-                        requestDTO.getDemandSurvey().getVoteType()
+                        requestDTO.getDemandSurvey().getVoteType(),
+                        requestDTO.getDemandSurvey().getOptions()
                 );
             } else {
                 // 기존 수요조사가 없으면 새로 생성
@@ -234,6 +237,9 @@ public class PostServiceImpl implements PostService {
                         .content(requestDTO.getDemandSurvey().getContent())
                         .deadline(requestDTO.getDemandSurvey().getDeadline())
                         .voteType(requestDTO.getDemandSurvey().getVoteType())
+                        .options(requestDTO.getDemandSurvey().getOptions() != null
+                                ? new ArrayList<>(requestDTO.getDemandSurvey().getOptions())
+                                : new ArrayList<>())
                         .post(post)
                         .author(post.getAuthor())
                         .build();
